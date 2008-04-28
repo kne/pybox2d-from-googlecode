@@ -1,0 +1,5 @@
+wrap shape.GetCoreVertices() like GetVertices(): (test_TimeOfImpact)
+getCoreVertices_b2Vec2()
+getCoreVertices_tuple()
+
+port broadphase test
