@@ -1,0 +1,64 @@
+#----------------------
+# change these if necessary
+SWIG_PATH=swig
+SWIG_OPTS=-w201
+SWIG_TEMPLATE=Box2D.i
+SWIG_FIXED_TEMPLATE=Box2D_fixed.i
+
+PYTHON_PATH=python
+PYTHON_LINKOPTS= #-O3
+
+RELEASE_DIR=/c/dev/box2d_release
+RELEASE_COPY=1
+#----------------------
+
+FLOAT_TARGET=Gen/float/libbox2d.a
+FIXED_TARGET=Gen/fixed/libbox2d.a
+ALL_TARGETS=pythonlib
+
+ifeq ($(FIXED),1)
+    # doesn't work just yet - language parse error on Float.h line 50?
+    PYTHON_LINK=$(FIXED_TARGET)
+    PYTHON_BUILDDIR=Gen/python-fixed
+    SWIG_EXTRA_OPTS=-DTARGET_FLOAT32_IS_FIXED
+    PYTHON_LINKOPTS_EXTRA=-DTARGET_FLOAT32_IS_FIXED
+    TARGET_FLOAT32_IS_FIXED=1
+else
+    PYTHON_LINK=$(FLOAT_TARGET)
+    PYTHON_BUILDDIR=Gen/python-float
+endif
+
+SWIG_OPTS_ALL=-python -w -c++ -O -includeall -ignoremissing $(SWIG_OPTS) $(SWIG_EXTRA_OPTS)
+SWIG_TEMPLATE_CXX=$(PYTHON_BUILDDIR)/Box2D_wrap.cxx
+
+PYTHON_SHAREDLIB=$(PYTHON_BUILDDIR)/_Box2D2.pyd
+PYTHON_MODULE=$(PYTHON_BUILDDIR)/Box2D2.py
+PYTHON_INCL=$(shell $(PYTHON_PATH) -c 'from distutils.sysconfig import get_python_inc; print get_python_inc().replace("\\","/")')
+PYTHON_LIB =$(shell $(PYTHON_PATH) -c 'from distutils.sysconfig import get_config_var; print get_config_var("prefix").replace("\\","/")')/libs
+PYTHON_DLIB=$(shell ${PYTHON_PATH} -c 'import sys; print "-lpython"+sys.version[:3].replace(".","")') #
+
+ifeq ($(RELEASE_COPY),1)
+	ALL_TARGETS += DO_RELEASE_COPY
+endif
+
+all: $(ALL_TARGETS)
+
+DO_RELEASE_COPY:
+	cp $(PYTHON_BUILDDIR)/Box2D2.py $(RELEASE_DIR)/bin/
+	cp $(PYTHON_BUILDDIR)/_Box2D2.pyd $(RELEASE_DIR)/bin/
+	cp Box2D*.i $(RELEASE_DIR)/interface/
+	cp Makefile* $(RELEASE_DIR)/interface/building/
+
+
+pythonlib: $(FLOAT_TARGET) $(FIXED_TARGET) $(PYTHON_BUILDDIR)/Box2D2.py $(PYTHON_BUILDDIR)/_Box2D2.pyd $(SWIG_TEMPLATE)
+	@echo "-> Building Python library... (setup.py)"
+	@echo "-> Done! Run 'setup.py install' to install the Python library."
+
+$(PYTHON_MODULE): $(SWIG_TEMPLATE) $(SWIG_FIXED_TEMPLATE)
+	@mkdir -p $(dir $@)
+	@echo "-> Executing SWIG..."
+	$(SWIG_PATH) $(SWIG_OPTS_ALL) -o $(SWIG_TEMPLATE_CXX) -outdir $(PYTHON_BUILDDIR) $(SWIG_TEMPLATE)
+
+$(PYTHON_SHAREDLIB): $(SWIG_TEMPLATE_CXX)
+	@echo "-> Building the shared library (linking with $(PYTHON_LINK))..."
+	$(CXX) $(SWIG_TEMPLATE_CXX) -shared $(PYTHON_LINKOPTS) $(PYTHON_LINKOPTS_EXTRA) -o $@ -I. -I$(PYTHON_INCL) -L$(PYTHON_LIB) $(PYTHON_LINK) $(PYTHON_DLIB)
