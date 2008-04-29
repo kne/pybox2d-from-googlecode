@@ -20,6 +20,7 @@ release_number = 2
 version_str = box2d_version + 'b' + str(release_number)
 
 all_data = []
+ignore_extensions = [".pyo", ".pyc"]
 
 for walkdir in ('.\\testbed', '.\\interface'):
     for root, dirs, files in os.walk(walkdir):
@@ -27,7 +28,8 @@ for walkdir in ('.\\testbed', '.\\interface'):
         file_list=[]
         for filename in files:
             if ".swp" in filename: continue # vim
-            if filename[0]=='.': continue  
+            elif os.path.splitext(filename)[1] in ignore_extensions: continue
+            elif filename[0]=='.': continue  
             file_list.append(os.path.join(root, filename))
         if file_list:
             all_data.append( ("box2d_" + root[2:], file_list) )

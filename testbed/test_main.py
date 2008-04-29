@@ -175,7 +175,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.circle(self.surface, color, center, radius, 1)
 
         p = radius * axis
-        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] + p.x, center[1] + p.y)) 
+        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p.x, center[1] + p.y)) 
 
     def DrawPolygon(self, in_vertices, vertexCount, color):
         color = self.convertColor(color)
@@ -505,7 +505,7 @@ class Framework(object):
         elif key==K_r:
             # Reload (disabled)
             #print "Reload not functional"
-            exit(-10)
+            exit(10)
         elif key==K_SPACE:
             # Launch a bomb
             self.LaunchBomb()
