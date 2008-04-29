@@ -8,6 +8,7 @@ from test_main import fwDebugDraw
 
 global width, height
 width, height = 640, 480
+from distutils import sysconfig
 
 def main():
     #gui initialization
@@ -166,9 +167,10 @@ def run_demo(demolist):
     if demolist.value == None: return
 
     print "Running: ", demolist.value
-    ret = os.system("python -OO %s" % demolist.value)
+    from sys import executable as python_interpreter
+    ret = os.system("%s -OO %s" % (python_interpreter, demolist.value))
 
-    if ret == -10: run_demo(demolist)
+    if ret == 10: run_demo(demolist) # user hit reload
 
 if __name__=="__main__":
     main()
