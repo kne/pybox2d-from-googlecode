@@ -15,6 +15,9 @@ def main():
 
     screen = pygame.display.set_mode((width,height))
 
+    caption= "Python Box2D Testbed Demos"
+    pygame.display.set_caption(caption)
+
     theme = gui.Theme("default")
     app = gui.Desktop(theme=theme)
 
@@ -168,9 +171,18 @@ def run_demo(demolist):
 
     print "Running: ", demolist.value
     from sys import executable as python_interpreter
-    ret = os.system("%s -OO %s" % (python_interpreter, demolist.value))
+    from platform import system as sys_platform
 
-    if ret == 10: run_demo(demolist) # user hit reload
+    if sys_platform() == "Windows":
+        cmd = '"%s" -OO %s' % (python_interpreter, demolist.value)
+    else:
+        cmd = "%s -OO %s" % (python_interpreter, demolist.value)
+
+    print "-> %s" % cmd
+
+    ret = os.system(cmd)
+
+    if ret == 10 or ret/256 == 10: run_demo(demolist) # user hit reload
 
 if __name__=="__main__":
     main()
