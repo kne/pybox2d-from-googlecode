@@ -1,0 +1,5 @@
+#summary Documentation Page
+
+For now, all of the documentation will be kept on the Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki].
+
+Please feel free to discuss your ideas and/or problems in the forums, also.
