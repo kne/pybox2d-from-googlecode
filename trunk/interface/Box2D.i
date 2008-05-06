@@ -146,6 +146,12 @@
             return self.pyGetUserData()
     }
 
+    %feature("shadow") SetUserData {
+        def SetUserData(self, value): # override the C++ version as it does not work. 
+            """Get the specified userData (m_userData)"""
+            return self.pySetUserData(value)
+    }
+
     //Typecast the shape as necessary so Python can use them properly (2.0)
     %include "Collision/Shapes/b2Shape.h"
     %extend b2Shape {
@@ -177,6 +183,10 @@
             PyObject* ret=(PyObject*)self->GetUserData();
             Py_INCREF(ret);
             return ret;
+        }
+        void pySetUserData(PyObject* value) {
+            self->SetUserData((void*)value);
+            Py_INCREF(value);
         }
     }
    
@@ -285,6 +295,10 @@
             Py_INCREF(ret);
             return ret;
         }
+        void pySetUserData(PyObject* value) {
+            self->SetUserData((void*)value);
+            Py_INCREF(value);
+        }
 
         b2MouseJoint* asMouseJoint() {
             if ($self->GetType()==e_mouseJoint)
@@ -330,11 +344,11 @@
     public:
         %pythoncode %{
         def __repr__(self):
-            return "b2PolygonShape(vertices: %s count: %d)" % (self.getVertices_tuple(), self.vertexCount)
+            return "b2PolygonShape(vertices: %s count: %d)" % (self.getVertices_tuple(), self.GetVertexCount())
         def getVertices_tuple(self):
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
             vertices = []
-            for i in range(0, self.vertexCount):
+            for i in range(0, self.GetVertexCount()):
                 vertices.append( (self.getVertex(i).x, self.getVertex(i).y ) )
             return vertices
         def getVertices_b2Vec2(self):
@@ -461,6 +475,10 @@
             PyObject* ret=(PyObject*)self->GetUserData();
             Py_INCREF(ret);
             return ret;
+        }
+        void pySetUserData(PyObject* value) {
+            self->SetUserData((void*)value);
+            Py_INCREF(value);
         }
     }
 
