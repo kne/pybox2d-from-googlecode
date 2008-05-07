@@ -1,10 +1,10 @@
 #summary Projects using pyBox2D
 
-== Libraries ==
+=== Libraries ===
 
  * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API 
 
-== Games ==
+=== Games ===
 
  * .
 
