@@ -1,5 +1,19 @@
 #summary Documentation Page
 
-For now, all of the documentation will be kept on the Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki].
+==Help==
+
+For now, the main documentation will be kept on the Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki].
 
 Please feel free to discuss your ideas and/or problems in the forums, also.
+
+==Changes==
+
+===2.0.1b3 (5/7/2008)===
+
+- Updated the interface to allow SetUserData() (absolutely necessary for setting the ground's userdata)
+
+- Fixed b2PolygonShape (.vertexCount is now private, so the accessor is used instead)
+
+- Release for Python 2.4
+
+- Linux (possibly OS X) support with setup.py
