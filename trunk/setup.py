@@ -23,12 +23,13 @@ Windows (MinGW)
     * Then you can 
       setup.py [build/install]
 
-Others (OS X, Linux, hopefully):
- setup.py [build/install]
+Others (Linux and hopefully OS X):
+ python setup.py install 
 
 General notes:
  * You can add data files to the release by modifying the directories.
  * These files will be assumed to be in the (release_dir)/[data_subdirs]
+ * Set do_file_copy = True to package them 
 
 """
 
@@ -51,7 +52,7 @@ box2d_version = "2.0.1"
 release_number = 3
 
 # other settings
-do_file_copy = True
+do_file_copy = False
 # ----------------------
 def add_data(path, subdirs, ignore_extensions = (".pyo", ".pyc")):
     for walkdir in [os.path.join(path, subdir) for subdir in subdirs]:
@@ -100,10 +101,7 @@ open("__init__.py","w").write("from Box2D2 import *")
 if do_file_copy:
     copy_files()
 
-if distutils.util.get_platform() == "win32":
-    distutils_win32_fix()
-
-distutils_fix()
+build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}
 
 shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
 link_to = os.path.join("Gen", build_type)
@@ -114,37 +112,45 @@ version_str = box2d_version + 'b' + str(release_number)
 all_data = []
 add_data(release_dir, data_subdirs)
 
+if distutils.util.get_platform() == "win32":
+    win32 = True
+    distutils_win32_fix()
+    print "Attempting to use MinGW."
+    build_ext_options['compiler']='mingw32'
+
+distutils_fix()
+
 setup (name = 'Box2D',
-        version = version_str,
-        packages=["Box2D2"],
-        package_dir = {"Box2D2": "."},
-        package_data={"Box2D2" : [shared_lib_name],  },
-        options={'build_ext':{'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}}, 
-            # ^^ these don't work if in Extension()
-        ext_modules = [Extension('Box2D2', [interface_file],
-            extra_compile_args=["-O3"], extra_link_args=[link_to], language="c++")],
-        data_files=all_data,
-        author      = "kne",
-        author_email = "sirkne at gmail dot com",
-        description = "Box2D Python Wrapper",
-        license="zlib",
-        url="http://code.google.com/p/pybox2d/",
-        long_description = """Wraps Box2D (currently version %s) for usage in Python.
-        For more information, see the homepage or Box2D's homepage at http://www.box2d.org .
+    version = version_str,
+    packages=["Box2D2"],
+    package_dir = {"Box2D2": "."},
+    package_data={"Box2D2" : [shared_lib_name],  },
+    options={'build_ext':build_ext_options}, 
+        # ^^ these don't work if in Extension()
+    ext_modules = [Extension('Box2D2', [interface_file],
+        extra_compile_args=["-O3"], extra_link_args=[link_to], language="c++")],
+    data_files=all_data,
+    author      = "kne",
+    author_email = "sirkne at gmail dot com",
+    description = "Box2D Python Wrapper",
+    license="zlib",
+    url="http://code.google.com/p/pybox2d/",
+    long_description = """Wraps Box2D (currently version %s) for usage in Python.
+    For more information, see the homepage or Box2D's homepage at http://www.box2d.org .
 
-        After installing, please be sure to try out the testbed demos (requires pygame).
-        See <python directory>box2d/testbed/demos.py .
+    After installing, please be sure to try out the testbed demos (requires pygame).
+    See <python directory>box2d/testbed/demos.py .
 
-        Wiki: http://www.box2d.org/wiki/index.php?title=Box2D_with_Python
-        Ports forum: http://www.box2d.org/forum/viewforum.php?f=5
-        """ % (box2d_version),
-        classifiers=[
-            "Development Status :: 4 - Beta",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: zlib/libpng License",
-            "Operating System :: Microsoft :: Windows",
-            "Programming Language :: Python",
-            "Games :: Physics Libraries"
-        ]
-        )
+    Wiki: http://www.box2d.org/wiki/index.php?title=Box2D_with_Python
+    Ports forum: http://www.box2d.org/forum/viewforum.php?f=5
+    """ % (box2d_version),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: zlib/libpng License",
+        "Operating System :: Microsoft :: Windows",
+        "Programming Language :: Python",
+        "Games :: Physics Libraries"
+    ]
+    )
 
