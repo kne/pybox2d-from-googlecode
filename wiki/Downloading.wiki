@@ -3,9 +3,14 @@
 
 ===Windows===
 
-Included in the installer is: The compiled library, the testbed, and the SWIG interface. They are installed to your Python\Box2D\ and Python\Lib\site-packages\Box2D2\ directories.
+Simply download the latest release for your version of Python (2.4 or 2.5) [http://code.google.com/p/pybox2d/downloads/list here].
 
-After installing, see your Python/Box2D/testbed directory for the demos. They require [http://www.pygame.org pygame].
+Included in the installer is: 
+ * Compiled library (installed in Python\Lib\site-packages\Box2D2\)
+ * Testbed and demos. (installed in Python\Box2D\testbed)
+ * SWIG interface. (installed in Python\Box2D\interface)
+
+The testbed and demos require [http://www.pygame.org pygame].
 
 
 ===Linux and OS X===
