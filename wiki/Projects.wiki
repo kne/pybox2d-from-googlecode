@@ -1,0 +1,11 @@
+#summary Projects using pyBox2D
+
+= Libraries =
+
+ * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API 
+
+= Games =
+
+ * .
+
+Please let me know if you use pybox2d in any of your projects and I will gladly link to them here.
