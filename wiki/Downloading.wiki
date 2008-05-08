@@ -1,4 +1,6 @@
+#summary Downloading and installing information for various platforms
 #labels Phase-Deploy
+
 ==Download Notes==
 
 ===Windows===
