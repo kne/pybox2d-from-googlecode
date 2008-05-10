@@ -1,10 +1,13 @@
 #summary Documentation Page
-
 ==Help==
 
 For now, the main documentation will be kept on the *Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki]*.
 
 Please feel free to discuss your ideas and/or problems in the forums, also.
+
+==Getting Started Manual==
+
+I've started to convert the getting started with Box2D manual to Python. [http://www.box2d.org/wiki/index.php?title=Python_Manual Here] it is.
 
 ==Changes==
 
