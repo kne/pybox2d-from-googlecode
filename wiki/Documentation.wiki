@@ -9,6 +9,10 @@ Please feel free to discuss your ideas and/or problems in the forums, also.
 
 I've started to convert the getting started with Box2D manual to Python. [http://www.box2d.org/wiki/index.php?title=Python_Manual Here] it is.
 
+==Version Numbers==
+
+The version numbers follow the main Box2D releases (currently 2.0.1) with a release number attached. For example, 2.0.1b3 is based on Box2D release 2.0.1 and is the third release of the bindings.
+
 ==Changes==
 
 ===2.0.1b3 (5/7/2008)===
