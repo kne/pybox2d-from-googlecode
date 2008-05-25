@@ -27,17 +27,16 @@ global k_scale
 k_scale = 3.0
 
 class Test_Biped(test_main.Framework):
-    name = "Biped" # Name of the class to display
+    name = "Biped"
     m_biped = None
 
     def __init__(self):
         super(Test_Biped, self).__init__()
         k_restitution = 1.4
 
-        #self.settings.pause=True
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 20.0)
-        body = self.world.CreateBody(bd) #
+        body = self.world.CreateBody(bd)
 
         sd=box2d.b2PolygonDef()
         sd.density = 0.0
@@ -114,7 +113,7 @@ class Biped(object):
     def __init__(self, world, position):
         self.world = world
         bdef = BipedDef()
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
 
         # create body parts
         bd = bdef.LFootDef
@@ -159,7 +158,7 @@ class Biped(object):
         self.Pelvis.CreateShape(bdef.PelvisPoly)
         self.Pelvis.SetMassFromShapes()
 
-        bd = bdef.StomachDef # wrong in the C++ source
+        bd = bdef.StomachDef
         bd.position += position
         self.Stomach = self.world.CreateBody(bd)
         self.Stomach.CreateShape(bdef.StomachPoly)
@@ -570,7 +569,6 @@ class BipedDef(object):
         self.UpperNeckDef.referenceAngle	= 0.0
         self.UpperNeckDef.lowerAngle		= -0.610865238
         self.UpperNeckDef.upperAngle		= 0.785398163
-        #!! ?
 
         #b.self.LShoulderDef.body1	= Chest
         #b.self.LShoulderDef.body2	= self.LUpperArm

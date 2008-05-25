@@ -35,7 +35,6 @@ class SensorTest (test_main.Framework):
         ground = self.world.CreateBody(bd) 
 
         sd=box2d.b2PolygonDef() 
-        sd.userData = -2
         sd.SetAsBox(50.0, 10.0)
         ground.CreateShape(sd)
 
@@ -43,7 +42,6 @@ class SensorTest (test_main.Framework):
         cd.isSensor = True
         cd.radius = 5.0
         cd.localPosition.Set(0.0, 20.0)
-        cd.userData = -1
         self.m_sensor = ground.CreateShape(cd)
 
         sd=box2d.b2CircleDef() 
@@ -54,7 +52,6 @@ class SensorTest (test_main.Framework):
             bd=box2d.b2BodyDef() 
             bd.position.Set(-10.0 + 3.0 * i, 20.0)
             
-            sd.userData = i
             body = self.world.CreateBody(bd) 
 
             body.CreateShape(sd)
@@ -67,14 +64,12 @@ class SensorTest (test_main.Framework):
             if (point.state == fwContactTypes.contactPersisted):
                 continue
             
-            shape1=point.shape1
-            shape2=point.shape2
+            shape1, shape2=point.shape1, point.shape2
             other=None
             
-            # Regular pointer comparisons don't work, so we use the userData here in Python.
-            if (shape1.GetUserData() == -1):
+            if shape1 == self.m_sensor:
                 other = shape2.GetBody()
-            elif (shape2.GetUserData() == -1):
+            elif shape2 == self.m_sensor:
                 other = shape1.GetBody()
             else:
                 continue

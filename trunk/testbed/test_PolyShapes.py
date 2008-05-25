@@ -81,6 +81,7 @@ class PolyShapes (test_main.Framework):
         sds[2].friction = 0.3
         sds[2].filter.categoryBits = 0x0004
 
+        #sds[3].SetAsBox(15.0, 15.0) # svn r153
         sds[3].vertexCount = 4
         sds[3].setVertex(0,-0.5, 0.0)
         sds[3].setVertex(1,0.5, 0.0)
@@ -96,7 +97,7 @@ class PolyShapes (test_main.Framework):
         self.bodyIndex = 0
 
     def Create(self, index) :
-          bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+          bd=box2d.b2BodyDef() 
           
           x = box2d.b2Random(-2.0, 2.0)
           bd.position.Set(x, 10.0)

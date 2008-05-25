@@ -32,42 +32,38 @@ class Web (test_main.Framework):
     m_joints=[]
     def __init__(self):
         super(Web, self).__init__()
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 0.5)
         sd.density = 5.0
         sd.friction = 0.2
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
 
         bd.position.Set(-5.0, 5.0)
-        self.m_bodies.append( None )
-        self.m_bodies[0] = self.world.CreateBody(bd)
+        self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[0].CreateShape(sd)
         self.m_bodies[0].SetMassFromShapes()
 
         bd.position.Set(5.0, 5.0)
-        self.m_bodies.append( None )
-        self.m_bodies[1] = self.world.CreateBody(bd)
+        self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[1].CreateShape(sd)
         self.m_bodies[1].SetMassFromShapes()
 
         bd.position.Set(5.0, 15.0)
-        self.m_bodies.append( None )
-        self.m_bodies[2] = self.world.CreateBody(bd)
+        self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[2].CreateShape(sd)
         self.m_bodies[2].SetMassFromShapes()
 
         bd.position.Set(-5.0, 15.0)
-        self.m_bodies.append( None )
-        self.m_bodies[3] = self.world.CreateBody(bd)
+        self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[3].CreateShape(sd)
         self.m_bodies[3].SetMassFromShapes()
 
@@ -176,14 +172,17 @@ class Web (test_main.Framework):
     def Step(self, settings) :
           self.DrawString(5, self.textLine, "This demonstrates a soft distance joint.")
           self.textLine += 15
-          self.DrawString(5, self.textLine, "Press: (b) to delete a body, (j) to delete a joint (buggy)")
+          self.DrawString(5, self.textLine, "Press: (b) to delete a body, (j) to delete a joint")
           self.textLine += 15
           super(Web, self).Step(settings)
      
     def JointDestroyed(self, joint) :
-        print "Joint destroyed..."
         if joint in self.m_joints:
+            print "Joint destroyed and removed from the list"
             self.m_joints.remove(joint)
+        else:
+            print "Joint destroyed but not found in list", joint
+            # bug here? is this box2d's fault? it passes in shapes!
 
 if __name__=="__main__":
      test_main.main(Web)

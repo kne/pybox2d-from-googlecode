@@ -52,7 +52,7 @@ class TheoJansen (test_main.Framework):
         sd1.density = 1.0
         sd2.density = 1.0
         
-        if (s > 0.0) :
+        if s > 0.0:
             sd1.setVertex(0, p1)
             sd1.setVertex(1, p2)
             sd1.setVertex(2, p3)
@@ -60,7 +60,7 @@ class TheoJansen (test_main.Framework):
             sd2.setVertex(0, box2d.b2Vec2_zero)
             sd2.setVertex(1, p5 - p4)
             sd2.setVertex(2, p6 - p4)
-        else :
+        else:
             sd1.setVertex(0, p1)
             sd1.setVertex(1, p3)
             sd1.setVertex(2, p2)
@@ -68,7 +68,7 @@ class TheoJansen (test_main.Framework):
             sd2.setVertex(0, box2d.b2Vec2_zero)
             sd2.setVertex(1, p6 - p4)
             sd2.setVertex(2, p5 - p4)
-        
+
         bd1=box2d.b2BodyDef()
         bd2=box2d.b2BodyDef()
         bd1.position = self.m_offset
@@ -77,8 +77,8 @@ class TheoJansen (test_main.Framework):
         bd1.angularDamping = 10.0
         bd2.angularDamping = 10.0
         
-        body1 = self.world.CreateBody(bd1) #
-        body2 = self.world.CreateBody(bd2) #
+        body1 = self.world.CreateBody(bd1) 
+        body2 = self.world.CreateBody(bd2) 
         
         body1.CreateShape(sd1)
         body2.CreateShape(sd2)
@@ -86,24 +86,31 @@ class TheoJansen (test_main.Framework):
         body1.SetMassFromShapes()
         body2.SetMassFromShapes()
         
-        djd=box2d.b2DistanceJointDef() #box2d.b2DistanceJointDef djd
+        djd=box2d.b2DistanceJointDef()
+        
+        # Using a soft distance constraint can reduce some jitter.
+        # It also makes the structure seem a bit more fluid by
+        # acting like a suspension system.
+        #djd.dampingRatio = 0.5
+        #djd.frequencyHz = 10.0
+        # svn r149, not usable yet
         
         djd.Initialize(body1, body2, p2 + self.m_offset, p5 + self.m_offset)
-        self.world.CreateJoint(djd).getAsType() #
+        self.world.CreateJoint(djd).getAsType() 
         
         djd.Initialize(body1, body2, p3 + self.m_offset, p4 + self.m_offset)
-        self.world.CreateJoint(djd).getAsType() #
+        self.world.CreateJoint(djd).getAsType() 
         
         djd.Initialize(body1, self.m_wheel, p3 + self.m_offset, wheelAnchor + self.m_offset)
-        self.world.CreateJoint(djd).getAsType() #
+        self.world.CreateJoint(djd).getAsType() 
         
         djd.Initialize(body2, self.m_wheel, p6 + self.m_offset, wheelAnchor + self.m_offset)
-        self.world.CreateJoint(djd).getAsType() #
+        self.world.CreateJoint(djd).getAsType() 
         
-        rjd=box2d.b2RevoluteJointDef() #box2d.b2RevoluteJointDef rjd
+        rjd=box2d.b2RevoluteJointDef() 
         
         rjd.Initialize(body2, self.m_chassis, p4 + self.m_offset)
-        self.world.CreateJoint(rjd).getAsType() #
+        self.world.CreateJoint(rjd).getAsType() 
     
     def __init__(self):
         super(TheoJansen, self).__init__()
@@ -112,12 +119,12 @@ class TheoJansen (test_main.Framework):
         self.m_motorOn = True
         pivot=box2d.b2Vec2(0.0, 0.8)
         
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
         
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef() 
         bd.position.Set(0.0, -10.0)
-        ground = self.world.CreateBody(bd) #
+        ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
         
         sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(-50.0, 15.0), 0.0)
@@ -131,18 +138,18 @@ class TheoJansen (test_main.Framework):
             sd.density = 1.0
             sd.radius = 0.25
             
-            bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+            bd=box2d.b2BodyDef() 
             bd.position.Set(-40.0 + 2.0 * i, 0.5)
             
-            body = self.world.CreateBody(bd) #
+            body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()
         
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef() 
         sd.density = 1.0
         sd.SetAsBox(2.5, 1.0)
         sd.filter.groupIndex = -1
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef() 
         bd.position = pivot + self.m_offset
         self.m_chassis = self.world.CreateBody(bd)
         self.m_chassis.CreateShape(sd)
@@ -152,13 +159,13 @@ class TheoJansen (test_main.Framework):
         sd.density = 1.0
         sd.radius = 1.6
         sd.filter.groupIndex = -1
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef() 
         bd.position = pivot + self.m_offset
         self.m_wheel = self.world.CreateBody(bd)
         self.m_wheel.CreateShape(sd)
         self.m_wheel.SetMassFromShapes()
     
-        jd=box2d.b2RevoluteJointDef() #box2d.b2RevoluteJointDef jd
+        jd=box2d.b2RevoluteJointDef() 
         jd.Initialize(self.m_wheel, self.m_chassis, pivot + self.m_offset)
         jd.collideConnected = False
         jd.motorSpeed = self.m_motorSpeed
