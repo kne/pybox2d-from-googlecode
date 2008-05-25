@@ -28,16 +28,14 @@ class CollisionProcessing (test_main.Framework):
         super(CollisionProcessing, self).__init__()
 
         # Ground body
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         sd.friction = 0.3
 
-        id = 0
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
-        bd.userData = id
 
-        ground = self.world.CreateBody(bd) #
+        ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
         xLo = -5.0
@@ -45,7 +43,7 @@ class CollisionProcessing (test_main.Framework):
         yLo = 2.0
         yHi = 35.0
         # Small triangle
-        triangleShapeDef=box2d.b2PolygonDef() #box2d.b2PolygonDef triangleShapeDef
+        triangleShapeDef=box2d.b2PolygonDef()
         triangleShapeDef.vertexCount = 3
         triangleShapeDef.setVertex(0,-1.0, 0.0)
         triangleShapeDef.setVertex(1,1.0, 0.0)
@@ -54,9 +52,6 @@ class CollisionProcessing (test_main.Framework):
 
         triangleBodyDef=box2d.b2BodyDef() 
         triangleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
-
-        id+=1
-        triangleBodyDef.userData=id
 
         body1 = self.world.CreateBody(triangleBodyDef) 
         body1.CreateShape(triangleShapeDef)
@@ -68,10 +63,7 @@ class CollisionProcessing (test_main.Framework):
         triangleShapeDef.setVertex(2, 2.0*triangleShapeDef.getVertex(2))
         triangleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
-        id+=1
-        triangleBodyDef.userData=id
-
-        body2 = self.world.CreateBody(triangleBodyDef) #
+        body2 = self.world.CreateBody(triangleBodyDef)
         body2.CreateShape(triangleShapeDef)
         body2.SetMassFromShapes()
 
@@ -83,8 +75,6 @@ class CollisionProcessing (test_main.Framework):
         boxBodyDef=box2d.b2BodyDef() 
         boxBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
-        id+=1
-        boxBodyDef.userData=id
         body3 = self.world.CreateBody(boxBodyDef) 
         body3.CreateShape(boxShapeDef)
         body3.SetMassFromShapes()
@@ -93,9 +83,7 @@ class CollisionProcessing (test_main.Framework):
         boxShapeDef.SetAsBox(2.0, 1.0)
         boxBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
-        id+=1
-        boxBodyDef.userData=id
-        body4 = self.world.CreateBody(boxBodyDef) #
+        body4 = self.world.CreateBody(boxBodyDef)
         body4.CreateShape(boxShapeDef)
         body4.SetMassFromShapes()
 
@@ -107,8 +95,6 @@ class CollisionProcessing (test_main.Framework):
         circleBodyDef=box2d.b2BodyDef() 
         circleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
-        id+=1
-        circleBodyDef.userData=id
         body5 = self.world.CreateBody(circleBodyDef) 
         body5.CreateShape(circleShapeDef)
         body5.SetMassFromShapes()
@@ -117,8 +103,6 @@ class CollisionProcessing (test_main.Framework):
         circleShapeDef.radius *= 2.0
         circleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
-        id+=1
-        circleBodyDef.userData=id
         body6 = self.world.CreateBody(circleBodyDef) 
         body6.CreateShape(circleShapeDef)
         body6.SetMassFromShapes()
@@ -129,30 +113,26 @@ class CollisionProcessing (test_main.Framework):
         # because they may belong to multiple contact points.
         k_maxNuke = 6
         nuke = []
-        nuke_ids = []
         nukeCount = 0
         
         # Traverse the contact results. Destroy bodies that
         # are touching heavier bodies.
-        for point in self.points:
-            body1 = point.shape1.GetBody()
-            body2 = point.shape2.GetBody()
+        body_pairs = [(p.shape1.GetBody(), p.shape2.GetBody()) for p in self.points]
 
+        for body1, body2 in body_pairs:
             mass1 = body1.GetMass()
             mass2 = body2.GetMass()
 
-            if (mass1 > 0.0 and mass2 > 0.0) :
-                if (mass2 > mass1) :
-                    if body1.GetUserData() not in nuke_ids:
-                        nuke.append(body1)
-                        nuke_ids.append(body1.GetUserData())
+            if mass1 > 0.0 and mass2 > 0.0:
+                if mass2 > mass1:
+                    nuke_body = body1
                 else:
-                    if body2.GetUserData() not in nuke_ids:
-                        nuke.append(body2)
-                        nuke_ids.append(body2.GetUserData())
+                    nuke_body = body2
 
-                if (len(nuke) == k_maxNuke):
-                    break
+                if nuke_body not in nuke:
+                    nuke.append(nuke_body)
+                    if len(nuke) == k_maxNuke:
+                        break
 
         # Destroy the bodies, skipping duplicates.
         for b in nuke:

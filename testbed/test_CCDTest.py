@@ -32,11 +32,11 @@ class CCDTest (test_main.Framework):
         # See the original source code for more (Box2D/Examples/TestBed/Tests/CCDTest.h)
         k_restitution = 1.4
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 20.0)
-        body = self.world.CreateBody(bd) #
+        body = self.world.CreateBody(bd) 
 
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef() 
         sd.density = 0.0
         sd.restitution = k_restitution
 
@@ -52,21 +52,21 @@ class CCDTest (test_main.Framework):
         sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(0.0, 10.0), -0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
-        sd_bottom=box2d.b2PolygonDef() #box2d.b2PolygonDef sd_bottom
+        sd_bottom=box2d.b2PolygonDef() 
         sd_bottom.SetAsBox( 1.5, 0.15 )
         sd_bottom.density = 4.0
 
-        sd_left=box2d.b2PolygonDef() #box2d.b2PolygonDef sd_left
+        sd_left=box2d.b2PolygonDef() 
         sd_left.SetAsBox(0.15, 2.7, box2d.b2Vec2(-1.45, 2.35), 0.2)
         sd_left.density = 4.0
 
-        sd_right=box2d.b2PolygonDef() #box2d.b2PolygonDef sd_right
+        sd_right=box2d.b2PolygonDef() 
         sd_right.SetAsBox(0.15, 2.7, box2d.b2Vec2(1.45, 2.35), -0.2)
         sd_right.density = 4.0
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef() 
         bd.position.Set( 0.0, 15.0 )
-        body = self.world.CreateBody(bd) #
+        body = self.world.CreateBody(bd) 
         body.CreateShape(sd_bottom)
         body.CreateShape(sd_left)
         body.CreateShape(sd_right)
@@ -75,13 +75,13 @@ class CCDTest (test_main.Framework):
         return
 
         for i in range(0):
-            bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+            bd=box2d.b2BodyDef() 
             bd.position.Set(0.0, 15.0 + i)
             bd.isBullet = True
-            body = self.world.CreateBody(bd) #
+            body = self.world.CreateBody(bd) 
             body.SetAngularVelocity(box2d.b2Random(-50.0, 50.0))
 
-            sd=box2d.b2CircleDef() #box2d.b2CircleDef sd
+            sd=box2d.b2CircleDef() 
             sd.radius = 0.25
             sd.density = 1.0
             sd.restitution = 0.0

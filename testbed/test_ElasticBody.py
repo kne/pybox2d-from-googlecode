@@ -30,14 +30,14 @@ class ElasticBody (test_main.Framework):
     m_ground=None 
     m_elev=None
     m_joint_elev=None
-    #/ Main...
+    # Main...
     def __init__(self):
         super(ElasticBody, self).__init__()
 
         bodies = self.bodies
         for i in range(64):
             bodies.append(None)
-        #/ Bottom static body
+        # Bottom static body
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 2.0)
         sd.friction = 0.1
@@ -46,7 +46,7 @@ class ElasticBody (test_main.Framework):
         bd.position.Set(-1.0, -7.5)
         self.m_ground = self.world.CreateBody(bd)
         self.m_ground.CreateShape(sd)
-        #/ Upper static body
+        # Upper static body
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(20.0, 0.50,box2d.b2Vec2(0,0),0.047*box2d.b2_pi)
         sd.friction    = 0.01
@@ -60,7 +60,7 @@ class ElasticBody (test_main.Framework):
 
         sd.SetAsBox(20,0.5,box2d.b2Vec2(0.0,-25.0),-0.5)
         g.CreateShape(sd)
-        #/ Left channel left wall
+        # Left channel left wall
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.7, 55.0)
         sd.friction    = 0.1
@@ -69,7 +69,7 @@ class ElasticBody (test_main.Framework):
         bd.position.Set(-49.3, 50.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
-        #/ Right wall
+        # Right wall
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.7, 55.0)
         sd.friction    = 0.1
@@ -78,7 +78,7 @@ class ElasticBody (test_main.Framework):
         bd.position.Set(45, 50.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
-        #/ Left channel right upper wall
+        # Left channel right upper wall
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.5, 20.0)
         sd.friction    = 0.05
@@ -88,7 +88,7 @@ class ElasticBody (test_main.Framework):
         bd.angle = -0.03*box2d.b2_pi
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
-        #/ Left channel right lower wall
+        # Left channel right lower wall
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.50, 23.0)
         sd.friction    = 0.05
@@ -97,13 +97,13 @@ class ElasticBody (test_main.Framework):
         bd.position.Set(-44.0, 27.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
-        #/ Bottom motors
+        # Bottom motors
         cd=box2d.b2CircleDef() 
         cd.radius   = 3.0
         cd.density  = 15.0
         cd.friction = 1
         cd.restitution = 0.2
-        #/ 1.
+        # 1.
         bd.position.Set(-40.0,2.5)
         body = self.world.CreateBody(bd) 
         body.CreateShape(cd)
@@ -114,7 +114,7 @@ class ElasticBody (test_main.Framework):
         jr.enableMotor    = True
         jr.motorSpeed     = 20
         self.world.CreateJoint(jr).getAsType()
-        #/ 1. left down
+        # 1. left down
         bd.position.Set(-46.0,-2.5)
         cd.radius = 1.5
         jr.motorSpeed  = -20
@@ -125,7 +125,7 @@ class ElasticBody (test_main.Framework):
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter())
         self.world.CreateJoint(jr).getAsType()
-        #/ 2.
+        # 2.
         cd.radius   = 3.0
         jr.motorSpeed  = 20
         bd.position.Set(-32.0,2.5)
@@ -134,7 +134,7 @@ class ElasticBody (test_main.Framework):
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 3.
+        # 3.
         jr.motorSpeed     = 20
         bd.position.Set(-24.0,1.5)
         body = self.world.CreateBody(bd)
@@ -142,28 +142,28 @@ class ElasticBody (test_main.Framework):
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 4.
+        # 4.
         bd.position.Set(-16.0,0.8)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 5.
+        # 5.
         bd.position.Set(-8.0,0.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 6.
+        # 6.
         bd.position.Set(0.0,0.1)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 7.
+        # 7.
         bd.position.Set(8.0,-0.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
@@ -172,7 +172,7 @@ class ElasticBody (test_main.Framework):
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+box2d.b2Vec2(0,1))
         self.world.CreateJoint(jr).getAsType()
-        #/ 8. right rotator
+        # 8. right rotator
         sd.SetAsBox(5, 0.5)
         sd.density = 2.0
         bd.position.Set(18.0,1)
@@ -189,7 +189,7 @@ class ElasticBody (test_main.Framework):
         jr.maxMotorTorque = 70000
         jr.motorSpeed     = -4
         self.world.CreateJoint(jr).getAsType()
-        #/ 9. left rotator
+        # 9. left rotator
         sd.SetAsBox(8.5, 0.5)
         sd.density = 2.0
         bd.position.Set(-34.0,17)
@@ -205,7 +205,7 @@ class ElasticBody (test_main.Framework):
         jr.maxMotorTorque = 100000
         jr.motorSpeed     = -5
         self.world.CreateJoint(jr).getAsType()
-        #/ big compressor
+        # big compressor
         sd.SetAsBox(3.0,4)
         sd.density = 10.0
         bd.position.Set(-16.0,17)
@@ -222,7 +222,7 @@ class ElasticBody (test_main.Framework):
         hammerright.SetMassFromShapes()
         jd.Initialize(body, hammerright, body.GetWorldCenter()-box2d.b2Vec2(0,6), hammerright.GetWorldCenter() )
         self.world.CreateJoint(jd).getAsType()
-        #/ pusher
+        # pusher
         sd.SetAsBox(6,0.75)
         bd.position.Set(-21.0,9)
         pusher = self.world.CreateBody(bd) #
@@ -233,7 +233,7 @@ class ElasticBody (test_main.Framework):
         jd.Initialize(rightmotor,pusher,rightmotor.GetWorldCenter()+box2d.b2Vec2(-8.0,0),
         pusher.GetWorldCenter()+box2d.b2Vec2(5.0,0) )
         self.world.CreateJoint(jd).getAsType()
-        #/ Static bodies above motors
+        # Static bodies above motors
         sd=box2d.b2PolygonDef() 
         cd=box2d.b2CircleDef() 
         sd.SetAsBox(9.0, 0.5)
@@ -247,7 +247,7 @@ class ElasticBody (test_main.Framework):
 
         sd.SetAsBox(8, 0.5, box2d.b2Vec2(23,0),0)
         g.CreateShape(sd)
-        #/ compressor statics
+        # compressor statics
         sd.SetAsBox(7.0, 0.5, box2d.b2Vec2(-2,9),0)
         g.CreateShape(sd)
         sd.SetAsBox(9.0, 0.5, box2d.b2Vec2(22,9),0)
@@ -257,7 +257,7 @@ class ElasticBody (test_main.Framework):
         g.CreateShape(sd)
         sd.SetAsBox(4.7, 0.5, box2d.b2Vec2(15,11.5),-0.5)
         g.CreateShape(sd)
-        #/ below compressor
+        # below compressor
         sd.SetAsBox(26.0, 0.3, box2d.b2Vec2(17,-4.4),-0.02)
         g.CreateShape(sd)
         cd.radius   = 1.0	
@@ -267,7 +267,7 @@ class ElasticBody (test_main.Framework):
         cd.radius   = 0.7
         cd.localPosition = box2d.b2Vec2(-2,-4.5)
         g.CreateShape(cd)
-        #/ Elevator
+        # Elevator
         bd=box2d.b2BodyDef() 
         cd=box2d.b2CircleDef() 
         sd=box2d.b2PolygonDef() 
@@ -295,7 +295,7 @@ class ElasticBody (test_main.Framework):
         jp.motorSpeed    = 0
         self.m_joint_elev = self.world.CreateJoint(jp).getAsType()
 
-        #/ Korb
+        # Korb
         sd.SetAsBox(2.3, 0.5,box2d.b2Vec2(1,0.0), 0.0)
         sd.density = 0.5
         bd.position.Set(29.0,6.5)
@@ -325,13 +325,13 @@ class ElasticBody (test_main.Framework):
         jr.upperAngle  = box2d.b2_pi*1.1
         jr.collideConnected = True
         self.world.CreateJoint(jr).getAsType()
-        #/ upper body exit
+        # upper body exit
         sd.SetAsBox(14.0, 0.5,box2d.b2Vec2(-3.5,-10.0), 0.0)
         bd.position.Set(17.5,96.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
-        #/ "Elastic body" 64 bodies - something like a lin. elastic compound
-        #/ connected via dynamic forces (springs)
+        # "Elastic body" 64 bodies - something like a lin. elastic compound
+        # connected via dynamic forces (springs)
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.55, 0.55)
         sd.density    = 1.5
@@ -350,7 +350,7 @@ class ElasticBody (test_main.Framework):
                 body.CreateShape(sd)
                 body.SetMassFromShapes()
 
-         #/  Apply dynamic forces (springs) and check elevator state
+         #  Apply dynamic forces (springs) and check elevator state
     def Step(self, settings) :
         bodies = self.bodies
         for i in range(8):
@@ -394,27 +394,29 @@ class ElasticBody (test_main.Framework):
                 if (i < 6 and j > 1):
                     self.AddSpringForce((bodies[ind]),zero,(bodies[inddl]),zero,spring, damp, drdist)
 
-        #/ Check if bodies are near elevator
-        #/  Look if the body to lift is near the elevator
+        # Check if bodies are near elevator
+        #  Look if the body to lift is near the elevator
         p1 = bodies[0].GetWorldCenter()
         p2 = bodies[63].GetWorldCenter()
-        #/    self.m_elev:   elevator prism. joint
+        #    self.m_elev:   elevator prism. joint
         e = self.m_elev.GetWorldCenter() + box2d.b2Vec2(0,7)
+
         # maybe not the best way to do it...
         # Bodies reached the elevator side
         if ( p1.x>e.x or p2.x>e.x ):
             # go up
             if ( ( p1.y<e.y or p2.y<e.y ) and ( self.m_joint_elev.GetJointTranslation()<=self.m_joint_elev.GetLowerLimit()+1 ) ):
                 self.m_joint_elev.SetMotorSpeed(20)
+                #print "lift goes up trans: %G" % self.m_joint_elev.GetJointTranslation()
 
-        #print "lift goes up trans: %G" % self.m_joint_elev.GetJointTranslation()
         # go down
         if ( (self.m_joint_elev.GetJointTranslation()>=self.m_joint_elev.GetUpperLimit()-2) ) :
             self.m_joint_elev.SetMotorSpeed(-15)
-        #printf("lift goes down: %G\n",self.m_joint_elev.GetJointTranslation())
+            #printf("lift goes down: %G\n",self.m_joint_elev.GetJointTranslation())
+
         super(ElasticBody, self).Step(settings)
 
-    #/ Add a spring force
+    # Add a spring force
     def AddSpringForce(self, bA, localA, bB, localB, k, friction, desiredDist) :
         pA = bA.GetWorldPoint(localA)
         pB = bB.GetWorldPoint(localB)

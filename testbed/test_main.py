@@ -40,9 +40,6 @@ from pygame.locals import *
 from settings import fwSettings
 from pgu import gui
 
-global bRunning
-bRunning = True
-
 class fwDestructionListener(box2d.b2DestructionListener):
     test = None
     def __init__(self):
@@ -79,6 +76,10 @@ class fwContactPoint:
 	state = 0
 
 class fwContactListener(box2d.b2ContactListener):
+    """
+    Handles all of the contact states passed in from Box2D.
+
+    """
     test = None
     def __init__(self):
         super(fwContactListener, self).__init__()
@@ -95,7 +96,7 @@ class fwContactListener(box2d.b2ContactListener):
         cp.shape2 = point.shape2
         cp.position = point.position.copy()
         cp.normal = point.normal.copy()
-        cp.id = point.id # a problem?
+        cp.id = point.id
         cp.state = state
 
     def Add(self, point):
@@ -116,6 +117,10 @@ class fwDebugDraw(box2d.b2DebugDraw):
     width, height = 0, 0
     def __init__(self): super(fwDebugDraw, self).__init__()
     def _setValues(self, viewZoom, viewCenter, viewOffset, width, height):
+        """
+        Sets the view zoom, center, offset, and width and height of the screen such that access 
+        to the main window is unnecessary.
+        """
         self.viewZoom=viewZoom
         self.viewCenter=viewCenter
         self.viewOffset=viewOffset
@@ -123,12 +128,21 @@ class fwDebugDraw(box2d.b2DebugDraw):
         self.height = height
 
     def convertColor(self, color):
+        """
+        Take a floating point color in range (0..1,0..1,0..1) and convert it to (255,255,255)
+        """
         return (int(255*color.r), int(255*color.g), int(255*color.b))
 
     def DrawPoint(self, p, size, color):
+        """
+        Draw a single point at point p given a pixel size and color.
+        """
         self.DrawCircle(p, size/self.viewZoom, color, drawwidth=0)
         
     def DrawAABB(self, aabb, color):
+        """
+        Draw a wireframe around the AABB with the given color.
+        """
         points = []
         points.append( (aabb.lowerBound.x, aabb.lowerBound.y ) )
         points.append( (aabb.upperBound.x, aabb.lowerBound.y ) )
@@ -138,10 +152,16 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.aalines(self.surface, color, True, [self.toScreen(p) for p in points])
 
     def DrawSegment(self, p1, p2, color):
+        """
+        Draw the line segment from p1-p2 with the specified color.
+        """
         color = self.convertColor(color)
         pygame.draw.aaline(self.surface, color, self.toScreen_v(p1), self.toScreen_v(p2))
 
     def DrawXForm(self, xf):
+        """
+        Draw the transform xf on the screen
+        """
         p1 = xf.position
         k_axisScale = 0.4
         p2 = self.toScreen_v(p1 + k_axisScale * xf.R.col1)
@@ -155,6 +175,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.aaline(self.surface, color, p1, p3)
 
     def DrawCircle(self, center, radius, color, drawwidth=1):
+        """
+        Draw a circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        """
         color = self.convertColor(color)
         radius *= self.viewZoom
         if radius < 1: radius = 1
@@ -164,6 +187,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.circle(self.surface, color, center, radius, drawwidth)
 
     def DrawSolidCircle(self, center_v, radius, axis, color):
+        """
+        Draw a solid circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        """
         color = self.convertColor(color)
         radius *= self.viewZoom
         if radius < 1: radius = 1
@@ -178,6 +204,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p.x, center[1] + p.y)) 
 
     def DrawPolygon(self, in_vertices, vertexCount, color):
+        """
+        Draw a wireframe polygon given the world b2Vec2 vertices in_vertices with the specified color.
+        """
         color = self.convertColor(color)
         vertices = [self.toScreen(v) for v in in_vertices]
         pygame.draw.polygon(self.surface, color, vertices, 1)
@@ -189,10 +218,22 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.polygon(self.surface, color, vertices, 1)
 
     def toScreen_v(self, pt):
+        """
+        Input:  pt - a b2Vec2 in world coordinates
+        Output: (x, y) - a tuple in screen coordinates
+        """
         return (int((pt.x * self.viewZoom) - self.viewOffset.x), int(self.height - ((pt.y * self.viewZoom) - self.viewOffset.y)))
     def toScreen(self, pt):
+        """
+        Input:  (x, y) - a tuple in world coordinates
+        Output: (x, y) - a tuple in screen coordinates
+        """
         return ((pt[0] * self.viewZoom) - self.viewOffset.x, self.height - ((pt[1] * self.viewZoom) - self.viewOffset.y))
     def scaleValue(self, value):
+        """
+        Input: value - unscaled value
+        Output: scaled value according to the view zoom ratio
+        """
         return value/self.viewZoom
 
 class fwGUI(gui.Table):
@@ -623,16 +664,6 @@ def main(test_class):
     print "Loading %s..." % test_class.name
     test = test_class()
     test.run()
-    return
-
-    # below is an attempt at support for reloading (doesn't work yet)
-    global bRunning
-    bRunning = True
-    while bRunning:
-        print "----------------------------------"
-        print "Loading %s..." % test_class.name
-        test = test_class()
-        test.run()
 
 if __name__=="__main__":
     from test_empty import Empty
