@@ -62,6 +62,31 @@ class Bridge(test_main.Framework):
         anchor = box2d.b2Vec2(-15.0 + 1.0 * numPlanks, 5.0)
         jd.Initialize(prevBody, ground, anchor)
         self.world.CreateJoint(jd)
+
+        for i in range(2):
+            sd=box2d.b2PolygonDef()
+            sd.vertexCount = 3
+            sd.setVertex(0,-0.5, 0.0)
+            sd.setVertex(1,0.5, 0.0)
+            sd.setVertex(2,0.0, 1.5)
+            sd.density = 1.0
+
+            bd=box2d.b2BodyDef()
+            bd.position.Set(-8.0 + 8.0 * i, 12.0)
+            body = self.world.CreateBody(bd)
+            body.CreateShape(sd)
+            body.SetMassFromShapes()
+
+        for i in range(3):
+            sd=box2d.b2CircleDef()
+            sd.radius = 0.5
+            sd.density = 1.0
+
+            bd=box2d.b2BodyDef()
+            bd.position.Set(-6.0 + 6.0 * i, 10.0)
+            body = self.world.CreateBody(bd)
+            body.CreateShape(sd)
+            body.SetMassFromShapes()
  
 if __name__=="__main__":
     test_main.main(Bridge)

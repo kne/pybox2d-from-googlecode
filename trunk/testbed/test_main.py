@@ -20,12 +20,17 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
+6/1/2008
+Added some much needed comments in the code (next to none in the C++ code).
+Cleanups all around.
+
 4/27/2008
 pygame port. All tests now ported.
 
 4/25/2008
 Initial port of the Testbed Framework for Box2D 2.0.1
 The 'fw' prefix refers to 'framework'
+(Initial port was for pyglet 1.1)
 
 Notes:
 * Edit test_settings to change what's displayed. Add your own test based on test_empty.
@@ -41,6 +46,10 @@ from settings import fwSettings
 from pgu import gui
 
 class fwDestructionListener(box2d.b2DestructionListener):
+    """
+    The destruction listener callback:
+    "SayGoodbye" is called when a joint is deleted.
+    """
     test = None
     def __init__(self):
         super(fwDestructionListener, self).__init__()
@@ -52,28 +61,42 @@ class fwDestructionListener(box2d.b2DestructionListener):
             self.test.JointDestroyed(joint)
 
 class fwBoundaryListener(box2d.b2BoundaryListener):
+    """
+    The boundary listener callback:
+    Violation is called when the specified body leaves the world AABB.
+    """
     test = None
     def __init__(self):
         super(fwBoundaryListener, self).__init__()
 
     def Violation(self, body):
+        # So long as it's not the user-created bomb, let the test know that
+        # the specific body has left the world AABB
         if self.test.bomb != body:
             self.test.BoundaryViolated(body)
 
 class fwContactTypes:
+    """
+    Acts as an enum, holding the types necessary for contacts:
+    Added, persisted, and removed
+    """
     contactUnknown = 0
     contactAdded = 1
     contactPersisted = 2
     contactRemoved = 3
 
 class fwContactPoint:
-	shape1 = None
-	shape2 = None
-	normal = None
-	position = None
-	velocity = None
-	id  = box2d.b2ContactID()
-	state = 0
+    """
+    Structure holding the necessary information for a contact point.
+    All of the information is copied from the contact listener callbacks.
+    """
+    shape1 = None
+    shape2 = None
+    normal = None
+    position = None
+    velocity = None
+    id  = box2d.b2ContactID()
+    state = 0
 
 class fwContactListener(box2d.b2ContactListener):
     """
@@ -109,6 +132,13 @@ class fwContactListener(box2d.b2ContactListener):
         self.handleCall(fwContactTypes.contactRemoved, point)
 
 class fwDebugDraw(box2d.b2DebugDraw):
+    """
+    This debug draw class accepts callbacks from Box2D (which specifies what to draw)
+    and handles all of the rendering.
+
+    If you are writing your own game, you likely will not want to use debug drawing.
+    Debug drawing, as its name implies, is for debugging.
+    """
     circle_segments = 16
     surface = None
     viewZoom = 1.0
@@ -237,6 +267,11 @@ class fwDebugDraw(box2d.b2DebugDraw):
         return value/self.viewZoom
 
 class fwGUI(gui.Table):
+    """
+    Deals with the initialization and changing the settings based on the GUI 
+    controls. Callbacks are not used, but the checkboxes and sliders are polled
+    by the main loop.
+    """
     checkboxes = (  ("Position Correction", "enablePositionCorrection"), 
                     ("Warm Starting", "enableWarmStarting"), 
                     ("Time of Impact", "enableTOI"), 
@@ -260,44 +295,71 @@ class fwGUI(gui.Table):
     form = None
 
     def __init__(self,settings, **params):
+        # The framework GUI is just basically a HTML-like table.
+        # There are 2 columns, and basically everything is right-aligned.
         gui.Table.__init__(self,**params)
         self.form=gui.Form()
 
         fg = (255,255,255)
 
+        # "Hertz"
         self.tr()
         self.td(gui.Label("Hertz",color=fg),align=1,colspan=2)
+
+        # Hertz slider
         self.tr()
         e = gui.HSlider(settings.hz,5,200,size=20,width=100,height=16,name='hz')
         self.td(e,colspan=2,align=1)
 
+        # "Iterations"
         self.tr()
         self.td(gui.Label("Iterations",color=fg),align=1,colspan=2)
 
+        # Iterations slider (min 1, max 100)
         self.tr()
         e = gui.HSlider(settings.iterationCount,1,100,size=20,width=100,height=16,name='iterationCount')
         self.td(e,colspan=2,align=1)
 
+        # Add each of the checkboxes.
         for text, variable in self.checkboxes:
             self.tr()
             if variable == None:
+                # Checkboxes that have no variable (i.e., None) are just labels.
                 self.td(gui.Label(text, color=fg), align=1, colspan=2)
             else:
+                # Add the label and then the switch/checkbox
                 self.td(gui.Label(text, color=fg), align=1)
                 self.td(gui.Switch(value=getattr(settings, variable),name=variable))
 
     def updateSettings(self, settings):
+        """
+        Change all of the settings based on the current state of the GUI.
+        """
         for text, variable in self.checkboxes:
             if variable == None: continue
             setattr(settings, variable, self.form[variable].value)
+
+        # Now do the sliders
         settings.hz = int(self.form['hz'].value)
         settings.iterationCount = int(self.form['iterationCount'].value)
+
+        # If we're in single-step mode, update the GUI to reflect that.
         if settings.singleStep:
             settings.pause=True
             self.form['pause'].value = True
             self.form['singleStep'].value = False
 
 class Framework(object):
+    """
+    The main testbed framework.
+    It handles basically everything:
+    * The initialization of pygame, Box2D
+    * Contains the main loop
+    * Handles all user input.
+
+    You should derive your class from this one to implement your own tests.
+    See test_Empty.py or any of the other tests for more information.
+    """
     name = "None"
 
     # Box2D-related
@@ -371,11 +433,20 @@ class Framework(object):
         self.updateCenter()
 
     def updateCenter(self):
+        """
+        Updates the view offset based on the center of the screen.
+        
+        Tells the debug draw to update its values also.
+        """
         self.viewOffset = self.viewCenter - self.screenSize/2
 
         self.debugDraw._setValues(self.viewZoom, self.viewCenter, self.viewOffset, self.screenSize.x, self.screenSize.y)
         
     def checkEvents(self):
+        """
+        Check for pygame events (mainly keyboard/mouse events).
+        Passes the events onto the GUI also.
+        """
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 return False
@@ -383,7 +454,7 @@ class Framework(object):
                 self._Keyboard_Event(event.key)
             elif event.type == MOUSEBUTTONDOWN:
                 p = self.ConvertScreenToWorld(*event.pos)
-                if event.button == 1:
+                if event.button == 1: # left
                     self.MouseDown( p )
                 elif event.button == 2: #middle
                     pass
@@ -414,6 +485,14 @@ class Framework(object):
         return True
 
     def run(self):
+        """
+        Main loop.
+
+        Continues to run while checkEvents indicates the user has 
+        requested to quit.
+
+        Updates the screen and tells the GUI to paint itself.
+        """
         running = True
         clock = pygame.time.Clock()
 
@@ -421,7 +500,10 @@ class Framework(object):
             running = self.checkEvents()
             self.screen.fill( (0,0,0) )
 
+            # Check keys that should be checked every loop (not only on initial keydown)
             self.CheckKeys()
+
+            # Run the simulation loop 
             self.SimulationLoop()
 
             if self.settings.drawMenu:
@@ -432,14 +514,31 @@ class Framework(object):
             self.fps = clock.get_fps()
 
     def SetTextLine(self, line):
+        """
+        Kept for compatibility with C++ Box2D's testbeds.
+        
+        ** TODO: Probably should update this to be more logical and easy to use.
+        """
         self.textLine=line
 
     def Step(self, settings):
+        """
+        The main physics step.
+
+        Takes care of physics drawing (callbacks are executed after the world.Step() )
+        and drawing additional information.
+        """
+
+        # Update the settings based on the GUI
+        self.gui_table.updateSettings(settings)
+
+        # Don't do anything if the setting's Hz are <= 0
         if settings.hz > 0.0:
             timeStep = 1.0 / settings.hz
         else:
             timeStep = 0.0
         
+        # If paused, display so
         if settings.pause:
             if settings.singleStep:
                 settings.singleStep=False
@@ -449,8 +548,7 @@ class Framework(object):
             self.DrawString(5, self.textLine, "****PAUSED****")
             self.textLine += 15
 
-        self.gui_table.updateSettings(settings)
-
+        # Set the flags based on what the settings show (uses a bitwise or mask)
         flags = 0
         if settings.drawShapes:     flags |= box2d.b2DebugDraw.e_shapeBit
         if settings.drawJoints:     flags |= box2d.b2DebugDraw.e_jointBit
@@ -461,15 +559,19 @@ class Framework(object):
         if settings.drawCOMs:       flags |= box2d.b2DebugDraw.e_centerOfMassBit
         self.debugDraw.SetFlags(flags)
 
+        # Set the other settings that aren't contained in the flags
         self.world.SetWarmStarting(settings.enableWarmStarting)
     	self.world.SetPositionCorrection(settings.enablePositionCorrection)
     	self.world.SetContinuousPhysics(settings.enableTOI)
 
+        # Reset the collision points
         self.points = []
 
+        # Tell Box2D to step
         self.world.Step(timeStep, settings.iterationCount)
         self.world.Validate()
 
+        # If the bomb is frozen, get rid of it.
         if self.bomb and self.bomb.IsFrozen():
             self.world.DestroyBody(self.bomb)
             self.bomb = None
@@ -490,10 +592,11 @@ class Framework(object):
             #self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.b2_byteCount) # not wrapped?
             #self.textLine += 15
 
-        if settings.drawFPS: #python only
+        if settings.drawFPS: #python version only
             self.DrawString(5, self.textLine, "FPS %d" % self.fps)
             self.textLine += 15
-            
+        
+        # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
             body = self.mouseJoint.GetBody2()
             p1 = body.GetWorldPoint(self.mouseJoint.m_localAnchor)
@@ -503,6 +606,7 @@ class Framework(object):
             self.debugDraw.DrawPoint(p2, settings.pointSize, box2d.b2Color(0,1.0,0))
             self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.8,0.8,0.8))
 
+        # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
             #k_impulseScale = 0.1
             k_axisScale = 0.3
@@ -535,6 +639,12 @@ class Framework(object):
                     #DrawSegment(p1, p2, box2d.b2Color(0.9, 0.9, 0.3))
 
     def _Keyboard_Event(self, key):
+        """
+        Internal keyboard event, don't override this.
+
+        Checks for the initial keydown of the basic testbed keys. Passes the unused
+        ones onto the test via the Keyboard() function.
+        """
         if key==K_z:
             # Zoom in
             self.viewZoom = min(1.1 * self.viewZoom, 20.0)
@@ -551,14 +661,20 @@ class Framework(object):
             # Launch a bomb
             self.LaunchBomb()
         elif key==K_F1:
+            # Toggle drawing the menu
             self.settings.drawMenu = not self.settings.drawMenu
         else:
             # Inform the test of the key press
             self.Keyboard(key)
         
     def MouseDown(self, p):
+        """
+        Indicates that there was a left click at point p (world coordinates)
+        """
         if self.mouseJoint != None:
             return
+
+        # Create a mouse joint on the selected body (assuming it's dynamic)
 
         # Make a small box.
         aabb = box2d.b2AABB()
@@ -568,7 +684,7 @@ class Framework(object):
 
         # Query the world for overlapping shapes.
         body = None
-        k_maxCount = 10
+        k_maxCount = 10 # maximum amount of shapes to return
 
         (count, shapes) = self.world.Query(aabb, k_maxCount)
         for shape in shapes:
@@ -588,15 +704,25 @@ class Framework(object):
             body.WakeUp()
 
     def MouseUp(self):
+        """
+        Left mouse button up.
+        """     
         if self.mouseJoint:
             self.world.DestroyJoint(self.mouseJoint)
             self.mouseJoint = None
 
     def MouseMove(self, p):
+        """
+        Mouse moved to point p, in world coordinates.
+        """
         if self.mouseJoint:
             self.mouseJoint.SetTarget(p)
 
     def LaunchBomb(self):
+        """
+        Create a new bomb and launch it at the testbed.
+        A bomb is a simple circle which has a random position and velocity.
+        """
         if self.bomb:
             self.world.DestroyBody(self.bomb)
             self.bomb = None
@@ -616,6 +742,11 @@ class Framework(object):
         self.bomb.SetMassFromShapes()
      
     def CheckKeys(self):
+        """
+        Check the keys that are evaluated on every main loop iteration.
+        I.e., they aren't just evaluated when first pressed down
+        """
+
         pygame.event.pump()
         self.keys = keys = pygame.key.get_pressed()
         if keys[K_LEFT]:
@@ -637,29 +768,57 @@ class Framework(object):
             self.updateCenter()
 
     def SimulationLoop(self):
+        """
+        The main simulation loop contents.
+        """
+        # TODO: perhaps just stick this all in Step()? Is it really necessary?
         self.SetTextLine(30)
         self.DrawString(5, 15, self.name)
         self.Step(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
+        """
+        Return a b2Vec2 in world coordinates of the passed in screen coordinates x, y
+        """
         return box2d.b2Vec2((x + self.viewOffset.x) / self.viewZoom, ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
 
     def DrawString(self, x, y, str):
+        """
+        Draw some text, str, at screen coordinates (x, y).
+        """
         color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
         text = self.font.render(str, True, color)
         self.screen.blit(text, (x,y))
 
     # These should be implemented in the subclass: (Step() also if necessary)
     def JointDestroyed(self, joint):
+        """
+        Callback indicating 'joint' has been destroyed.
+        """
         pass
 
     def BoundaryViolated(self, body):
+        """
+        Callback indicating 'body' has left the world AABB.
+        """
         pass
 
     def Keyboard(self, key):
+        """
+        Callback indicating 'key' has been pressed down.
+        The key is from pygame.locals.K_*:
+
+         from pygame.locals import *
+         ...
+         if key == K_z:
+             pass
+        """
         pass
 
 def main(test_class):
+    """
+    Loads the test class and executes it.
+    """
     print "----------------------------------"
     print "Loading %s..." % test_class.name
     test = test_class()
