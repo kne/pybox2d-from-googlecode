@@ -42,14 +42,14 @@ import os
 
 # paths
 release_dir = "C:\\dev\\pybox2d\\"
-data_subdirs = ["testbed", "interface"]
+data_subdirs = ["testbed", "interface", "docs"]
 interface_file = "Box2D.i"
 fixed_interface_file = "Box2D_fixed.i"
 build_type="float" #or 'fixed'
 
 # release version number
 box2d_version = "2.0.1"
-release_number = 3
+release_number = 4
 
 # other settings
 do_file_copy = False
