@@ -120,8 +120,7 @@ class CollisionProcessing (test_main.Framework):
         body_pairs = [(p.shape1.GetBody(), p.shape2.GetBody()) for p in self.points]
 
         for body1, body2 in body_pairs:
-            mass1 = body1.GetMass()
-            mass2 = body2.GetMass()
+            mass1, mass2 = body1.GetMass(), body2.GetMass()
 
             if mass1 > 0.0 and mass2 > 0.0:
                 if mass2 > mass1:

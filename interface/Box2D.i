@@ -44,6 +44,8 @@
         %include "Box2D_fixed.i"
     #endif
 
+    %include "Box2D_printing.i"
+
     //Autodoc puts the basic docstrings for each function
     %feature("autodoc", "1");
 
@@ -152,8 +154,6 @@
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
-        def __repr__(self):
-            return "b2Shape(from Body %s )" % (self.GetBody())
         def typeName(self):
             types = {  e_unknownShape   : "Unknown",
                         e_circleShape   : "Circle",
@@ -185,23 +185,8 @@
         }
     }
    
-    //Generic joint information
+    //Support using == on bodies, joints, and shapes
     %pythoncode %{
-        def b2JointInfo(self):
-            """Return a rather verbose string representation of a joint"""
-            ignoreList = ('this', 'thisown', 'next', 'prev', 'm_next', 'm_prev')
-            def checkProperty(prop):
-                if prop in ignoreList: return False
-                if prop[:2]=="__": return False
-                if callable(getattr(self, prop)): return False
-                return True
-
-            props = [prop for prop in dir(self) if checkProperty(prop)]
-            props.sort()
-
-            info  = ["%s:%s" % (prop,str(getattr(self, prop))) for prop in props]
-            return "%s(%s)" % (self.__class__.__name__, " ".join(info))
-
         def b2ShapeCompare(a, b):
             if not isinstance(a, b2Shape) or not isinstance(b, b2Shape):
                 return False
@@ -219,7 +204,6 @@
     %extend b2MouseJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -227,7 +211,6 @@
     %extend b2GearJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -235,7 +218,6 @@
     %extend b2DistanceJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -243,7 +225,6 @@
     %extend b2PrismaticJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -251,7 +232,6 @@
    %extend b2PulleyJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -259,7 +239,6 @@
    %extend b2RevoluteJoint {
     public:
         %pythoncode %{
-        __repr__ = b2JointInfo
         __eq__ = b2JointCompare
         %}
     }
@@ -269,8 +248,6 @@
     %extend b2JointDef {
     public:
         %pythoncode %{
-        def __repr__(self):
-            return "b2JointDef(body1: %s body2: %s)" % (self.body1, self.body2)
         def typeName(self):
             """
             Return the name of the joint from:
@@ -291,9 +268,6 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
-        __repr__ = b2JointInfo
-        #def __repr__(self):
-        #    return "b2Joint(m_body1: %s m_body2: %s getAsType(): %s)" % (self.m_body1, self.m_body2, self.getAsType())
         def typeName(self):
             """
             Return the name of the joint from:
@@ -362,20 +336,10 @@
 
     %ignore b2PolygonShape::GetVertices; //Inaccessible 
 
-    %extend b2CircleDef {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2CircleDef(radius: %g)" % (self.radius)
-        %}
-    }
-
     %extend b2CircleShape {
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
-        def __repr__(self):
-            return "b2CircleShape(radius: %g)" % (self.GetRadius())
         %}
     }
 
@@ -537,19 +501,9 @@
         }
     }
 
-    //Pretty printing section
-    %extend b2BodyDef {
-        %pythoncode %{
-        def __repr__(self):
-            return "b2BodyDef(Position: %s)" % (self.position)
-        %}
-    }
-
     %extend b2Body {
         %pythoncode %{
         __eq__ = b2BodyCompare
-        def __repr__(self):
-            return "b2Body(Position: %s)" % (self.GetPosition())
         %}
         PyObject* pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
@@ -562,79 +516,6 @@
         }
     }
 
-    %extend b2ContactID_features {
-        %pythoncode %{
-        def __repr__(self):
-            return "b2ContactID::Features(\n\treferenceFace: %d incidentEdge: %d incidentVertex: %d flip: %d)" % \
-                (self.referenceFace, self.incidentEdge, self.incidentVertex, self.flip)
-        %}
-    }
-    %extend b2ContactID {
-        %pythoncode %{
-        def __repr__(self):
-            return "b2ContactID(key: %d Features: \n\t%s)" % \
-                (self.key, self.features)
-        %}
-    }
-
-    %extend b2ContactPoint {
-        %pythoncode %{
-        def __repr__(self):
-            return "b2ContactPoint(\n\tid: %s\n\tshape1: %s\n\tshape2: %s\n\tposition: %s\n\tnormal: %s\n\tseparation: %f normalForce: %f tangentForce: %f)" % \
-                (self.id, self.shape1, self.shape2, self.position, self.normal, self.separation, self.normalForce, self.tangentForce)
-        %}
-    }
-
-    %extend b2JointEdge {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2JointEdge(other: %s)" % (self.other)
-        %}
-    }
-    
-    %extend b2Jacobian {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2Jacobian(linear1: %s: linear2: %s angular1: %s angular2: %s)" %\
-                (self.linear1, self.linear2, self.angular1, self.angular2)
-        %}
-    }
-
-    %extend b2Mat22 {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2Mat22(col1: %s col2: %s)" % (self.col1, self.col2)
-        %}
-    }
-
-    %extend b2Color {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2Color(RGB: %g,%g,%g)" % (self.r, self.g, self.b)
-        %}
-    }
-
-    %extend b2Version {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2Version(%d.%d.%d)" % (self.major, self.minor, self.revision)
-        %}
-    }
-
-    %extend b2AABB {
-    public:
-        %pythoncode %{
-        def __repr__(self):
-            return "b2AABB(lowerBound: %s upperBound: %s)" % (self.lowerBound, self.upperBound)
-        %}
-    }
-
-    
     // Additional supporting code
     %pythoncode %{
     # Checks the Polygon definition to see if upon creation it will cause an assertion.
