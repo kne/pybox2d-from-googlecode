@@ -1,3 +1,27 @@
+#!/usr/bin/python
+#
+# C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+# Python version Copyright (c) 2008 kne / sirkne at gmail dot com
+# 
+# Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlepages.com)
+# 
+# This software is provided 'as-is', without any express or implied
+# warranty.  In no event will the authors be held liable for any damages
+# arising from the use of this software.
+# Permission is granted to anyone to use this software for any purpose,
+# including commercial applications, and to alter it and redistribute it
+# freely, subject to the following restrictions:
+# 1. The origin of this software must not be misrepresented; you must not
+# claim that you wrote the original software. If you use this software
+# in a product, an acknowledgment in the product documentation would be
+# appreciated but is not required.
+# 2. Altered source versions must be plainly marked as such, and must not be
+# misrepresented as being the original software.
+# 3. This notice may not be removed or altered from any source distribution.
+#
+# -----------------------------------------------------------------------------
+# Original comments (ported from the C++ version):
+#
 # lite delauney triangle mesh generator
 #
 # 2001/03 as part of a basic FEA package
@@ -63,7 +87,7 @@ class tmVertex(object):
 class tmSegment(object):
     # tmVertex v[2] 
     def __init__(self):
-        self.v = [ tmVertex(), tmVertex() ] 
+        self.v = [tmVertex(), tmVertex()]
 
 class tmSegmentId(object):
     # i1, i2
@@ -96,8 +120,26 @@ class TriangleMesh(object):
         self.maxVertexCount = aMaxVertexCount
         self.minAngle       = aMinAngle
         self.options        = aOptions
-        print "(TriangleMesh Initialized)"
 
+    def SetMaxVertexCount(self, count):
+       if count>3:
+           self.maxVertexCount = count
+           self.options &= ~tmO_MINIMALGRID
+
+    def SetOptions(self, options): self.options = options
+    def AddOption(self, options):  self.options |= options
+
+    # angle in degree !
+    def SetAngle(self, angle): self.minAngle = angle
+    def GetVertexCount(self):          return self.vertexCount        
+    def GetInputVertexCount(self):     return self.inputVertexCount   
+    def GetEdgeCount(self):            return self.edgeCount          
+    def GetTriangleCount(self):        return self.triangleCount      
+    def GetInsideTriangleCount(self):  return self.insideTriangleCount
+    def GetVertices(self):  return self.Vertices  
+    def GetEdges(self):     return self.Edges     
+    def GetTriangles(self): return self.Triangles  
+    
     def Mesh(self, input, n_input, segment, n_segment, hole, n_holes):
         i=0
         rtn = tmE_OK
@@ -137,7 +179,6 @@ class TriangleMesh(object):
         if n_segment>0:
             self.segmentCount = n_segment
             for i in range(n_segment):
-                self.Segments.append(tmSegment())
                 self.Segments[i].v[0] = self.Vertices[segment[i].i1+3-1]
                 self.Segments[i].v[1] = self.Vertices[segment[i].i2+3-1]
 
@@ -149,15 +190,9 @@ class TriangleMesh(object):
         self.holeCount = n_holes
         self.Holes     = hole
 
-        print "Triangulating..."
         self.Triangulate()
-        print "Triangulating done."
-
-        #print self.Vertices[:self.vertexCount]
-        #print str([e.v[0] for e in self.Edges[:self.edgeCount]])[1:-1]
 
         if self.options & tmO_BASICMESH ==0:
-            print "Options: Not basic mesh."
             # convex graphs
             if self.options & tmO_CONVEXHULL:
                 self.ConvexHull()
@@ -301,10 +336,6 @@ class TriangleMesh(object):
         return None 
 
     def SetEdge(self, e, v0, v1, t0, t1):
-        #if e == self.Edges[9]:
-        #    print "Edge 9, v0: ", v0
-        #    #if v0.x == 2: # 1.41 is right (line 480), -1.41 is next incorrect (line )
-        #    #    assert(False)
         e.v[0], e.v[1] = v0, v1
         e.t[0], e.t[1] = t0, t1
         e.locked=False
@@ -673,9 +704,6 @@ class TriangleMesh(object):
                 v1 = s.v[1]
                 
                 e = self.GetEdge(v0, v1)
-                #print "GetEdge", v0, v1, e
-                #some problem here, does way more work than the C++ version
-                # i think some pointer discrepancies are getting in the way
                 if not e:
                      v = self.AddVertex()
                      if not v: return
@@ -739,14 +767,6 @@ class TriangleMesh(object):
          print "self.Segments   : %d" % (self.segmentCount)
          print "self.Triangles  : %d (total: %d)" % (self.insideTriangleCount,self.triangleCount)
 
-class TriangleMeshTrace(TriangleMesh):
-    def __init__(self, *kw):
-        super(TriangleMeshTrace, self).__init__(kw)
-
-    def __getattribute__(self, attr):
-        print "->", attr
-        return getattr(super(TriangleMeshTrace, self), attr)
-
 def main():
     # the geometry-boundary to mesh, points in length units.
     # a ring
@@ -791,9 +811,6 @@ def main():
 
     # show some minimal stats
     md.PrintData()
-
-    # cleanup
-    #md.FreeMemory()
 
 if __name__=="__main__":
      main()
