@@ -28,9 +28,230 @@ import TriangleMesh as tm
 def H(x):
     return x/2.0
 
+data = {
+    'ring_nodes' : (
+        (6.00, 3.00),
+        (5.12, 5.12),
+        (3.00, 6.00),
+        (0.88, 5.12),
+        (0.00, 3.00),
+        (0.88, 0.88),
+        (3.00, 0.00),
+        (5.12, 0.88),
+        (4.50, 3.00),
+        (4.06, 4.06),
+        (3.00, 4.50),
+        (1.94, 4.06),
+        (1.50, 3.00),
+        (1.94, 1.94),
+        (3.00, 1.50),
+        (4.06, 1.94)),
+
+    'ring_segments' : (            
+        (9, 10),
+        (10, 11),
+        (11, 12),
+        (12, 13),
+        (13, 14),
+        (14, 15),
+        (15, 16),
+        (16, 9)),
+
+    'ring_holes' : (
+        (3.00, 3.00), ),
+
+    # 'B'
+    'B_nodes' : (
+        (0.00, 0.00),
+        (4.00, 0.00),
+        (5.00, 2.00),
+        (5.00, 4.00),
+        (4.00, 5.00),
+        (5.00, 6.00),
+        (5.00, 8.00),
+        (4.00, 9.00),
+        (0.00, 9.00),
+        (0.00, 5.00),
+        (1.50, 1.50),
+        (3.50, 1.50),
+        (3.50, 4.00),
+        (1.50, 4.00),
+        (1.50, 6.00),
+        (3.50, 6.00),
+        (3.50, 8.50),
+        (1.50, 8.50)),
+
+    'B_segments' : (
+        (1, 2),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 8),
+        (8, 9),
+        (9, 10),
+        (10, 1),
+        (11, 12),
+        (12, 13),
+        (13, 14),
+        (14, 11),
+        (15, 16),
+        (16, 17),
+        (17, 18),
+        (18, 15)),
+
+    'B_holes' : (
+        (5.00, 5.00),
+        (2.50, 2.50),
+        (2.50, 7.00)),
+
+    # 'D'
+    'D_nodes' : (
+        (0.00, 0.00),
+        (4.00, 0.00),
+        (5.00, 2.50),
+        (5.00, 7.00),
+        (4.00, 9.00),
+        (0.00, 9.00),
+        (0.00, 5.00),
+        (1.50, 2.50),
+        (3.50, 2.50),
+        (3.50, 7.00),
+        (1.50, 7.00)),
+
+    'D_segments' : (
+        (1, 2),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 1),
+        (8, 9),
+        (9, 10),
+        (10, 11),
+        (11, 8)),
+
+    'D_holes' : (
+        (2.50, 5.00), ),
+
+    # 'x'
+    'x_nodes' : (
+        (0.00, 0.00),
+        (1.00, 0.00),
+        (5.00, 0.00),
+        (6.00, 0.00),
+        (6.00, 1.00),
+        (6.00, 5.00),
+        (6.00, 6.00),
+        (1.00, 6.00),
+        (5.00, 6.00),
+        (0.00, 6.00),
+        (0.00, 5.00),
+        (0.00, 1.00),
+        (3.00, 2.00),
+        (4.00, 3.00),
+        (3.00, 4.00),
+        (2.00, 3.00)),
+
+    'x_segments' : (
+        (2, 13),
+        (3, 13),
+        (5, 14),
+        (6, 14),
+        (8, 15),
+        (9, 15),
+        (11, 16),
+        (12, 16)),
+
+    'x_holes' : (
+        (3.00, 1.00),
+        (5.00, 3.00),
+        (3.00, 5.00),
+        (1.00, 3.00)),
+
+    # '2'
+    'two_nodes' : (
+        (0.00, 0.00),
+        (6.00, 0.00),
+        (6.00, 1.00),
+        (2.00, 1.00),
+        (2.00, 2.00),
+        (6.00, 6.00),
+        (6.00, 8.00),
+        (5.00, 9.00),
+        (2.00, 9.00),
+        (1.00, 7.50),
+        (0.00, 2.50),
+        (5.00, 6.50),
+        (5.00, 8.00),
+        (2.50, 8.00),
+        (2.00, 7.50)),
+
+    'two_segments' : (
+        (1, 2),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 8),
+        (8, 9),
+        (9, 10),
+        (10, 15),
+        (11, 12),
+        (12, 13),
+        (13, 14),
+        (14, 15)),
+
+    'two_holes' : (
+        (3.00, 5.00),
+        (4.00, 3.00)),
+
+    # '-' beam
+    'beam_nodes' : (
+        (0.00, 0.00),
+        (32.00, 0.00),
+        (32.00, 3.00),
+        (0.00, 3.00)),
+
+    'beam_segments' : None,
+    'beam_holes' : None,
+
+    # 'b' a box
+    'b_nodes' : (
+        (0.00, 0.00),
+        (10.00, 0.00),
+        (10.00, 10.00),
+        (0.00, 10.00),
+        (2.00, 2.00),
+        (8.00, 2.00),
+        (8.00, 8.00),
+        (2.00, 8.00)),
+
+    'b_segments' : (
+        (5, 6),
+        (6, 7),
+        (7, 8),
+        (8, 5)),
+
+    'b_holes' : (
+        (5.0, 5.0), )
+
+    }
+
+# convert the data to the specific types
+
+for key in data.keys():
+    if data[key] == None: continue
+    if key[-6:] == "_nodes" or key[-6:] == "_holes":
+       data[key] = [tm.tmVertex( (x, y) )   for x, y  in data[key]]
+    elif key[-9:] == "_segments":
+       data[key] = [tm.tmSegmentId((v0,v1)) for v0,v1 in data[key]]
+
 class BreakableBody(test_main.Framework):
     name="BreakableBody"
-    # temporary vars to hold the examples
     maxAllowableForce = 0.0
     
     def __init__(self):
@@ -114,7 +335,7 @@ class BreakableBody(test_main.Framework):
     # Create compound (soft) body using a triangle mesh
     # If meshDensity is 0, a minimal grid is generated.
     # Actually pd and dj define the behaviour for all triangles
-    def CreateSoftBody(self, pos, meshDensity,pd, dj,nodes, segments, holes) :
+    def CreateSoftBody(self, pos, meshDensity, pd, dj,nodes, segments, holes):
         n_nodes   =len(nodes)
         n_segments=len(segments)
         n_holes   =len(holes) 
@@ -125,11 +346,11 @@ class BreakableBody(test_main.Framework):
         # box2d defs
         bd=box2d.b2BodyDef()
 
-        # in case of meshDensit>3 ...
+        # in case of meshDensity>3 ...
         md.SetMaxVertexCount(meshDensity)
 
         # triangulator main
-        md.Mesh( nodes, n_nodes,  segments,n_segments,  holes, n_holes )
+        md.Mesh(nodes, n_nodes,  segments,n_segments, holes, n_holes)
         md.PrintData()
 
         # bodies (triangles)
@@ -139,7 +360,6 @@ class BreakableBody(test_main.Framework):
 
         for i in range(md.GetTriangleCount()):
             if ( triangles[i].inside ) :
-                # triangle . box2d.b2PolygonDef
                 pd.setVertex(0,triangles[i].v[0].x, triangles[i].v[0].y)
                 pd.setVertex(1,triangles[i].v[1].x, triangles[i].v[1].y)
                 pd.setVertex(2,triangles[i].v[2].x, triangles[i].v[2].y)
@@ -149,6 +369,7 @@ class BreakableBody(test_main.Framework):
                 b.SetMassFromShapes()
                 # we need the body pointer in the triangles for the joints later
                 triangles[i].userData = b
+
         # joints
         # for each triangle-pair in edges, connect with a distance joint
         edges = md.GetEdges()
@@ -199,206 +420,10 @@ class BreakableBody(test_main.Framework):
     # examples
     def ExampleData(self, which) :
         print "\nLoading data:", which
-        data = {
-            'ring_nodes' : (
-                (6.00, 3.00),
-                (5.12, 5.12),
-                (3.00, 6.00),
-                (0.88, 5.12),
-                (0.00, 3.00),
-                (0.88, 0.88),
-                (3.00, 0.00),
-                (5.12, 0.88),
-                (4.50, 3.00),
-                (4.06, 4.06),
-                (3.00, 4.50),
-                (1.94, 4.06),
-                (1.50, 3.00),
-                (1.94, 1.94),
-                (3.00, 1.50),
-                (4.06, 1.94)),
 
-            'ring_segments' : (            
-                (9, 10),
-                (10, 11),
-                (11, 12),
-                (12, 13),
-                (13, 14),
-                (14, 15),
-                (15, 16),
-                (16, 9)),
-            'ring_holes' : (
-                (3.00, 3.00), ),
-            # 'B'
-            'B_nodes' : (
-                (0.00, 0.00),
-                (4.00, 0.00),
-                (5.00, 2.00),
-                (5.00, 4.00),
-                (4.00, 5.00),
-                (5.00, 6.00),
-                (5.00, 8.00),
-                (4.00, 9.00),
-                (0.00, 9.00),
-                (0.00, 5.00),
-                (1.50, 1.50),
-                (3.50, 1.50),
-                (3.50, 4.00),
-                (1.50, 4.00),
-                (1.50, 6.00),
-                (3.50, 6.00),
-                (3.50, 8.50),
-                (1.50, 8.50)),
-
-            'B_segments' : (
-                (1, 2),
-                (2, 3),
-                (3, 4),
-                (4, 5),
-                (5, 6),
-                (6, 7),
-                (7, 8),
-                (8, 9),
-                (9, 10),
-                (10, 1),
-                (11, 12),
-                (12, 13),
-                (13, 14),
-                (14, 11),
-                (15, 16),
-                (16, 17),
-                (17, 18),
-                (18, 15)),
-
-            'B_holes' : (
-                (5.00, 5.00),
-                (2.50, 2.50),
-                (2.50, 7.00)),
-            # 'D'
-            'D_nodes' : (
-                (0.00, 0.00),
-                (4.00, 0.00),
-                (5.00, 2.50),
-                (5.00, 7.00),
-                (4.00, 9.00),
-                (0.00, 9.00),
-                (0.00, 5.00),
-                (1.50, 2.50),
-                (3.50, 2.50),
-                (3.50, 7.00),
-                (1.50, 7.00)),
-            'D_segments' : (
-                (1, 2),
-                (2, 3),
-                (3, 4),
-                (4, 5),
-                (5, 6),
-                (6, 7),
-                (7, 1),
-                (8, 9),
-                (9, 10),
-                (10, 11),
-                (11, 8)),
-            'D_holes' : ((2.50, 5.00), ),
-            # 'x'
-            'x_nodes' : (
-                (0.00, 0.00),
-                (1.00, 0.00),
-                (5.00, 0.00),
-                (6.00, 0.00),
-                (6.00, 1.00),
-                (6.00, 5.00),
-                (6.00, 6.00),
-                (1.00, 6.00),
-                (5.00, 6.00),
-                (0.00, 6.00),
-                (0.00, 5.00),
-                (0.00, 1.00),
-                (3.00, 2.00),
-                (4.00, 3.00),
-                (3.00, 4.00),
-                (2.00, 3.00)),
-
-            'x_segments' : (
-                (2, 13),
-                (3, 13),
-                (5, 14),
-                (6, 14),
-                (8, 15),
-                (9, 15),
-                (11, 16),
-                (12, 16)),
-
-            'x_holes' : (
-                (3.00, 1.00),
-                (5.00, 3.00),
-                (3.00, 5.00),
-                (1.00, 3.00)),
-            # '2'
-            'two_nodes' : (
-                (0.00, 0.00),
-                (6.00, 0.00),
-                (6.00, 1.00),
-                (2.00, 1.00),
-                (2.00, 2.00),
-                (6.00, 6.00),
-                (6.00, 8.00),
-                (5.00, 9.00),
-                (2.00, 9.00),
-                (1.00, 7.50),
-                (0.00, 2.50),
-                (5.00, 6.50),
-                (5.00, 8.00),
-                (2.50, 8.00),
-                (2.00, 7.50)),
-            'two_segments' : (
-                (1, 2),
-                (2, 3),
-                (3, 4),
-                (4, 5),
-                (5, 6),
-                (6, 7),
-                (7, 8),
-                (8, 9),
-                (9, 10),
-                (10, 15),
-                (11, 12),
-                (12, 13),
-                (13, 14),
-                (14, 15)),
-            'two_holes' : (
-                (3.00, 5.00),
-                (4.00, 3.00)),
-            # '-' beam
-            'beam_nodes' : (
-                (0.00, 0.00),
-                (32.00, 0.00),
-                (32.00, 3.00),
-                (0.00, 3.00)),
-            'beam_segments' : None,
-            'beam_holes' : None,
-            # 'b' a box
-            'b_nodes' : (
-                (0.00, 0.00),
-                (10.00, 0.00),
-                (10.00, 10.00),
-                (0.00, 10.00),
-                (2.00, 2.00),
-                (8.00, 2.00),
-                (8.00, 8.00),
-                (2.00, 8.00)),
-            'b_segments' : (
-                (5, 6),
-                (6, 7),
-                (7, 8),
-                (8, 5)),
-            'b_holes' : (
-                (5.0, 5.0), )
-            }
-        # choose...
-        nodes      = [tm.tmVertex( (x, y) )   for x, y  in data["%s_nodes" % which]]
-        segments   = [tm.tmSegmentId((v0,v1)) for v0,v1 in data["%s_segments" % which]]
-        holes      = [tm.tmVertex( (x, y) )   for x, y  in data["%s_holes" % which]]
+        nodes      = data["%s_nodes" % which]
+        segments   = data["%s_segments" % which]
+        holes      = data["%s_holes" % which]
         
         return (nodes, segments, holes)
 
