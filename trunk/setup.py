@@ -41,7 +41,7 @@ import glob
 import os
 
 # paths
-release_dir = "C:\\dev\\pybox2d\\"
+release_dir = os.path.join("..", "Python") # you can change this or set do_copy_data to False
 data_subdirs = ["testbed", "interface", "docs"]
 interface_file = "Box2D.i"
 fixed_interface_file = "Box2D_fixed.i"
@@ -52,8 +52,10 @@ box2d_version = "2.0.1"
 release_number = 4
 
 # other settings
-do_file_copy = False
-# ----------------------
+do_copy_data = True  # include release_dir/data_subdirs into the distribution
+do_file_copy = False # copy files from this directory (e.g., setup.py) to the release dir
+# ----------------------------------------------------------------
+
 def add_data(path, subdirs, ignore_extensions = (".pyo", ".pyc")):
     for walkdir in [os.path.join(path, subdir) for subdir in subdirs]:
         for root, dirs, files in os.walk(walkdir):
@@ -71,7 +73,6 @@ def distutils_win32_fix():
     # okay, so the problem is that there seems to be no actual way to remove the initBox2D2 from
     # the exported symbols, so we need to patch that from here.
     def patch_get_export_symbols(self,ext):
-        # print "Hello! Patched get_export_symbols called."
         return []
     build_ext.build_ext.get_export_symbols = patch_get_export_symbols
     print "[setup.py] Patched get_export_symbols for win32 build"
@@ -81,15 +82,15 @@ def distutils_fix():
     # the default name would be Box2D2 for the py and the pyd, but the pyd needs to be _Box2D2, so correct that
     # here. (no way to change it with parameters?!)
     def patch_get_ext_filename(self, ext_name):
-        #print "Hello! Patched get_ext_filename called."
-        #return "_" + real_get_ext_filename(self, ext_name)
         return shared_lib_name
         
     real_get_ext_filename = build_ext.build_ext.get_ext_filename
     build_ext.build_ext.get_ext_filename=patch_get_ext_filename
-
+    print "[setup.py] Patched get_ext_filename"
 
 def copy_files():
+    print "Copying files to the release directory..."
+
     from shutil import copy
     copy(interface_file, os.path.join(release_dir, "interface"))
     copy(fixed_interface_file, os.path.join(release_dir, "interface"))
@@ -101,18 +102,20 @@ open("__init__.py","w").write("from Box2D2 import *")
 if do_file_copy:
     copy_files()
 
+version_str = box2d_version + 'b' + str(release_number)
+
 build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}
 
 shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
 link_to = os.path.join("Gen", build_type)
 link_to = os.path.join(link_to, "libbox2d.a")
 
-version_str = box2d_version + 'b' + str(release_number)
-
 all_data = []
-add_data(release_dir, data_subdirs)
 
 if distutils.util.get_platform() == "win32":
+    if do_copy_data:
+        add_data(release_dir, data_subdirs)
+
     win32 = True
     distutils_win32_fix()
     print "Attempting to use MinGW."
