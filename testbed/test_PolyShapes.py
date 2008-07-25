@@ -29,7 +29,7 @@ class PolyShapes (test_main.Framework):
     bodyIndex=0
     bodies=[]
     sds=[]
-    circleDef=box2d.b2CircleDef() #box2d.b2CircleDef circleDef
+    circleDef=box2d.b2CircleDef()
 
     def __init__(self):
         super(PolyShapes, self).__init__()
@@ -39,7 +39,6 @@ class PolyShapes (test_main.Framework):
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
         sd.friction = 0.3
-        sd.filter.categoryBits = 0x0001
 
         for i in range(4):
             sds.append(box2d.b2PolygonDef())
@@ -54,8 +53,6 @@ class PolyShapes (test_main.Framework):
         sds[0].setVertex(2,0.0, 1.5)
         sds[0].density = 1.0
         sds[0].friction = 0.3
-        sds[0].filter.categoryBits = 0x0002
-        #sds[0].maskBits = 0x0003
 
         sds[1].vertexCount = 3
         sds[1].setVertex(0,-0.1, 0.0)
@@ -63,7 +60,6 @@ class PolyShapes (test_main.Framework):
         sds[1].setVertex(2,0.0, 1.5)
         sds[1].density = 1.0
         sds[1].friction = 0.3
-        sds[1].filter.categoryBits = 0x0004
 
         sds[2].vertexCount = 8
         w = 1.0
@@ -79,17 +75,15 @@ class PolyShapes (test_main.Framework):
         sds[2].setVertex(7,-0.5 * s, 0.0)
         sds[2].density = 1.0
         sds[2].friction = 0.3
-        sds[2].filter.categoryBits = 0x0004
 
-        #sds[3].SetAsBox(15.0, 15.0) # svn r153
-        sds[3].vertexCount = 4
-        sds[3].setVertex(0,-0.5, 0.0)
-        sds[3].setVertex(1,0.5, 0.0)
-        sds[3].setVertex(2,0.5, 1.0)
-        sds[3].setVertex(3,-0.5, 1.0)
+        sds[3].SetAsBox(0.5, 0.5)
+        #sds[3].vertexCount = 4
+        #sds[3].setVertex(0,-0.5, 0.0)
+        #sds[3].setVertex(1,0.5, 0.0)
+        #sds[3].setVertex(2,0.5, 1.0)
+        #sds[3].setVertex(3,-0.5, 1.0)
         sds[3].density = 1.0
         sds[3].friction = 0.3
-        sds[3].filter.categoryBits = 0x0004
 
         self.circleDef.radius = 0.5
         self.circleDef.density = 1.0

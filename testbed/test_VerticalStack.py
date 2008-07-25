@@ -40,26 +40,20 @@ class VerticalStack (test_main.Framework):
 
         xs = [0.0, -10.0, -5.0, 5.0, 10.0]
 
-        for j in range(5):
+        for j in xrange(5):
             sd=box2d.b2PolygonDef()
             sd.SetAsBox(0.5, 0.5)
             sd.density = 1.0
             sd.friction = 0.3
 
-            for i in range(12):
+            for i in xrange(16):
                 bd=box2d.b2BodyDef()
 
-                # For this test we are using continuous physics for all boxes.
-                # This is a stress test, you normally wouldn't do this for
-                # performance reasons.
-                #bd.isBullet = True
-                bd.allowSleep = True
-
+                x = 0.0
                 #x = b2Random(-0.1, 0.1)
                 #x = i % 2 == 0 ? -0.025 : 0.025
-                bd.position.Set(xs[j], 0.752 + 1.54 * i)
-                #bd.position.Set(xs[j], 2.51 + 4.02 * i)
-                body = self.world.CreateBody(bd) #
+                bd.position.Set(xs[j] + x, 0.752 + 1.54 * i)
+                body = self.world.CreateBody(bd)
 
                 body.CreateShape(sd)
                 body.SetMassFromShapes()
@@ -79,7 +73,6 @@ class VerticalStack (test_main.Framework):
 
             bd=box2d.b2BodyDef()
             bd.isBullet = True
-            bd.allowSleep = False
             bd.position.Set(-31.0, 5.0)
 
             self.m_bullet = self.world.CreateBody(bd)

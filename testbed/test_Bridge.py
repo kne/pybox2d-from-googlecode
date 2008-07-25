@@ -45,7 +45,7 @@ class Bridge(test_main.Framework):
         numPlanks = 30
 
         prevBody = ground
-        for i in range(numPlanks):
+        for i in xrange(numPlanks):
             bd = box2d.b2BodyDef()
             bd.position.Set(-14.5 + 1.0 * i, 5.0)
 
@@ -63,7 +63,7 @@ class Bridge(test_main.Framework):
         jd.Initialize(prevBody, ground, anchor)
         self.world.CreateJoint(jd)
 
-        for i in range(2):
+        for i in xrange(2):
             sd=box2d.b2PolygonDef()
             sd.vertexCount = 3
             sd.setVertex(0,-0.5, 0.0)
@@ -77,7 +77,7 @@ class Bridge(test_main.Framework):
             body.CreateShape(sd)
             body.SetMassFromShapes()
 
-        for i in range(3):
+        for i in xrange(3):
             sd=box2d.b2CircleDef()
             sd.radius = 0.5
             sd.density = 1.0
