@@ -36,7 +36,7 @@ class ShapeEditing (test_main.Framework):
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
 
-        ground = self.world.CreateBody(bd) #
+        ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
         bodydef=box2d.b2BodyDef()

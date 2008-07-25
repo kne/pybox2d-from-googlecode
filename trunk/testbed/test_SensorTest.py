@@ -38,19 +38,27 @@ class SensorTest (test_main.Framework):
         sd.SetAsBox(50.0, 10.0)
         ground.CreateShape(sd)
 
-        cd=box2d.b2CircleDef() 
-        cd.isSensor = True
-        cd.radius = 5.0
-        cd.localPosition.Set(0.0, 20.0)
-        self.m_sensor = ground.CreateShape(cd)
+        if True:
+            sd=box2d.b2PolygonDef() 
+            sd.SetAsBox(10.0, 2.0, box2d.b2Vec2(0.0, 20.0), 0.0)
+            sd.isSensor = True
+            self.m_sensor = ground.CreateShape(sd)
+
+        else:
+            # Alternative test:
+            cd=box2d.b2CircleDef() 
+            cd.isSensor = True
+            cd.radius = 5.0
+            cd.localPosition.Set(0.0, 20.0)
+            self.m_sensor = ground.CreateShape(cd)
 
         sd=box2d.b2CircleDef() 
         sd.radius = 1.0
         sd.density = 1.0
 
-        for i in range(7):
+        for i in range(10):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(-10.0 + 3.0 * i, 20.0)
+            bd.position.Set(0.0 + 3.0 * i, 20.0)
             
             body = self.world.CreateBody(bd) 
 
@@ -75,14 +83,12 @@ class SensorTest (test_main.Framework):
                 continue
 
             ground = self.m_sensor.GetBody()
-            circle = self.m_sensor.getAsType()
+            circle = self.m_sensor.getAsType() ### ?
             center = ground.GetWorldPoint(circle.GetLocalPosition())
 
             d = center - point.position
 
-            # Not in the bindings yet
-            FLT_EPSILON = 1.192092896e-07
-            if (d.LengthSquared() < FLT_EPSILON * FLT_EPSILON) :
+            if (d.LengthSquared() < box2d.FLT_EPSILON * box2d.FLT_EPSILON) :
                 continue
 
             d.Normalize()

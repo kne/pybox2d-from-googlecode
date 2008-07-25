@@ -20,6 +20,10 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
+7/25/2008
+Updated to SVN r151:
+* Added bomb slingshot (shift+drag)
+
 6/1/2008
 Added some much needed comments in the code (next to none in the C++ code).
 Cleanups all around.
@@ -369,6 +373,9 @@ class Framework(object):
     bomb = None
     mouseJoint = None
     settings = fwSettings()
+    bombSpawning = False
+    bombSpawnPoint = None
+    mouseWorld = None
 
     # Box2D-callbacks
     destructionListener = None
@@ -455,7 +462,11 @@ class Framework(object):
             elif event.type == MOUSEBUTTONDOWN:
                 p = self.ConvertScreenToWorld(*event.pos)
                 if event.button == 1: # left
-                    self.MouseDown( p )
+                    mods = pygame.key.get_mods()
+                    if mods & KMOD_LSHIFT:
+                        self.ShiftMouseDown( p )
+                    else:
+                        self.MouseDown( p )
                 elif event.button == 2: #middle
                     pass
                 elif event.button == 3: #right
@@ -467,10 +478,11 @@ class Framework(object):
                     self.viewZoom /= 1.1
                     self.updateCenter()
             elif event.type == MOUSEBUTTONUP:
+                p = self.ConvertScreenToWorld(*event.pos)
                 if event.button == 3: #right
                     self.rMouseDown = False
                 else:
-                    self.MouseUp()
+                    self.MouseUp(p)
             elif event.type == MOUSEMOTION:
                 p = self.ConvertScreenToWorld(*event.pos)
 
@@ -606,6 +618,11 @@ class Framework(object):
             self.debugDraw.DrawPoint(p2, settings.pointSize, box2d.b2Color(0,1.0,0))
             self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.8,0.8,0.8))
 
+        # Draw the slingshot bomb
+        if self.bombSpawning:
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,0.1))
+            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, box2d.b2Color(0.8,0.8,0.8))
+
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
             #k_impulseScale = 0.1
@@ -624,7 +641,7 @@ class Framework(object):
                     p2 = p1 + k_axisScale * point.normal
                     self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.4, 0.9, 0.4))
 
-                # point.normalForce, point.tangentForce don't exist, so we can't use these two:
+                # point.normalForce, point.tangentForce don't exist anymore, so we can't use these two:
                 #if settings.drawContactForces: # commented out in the testbed code
                     #k_forceScale=1.0 #? unknown
                     #p1 = point.position
@@ -659,7 +676,7 @@ class Framework(object):
             exit(10)
         elif key==K_SPACE:
             # Launch a bomb
-            self.LaunchBomb()
+            self.LaunchRandomBomb()
         elif key==K_F1:
             # Toggle drawing the menu
             self.settings.drawMenu = not self.settings.drawMenu
@@ -667,10 +684,23 @@ class Framework(object):
             # Inform the test of the key press
             self.Keyboard(key)
         
+    def ShiftMouseDown(self, p):
+        """
+        Indicates that there was a left click at point p (world coordinates) with the
+        left shift key being held down.
+        """
+        self.mouseWorld = p
+
+        if self.mouseJoint != None:
+            return
+
+        self.SpawnBomb(p)
+
     def MouseDown(self, p):
         """
         Indicates that there was a left click at point p (world coordinates)
         """
+
         if self.mouseJoint != None:
             return
 
@@ -703,7 +733,7 @@ class Framework(object):
             self.mouseJoint = self.world.CreateJoint(md).getAsType()
             body.WakeUp()
 
-    def MouseUp(self):
+    def MouseUp(self, p):
         """
         Left mouse button up.
         """     
@@ -711,35 +741,79 @@ class Framework(object):
             self.world.DestroyJoint(self.mouseJoint)
             self.mouseJoint = None
 
+        if self.bombSpawning:
+            self.CompleteBombSpawn(p)
+
     def MouseMove(self, p):
         """
         Mouse moved to point p, in world coordinates.
         """
+        self.mouseWorld = p
         if self.mouseJoint:
             self.mouseJoint.SetTarget(p)
 
-    def LaunchBomb(self):
+    def SpawnBomb(self, worldPt):
         """
-        Create a new bomb and launch it at the testbed.
-        A bomb is a simple circle which has a random position and velocity.
+        Begins the slingshot bomb by recording the initial position.
+        Once the user drags the mouse and releases it, then 
+        CompleteBombSpawn will be called and the actual bomb will be
+        released.
+        """
+
+        self.bombSpawnPoint = worldPt.copy()
+        self.bombSpawning = True
+
+    def CompleteBombSpawn(self, p):
+        """
+        Create the slingshot bomb based on the two points
+        (from the worldPt passed to SpawnBomb to p passed in here)
+        """
+        if not self.bombSpawning: 
+            return
+        multiplier = 30.0
+        vel  = self.bombSpawnPoint - p
+        vel *= multiplier
+        self.LaunchBomb(self.bombSpawnPoint, vel)
+        self.bombSpawning = False
+
+    def LaunchBomb(self, position, velocity):
+        """
+        A bomb is a simple circle which has the specified position and velocity.
         """
         if self.bomb:
             self.world.DestroyBody(self.bomb)
             self.bomb = None
+
         bd = box2d.b2BodyDef()
         bd.allowSleep = True
-        bd.position.Set(box2d.b2Random(-15.0, 15.0), 30.0)
+        bd.position = position
         bd.isBullet = True
         self.bomb = self.world.CreateBody(bd)
-        self.bomb.SetLinearVelocity(-5.0 * bd.position)
+        self.bomb.SetLinearVelocity(velocity)
 
         sd = box2d.b2CircleDef()
         sd.radius = 0.3
         sd.density = 20.0
         sd.restitution = 0.1
-        self.bomb.CreateShape(sd)
-        
-        self.bomb.SetMassFromShapes()
+
+        minV = position - box2d.b2Vec2(0.3,0.3)
+        maxV = position + box2d.b2Vec2(0.3,0.3)
+
+        aabb = box2d.b2AABB()
+        aabb.lowerBound = minV
+        aabb.upperBound = maxV
+
+        if self.world.InRange(aabb):
+            self.bomb.CreateShape(sd)
+            self.bomb.SetMassFromShapes()
+
+    def LaunchRandomBomb(self):
+        """
+        Create a new bomb and launch it at the testbed.
+        """
+        p = box2d.b2Vec2( box2d.b2Random(-15.0, 15.0), 30.0 )
+        v = -5.0 * p
+        self.LaunchBomb(p, v)
      
     def CheckKeys(self):
         """
@@ -769,9 +843,8 @@ class Framework(object):
 
     def SimulationLoop(self):
         """
-        The main simulation loop contents.
+        The main simulation loop. Don't override this, override Step instead.
         """
-        # TODO: perhaps just stick this all in Step()? Is it really necessary?
         self.SetTextLine(30)
         self.DrawString(5, 15, self.name)
         self.Step(self.settings)
