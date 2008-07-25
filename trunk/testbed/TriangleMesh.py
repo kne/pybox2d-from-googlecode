@@ -10,24 +10,36 @@
 # See the license below if you are planning on distributing a project that uses this
 # code.
 #
+# Updated to SVN r168 on 7/25
+#
 # -----------------------------------------------------------------------------
 # Original comments (ported from the C++ version):
 #
-# lite delauney triangle mesh generator
+# A lite constrained delauney triangle mesh generator,supporting holes and
+# non convex boundaries
 #
 # 2001/03 as part of a basic FEA package
 # 2008/05 some small changes for box2d
-# example: see main at the of this file
+# 2008/06 small bugs
+#         tmO_BASICMESH option for testing only, works sometimes ;)
+#         some comments (see .h file)
+#         variable names changed for better understanding, example
+#          - tmO_MINIMALGRID renamed to tmO_GRADING, used option with
+#            gradingLowerAngle 
+#         bug in SegmentVertices()
+#         things tried with zero tolerances... 
+#
+# Example: see main at the of this file
 #
 # See
 # 1) A Delaunay Refinement Algorithm for Quality 2-Dimensional Mesh Generation
 #    Jim Ruppert - Journal of Algorithms, 1995
 # 2) Jonathan Shewchuk
-#    http:#www.cs.cmu.edu/~quake/triangle.html
-# Idea from
-# 3) Francois Labelle
-#    http:#www.cs.berkeley.edu/~flab/
-#    a copy of original license (mesh.c):
+#    http://www.cs.cmu.edu/~quake/triangle.html 
+# 3) Original idea - recursive triangle eating - from
+#    Francois Labelle
+#    http://www.cs.berkeley.edu/~flab/
+#       Copy of original license from (mesh.c):
 #        Original author:
 #        Francois Labelle <flab@cs.berkeley.edu>
 #        University of California - Berkeley
@@ -53,20 +65,40 @@ tmE_MEM   =1
 tmE_HOLES =2
 
 # constants
+tmC_MAXVERTEXCOUNT  =500
+tmVERSION           =1.002
+tmC_ZEROTOL         =0.00001
 tmC_PI              =3.14159265359
 tmC_PIx2            =6.28318530718
 tmC_PI_3            =1.04719755119
 tmC_SQRT2           =1.41421356237
+# default big number to calculate a triangle covering all points (vertices[0-2])
 tmC_BIGNUMBER       =1.0e10
-tmC_MAXVERTEXCOUNT  =500
+# default max. nodes number
+mC_DEFAULTMAXVERTEX =500
+# default abort-inserting angle if tmO_GRADING set
+tmC_DEFAULTGRADINGLOWERANGLE   =30.0
+
 
 # options
+# automatic segment all input vertices
 tmO_SEGMENTBOUNDARY =  2
+
+# hull all vertices
 tmO_CONVEXHULL      =  4
-tmO_MINIMALGRID     =  8
+# abort inserting segments,if worst angle > minAngle
+tmO_MINIMALGRID      =8  # deprecated, use next
+tmO_GRADING          =8
+# only for testing
 tmO_BASICMESH       = 16
-# bit to mark if maxVertexCount was enough
+
+# internal option bit to mark, if there were enough maxVertexCount
 tmO_ENOUGHVERTICES  =128
+
+# only for debug, testing
+tmO_NOCALC         = 256
+# only for debug, testing
+tmO_BASICMESHNODEL = 512
 
 class tmVertex(object):
     # x, y
@@ -92,47 +124,53 @@ class tmEdge(object):
         self.t = [None, None]
 
 class Triangle(object):
+    minAngle = 0.0
+    angle    = 0.0
+    inside   = False
+    # hold attributes for the triangles, external use only
+    userData = None
+    area     = 0.0
     def __init__(self):
         self.v = [None, None, None]
         self.e = [tmEdge(), tmEdge(), tmEdge()]
-        self.minAngle = 0.0
-        self.angle    = 0.0
-        self.inside   = False
-        # hold attributes for the triangles, internally not used
-        self.userData = None
 
 class TriangleMesh(object):
     Vertices  = []
     Edges     = []
     Triangles = []
     Segments  = []
-    def __init__(self, aMaxVertexCount=tmC_MAXVERTEXCOUNT, aMinAngle=30.0, aOptions=tmO_MINIMALGRID|tmO_CONVEXHULL):
+    gradingLowerAngle = tmC_DEFAULTGRADINGLOWERANGLE
+    def __init__(self, aMaxVertexCount=tmC_MAXVERTEXCOUNT, aOptions=tmO_MINIMALGRID|tmO_CONVEXHULL):
         self.Reset()
         self.maxVertexCount = aMaxVertexCount
-        self.minAngle       = aMinAngle
         self.options        = aOptions
 
     def SetMaxVertexCount(self, count):
        if count>3:
            self.maxVertexCount = count
-           self.options &= ~tmO_MINIMALGRID
+           options &= ~tmO_GRADING
 
-    def SetOptions(self, options): self.options = options
-    def AddOption(self, options):  self.options |= options
+    def SetOptions(self, options):   self.options = options
+    def AddOption(self, options):    self.options |= options
+    def DeleteOption(self, options): self.options &= ~options
+    def SetGradingLowerAngle(self, angle):
+        self.gradingLowerAngle = angle
+        self.options |= tmO_GRADING
 
-    # angle in degrees!
-    def SetAngle(self, angle): self.minAngle = angle
     def GetVertexCount(self):          return self.vertexCount        
     def GetInputVertexCount(self):     return self.inputVertexCount   
     def GetEdgeCount(self):            return self.edgeCount          
     def GetTriangleCount(self):        return self.triangleCount      
+    def GetSegmentCount():             return self.segmentCount
+    def GetHoleCount():                return self.holeCount
     def GetInsideTriangleCount(self):  return self.insideTriangleCount
     def GetVertices(self):  return self.Vertices  
     def GetEdges(self):     return self.Edges     
     def GetTriangles(self): return self.Triangles  
+    def GetSegments():      return self.Segments
+    def GetHoles():         return self.Holes
     
     def Mesh(self, input, n_input, segment, n_segment, hole, n_holes):
-        i=0
         rtn = tmE_OK
         hasInsideTriangles=False
 
@@ -140,22 +178,24 @@ class TriangleMesh(object):
         self.vertexCount      = n_input + 3
 
         # max sizes
+        if n_input>self.maxVertexCount:
+            self.maxVertexCount = n_input
         self.maxVertexCount  += 3
         self.maxEdgeCount     = 3*self.maxVertexCount - 6
         self.maxTriangleCount = 2*self.maxVertexCount - 5 + 1
         self.maxSegmentCount  = 3*self.maxVertexCount - 6
 
         # allocate space
-        for i in range(self.maxVertexCount):
+        for i in xrange(self.maxVertexCount):
             self.Vertices.append(tmVertex())
-        for i in range(self.maxEdgeCount):
+        for i in xrange(self.maxEdgeCount):
             self.Edges.append(tmEdge())
-        for i in range(self.maxTriangleCount):
+        for i in xrange(self.maxTriangleCount):
             self.Triangles.append(Triangle())
-        for i in range(self.maxSegmentCount):
+        for i in xrange(self.maxSegmentCount):
             self.Segments.append(tmSegment())
 
-        # first 3 points are big equilateral triangle
+        # first 3 points make a big equilateral triangle
         for i in range(3):
             self.Vertices[i].x = tmC_BIGNUMBER * cos(i*(tmC_PIx2/3.0))
             self.Vertices[i].y = tmC_BIGNUMBER * sin(i*(tmC_PIx2/3.0))
@@ -166,24 +206,38 @@ class TriangleMesh(object):
                 self.Vertices[i].x = input[i-3].x
                 self.Vertices[i].y = input[i-3].y
 
-        # given segments (boundary restrictions)
-        if n_segment>0:
-            self.segmentCount = n_segment
-            for i in range(n_segment):
-                self.Segments[i].v[0] = self.Vertices[segment[i].i1+3-1]
-                self.Segments[i].v[1] = self.Vertices[segment[i].i2+3-1]
-
-        # add boundary and close last/first,this adds ALL input vertices
+        # add boundary and close last/first,this adds ALL input vertices but
+        # to the first input segment
         if self.options & tmO_SEGMENTBOUNDARY:
-            self.AutoSegment(1, inputVertexCount, True )
+            # find outer boundary end-node, assume first segment input is start
+            # of inner boundaries (holes)
+            endVertex = self.inputVertexCount
+            if n_segment>0:
+                if segment[0].i1<self.inputVertexCount and segment[0].i2==segment[0].i1+1:
+                    endVertex = segment[0].i1-1
+            self.SegmentVertices(1, endVertex, True)
+
+        # given segments
+        if n_segment>0:
+            k = 0
+            for i in xrange(self.segmentCount+n_segment):
+                self.Segments[i].v[0] = self.Vertices[segment[k].i1+3-1]
+                self.Segments[i].v[1] = self.Vertices[segment[k].i2+3-1]
+                k += 1
+            self.segmentCount += n_segment
 
         # assign hole pointer
         self.holeCount = n_holes
         self.Holes     = hole
 
+        # debug - for testing purposes only !
+        if self.options&tmO_NOCALC:
+            return
+
         self.Triangulate()
 
         if self.options & tmO_BASICMESH ==0:
+            self.inputVertexCount = self.vertexCount
             # convex graphs
             if self.options & tmO_CONVEXHULL:
                 self.ConvexHull()
@@ -206,9 +260,13 @@ class TriangleMesh(object):
                if e: e.locked = True
             #
             self.DeleteBadTriangles()
+            # debug - for testing purposes only !
         else:
-          self.MarkInsideTriangles(False)
+            # quick & dirty hack for a mesh with lesser angles than with the
+            # tmO_GRADING flag set with gradingLowerAngle
+            self.MarkInsideTriangles( not (options&tmO_BASICMESHNODEL) )
 
+        # count inner triangles
         self.insideTriangleCount = 0
         for i in range(self.triangleCount):
             if self.Triangles[i].inside:
@@ -280,12 +338,11 @@ class TriangleMesh(object):
          for i in range(3):
             e = t.e[i]
             if self.GetSegment( e.v[0], e.v[1])==None:
-                assert( e.t[0]==t or e.t[1]==t )
-
                 if   e.t[0]==t: self.DeleteTriangle(e.t[1])
                 elif e.t[1]==t: self.DeleteTriangle(e.t[0])
+                else: assert( e.t[0]==t or e.t[1]==t )
 
-    def AutoSegment(self, startNode, endNode, doclose):
+    def SegmentVertices(self, startNode, endNode, doclose):
          k = self.segmentCount
          for i in range(startNode-1, endNode-1):
              k+=1
@@ -319,11 +376,15 @@ class TriangleMesh(object):
          self.triangleCount += 1
          return self.Triangles[self.triangleCount-1]
 
+    def SameVertex(self, v0, v1):
+        return (    abs(v0.x - v1.x) < tmC_ZEROTOL 
+                and abs(v0.y - v1.y) < tmC_ZEROTOL )
+
     def GetOppositeVertex(self, e, t):
         if e==t.e[0]: return t.v[2]
         if e==t.e[1]: return t.v[0]
         if e==t.e[2]: return t.v[1]
-        assert(False)
+        # assert(False)
         return None 
 
     def SetEdge(self, e, v0, v1, t0, t1):
@@ -341,41 +402,42 @@ class TriangleMesh(object):
     def SetTriangle(self,t,v0,v1,v2,e0,e1,e2) :
         t.v[0], t.v[1], t.v[2] = v0, v1, v2
         t.e[0], t.e[1], t.e[2] = e0, e1, e2
-        t.minAngle, t.angle = self.SetTriangleData( v0, v1, v2)
+        t.minAngle, t.angle, t.area = self.SetTriangleData( v0, v1, v2)
         t.inside = True
 
     def SetTriangleData(self,v0,v1,v2):
-         self.HasBoundingVertices(v0, v1, v2)
-         
-         d0x = v1.x - v0.x; d0y = v1.y - v0.y
-         d1x = v2.x - v1.x; d1y = v2.y - v1.y
-         d2x = v0.x - v2.x; d2y = v0.y - v2.y
-         
-         t0 = self.ArcTan2(d0y, d0x)
-         t1 = self.ArcTan2(d1y, d1x)
-         t2 = self.ArcTan2(d2y, d2x)
-         
-         a0 = self.GetAngle(t2 + tmC_PI, t0)
-         a1 = self.GetAngle(t0 + tmC_PI, t1)
-         a2 = self.GetAngle(t1 + tmC_PI, t2)
+        d0x = v1.x - v0.x; d0y = v1.y - v0.y
+        d1x = v2.x - v1.x; d1y = v2.y - v1.y
+        d2x = v0.x - v2.x; d2y = v0.y - v2.y
+        
+        t0 = self.ArcTan2(d0y, d0x)
+        t1 = self.ArcTan2(d1y, d1x)
+        t2 = self.ArcTan2(d2y, d2x)
+        
+        a0 = self.GetAngle(t2 + tmC_PI, t0)
+        a1 = self.GetAngle(t0 + tmC_PI, t1)
+        a2 = self.GetAngle(t1 + tmC_PI, t2)
 
-         amin = min(a0, a1, a2)
+        amin = min(a0, a1, a2)
 
-         minAngle = amin*180.0/tmC_PI
-         
-         if self.IsOppositeVertex( v2, v0, v1):  a0 = tmC_PI_3 
-         if self.IsOppositeVertex( v0, v1, v2):  a1 = tmC_PI_3
-         if self.IsOppositeVertex( v1, v2, v0):  a2 = tmC_PI_3
+        minAngle = amin*180.0/tmC_PI
+        
+        if self.IsOppositeVertex( v2, v0, v1):  a0 = tmC_PI_3 
+        if self.IsOppositeVertex( v0, v1, v2):  a1 = tmC_PI_3
+        if self.IsOppositeVertex( v1, v2, v0):  a2 = tmC_PI_3
 
-         amin = min(a0, a1, a2)
-         
-         if self.options & tmO_MINIMALGRID:
-              angle = amin*180.0/tmC_PI
-         else:
-              d = sqrt( d0x*d0x + d0y*d0y ) + sqrt( d1x*d1x + d1y*d1y ) + sqrt( d2x*d2x + d2y*d2y )
-              angle = amin/d/d
+        amin = min(a0, a1, a2)
+        
+        if self.options & tmO_GRADING:
+             angle = amin*180.0/tmC_PI
+        else:
+             d = sqrt( d0x*d0x + d0y*d0y ) + sqrt( d1x*d1x + d1y*d1y ) + sqrt( d2x*d2x + d2y*d2y )
+             angle = amin/d/d
 
-         return minAngle, angle
+        area =  0.5*sin(a0)*sqrt(d2x*d2x+d2y*d2y)
+        if area < 0.0: return 0,0,0
+
+        return minAngle, angle, area
 
     def HasBoundingVertices(self,v0,v1,v2):
          return (v0 in self.Vertices[:3] or v1 in self.Vertices[:3] or v2 in self.Vertices[:3])
@@ -469,41 +531,43 @@ class TriangleMesh(object):
               self.CheckEdge( e0)
               self.CheckEdge( e1)
 
+         return True
+
     def InsertVertex(self, v):
-         t0 = self.FindVertex(v)
-         assert( t0 != None )
-         
-         for i in range(3):
-              v0 = t0.v[i]
-              if i == 2: v1 = t0.v[0]
-              else:      v1 = t0.v[i+1]
-              if self.GetVertexPosition(v0, v1, v)==0:
-                   self.InsertVertexAt( v, t0.e[i] )
-                   return
-         
-         v0, v1, v2 = t0.v
-         e0, e1, e2 = t0.e
-         
-         t1 = self.AddTriangle()
-         t2 = self.AddTriangle()
-         f0 = self.AddEdge()
-         f1 = self.AddEdge()
-         f2 = self.AddEdge()
-         
-         self.SetTriangle( t0, v0, v1, v, e0, f1, f0)
-         self.SetTriangle( t1, v1, v2, v, e1, f2, f1)
-         self.SetTriangle( t2, v2, v0, v, e2, f0, f2)
-         
-         self.SetEdge(f0, v0, v, t2, t0)
-         self.SetEdge(f1, v1, v, t0, t1)
-         self.SetEdge(f2, v2, v, t1, t2)
-         
-         self.FixEdge(e1, t0, t1)
-         self.FixEdge(e2, t0, t2)
-         
-         self.CheckEdge(e0)
-         self.CheckEdge(e1)
-         self.CheckEdge(e2)
+        t0 = self.FindVertex(v)
+        if t0 == None: return False
+        
+        for i in range(3):
+             v0 = t0.v[i]
+             if i == 2: v1 = t0.v[0]
+             else:      v1 = t0.v[i+1]
+             if self.GetVertexPosition(v0, v1, v)==0.0:
+                  return self.InsertVertexAt( v, t0.e[i] )
+        
+        v0, v1, v2 = t0.v
+        e0, e1, e2 = t0.e
+        
+        t1 = self.AddTriangle()
+        t2 = self.AddTriangle()
+        f0 = self.AddEdge()
+        f1 = self.AddEdge()
+        f2 = self.AddEdge()
+        
+        self.SetTriangle( t0, v0, v1, v, e0, f1, f0)
+        self.SetTriangle( t1, v1, v2, v, e1, f2, f1)
+        self.SetTriangle( t2, v2, v0, v, e2, f0, f2)
+        
+        self.SetEdge(f0, v0, v, t2, t0)
+        self.SetEdge(f1, v1, v, t0, t1)
+        self.SetEdge(f2, v2, v, t1, t2)
+        
+        self.FixEdge(e1, t0, t1)
+        self.FixEdge(e2, t0, t2)
+        
+        self.CheckEdge(e0)
+        self.CheckEdge(e1)
+        self.CheckEdge(e2)
+        return True
 
     def CheckEdge(self, e):
         if e.locked: return False
@@ -513,7 +577,7 @@ class TriangleMesh(object):
         v0, v2 = e.v
         e2, e3, v3 = self.GetAdjacentEdges(e, t0)
         e0, e1, v1 = self.GetAdjacentEdges(e, t1)
-        if self.GetVertexPosition( v1, v3, v2)>=0 or self.GetVertexPosition( v1, v3, v0)<=0:
+        if self.GetVertexPosition( v1, v3, v2)>=0.0 or self.GetVertexPosition( v1, v3, v0)<=0.0:
             return False
 
         cCount = 0
@@ -527,8 +591,8 @@ class TriangleMesh(object):
         if self.HasBoundingVertices( v1, v3, v0): pCount+=1
         if self.HasBoundingVertices( v3, v1, v2): pCount+=1
 
-        a0, q0 = self.SetTriangleData( v1, v3, v0)
-        a1, q1 = self.SetTriangleData( v3, v1, v2)
+        a0, q0, s = self.SetTriangleData( v1, v3, v0)
+        a1, q1, s = self.SetTriangleData( v3, v1, v2)
         pAngle = min(a0, a1)
 
         if pCount<cCount or pAngle>cAngle:
@@ -559,10 +623,10 @@ class TriangleMesh(object):
                 v = self.Vertices[i]
         return(v)
 
-    def MarkInsideTriangles(self, holes):
+    def MarkInsideTriangles(self, nonconvex):
          rtn=tmE_OK
          
-         if holes:
+         if nonconvex:
               self.DeleteTriangle(self.Triangles[1])
               for i in range(self.holeCount):
                    t = self.FindVertex(  self.Holes[i] )
@@ -588,7 +652,7 @@ class TriangleMesh(object):
                        angle  = t.angle
                        tBad   = t
               
-              if (self.options & tmO_MINIMALGRID) and (angle>=self.minAngle):
+              if (self.options & tmO_MINIMALGRID) and (angle>=self.gradingLowerAngle):
                   return
               
               self.CircumCenter(vc, tBad)
@@ -596,8 +660,7 @@ class TriangleMesh(object):
               isInside = False
               for i in range(self.segmentCount):
                    if self.ContainsVertex(self.Segments[i].v[0], self.Segments[i].v[1], vc):
-                       self.SplitSegment( self.Segments[i])
-                       isInside = True
+                       isInside = self.SplitSegment( self.Segments[i])
               if not isInside:
                    v  = self.AddVertex()
                    if not v: return
@@ -616,11 +679,11 @@ class TriangleMesh(object):
                   v0 = t.v[i]
                   if i==2: v1 = t.v[0]
                   else:    v1 = t.v[i+1]
-                  if self.GetVertexPosition(v0, v1, v) < 0:
+                  if self.GetVertexPosition(v0, v1, v) < 0.0:
                        e = t.e[i]
-                       assert( (e.t[0]==t) or (e.t[1]==t) )
                        if   e.t[0]==t: t = e.t[1] 
                        elif e.t[1]==t: t = e.t[0]
+                       else: assert( False )
                        repeat = True
                        break
          # found
@@ -674,8 +737,11 @@ class TriangleMesh(object):
          
          v0 = s.v[0]
          v1 = s.v[1]
+
+         if self.SameVertex(v0,v1): return False
+
          v = self.AddVertex()
-         if not v: return
+         if not v: return False
          
          t = self.AddSegment()
          self.SetSegment(s, v0, v)
@@ -683,6 +749,7 @@ class TriangleMesh(object):
          
          self.GetSplitPosition( v, v0, v1)
          self.InsertVertexAt( v, e)
+         return True
 
     def InsertSegments(self):
         inserting = True
@@ -703,14 +770,13 @@ class TriangleMesh(object):
                      self.SetSegment(t, v, v1)
                      
                      self.GetSplitPosition( v, v0, v1)
-                     self.InsertVertex( v)
-
-                     inserting = True
+                     inserting = self.InsertVertex( v)
+                     # inserting = True # NM20080618
 
                 elif (self.ContainsVertex(e.v[0], e.v[1], self.GetOppositeVertex(e, e.t[0])) or
                       self.ContainsVertex(e.v[0], e.v[1], self.GetOppositeVertex(e, e.t[1]))):
-                     self.SplitSegment(s)
-                     inserting = True
+                     inserting = self.SplitSegment(s)
+                     # inserting = True # NM20080618
   
             if self.vertexCount==self.maxVertexCount:
                 self.options &= ~tmO_ENOUGHVERTICES
@@ -751,12 +817,18 @@ class TriangleMesh(object):
 
     def PrintData(self):
          print "Options    : %d" % (self.options)
-         print "MinAngle   : %G" % (self.minAngle)
+         print "MinAngle   : %G" % (self.gradingLowerAngle)
          print "Max V/E/T/S: %d %d %d %d" % (self.maxVertexCount,self.maxEdgeCount,self.maxTriangleCount,self.maxSegmentCount)
          print "    actual : %d %d %d %d %d" % (self.vertexCount,self.edgeCount, self.triangleCount, self.segmentCount, self.holeCount)
          print "self.Vertices   : %d" % (self.vertexCount)
          print "self.Segments   : %d" % (self.segmentCount)
          print "self.Triangles  : %d (total: %d)" % (self.insideTriangleCount,self.triangleCount)
+
+    def PrintTriangles():
+        for t in self.Triangles:
+            print "%04d;%6.2f;%6.2f;%6.2f;%6.2f;%6.2f;%6.2f;%d;%6.2f;%6.2f\n" % (i,
+                   t.v[0].x,t.v[0].y,t.v[1].x,t.v[1].y,
+                   t.v[2].x,t.v[2].y,t.inside,t.minAngle,t.angle)
 
 def main():
     # the geometry-boundary to mesh, points in length units.
@@ -784,7 +856,7 @@ def main():
 
     # center hole point
     holes = [ tmVertex( (0.0, 0.0) ) ]
-    # center hole boundary segments
+    # center hole boundary 
     segs = (  ( 9, 10),
               (10, 11),
               (11, 12),
