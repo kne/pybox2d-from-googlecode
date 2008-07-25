@@ -1,3 +1,5 @@
+#summary Installing pyBox2D under OS X
+
 === OS X Installation Guide ===
 
 As there is no installer for pyBox2D under OS X right now, you will have to build it from the source.
