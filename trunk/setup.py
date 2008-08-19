@@ -107,8 +107,7 @@ version_str = box2d_version + 'b' + str(release_number)
 build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}
 
 shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
-link_to = os.path.join("Gen", build_type)
-link_to = os.path.join(link_to, "libbox2d.a")
+link_to = os.path.join("Gen", build_type, "libbox2d.a")
 
 all_data = []
 
