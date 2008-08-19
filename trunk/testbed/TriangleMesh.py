@@ -3,7 +3,7 @@
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
 # 
-# Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlepages.com)
+# Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlecode.com)
 # 
 # Note that this code does not follow the zlib license like the rest of the code does.
 #

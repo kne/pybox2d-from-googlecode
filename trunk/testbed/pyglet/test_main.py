@@ -3,7 +3,7 @@
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
 # 
-# Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlepages.com)
+# Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlecode.com)
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -399,7 +399,7 @@ class Framework(pyglet.window.Window):
 
         # L/R/B/T
         gl.gluOrtho2D(lower.x, upper.x, lower.y, upper.y)
-        print "(Resize) View extents", lower, upper, "Ratio", ratio
+        #print "(Resize) View extents", lower, upper, "Ratio", ratio
 
         self.lower, self.upper = lower, upper
 
@@ -524,7 +524,6 @@ class Framework(pyglet.window.Window):
         # Tell Box2D to step
         self.world.Step(timeStep, settings.iterationCount)
         self.world.Validate()
-        print ".",
 
         # If the bomb is frozen, get rid of it.
         if self.bomb and self.bomb.IsFrozen():
@@ -623,9 +622,6 @@ class Framework(pyglet.window.Window):
             md.maxForce= 1000.0 * body.GetMass()
             self.mouseJoint = self.world.CreateJoint(md).getAsType()
             body.WakeUp()
-            print "Created mouse joint"
-        else:
-            print "No body at", p
             
     def MouseUp(self):
         if self.mouseJoint:
@@ -711,8 +707,6 @@ class Framework(pyglet.window.Window):
         p = box2d.b2Vec2()
         p.x = (1.0 - u) * lower.x + u * upper.x
         p.y = (1.0 - v) * lower.y + v * upper.y
-
-        #print "%d %d (%g %g)" % (x, y, p.x, p.y)
         return p
 
 
