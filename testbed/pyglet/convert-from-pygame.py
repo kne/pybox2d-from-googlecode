@@ -16,8 +16,7 @@ def checkFile(file):
     return False
 
 files = [file for file in os.listdir(pygame_path) if checkFile(file)]
-print files
-exit(0)
+
 for file in files:
     outfile = open(file, "w")
     for line in open(os.path.join(pygame_path, file), "r").readlines():

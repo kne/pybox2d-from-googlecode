@@ -23,14 +23,25 @@ Windows (MinGW)
     * Then you can 
       setup.py [build/install]
 
-Others (Linux and hopefully OS X):
- python setup.py install 
+Linux:
+ python setup.py build
+ sudo python setup.py install 
+
+OS X:
+ See: http://code.google.com/p/pybox2d/wiki/OSXInstallation
+ Assuming you have the dependencies, it should be as simple 
+ as the Linux install.
 
 General notes:
  * You can add data files to the release by modifying the directories.
  * These files will be assumed to be in the (release_dir)/[data_subdirs]
  * Set do_file_copy = True to package them 
 
+
+TODO:
+
+This script is really difficult to understand. Needs to be improved for
+non-win32 installations and such.
 """
 
 import distutils
@@ -40,23 +51,41 @@ from distutils.command import build_ext
 import glob
 import os
 
-# paths
-release_dir = os.path.join("..", "Python") # you can change this or set do_copy_data to False
+#-----------------------------------------------------------------
+# config variables
+
+# include release_dir/data_subdirs in the distribution (win32 only)
+do_copy_data = True  
+
+# do_copy_data uses this path:
+release_dir = os.path.join("..", "Python")  
+
+# copy files from this directory (e.g., setup.py) to the release dir
+# copies: the interfaces, __init__.py, and setup.py to the appropriate release dirs
+# -> see copy_files()
+do_file_copy = False 
+
+# subdirectories from release_dir
 data_subdirs = ["testbed", "interface", "docs"]
+
+# interface files to copy (and compile with)
 interface_file = "Box2D.i"
 fixed_interface_file = "Box2D_fixed.i"
 build_type="float" #or 'fixed'
 
 # release version number
 box2d_version = "2.0.1"
-release_number = 4
+release_number = 5
 
-# other settings
-do_copy_data = True  # include release_dir/data_subdirs into the distribution
-do_file_copy = False # copy files from this directory (e.g., setup.py) to the release dir
+# all_data holds the filenames to include in the distribution
+# -> shouldn't be used on linux, as it'll copy to '/' for some reason.
+all_data = []
+
 # ----------------------------------------------------------------
+# support functions
 
 def add_data(path, subdirs, ignore_extensions = (".pyo", ".pyc")):
+    # Adds all valid files from path\[subdirs] to the list all_data
     for walkdir in [os.path.join(path, subdir) for subdir in subdirs]:
         for root, dirs, files in os.walk(walkdir):
             if ".svn" in root: continue
@@ -89,6 +118,7 @@ def distutils_fix():
     print "[setup.py] Patched get_ext_filename"
 
 def copy_files():
+    # Copies files to the release dir for packaging
     print "Copying files to the release directory..."
 
     from shutil import copy
@@ -97,29 +127,37 @@ def copy_files():
     copy("__init__.py", release_dir) 
     copy("setup.py", release_dir)
 
+#-----------------------------------------------------------------
+
+# Create a simple __init__.py for the package
 open("__init__.py","w").write("from Box2D2 import *")
 
 if do_file_copy:
     copy_files()
 
-version_str = box2d_version + 'b' + str(release_number)
+# Create the version string
+version_str = "%sb%s" % (box2d_version, str(release_number))
 
+# Set the SWIG options
+# [If you get -O unrecognized parameter for SWIG, your version is too old.]
 build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}
 
+# The shared lib name is _Box2D.so (linux), _Box2D.pyd (windows), etc.
 shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
-link_to = os.path.join("Gen", build_type, "libbox2d.a")
 
-all_data = []
+# Link to the appropriate build (fixed/float)
+link_to = os.path.join("Gen", build_type, "libbox2d.a")
 
 if distutils.util.get_platform() == "win32":
     if do_copy_data:
         add_data(release_dir, data_subdirs)
 
-    win32 = True
     distutils_win32_fix()
-    print "Attempting to use MinGW."
+
+    print "Win32 detected. Attempting to use MinGW."
     build_ext_options['compiler']='mingw32'
 
+# Fix the library name
 distutils_fix()
 
 setup (name = 'Box2D',
@@ -128,7 +166,6 @@ setup (name = 'Box2D',
     package_dir = {"Box2D2": "."},
     package_data={"Box2D2" : [shared_lib_name],  },
     options={'build_ext':build_ext_options}, 
-        # ^^ these don't work if in Extension()
     ext_modules = [Extension('Box2D2', [interface_file],
         extra_compile_args=["-O3"], extra_link_args=[link_to], language="c++")],
     data_files=all_data,
@@ -136,8 +173,8 @@ setup (name = 'Box2D',
     author_email = "sirkne at gmail dot com",
     description = "Box2D Python Wrapper",
     license="zlib",
-    url="http://code.google.com/p/pybox2d/",
-    long_description = """Wraps Box2D (currently version %s) for usage in Python.
+    url="http://pybox2d.googlecode.com/",
+    long_description = """Wraps Box2D (version %s) for usage in Python.
     For more information, see the homepage or Box2D's homepage at http://www.box2d.org .
 
     After installing, please be sure to try out the testbed demos (requires pygame).
