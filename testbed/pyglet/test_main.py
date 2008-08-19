@@ -179,22 +179,128 @@ class fwDebugDraw(box2d.b2DebugDraw):
     blended = grBlended()
     circle_segments = 16
     surface = None
+    circle_cache_tf = {} # triangle fan (inside)
+    circle_cache_ll = {} # line loop (border)
     def __init__(self): super(fwDebugDraw, self).__init__()
-    def getCircleVertices(self, center, radius, points):
+    def _getLLCircleVertices(self, radius, points):
         ret = []
         step = 2*math.pi/points
         n = 0
         for i in range(0, points):
-            ret.append( center.x + math.cos(n) * radius )
-            ret.append( center.y + math.sin(n) * radius )
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
             n += step
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
         return ret
 
+    def _getTFCircleVertices(self, radius, points):
+        ret = []
+        step = 2*math.pi/points
+        n = 0
+        for i in range(0, points):
+            ret.append( (0.0, 0.0) )
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+            n += step
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+        return ret
+
+    def getCircleVertices(self, center, radius, points):
+        if radius not in self.circle_cache_tf.keys():
+            self.circle_cache_tf[radius]=self._getTFCircleVertices(radius,points)
+            self.circle_cache_ll[radius]=self._getLLCircleVertices(radius,points)
+
+        ret_tf, ret_ll = [], []
+
+        for x, y in self.circle_cache_tf[radius]:
+            ret_tf.extend( (x+center.x, y+center.y) )
+        for x, y in self.circle_cache_ll[radius]:
+            ret_ll.extend( (x+center.x, y+center.y) )
+        return ret_tf, ret_ll
+
     def DrawCircle(self, center, radius, color):
-        self.DrawPolygon( self.getCircleVertices( center, radius, self.circle_segments), self.circle_segments, color, new_vertices=True)
+        return
+        unused, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
+        ll_count = len(ll_vertices)/2
+
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+
+    def DrawSolidCircle(self, center, radius, axis, color):
+        tf_vertices, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
+        tf_count, ll_count = len(tf_vertices) / 2, len(ll_vertices) / 2
+
+
+        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+            ('v2f', tf_vertices),
+            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+
+        p = center + radius * axis
+        self.batch.add(2, gl.GL_LINES, None,
+            ('v2f', (center.x, center.y, p.x, p.y)),
+            ('c3f', [1.0, 0.0, 0.0] * 2))
+
+    def triangle_fan(self, vertices):
+        """
+        in: vertices arranged for gl_triangle_fan ((x,y),(x,y)...)
+        out: vertices arranged for gl_triangles (x,y,x,y,x,y...)
+        """
+        out = []
+        for i in range(1, len(vertices)-1):
+            # 0,1,2   0,2,3  0,3,4 ..
+            out.extend( vertices[0  ] )
+            out.extend( vertices[i  ] )
+            out.extend( vertices[i+1] )
+        return len(out) / 2, out
+
+    def line_loop(self, vertices):
+        """
+        in: vertices arranged for gl_line_loop ((x,y),(x,y)...)
+        out: vertices arranged for gl_lines (x,y,x,y,x,y...)
+        """
+        out = []
+        for i in range(0, len(vertices)-1):
+            # 0,1  1,2  2,3 ... len-1,len  len,0
+            out.extend( vertices[i  ] )
+            out.extend( vertices[i+1] )
+        
+        out.extend( vertices[len(vertices)-1] )
+        out.extend( vertices[0] )
+
+        return len(out)/2, out
+
+    def DrawPolygon(self, in_vertices, vertexCount, color):
+        ll_count, ll_vertices = self.line_loop(in_vertices)
+
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+
+    def DrawSolidPolygon(self, in_vertices, vertexCount, color):
+        tf_count, tf_vertices = self.triangle_fan(in_vertices)
+
+        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+            ('v2f', tf_vertices),
+            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+
+        ll_count, ll_vertices = self.line_loop(in_vertices)
+
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+
+    def convertColor(self, color):
+        """
+        Take a floating point color in range (0..1,0..1,0..1) and convert it to a tuple
+        (leftover from the pygame->pyglet back-conversion
+        """
+        return (color.r, color.g, color.b)
 
     def DrawSegment(self, p1, p2, color):
-        self.batch.add(2, pyglet.gl.GL_LINES, None,
+        self.batch.add(2, gl.GL_LINES, None,
             ('v2f', (p1.x, p1.y, p2.x, p2.y)),
             ('c3f', [color.r, color.g, color.b]*2))
 
@@ -204,62 +310,18 @@ class fwDebugDraw(box2d.b2DebugDraw):
         p2 = p1 + k_axisScale * xf.R.col1
         p3 = p1 + k_axisScale * xf.R.col2
 
-        self.batch.add(3, pyglet.gl.GL_LINES, None,
+        self.batch.add(3, gl.GL_LINES, None,
             ('v2f', (p1.x, p1.y, p2.x, p2.y, p1.x, p1.y, p3.x, p3.y)),
             ('c3f', [1.0, 0.0, 0.0] * 2 + [0.0, 1.0, 0.0] * 2))
 
-    def DrawSolidCircle(self, center, radius, axis, color):
-        self.DrawSolidPolygon(self.getCircleVertices( center, radius, self.circle_segments), self.circle_segments, color, new_vertices=True)
-
-        p = center + radius * axis
-        self.batch.add(2, pyglet.gl.GL_LINES, None,
-            ('v2f', (center.x, center.y, p.x, p.y)),
-            ('c3f', [color.r, color.g, color.b] * 2))
-
-    def DrawPolygon(self, in_vertices, vertexCount, color, new_vertices=False):
-        if new_vertices:
-            vertices = in_vertices
-        else:
-            vertices = []
-            for v in in_vertices: vertices.extend(v)
-
-        vertices.append(vertices[0])
-        vertices.append(vertices[1])
-
-        new_vertices = []
-        for i in range(0, vertexCount*2, 2): # 0..vertexCount*2-4, step 2
-            new_vertices.extend( (vertices[i+0], vertices[i+1], vertices[i+2], vertices[i+3]) )
-
-        self.batch.add(vertexCount*2, pyglet.gl.GL_LINES, None,
-            ('v2f', new_vertices),
-            ('c3f', [color.r, color.g, color.b] * (vertexCount*2)))
-
-    def DrawSolidPolygon(self, in_vertices, vertexCount, color, new_vertices=False):
-        if new_vertices:
-            vertices = in_vertices
-        else:
-            vertices = []
-            for v in in_vertices: vertices.extend(v)
-
-        self.batch.add(vertexCount, pyglet.gl.GL_QUADS, self.blended,
-            ('v2f', vertices),
-            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * vertexCount))
-        
-        self.DrawPolygon(vertices, vertexCount, color, new_vertices=True)
-    def convertColor(self, color):
-        """
-        Take a floating point color in range (0..1,0..1,0..1) and convert it to a tuple
-        (leftover from the pygame->pyglet back-conversion
-        """
-        return (color.r, color.g, color.b)
 
     def DrawPoint(self, p, size, color):
-        self.batch.add(1, pyglet.gl.GL_POINTS, grPointSize(size),
+        self.batch.add(1, gl.GL_POINTS, grPointSize(size),
             ('v2f', (p.x, p.y)),
             ('c3f', [color.r, color.g, color.b]))
         
     def DrawAABB(self, aabb, color):
-        self.debugDraw.batch.add(8, pyglet.gl.GL_LINES, None,
+        self.debugDraw.batch.add(8, gl.GL_LINES, None,
             ('v2f', (aabb.lowerBound.x, aabb.lowerBound.y, abb.upperBound.x, aabb.lowerBound.y, 
                 abb.upperBound.x, aabb.lowerBound.y, aabb.upperBound.x, aabb.upperBound.y,
                 aabb.upperBound.x, aabb.upperBound.y, aabb.lowerBound.x, aabb.upperBound.y,
@@ -335,18 +397,6 @@ class Framework(pyglet.window.Window):
     def __init__(self, **kw):
         super(Framework, self).__init__(**kw)
         self.textGroup = grText(self)
-        # pyglet 1.1beta hack! Thanks to Membury on Freenode #pyglet
-        #def fix_pyglet_font_loader():
-        #    font_loader = pyglet.font.load
-        #    font_cache = {}
-        #    def load(name, size, bold=False, italic=False, dpi=None):
-        #        spec = (name, size, bold, italic, dpi)
-        #        if spec not in font_cache:
-        #            font_cache[spec] = font_loader(*spec)
-        #        return font_cache[spec]
-        #    pyglet.font.load = load         
-        #
-        #fix_pyglet_font_loader()
 
         self.font = pyglet.font.load(self.fontname, self.fontsize)
         self.screenSize = box2d.b2Vec2(self.width, self.height)
@@ -374,6 +424,7 @@ class Framework(pyglet.window.Window):
         self.world.SetContactListener(self.contactListener)
         self.world.SetDebugDraw(self.debugDraw)
 
+    def on_show(self):
         self.updateCenter()
 
     def updateCenter(self):
@@ -459,7 +510,7 @@ class Framework(pyglet.window.Window):
         self.MouseMove(p)
 
         if buttons & pyglet.window.mouse.RIGHT:
-            self.viewCenter += box2d.b2Vec2(float(dx)/5, float(dy)/5)
+            self.viewCenter -= box2d.b2Vec2(float(dx)/5, float(dy)/5)
             self.updateCenter()
 
     def run(self):
@@ -674,13 +725,6 @@ class Framework(pyglet.window.Window):
         self.CheckKeys()
 
         self.clear()
-        # i can't figure it out yet, but without the code below, the projection doesn't work!
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        gl.gluOrtho2D(self.lower.x, self.upper.x, self.lower.y, self.upper.y)
-
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
 
         self.push_handlers(self.keys)
 
