@@ -693,6 +693,8 @@ class Framework(pyglet.window.Window):
 
         self.debugDraw.batch.draw()
 
+        self.fps = pyglet.clock.get_fps()
+
     def ConvertScreenToWorld(self, x, y):
         u = float(x) / self.width
         v = float(y) / self.height
