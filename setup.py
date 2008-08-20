@@ -160,6 +160,13 @@ if distutils.util.get_platform() == "win32":
 # Fix the library name
 distutils_fix()
 
+try:
+    compile_flags=os.environ["CXXFLAGS"].split(" ")
+except KeyError:
+    compile_flags="-O3".split(" ")
+
+print "Compile flags:", compile_flags
+
 setup (name = 'Box2D',
     version = version_str,
     packages=["Box2D2"],
@@ -167,7 +174,7 @@ setup (name = 'Box2D',
     package_data={"Box2D2" : [shared_lib_name],  },
     options={'build_ext':build_ext_options}, 
     ext_modules = [Extension('Box2D2', [interface_file],
-        extra_compile_args=["-O3"], extra_link_args=[link_to], language="c++")],
+        extra_compile_args=compile_flags, extra_link_args=[link_to], language="c++")],
     data_files=all_data,
     author      = "kne",
     author_email = "sirkne at gmail dot com",
