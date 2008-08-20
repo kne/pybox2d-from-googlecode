@@ -2,10 +2,11 @@
 
 === Libraries ===
 
- * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API 
+ * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API
+ * [http://wiki.laptop.org/go/Physics_(activity) OLPC Physics Activity] Basis for the OLPC Physics [http://developers.slashdot.org/article.pl?sid=08/08/18/2258228 Game Jam]
 
 === Games ===
 
- * .
+ * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
 
 Please let me know if you use pybox2d in any of your projects and I will gladly link to them here.
