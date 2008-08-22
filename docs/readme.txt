@@ -1,5 +1,7 @@
 pyBox2D
 
+http://pybox2d.googlecode.com/
+
 Getting Started
 ---------------
 

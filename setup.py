@@ -58,12 +58,12 @@ import os
 do_copy_data = True  
 
 # do_copy_data uses this path:
-release_dir = os.path.join("..", "Python")  
+release_dir = "d:/dev/pybox2d/"
 
 # copy files from this directory (e.g., setup.py) to the release dir
 # copies: the interfaces, __init__.py, and setup.py to the appropriate release dirs
 # -> see copy_files()
-do_file_copy = False 
+do_file_copy = True 
 
 # subdirectories from release_dir
 data_subdirs = ["testbed", "interface", "docs"]
