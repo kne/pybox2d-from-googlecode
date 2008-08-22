@@ -276,7 +276,7 @@ class fwGUI(gui.Table):
     controls. Callbacks are not used, but the checkboxes and sliders are polled
     by the main loop.
     """
-    checkboxes = (  ("Position Correction", "enablePositionCorrection"), 
+    checkboxes = (  
                     ("Warm Starting", "enableWarmStarting"), 
                     ("Time of Impact", "enableTOI"), 
                     ("Draw", None),
@@ -315,13 +315,22 @@ class fwGUI(gui.Table):
         e = gui.HSlider(settings.hz,5,200,size=20,width=100,height=16,name='hz')
         self.td(e,colspan=2,align=1)
 
-        # "Iterations"
+        # "Vel Iters"
         self.tr()
-        self.td(gui.Label("Iterations",color=fg),align=1,colspan=2)
+        self.td(gui.Label("Vel Iters",color=fg),align=1,colspan=2)
 
-        # Iterations slider (min 1, max 100)
+        # Velocity Iterations slider (min 1, max 500)
         self.tr()
-        e = gui.HSlider(settings.iterationCount,1,100,size=20,width=100,height=16,name='iterationCount')
+        e = gui.HSlider(settings.velocityIterations,1,500,size=20,width=100,height=16,name='velIters')
+        self.td(e,colspan=2,align=1)
+
+        # "Pos Iters"
+        self.tr()
+        self.td(gui.Label("Pos Iters",color=fg),align=1,colspan=2)
+
+        # Position Iterations slider (min 0, max 100)
+        self.tr()
+        e = gui.HSlider(settings.positionIterations,0,100,size=20,width=100,height=16,name='posIters')
         self.td(e,colspan=2,align=1)
 
         # Add each of the checkboxes.
@@ -345,7 +354,8 @@ class fwGUI(gui.Table):
 
         # Now do the sliders
         settings.hz = int(self.form['hz'].value)
-        settings.iterationCount = int(self.form['iterationCount'].value)
+        settings.positionIterations = int(self.form['posIters'].value)
+        settings.velocityIterations = int(self.form['velIters'].value)
 
         # If we're in single-step mode, update the GUI to reflect that.
         if settings.singleStep:
@@ -573,14 +583,13 @@ class Framework(object):
 
         # Set the other settings that aren't contained in the flags
         self.world.SetWarmStarting(settings.enableWarmStarting)
-    	self.world.SetPositionCorrection(settings.enablePositionCorrection)
     	self.world.SetContinuousPhysics(settings.enableTOI)
 
         # Reset the collision points
         self.points = []
 
         # Tell Box2D to step
-        self.world.Step(timeStep, settings.iterationCount)
+        self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
         # If the bomb is frozen, get rid of it.
@@ -597,8 +606,8 @@ class Framework(object):
                 (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
             self.textLine += 15
 
-            self.DrawString(5, self.textLine, "hz %d iterations %d" %
-                (settings.hz, settings.iterationCount))
+            self.DrawString(5, self.textLine, "hz %d vel/pos iterations %d/%d" %
+                (settings.hz, settings.velocityIterations, settings.positionIterations))
             self.textLine += 15
 
             #self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.b2_byteCount) # not wrapped?

@@ -112,12 +112,85 @@
         }
         
     }
+/// Query the world for all shapes that intersect a given segment. You provide a shap
+/// pointer buffer of specified size. The number of shapes found is returned, and the buffer
+/// is filled in order of intersection
+/// @param segment defines the begin and end point of the ray cast, from p1 to p2.
+/// Use b2Segment.Extend to create (semi-)infinite rays
+/// @param shapes a user allocated shape pointer array of size maxCount (or greater).
+/// @param maxCount the capacity of the shapes array
+/// @param solidShapes determines if shapes that the ray starts in are counted as hits.
+/// @param userData passed through the worlds contact filter, with method RayCollide. This can be used to filter valid shapes
+/// @returns the number of shapes found
+//int32 Raycast(const b2Segment& segment, b2Shape** shapes, int32 maxCount, bool solidShapes, void* userData);
+/// Performs a raycast as with Raycast, finding the first intersecting shape.
+/// @param segment defines the begin and end point of the ray cast, from p1 to p2.
+/// Use b2Segment.Extend to create (semi-)infinite rays
+/// @param lambda returns the hit fraction. You can use this to compute the contact point
+/// p = (1 - lambda) * segment.p1 + lambda * segment.p2.
+/// @param normal returns the normal at the contact point. If there is no intersection, the normal
+/// is not set.
+/// @param solidShapes determines if shapes that the ray starts in are counted as hits.
+/// @returns the colliding shape shape, or null if not found
+//b2Shape* RaycastOne(const b2Segment& segment, float32* lambda, b2Vec2* normal, bool solidShapes, void* userData);
 
     %extend b2World {
-    public:
-        PyObject* Query(const b2AABB& aabb, uint32 maxCount) {
+    public:        
+        PyObject* RaycastOne(const b2Segment& segment, int32 maxCount, bool solidShapes, PyObject* userData) {
+            //returns tuple (shapecount, shapes)
             PyObject* ret=Py_None;
-            b2Shape** shapes=(b2Shape**)malloc(maxCount * sizeof(b2Shape*));
+            b2Shape** shapes=new b2Shape* [maxCount];
+
+            if (!shapes) {
+                PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
+                return ret;
+            }
+            
+            Py_INCREF(userData);
+
+            int32 num = $self->Raycast(segment, shapes, maxCount, solidShapes, (void*)userData);
+
+            ret = PyTuple_New(2);
+            
+            PyObject* shapeList=PyTuple_New(num);
+            PyObject* shape;
+
+            for (int i=0; i < num; i++) {
+                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Shape, 0 );
+                PyTuple_SetItem(shapeList, i, shape);
+            }
+
+            PyTuple_SetItem(ret, 0, SWIG_From_int(num));
+            PyTuple_SetItem(ret, 1, shapeList);
+
+            delete [] shapes;
+            return ret;
+        }
+
+        PyObject* RaycastOne(const b2Segment& segment, bool solidShapes, PyObject* userData) {
+            //returns tuple (float32* lambda, b2Vec2* normal, shape)
+            PyObject* ret=Py_None;
+            float32 lambda=0.0;
+            b2Vec2* normal=new b2Vec2(0.0, 0.0);
+            b2Shape* shape;
+            
+            Py_INCREF(userData);
+
+            shape = $self->RaycastOne(segment, &lambda, normal, solidShapes, (void*)userData);
+            
+            ret = PyTuple_New(3);
+
+            PyTuple_SetItem(ret, 0, SWIG_From_float(lambda));
+            PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(normal), SWIGTYPE_p_b2Vec2, 0) );
+            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(shape), SWIGTYPE_p_b2Shape, 0) );
+
+            return ret;
+        }
+
+        PyObject* Query(const b2AABB& aabb, uint32 maxCount) {
+            // Returns tuple: (number of shapes, shapelist)
+            PyObject* ret=Py_None;
+            b2Shape** shapes=new b2Shape* [maxCount];
 
             if (!shapes) {
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
@@ -141,7 +214,7 @@
             PyTuple_SetItem(ret, 0, SWIG_From_int(num));
             PyTuple_SetItem(ret, 1, shapeList);
 
-            free(shapes);
+            delete [] shapes;
             return ret;
         }
     }
