@@ -20,7 +20,10 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
-backporting to pyglet
+8/23/2008
+Backported mostly to pyglet.
+Added more comments, documentation, fixes.
+TODO: Figure out a way to put the GUI in.
 
 4/27/2008
 pygame port. All tests now ported.
@@ -131,6 +134,9 @@ class fwContactListener(box2d.b2ContactListener):
         self.handleCall(fwContactTypes.contactRemoved, point)
 
 class grBlended (pyglet.graphics.Group):
+    """
+    This pyglet rendering group enables blending.
+    """
     def set_state(self):
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
@@ -138,6 +144,9 @@ class grBlended (pyglet.graphics.Group):
         gl.glDisable(gl.GL_BLEND)
 
 class grPointSize (pyglet.graphics.Group):
+    """
+    This pyglet rendering group sets a specific point size.
+    """
     def __init__(self, size=4.0):
         super(grPointSize, self).__init__()
         self.size = size
@@ -147,6 +156,10 @@ class grPointSize (pyglet.graphics.Group):
         gl.glPointSize(1.0)
 
 class grText(pyglet.graphics.Group):
+    """
+    This pyglet rendering group sets the proper projection for
+    displaying text when used.
+    """
     window = None
     def __init__(self, window=None):
         super(grText, self).__init__()
@@ -182,67 +195,6 @@ class fwDebugDraw(box2d.b2DebugDraw):
     circle_cache_tf = {} # triangle fan (inside)
     circle_cache_ll = {} # line loop (border)
     def __init__(self): super(fwDebugDraw, self).__init__()
-    def _getLLCircleVertices(self, radius, points):
-        ret = []
-        step = 2*math.pi/points
-        n = 0
-        for i in range(0, points):
-            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
-            n += step
-            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
-        return ret
-
-    def _getTFCircleVertices(self, radius, points):
-        ret = []
-        step = 2*math.pi/points
-        n = 0
-        for i in range(0, points):
-            ret.append( (0.0, 0.0) )
-            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
-            n += step
-            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
-        return ret
-
-    def getCircleVertices(self, center, radius, points):
-        if radius not in self.circle_cache_tf.keys():
-            self.circle_cache_tf[radius]=self._getTFCircleVertices(radius,points)
-            self.circle_cache_ll[radius]=self._getLLCircleVertices(radius,points)
-
-        ret_tf, ret_ll = [], []
-
-        for x, y in self.circle_cache_tf[radius]:
-            ret_tf.extend( (x+center.x, y+center.y) )
-        for x, y in self.circle_cache_ll[radius]:
-            ret_ll.extend( (x+center.x, y+center.y) )
-        return ret_tf, ret_ll
-
-    def DrawCircle(self, center, radius, color):
-        return
-        unused, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
-        ll_count = len(ll_vertices)/2
-
-        self.batch.add(ll_count, gl.GL_LINES, None,
-            ('v2f', ll_vertices),
-            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
-
-    def DrawSolidCircle(self, center, radius, axis, color):
-        tf_vertices, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
-        tf_count, ll_count = len(tf_vertices) / 2, len(ll_vertices) / 2
-
-
-        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
-            ('v2f', tf_vertices),
-            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
-
-        self.batch.add(ll_count, gl.GL_LINES, None,
-            ('v2f', ll_vertices),
-            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
-
-        p = center + radius * axis
-        self.batch.add(2, gl.GL_LINES, None,
-            ('v2f', (center.x, center.y, p.x, p.y)),
-            ('c3f', [1.0, 0.0, 0.0] * 2))
-
     def triangle_fan(self, vertices):
         """
         in: vertices arranged for gl_triangle_fan ((x,y),(x,y)...)
@@ -272,39 +224,153 @@ class fwDebugDraw(box2d.b2DebugDraw):
 
         return len(out)/2, out
 
-    def DrawPolygon(self, in_vertices, vertexCount, color):
-        ll_count, ll_vertices = self.line_loop(in_vertices)
+    def _getLLCircleVertices(self, radius, points):
+        """
+        Get the line loop-style vertices for a given circle.
+        Drawn as lines.
+
+        "Line Loop" is used as that's how the C++ code draws the
+        vertices, with lines going around the circumference of the
+        circle (GL_LINE_LOOP).
+
+        This returns 'points' amount of lines approximating the 
+        border of a circle.
+
+        (x1, y1, x2, y2, x3, y3, ...)
+        """
+        ret = []
+        step = 2*math.pi/points
+        n = 0
+        for i in range(0, points):
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+            n += step
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+        return ret
+
+    def _getTFCircleVertices(self, radius, points):
+        """
+        Get the triangle fan-style vertices for a given circle.
+        Drawn as triangles.
+
+        "Triangle Fan" is used as that's how the C++ code draws the
+        vertices, with triangles originating at the center of the
+        circle, extending around to approximate a filled circle
+        (GL_TRIANGLE_FAN).
+
+        This returns 'points' amount of lines approximating the 
+        circle.
+
+        (a1, b1, c1, a2, b2, c2, ...)
+        """
+        ret = []
+        step = 2*math.pi/points
+        n = 0
+        for i in range(0, points):
+            ret.append( (0.0, 0.0) )
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+            n += step
+            ret.append( (math.cos(n) * radius, math.sin(n) * radius ) )
+        return ret
+
+    def getCircleVertices(self, center, radius, points):
+        """
+        Returns the triangles that approximate the circle and
+        the lines that border the circles edges, given
+        (center, radius, points).
+
+        Caches the calculated LL/TF vertices, but recalculates
+        based on the center passed in.
+
+        TODO: As of this point, there's only one point amount,
+        so the circle cache ignores it when storing. Could cause 
+        some confusion if you're using multiple point counts as
+        only the first stored point-count for that radius will
+        show up.
+
+        Returns: (tf_vertices, ll_vertices)
+        """
+        if radius not in self.circle_cache_tf.keys():
+            self.circle_cache_tf[radius]=self._getTFCircleVertices(radius,points)
+            self.circle_cache_ll[radius]=self._getLLCircleVertices(radius,points)
+
+        ret_tf, ret_ll = [], []
+
+        for x, y in self.circle_cache_tf[radius]:
+            ret_tf.extend( (x+center.x, y+center.y) )
+        for x, y in self.circle_cache_ll[radius]:
+            ret_ll.extend( (x+center.x, y+center.y) )
+        return ret_tf, ret_ll
+
+    def DrawCircle(self, center, radius, color):
+        """
+        Draw an unfilled circle given center, radius and color.
+        """
+        unused, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
+        ll_count = len(ll_vertices)/2
 
         self.batch.add(ll_count, gl.GL_LINES, None,
             ('v2f', ll_vertices),
             ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-    def DrawSolidPolygon(self, in_vertices, vertexCount, color):
-        tf_count, tf_vertices = self.triangle_fan(in_vertices)
+    def DrawSolidCircle(self, center, radius, axis, color):
+        """
+        Draw an filled circle given center, radius, axis (of orientation) and color.
+        """
+        tf_vertices, ll_vertices = self.getCircleVertices( center, radius, self.circle_segments)
+        tf_count, ll_count = len(tf_vertices) / 2, len(ll_vertices) / 2
+
 
         self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
             ('v2f', tf_vertices),
             ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
 
-        ll_count, ll_vertices = self.line_loop(in_vertices)
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+
+        p = center + radius * axis
+        self.batch.add(2, gl.GL_LINES, None,
+            ('v2f', (center.x, center.y, p.x, p.y)),
+            ('c3f', [1.0, 0.0, 0.0] * 2))
+
+    def DrawPolygon(self, vertices, vertexCount, color):
+        """
+        Draw a wireframe polygon given the world vertices (tuples) with the specified color.
+        """
+        ll_count, ll_vertices = self.line_loop(vertices)
 
         self.batch.add(ll_count, gl.GL_LINES, None,
             ('v2f', ll_vertices),
             ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-    def convertColor(self, color):
+    def DrawSolidPolygon(self, vertices, vertexCount, color):
         """
-        Take a floating point color in range (0..1,0..1,0..1) and convert it to a tuple
-        (leftover from the pygame->pyglet back-conversion
+        Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
-        return (color.r, color.g, color.b)
+        tf_count, tf_vertices = self.triangle_fan(vertices)
+
+        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+            ('v2f', tf_vertices),
+            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+
+        ll_count, ll_vertices = self.line_loop(vertices)
+
+        self.batch.add(ll_count, gl.GL_LINES, None,
+            ('v2f', ll_vertices),
+            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
     def DrawSegment(self, p1, p2, color):
+        """
+        Draw the line segment from p1-p2 with the specified color.
+        """
         self.batch.add(2, gl.GL_LINES, None,
             ('v2f', (p1.x, p1.y, p2.x, p2.y)),
             ('c3f', [color.r, color.g, color.b]*2))
 
     def DrawXForm(self, xf):
+        """
+        Draw the transform xf on the screen
+        """
         p1 = xf.position
         k_axisScale = 0.4
         p2 = p1 + k_axisScale * xf.R.col1
@@ -314,13 +380,18 @@ class fwDebugDraw(box2d.b2DebugDraw):
             ('v2f', (p1.x, p1.y, p2.x, p2.y, p1.x, p1.y, p3.x, p3.y)),
             ('c3f', [1.0, 0.0, 0.0] * 2 + [0.0, 1.0, 0.0] * 2))
 
-
     def DrawPoint(self, p, size, color):
+        """
+        Draw a single point at point p given a point size and color.
+        """
         self.batch.add(1, gl.GL_POINTS, grPointSize(size),
             ('v2f', (p.x, p.y)),
             ('c3f', [color.r, color.g, color.b]))
         
     def DrawAABB(self, aabb, color):
+        """
+        Draw a wireframe around the AABB with the given color.
+        """
         self.debugDraw.batch.add(8, gl.GL_LINES, None,
             ('v2f', (aabb.lowerBound.x, aabb.lowerBound.y, abb.upperBound.x, aabb.lowerBound.y, 
                 abb.upperBound.x, aabb.lowerBound.y, aabb.upperBound.x, aabb.upperBound.y,
@@ -331,25 +402,19 @@ class fwDebugDraw(box2d.b2DebugDraw):
     def DrawXForm(self, xf):
         """
         Draw the transform xf on the screen
-        """
-        def toScreen_v(pt):
-            """
-            Input:  pt - a b2Vec2 in world coordinates
-            Output: (x, y) - a tuple in screen coordinates
-            """
-            return (int(pt.x), int(pt.y))
 
+        TODO: is this working?
+        """
         p1 = xf.position
         k_axisScale = 0.4
-        p2 = toScreen_v(p1 + k_axisScale * xf.R.col1)
-        p3 = toScreen_v(p1 + k_axisScale * xf.R.col2)
-        p1 = toScreen_v(p1)
+        p2 = p1 + k_axisScale * xf.R.col1
+        p3 = p1 + k_axisScale * xf.R.col2
 
-        color = (255,0,0)
-        #pygame.draw.aaline(self.surface, color, p1, p2)
+        color = (1.0,0,0)
+        self.DrawSegment(p1, p2, color)
 
-        color = (0,255,0)
-        #pygame.draw.aaline(self.surface, color, p1, p3)
+        color = (0,1.0,0)
+        self.DrawSegment(p1, p3, color)
 
 class Framework(pyglet.window.Window):
     """
@@ -359,10 +424,30 @@ class Framework(pyglet.window.Window):
     * Contains the main loop
     * Handles all user input.
 
+    The window itself is derived from pyglet's Window, so you can use
+    all of its functionality.
+
     You should derive your class from this one to implement your own tests.
     See test_Empty.py or any of the other tests for more information.
     """
     name = "None"
+
+    # Box2D-related
+    worldAABB = box2d.b2AABB()
+    points = []
+    world = None
+    bomb = None
+    bombSpawning = False
+    bombSpawnPoint = None
+    mouseJoint = None
+    settings = fwSettings()
+    mouseWorld = None
+
+    # Box2D-callbacks
+    destructionListener = None
+    boundaryListener = None
+    contactListener = None
+    debugDraw = None
 
     # Window-related
     fontname = "Arial"
@@ -370,20 +455,6 @@ class Framework(pyglet.window.Window):
     font = None
     textGroup = None
     keys=pyglet.window.key.KeyStateHandler()
-    
-    # Box2D-related
-    worldAABB = box2d.b2AABB()
-    points = []
-    world = None
-    bomb = None
-    mouseJoint = None
-    settings = fwSettings()
-
-    # Box2D-callbacks
-    destructionListener = None
-    boundaryListener = None
-    contactListener = None
-    debugDraw = None
 
     # Screen-related
     viewZoom = 1.0
@@ -396,8 +467,11 @@ class Framework(pyglet.window.Window):
 
     def __init__(self, **kw):
         super(Framework, self).__init__(**kw)
+
+        # Initialize the text display group
         self.textGroup = grText(self)
 
+        # Load the font and record the screen dimensions
         self.font = pyglet.font.load(self.fontname, self.fontsize)
         self.screenSize = box2d.b2Vec2(self.width, self.height)
 
@@ -425,13 +499,16 @@ class Framework(pyglet.window.Window):
         self.world.SetDebugDraw(self.debugDraw)
 
     def on_show(self):
+        """
+        Callback: the window was shown.
+        """
         self.updateCenter()
 
     def updateCenter(self):
         """
         Updates the view offset based on the center of the screen.
-        
-        Tells the debug draw to update its values also.
+
+        Recalculates the necessary projection.
         """
         self.viewOffset = self.viewCenter - self.screenSize/2
 
@@ -478,7 +555,7 @@ class Framework(pyglet.window.Window):
             exit(10)
         elif key==pyglet.window.key.SPACE:
             # Launch a bomb
-            self.LaunchBomb()
+            self.LaunchRandomBomb()
         elif key==pyglet.window.key.F1:
             self.settings.drawMenu = not self.settings.drawMenu
         else:
@@ -486,13 +563,33 @@ class Framework(pyglet.window.Window):
             self.Keyboard(key)
 
     def on_mouse_press(self, x, y, button, modifiers):
+        """
+        Mouse down
+        """
         p = self.ConvertScreenToWorld(x, y)
+        self.mouseWorld = p
         if button == pyglet.window.mouse.LEFT:
-            self.MouseDown( p )
+            if modifiers & pyglet.window.key.MOD_SHIFT:
+                self.ShiftMouseDown( p )
+            else:
+                self.MouseDown( p )
         elif button == pyglet.window.mouse.MIDDLE:
             pass
 
+    def on_mouse_release(self, x, y, button, modifiers):
+        """
+        Mouse up
+        """
+        p = self.ConvertScreenToWorld(x, y)
+        self.mouseWorld = p
+
+        if button == pyglet.window.mouse.LEFT:
+            self.MouseUp(p)
+
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        """
+        Mouse scrollwheel used
+        """
         if scroll_y < 0:
             self.viewZoom *= 1.1
             self.updateCenter()
@@ -500,12 +597,12 @@ class Framework(pyglet.window.Window):
             self.viewZoom /= 1.1
             self.updateCenter()
 
-    def on_mouse_release(self, x, y, button, modifiers):
-        if button == pyglet.window.mouse.LEFT:
-            self.MouseUp()
-
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        """
+        Mouse moved while clicking
+        """
         p = self.ConvertScreenToWorld(x, y)
+        self.mouseWorld = p
 
         self.MouseMove(p)
 
@@ -566,14 +663,13 @@ class Framework(pyglet.window.Window):
 
         # Set the other settings that aren't contained in the flags
         self.world.SetWarmStarting(settings.enableWarmStarting)
-    	self.world.SetPositionCorrection(settings.enablePositionCorrection)
     	self.world.SetContinuousPhysics(settings.enableTOI)
 
         # Reset the collision points
         self.points = []
 
-        # Tell Box2D to step
-        self.world.Step(timeStep, settings.iterationCount)
+        # Tell Box2D to step (r162)
+        self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
         # If the bomb is frozen, get rid of it.
@@ -611,6 +707,11 @@ class Framework(pyglet.window.Window):
             self.debugDraw.DrawPoint(p2, settings.pointSize, box2d.b2Color(0,1.0,0))
             self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.8,0.8,0.8))
 
+        # Draw the slingshot bomb
+        if self.bombSpawning:
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,0.1))
+            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, box2d.b2Color(0.8,0.8,0.8))
+
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
             #k_impulseScale = 0.1
@@ -629,21 +730,145 @@ class Framework(pyglet.window.Window):
                     p2 = p1 + k_axisScale * point.normal
                     self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.4, 0.9, 0.4))
 
-                # point.normalForce, point.tangentForce don't exist, so we can't use these two:
-                #if settings.drawContactForces: # commented out in the testbed code
-                    #k_forceScale=1.0 #? unknown
-                    #p1 = point.position
-                    #p2 = p1 + k_forceScale * point.normalForce * point.normal
-                    #self.DrawSegment(p1, p2, box2d.b2Color(0.9, 0.9, 0.3))
+    def LaunchBomb(self, position, velocity):
+        """
+        A bomb is a simple circle which has the specified position and velocity.
+        """
+        if self.bomb:
+            self.world.DestroyBody(self.bomb)
+            self.bomb = None
 
-                #if settings.drawFrictionForces: # commented out in the testbed code                    
-                    #k_forceScale=1.0 #? unknown
-                    #tangent = box2d.b2Cross(point.normal, 1.0)
-                    #p1 = point.position
-                    #p2 = p1 + k_forceScale * point.tangentForce * tangent
-                    #DrawSegment(p1, p2, box2d.b2Color(0.9, 0.9, 0.3))
+        bd = box2d.b2BodyDef()
+        bd.allowSleep = True
+        bd.position = position
+        bd.isBullet = True
+        self.bomb = self.world.CreateBody(bd)
+        self.bomb.SetLinearVelocity(velocity)
+
+        sd = box2d.b2CircleDef()
+        sd.radius = 0.3
+        sd.density = 20.0
+        sd.restitution = 0.1
+
+        minV = position - box2d.b2Vec2(0.3,0.3)
+        maxV = position + box2d.b2Vec2(0.3,0.3)
+
+        aabb = box2d.b2AABB()
+        aabb.lowerBound = minV
+        aabb.upperBound = maxV
+
+        if self.world.InRange(aabb):
+            self.bomb.CreateShape(sd)
+            self.bomb.SetMassFromShapes()
+
+    def LaunchRandomBomb(self):
+        """
+        Create a new bomb and launch it at the testbed.
+        """
+        p = box2d.b2Vec2( box2d.b2Random(-15.0, 15.0), 30.0 )
+        v = -5.0 * p
+        self.LaunchBomb(p, v)
+     
+    def CheckKeys(self):
+        """
+        Check the keys that are evaluated on every main loop iteration.
+        I.e., they aren't just evaluated when first pressed down
+        """
+        if self.keys[pyglet.window.key.LEFT]:
+            self.viewCenter.x -= 0.5
+            self.updateCenter()
+        elif self.keys[pyglet.window.key.RIGHT]:
+            self.viewCenter.x += 0.5
+            self.updateCenter()
+        if self.keys[pyglet.window.key.UP]:
+            self.viewCenter.y += 0.5
+            self.updateCenter()
+        elif self.keys[pyglet.window.key.DOWN]:
+            self.viewCenter.y -= 0.5
+            self.updateCenter()
+
+        if self.keys[pyglet.window.key.HOME]:
+            self.viewZoom = 1.0
+            self.viewCenter.Set(0.0, 20.0)
+            self.updateCenter()
+
+    def SimulationLoop(self, dt):
+        """
+        The main simulation loop. Don't override this, override Step instead.
+        And be sure to call super(classname, self).Step(settings) at the end
+        of your Step function.
+        """
+
+        # Check the input
+        self.CheckKeys()
+
+        # Clear the screen
+        self.clear()
+
+        # Update the keyboard status
+        self.push_handlers(self.keys)
+
+        # Reset the text position
+        self.SetTextLine(30)
+
+        # Create a new batch for drawing
+        self.debugDraw.batch = pyglet.graphics.Batch()
+
+        # Draw the title of the test at the top
+        self.DrawString(5, 15, self.name)
+
+        # Step the physics
+        self.Step(self.settings)
+
+        self.debugDraw.batch.draw()
+
+        self.fps = pyglet.clock.get_fps()
+
+    def ConvertScreenToWorld(self, x, y):
+        """
+        Takes screen (x, y) and returns
+        world coordinate b2Vec2(x,y).
+        """
+        u = float(x) / self.width
+        v = float(y) / self.height
+
+        ratio = float(self.width) / self.height
+        extents = box2d.b2Vec2(ratio * 25.0, 25.0)
+        extents *= self.viewZoom
+
+        lower = self.viewCenter - extents
+        upper = self.viewCenter + extents
+
+        p = box2d.b2Vec2()
+        p.x = (1.0 - u) * lower.x + u * upper.x
+        p.y = (1.0 - v) * lower.y + v * upper.y
+        return p
+
+
+    def DrawString(self, x, y, str):
+        """
+        Draw some text, str, at screen coordinates (x, y).
+        """
+        color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
+        text = pyglet.text.Label(str, font_name=self.fontname, font_size=self.fontsize, 
+                                 x=x, y=self.height-y, color=color, batch=self.debugDraw.batch, group=self.textGroup)
+
+    def ShiftMouseDown(self, p):
+        """
+        Indicates that there was a left click at point p (world coordinates) with the
+        left shift key being held down.
+        """
+        self.mouseWorld = p
+
+        if self.mouseJoint != None:
+            return
+
+        self.SpawnBomb(p)
 
     def MouseDown(self, p):
+        """
+        Indicates that there was a left click at point p (world coordinates)
+        """
         if self.mouseJoint != None:
             return
 
@@ -674,92 +899,46 @@ class Framework(pyglet.window.Window):
             self.mouseJoint = self.world.CreateJoint(md).getAsType()
             body.WakeUp()
             
-    def MouseUp(self):
+    def MouseUp(self, p):
+        """
+        Left mouse button up.
+        """     
         if self.mouseJoint:
             self.world.DestroyJoint(self.mouseJoint)
             self.mouseJoint = None
 
+        if self.bombSpawning:
+            self.CompleteBombSpawn(p)
+
     def MouseMove(self, p):
+        """
+        Mouse moved to point p, in world coordinates.
+        """
         if self.mouseJoint:
             self.mouseJoint.SetTarget(p)
 
-    def LaunchBomb(self):
-        if self.bomb:
-            self.world.DestroyBody(self.bomb)
-            self.bomb = None
-        bd = box2d.b2BodyDef()
-        bd.allowSleep = True
-        bd.position.Set(box2d.b2Random(-15.0, 15.0), 30.0)
-        bd.isBullet = True
-        self.bomb = self.world.CreateBody(bd)
-        self.bomb.SetLinearVelocity(-5.0 * bd.position)
+    def SpawnBomb(self, worldPt):
+        """
+        Begins the slingshot bomb by recording the initial position.
+        Once the user drags the mouse and releases it, then 
+        CompleteBombSpawn will be called and the actual bomb will be
+        released.
+        """
+        self.bombSpawnPoint = worldPt.copy()
+        self.bombSpawning = True
 
-        sd = box2d.b2CircleDef()
-        sd.radius = 0.3
-        sd.density = 20.0
-        sd.restitution = 0.1
-        self.bomb.CreateShape(sd)
-        
-        self.bomb.SetMassFromShapes()
-     
-    def CheckKeys(self):
-        if self.keys[pyglet.window.key.LEFT]:
-            self.viewCenter.x -= 0.5
-            self.updateCenter()
-        elif self.keys[pyglet.window.key.RIGHT]:
-            self.viewCenter.x += 0.5
-            self.updateCenter()
-        if self.keys[pyglet.window.key.UP]:
-            self.viewCenter.y += 0.5
-            self.updateCenter()
-        elif self.keys[pyglet.window.key.DOWN]:
-            self.viewCenter.y -= 0.5
-            self.updateCenter()
-
-        if self.keys[pyglet.window.key.HOME]:
-            self.viewZoom = 1.0
-            self.viewCenter.Set(0.0, 20.0)
-            self.updateCenter()
-
-    def SimulationLoop(self, dt):
-        self.CheckKeys()
-
-        self.clear()
-
-        self.push_handlers(self.keys)
-
-        self.SetTextLine(30)
-
-        self.debugDraw.batch = pyglet.graphics.Batch()
-
-        self.DrawString(5, 15, self.name)
-        self.Step(self.settings)
-
-        self.debugDraw.batch.draw()
-
-        self.fps = pyglet.clock.get_fps()
-
-    def ConvertScreenToWorld(self, x, y):
-        u = float(x) / self.width
-        v = float(y) / self.height
-
-        ratio = float(self.width) / self.height
-        extents = box2d.b2Vec2(ratio * 25.0, 25.0)
-        extents *= self.viewZoom
-
-        lower = self.viewCenter - extents
-        upper = self.viewCenter + extents
-
-        p = box2d.b2Vec2()
-        p.x = (1.0 - u) * lower.x + u * upper.x
-        p.y = (1.0 - v) * lower.y + v * upper.y
-        return p
-
-
-    def DrawString(self, x, y, str):
-        color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
-        text = pyglet.text.Label(str, font_name=self.fontname, font_size=self.fontsize, 
-                                 x=x, y=self.height-y, color=color, batch=self.debugDraw.batch, group=self.textGroup)
+    def CompleteBombSpawn(self, p):
+        """
+        Create the slingshot bomb based on the two points
+        (from the worldPt passed to SpawnBomb to p passed in here)
+        """
+        if not self.bombSpawning: 
+            return
+        multiplier = 30.0
+        vel  = self.bombSpawnPoint - p
+        vel *= multiplier
+        self.LaunchBomb(self.bombSpawnPoint, vel)
+        self.bombSpawning = False
 
     # These should be implemented in the subclass: (Step() also if necessary)
     def JointDestroyed(self, joint):

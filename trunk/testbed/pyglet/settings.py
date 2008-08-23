@@ -21,7 +21,8 @@
 
 class fwSettings(object):
     hz=60.0
-    iterationCount=10
+    velocityIterations=10
+    positionIterations=8
     drawStats=False
     drawShapes=True
     drawJoints=True
