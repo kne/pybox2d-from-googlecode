@@ -75,16 +75,13 @@ class RaycastTest (test_main.Framework):
         segment.p2 = self.laserBody.GetWorldVector(laserDir)
         segment.p2+=segment.p1
         
-        print segment
         for rebounds in xrange(10):
             lambda_, normal, shape = self.world.RaycastOne(segment,False,None)
             
-            print lambda_, normal, shape
             laserColor=box2d.b2Color(1.0,0,0)
             
             if shape:
                 self.debugDraw.DrawSegment(segment.p1,(1-lambda_)*segment.p1+lambda_*segment.p2,laserColor)
-                print "hit",
             else:
                 self.debugDraw.DrawSegment(segment.p1,segment.p2,laserColor)
                 break
@@ -98,7 +95,7 @@ class RaycastTest (test_main.Framework):
             laserStart = (1-lambda_)*segment.p1+lambda_*segment.p2
             laserDir = segment.p2-segment.p1
             laserDir.Normalize()
-            laserDir = laserDir -2 * b2Dot(laserDir,normal) * normal
+            laserDir = laserDir -2 * box2d.b2Dot(laserDir,normal) * normal
             segment.p1 = laserStart-0.1*laserDir
             segment.p2 = laserStart+segmentLength*laserDir
 

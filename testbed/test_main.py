@@ -613,8 +613,8 @@ class Framework(object):
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
             self.textLine += 15
 
-            #self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.b2_byteCount) # not wrapped?
-            #self.textLine += 15
+            self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
+            self.textLine += 15
 
         if settings.drawFPS: #python version only
             self.DrawString(5, self.textLine, "FPS %d" % self.fps)
@@ -632,7 +632,7 @@ class Framework(object):
 
         # Draw the slingshot bomb
         if self.bombSpawning:
-            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,0.1))
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,1.0))
             self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, box2d.b2Color(0.8,0.8,0.8))
 
         # Draw each of the contact points in different colors.

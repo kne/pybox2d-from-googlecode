@@ -62,6 +62,10 @@
     %rename(b2sub) operator  - (const b2Vec2& a, const b2Vec2& b);
     %rename(b2mul) operator  * (float32 s, const b2Vec2& a);
     %rename(b2equ) operator == (const b2Vec2& a, const b2Vec2& b);
+
+    %rename (b2mul)  b2Vec3::operator * (float32 s, const b2Vec3& a);
+    %rename (b2add)  b2Vec3::operator + (const b2Vec3& a, const b2Vec3& b);
+    %rename (b2sub)  b2Vec3::operator - (const b2Vec3& a, const b2Vec3& b);
     
     //Since Python (apparently) requires __imul__ to return self,
     //these void operators will not do. So, rename them, then call them
@@ -112,31 +116,10 @@
         }
         
     }
-/// Query the world for all shapes that intersect a given segment. You provide a shap
-/// pointer buffer of specified size. The number of shapes found is returned, and the buffer
-/// is filled in order of intersection
-/// @param segment defines the begin and end point of the ray cast, from p1 to p2.
-/// Use b2Segment.Extend to create (semi-)infinite rays
-/// @param shapes a user allocated shape pointer array of size maxCount (or greater).
-/// @param maxCount the capacity of the shapes array
-/// @param solidShapes determines if shapes that the ray starts in are counted as hits.
-/// @param userData passed through the worlds contact filter, with method RayCollide. This can be used to filter valid shapes
-/// @returns the number of shapes found
-//int32 Raycast(const b2Segment& segment, b2Shape** shapes, int32 maxCount, bool solidShapes, void* userData);
-/// Performs a raycast as with Raycast, finding the first intersecting shape.
-/// @param segment defines the begin and end point of the ray cast, from p1 to p2.
-/// Use b2Segment.Extend to create (semi-)infinite rays
-/// @param lambda returns the hit fraction. You can use this to compute the contact point
-/// p = (1 - lambda) * segment.p1 + lambda * segment.p2.
-/// @param normal returns the normal at the contact point. If there is no intersection, the normal
-/// is not set.
-/// @param solidShapes determines if shapes that the ray starts in are counted as hits.
-/// @returns the colliding shape shape, or null if not found
-//b2Shape* RaycastOne(const b2Segment& segment, float32* lambda, b2Vec2* normal, bool solidShapes, void* userData);
 
     %extend b2World {
     public:        
-        PyObject* RaycastOne(const b2Segment& segment, int32 maxCount, bool solidShapes, PyObject* userData) {
+        PyObject* Raycast(const b2Segment& segment, int32 maxCount, bool solidShapes, PyObject* userData) {
             //returns tuple (shapecount, shapes)
             PyObject* ret=Py_None;
             b2Shape** shapes=new b2Shape* [maxCount];
@@ -146,7 +129,11 @@
                 return ret;
             }
             
-            Py_INCREF(userData);
+            if (userData==Py_None) {
+                userData=NULL;
+            } else {
+                Py_INCREF(userData);
+            }
 
             int32 num = $self->Raycast(segment, shapes, maxCount, solidShapes, (void*)userData);
 
@@ -168,15 +155,18 @@
         }
 
         PyObject* RaycastOne(const b2Segment& segment, bool solidShapes, PyObject* userData) {
-            //returns tuple (float32* lambda, b2Vec2* normal, shape)
+            //returns tuple (float32 lambda, b2Vec2 normal, shape)
             PyObject* ret=Py_None;
-            float32 lambda=0.0;
+            float32 lambda=1.0;
             b2Vec2* normal=new b2Vec2(0.0, 0.0);
-            b2Shape* shape;
             
-            Py_INCREF(userData);
+            if (userData==Py_None) {
+                userData=NULL;
+            } else {
+                Py_INCREF(userData);
+            }
 
-            shape = $self->RaycastOne(segment, &lambda, normal, solidShapes, (void*)userData);
+            b2Shape* shape = $self->RaycastOne(segment, &lambda, normal, solidShapes, (void*)userData);
             
             ret = PyTuple_New(3);
 
@@ -614,7 +604,17 @@
     %pythoncode %{
     # Checks the Polygon definition to see if upon creation it will cause an assertion.
     # Raises ValueError if an assertion would be raised.
+    B2_FLT_EPSILON = 1.192092896e-07
     FLT_EPSILON = 1.192092896e-07
+    cvars = ["b2_pi","b2_maxManifoldPoints","b2_maxPolygonVertices","b2_maxProxies","b2_maxPairs",
+            "b2_linearSlop","b2_angularSlop","b2_toiSlop","b2_maxTOIContactsPerIsland","b2_maxTOIJointsPerIsland",
+            "b2_velocityThreshold","b2_maxLinearCorrection","b2_maxAngularCorrection","b2_maxLinearVelocity",
+            "b2_maxLinearVelocitySquared","b2_maxAngularVelocity","b2_maxAngularVelocitySquared","b2_contactBaumgarte",
+            "b2_timeToSleep","b2_linearSleepTolerance","b2_angularSleepTolerance","b2_version","b2Vec2_zero",
+            "b2Mat22_identity","b2XForm_identity","b2_nullFeature","b2_nullPair","b2_nullProxy","b2_tableCapacity","b2_tableMask",
+            "b2_invalid","b2_nullEdge","b2BroadPhase_s_validate","b2_defaultFilter","b2_chunkSize","b2_maxBlockSize",
+            "b2_blockSizes","b2_chunkArrayIncrement","b2_stackSize","b2_maxStackEntries","b2_minPulleyLength" ]
+
     def b2PythonComputeCentroid(pd):
         """
             Computes the centroid of the polygon shape definition, pd.
@@ -718,5 +718,4 @@
 #endif
 
 %include "../Include/Box2D.h"
-
 
