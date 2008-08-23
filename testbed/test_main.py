@@ -210,7 +210,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
 
     def DrawCircle(self, center, radius, color, drawwidth=1):
         """
-        Draw a circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        Draw a wireframe circle given the b2Vec2 center_v, radius, axis of orientation and color.
         """
         color = self.convertColor(color)
         radius *= self.viewZoom
@@ -239,13 +239,16 @@ class fwDebugDraw(box2d.b2DebugDraw):
 
     def DrawPolygon(self, in_vertices, vertexCount, color):
         """
-        Draw a wireframe polygon given the world b2Vec2 vertices in_vertices with the specified color.
+        Draw a wireframe polygon given the world vertices in_vertices (tuples) with the specified color.
         """
         color = self.convertColor(color)
         vertices = [self.toScreen(v) for v in in_vertices]
         pygame.draw.polygon(self.surface, color, vertices, 1)
         
     def DrawSolidPolygon(self, in_vertices, vertexCount, color):
+        """
+        Draw a filled polygon given the world vertices in_vertices (tuples) with the specified color.
+        """
         color = self.convertColor(color)
         vertices = [self.toScreen(v) for v in in_vertices]
         pygame.draw.polygon(self.surface, (color[0]/2, color[1]/2, color[1]/2, 127), vertices, 0)
@@ -649,20 +652,6 @@ class Framework(object):
                     p1 = point.position
                     p2 = p1 + k_axisScale * point.normal
                     self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.4, 0.9, 0.4))
-
-                # point.normalForce, point.tangentForce don't exist anymore, so we can't use these two:
-                #if settings.drawContactForces: # commented out in the testbed code
-                    #k_forceScale=1.0 #? unknown
-                    #p1 = point.position
-                    #p2 = p1 + k_forceScale * point.normalForce * point.normal
-                    #self.DrawSegment(p1, p2, box2d.b2Color(0.9, 0.9, 0.3))
-
-                #if settings.drawFrictionForces: # commented out in the testbed code                    
-                    #k_forceScale=1.0 #? unknown
-                    #tangent = box2d.b2Cross(point.normal, 1.0)
-                    #p1 = point.position
-                    #p2 = p1 + k_forceScale * point.tangentForce * tangent
-                    #DrawSegment(p1, p2, box2d.b2Color(0.9, 0.9, 0.3))
 
     def _Keyboard_Event(self, key):
         """
