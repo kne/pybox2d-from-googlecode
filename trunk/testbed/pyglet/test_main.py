@@ -668,7 +668,7 @@ class Framework(pyglet.window.Window):
         # Reset the collision points
         self.points = []
 
-        # Tell Box2D to step (r162)
+        # Tell Box2D to step (r172)
         self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
@@ -686,12 +686,12 @@ class Framework(pyglet.window.Window):
                 (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
             self.textLine += 15
 
-            self.DrawString(5, self.textLine, "hz %d iterations %d" %
-                (settings.hz, settings.iterationCount))
+            self.DrawString(5, self.textLine, "hz %d vel/pos iterations %d/%d" %
+                (settings.hz, settings.velocityIterations, settings.positionIterations))
             self.textLine += 15
 
-            #self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.b2_byteCount) # not wrapped?
-            #self.textLine += 15
+            self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
+            self.textLine += 15
 
         if settings.drawFPS: #python version only
             self.DrawString(5, self.textLine, "FPS %d" % self.fps)
@@ -709,7 +709,7 @@ class Framework(pyglet.window.Window):
 
         # Draw the slingshot bomb
         if self.bombSpawning:
-            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,0.1))
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,1.0))
             self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, box2d.b2Color(0.8,0.8,0.8))
 
         # Draw each of the contact points in different colors.

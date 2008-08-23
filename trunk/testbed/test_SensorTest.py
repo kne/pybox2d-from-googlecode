@@ -88,7 +88,7 @@ class SensorTest (test_main.Framework):
 
             d = center - point.position
 
-            if (d.LengthSquared() < box2d.FLT_EPSILON * box2d.FLT_EPSILON) :
+            if (d.LengthSquared() < box2d.B2_FLT_EPSILON * box2d.B2_FLT_EPSILON):
                 continue
 
             d.Normalize()
