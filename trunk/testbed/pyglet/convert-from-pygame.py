@@ -24,6 +24,7 @@ for file in files:
             line = "import pyglet\n"
         elif line.find("key==K_") > -1:
             # terrible code, use regexps please
+            line=line.replace("K_EQUALS", "pyglet.window.key.EQUAL")
             line=line.replace("key==K_", "key==pyglet.window.key.")
             temp = line.split("window.key.")
             temp[1] = temp[1][0].upper() + temp[1][1:]

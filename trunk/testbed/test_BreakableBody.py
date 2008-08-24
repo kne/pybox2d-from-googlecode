@@ -1,6 +1,9 @@
 #!/usr/bin/python
 #
-# C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+# Testbed example showing deformable and breakable bodies using the soft
+# b2DistanceJoint and a small,liteweight triangle mesher.
+# 2008-05-09 / nimodo 
+#
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
 # 
 # Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlecode.com)
@@ -18,6 +21,7 @@
 # 2. Altered source versions must be plainly marked as such, and must not be
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
+#
 
 from pygame.locals import *
 import test_main
@@ -27,6 +31,11 @@ import TriangleMesh as tm
 
 def H(x):
     return x/2.0
+MIN_SQUAREDLENGTH    =0.25  #0.5*0.5
+
+# want the value on restart,
+# break joint if reaction exceeds 
+g_maxAllowableForce = 200.0
 
 data = {
     'ring_nodes' : (
@@ -260,7 +269,6 @@ class BreakableBody(test_main.Framework):
     def __init__(self):
         super(BreakableBody, self).__init__()
 
-        self.drawMode = (self.staticBodies == False)
         self.viewZoom = 6.0
         self.updateCenter()
 
@@ -268,9 +276,6 @@ class BreakableBody(test_main.Framework):
         gx, gy  = 100.0, 1.0
         dx, br  =  34.0, 0.3
         sx, sy  = -dx-H(dx), 30
-
-        # break joint, if the reactionforce exceeds:
-        self.maxAllowableForce = 100.0
 
         # ground
         sd=box2d.b2PolygonDef()
@@ -289,7 +294,7 @@ class BreakableBody(test_main.Framework):
         pd=box2d.b2PolygonDef()
         dj=box2d.b2DistanceJointDef()
         
-        dj.dampingRatio     = 0.0
+        dj.dampingRatio     = 1.0
         dj.collideConnected = True
         
         nodes, segments, holes = self.ExampleData('B')
@@ -307,13 +312,14 @@ class BreakableBody(test_main.Framework):
         self.CreateSoftBody( box2d.b2Vec2(sx+6,sy), 0, 0, pd, dj,nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('x')
-        dj.frequencyHz      = 20.0
-        pd.density          = 1.0/60.0
-        pd.friction         = 0.6
-        pd.restitution      = 0.0
+        dj.frequencyHz      = 0.0
+        pd.density          = 0.2
+        pd.friction         = 1.0
+        pd.restitution      = 0.1
         self.CreateSoftBody( box2d.b2Vec2(sx+13,sy),  0,  0,  pd, dj,nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('two')
+        dj.frequencyHz      = 20.0
         pd.density          = 0.01
         pd.friction         = 0.3
         pd.restitution      = 0.3
@@ -323,8 +329,8 @@ class BreakableBody(test_main.Framework):
         self.CreateSoftBody( box2d.b2Vec2(sx+28,sy),  0, 0,   pd, dj, nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('b')
-        dj.frequencyHz      = 10
-        dj.dampingRatio     = 20.0
+        dj.frequencyHz      = 20
+        dj.dampingRatio     = 2.0
         pd.restitution      = 0.01
         pd.density          = 0.01
         pd.friction         = 0.9
@@ -359,8 +365,14 @@ class BreakableBody(test_main.Framework):
         if options: md.SetOptions(options)
 
         # triangulator main
-        md.Mesh(nodes, n_nodes,  segments,n_segments, holes, n_holes)
+        i = md.Mesh(nodes, segments, holes)
         md.PrintData()
+        print "TriangleMesh.py:%s" % md.GetErrorMessage(i)
+
+        # check if enough proxies set in box2d,  10 proxies as reserve
+        if self.world.GetProxyCount()+md.GetInsideTriangleCount() > (box2d.b2_maxProxies-10):
+            md.Reset()
+            return
 
         # bodies (triangles)
         triangles = md.GetTriangles()
@@ -386,20 +398,21 @@ class BreakableBody(test_main.Framework):
                 triangles[i].userData = b
 
         # joints
-        # for each triangle-pair in edges, connect with a distance joint
-        edges = md.GetEdges()
-        for i in range(md.GetEdgeCount()):
-            t0 = edges[i].t[0]
-            t1 = edges[i].t[1]
-            if t0.inside==False or t1.inside==False: continue
-            
-            # Get bodies
-            b1 = t0.userData
-            b2 = t1.userData
-            if b1==None or b2==None: continue
-            
-            dj.Initialize( b1,b2, b1.GetWorldCenter(), b2.GetWorldCenter())
-            self.world.CreateJoint(dj).getAsType()
+        if pd.density>0.0:
+            # for each triangle-pair in edges, connect with a distance joint
+            edges = md.GetEdges()
+            for i in range(md.GetEdgeCount()):
+                t0 = edges[i].t[0]
+                t1 = edges[i].t[1]
+                if t0.inside==False or t1.inside==False: continue
+                
+                # Get bodies
+                b1 = t0.userData
+                b2 = t1.userData
+                if b1==None or b2==None: continue
+                
+                dj.Initialize( b1,b2, b1.GetWorldCenter(), b2.GetWorldCenter())
+                self.world.CreateJoint(dj).getAsType()
 
         # clean TriangleMesh
         md.Reset()
@@ -412,39 +425,46 @@ class BreakableBody(test_main.Framework):
 
     # maybe here to check for maximal reaction forces to break a body
     def Step(self, settings):
+        global g_maxAllowableForce
         F=0.0
         jStressed = 0
         for j in self.GetJoints():
-            #tmp = j.GetReactionForce(settings.hz).Length()
-            tmp = j.GetReactionForce().Length()
+            tmp = j.GetReactionForce(settings.hz).Length() # for newer builds
+            #tmp = j.GetReactionForce().Length() # works for older builds
             if tmp>F:
                 F = tmp
                 jStressed = j
-        if jStressed and (F>self.maxAllowableForce):
+        if jStressed and (F>g_maxAllowableForce):
             self.world.DestroyJoint(jStressed)
 
-        self.DrawString(1, self.textLine,"max.reactionforce=%f.0 allowable=%f.0  change:-+" % (F,self.maxAllowableForce));
+        self.DrawString(1, self.textLine,"max.reactionforce=%f.0 allowable=%f.0  change:-+" % (F,g_maxAllowableForce));
         self.textLine += 12
 
-        self.DrawString(1, self.textLine,"drawmode(%s):d  mesh:m  static(%s):s" % (self.drawMode, self.staticBodies))
+        onoff = { False: 'off', True: 'on' }
+        self.DrawString(1, self.textLine,"(d)rawmode-%s  (m)esh  (s)taticbody-%s" % (onoff[self.drawMode], onoff[self.staticBodies]))
         self.textLine += 12
 
         p1, p2 = box2d.b2Vec2(), box2d.b2Vec2()
         for i in xrange(self.drawCount-1):
             p1.Set(self.drawVertices[i].x  ,self.drawVertices[i].y)
-            p2.Set(self.drawVertices[i+1].x,self.drawVertices[i+1].y)
+            if i<self.drawCount-1:
+                p2.Set(self.drawVertices[i+1].x,self.drawVertices[i+1].y)
+            else:
+                p2.Set(self.drawVertices[0].x,self.drawVertices[0].y)
             self.debugDraw.DrawSegment(p1,p2,box2d.b2Color(0.6,0.2,0.2))
+            self.debugDraw.DrawPoint(p1,3.0, box2d.b2Color(0.6,0.5,0.2))
 
         super(BreakableBody, self).Step(settings)
     
     def Keyboard(self, key) :
+        global g_maxAllowableForce
         if key==K_MINUS:
-            if self.maxAllowableForce > 0.0:
-                self.maxAllowableForce -= 5.0
+            if g_maxAllowableForce > 0.0:
+                g_maxAllowableForce -= 5.0
         elif key==K_PLUS or key==K_EQUALS:
-            self.maxAllowableForce += 5.0
+            g_maxAllowableForce += 5.0
         elif key==K_d:
-            self.m_drawMode = not self.m_drawMode
+            self.drawMode = not self.drawMode
         elif key==K_s:
             self.staticBodies = not self.staticBodies
         elif key==K_m:
@@ -454,25 +474,39 @@ class BreakableBody(test_main.Framework):
                 dj.collideConnected = True
                 dj.frequencyHz      = 20.0
                 dj.dampingRatio     = 10.0
-                pd.friction         = 0.99
-                pd.restitution      = 0.01
+                pd.friction         = 0.9
+                pd.restitution      = 0.1
                 if self.staticBodies:
                     pd.density      = 0.0
                 else:
                     pd.density      = 1.0/32.0
 
-                self.CreateSoftBody( box2d.b2Vec2(0.0,0.0),  0, tm.tmO_SEGMENTBOUNDARY|tm.tmO_GRADING,
+                self.CreateSoftBody( box2d.b2Vec2(0.0,0.0),  0, tm.tmO_SEGMENTBOUNDARY|tm.tmO_GRADING|tm.tmO_CHECKINTERSECT,
                     pd, dj, self.drawVertices) 
 
                 self.drawCount = 0
                 self.drawMode = False
 
-    def MouseDown(self, p):
-        if self.drawMode:
+    def AddVertex(self, p):
+        if self.drawCount>0:
+            dx = self.drawVertices[self.drawCount-1].x - p.x 
+            dy = self.drawVertices[self.drawCount-1].y - p.y
+            if dx*dx+dy*dy > MIN_SQUAREDLENGTH:
+                self.drawVertices.append( box2d.b2Vec2(p.x, p.y) )
+                self.drawCount+=1
+        else:
             self.drawVertices.append( box2d.b2Vec2(p.x, p.y) )
             self.drawCount+=1
+
+    def MouseDown(self, p):
+        if self.drawMode:
+            self.AddVertex(p)
         else:
             super(BreakableBody, self).MouseDown(p)
+
+    def MouseUp(self, p):
+        if not self.drawMode:
+            super(BreakableBody, self).MouseUp(p)
         
     # examples
     def ExampleData(self, which) :
