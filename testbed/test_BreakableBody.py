@@ -296,7 +296,7 @@ class BreakableBody(test_main.Framework):
         
         dj.dampingRatio     = 1.0
         dj.collideConnected = True
-        
+       
         nodes, segments, holes = self.ExampleData('B')
         dj.frequencyHz      = 20
         pd.density          = 1.0/70.0
@@ -371,6 +371,11 @@ class BreakableBody(test_main.Framework):
 
         # check if enough proxies set in box2d,  10 proxies as reserve
         if self.world.GetProxyCount()+md.GetInsideTriangleCount() > (box2d.b2_maxProxies-10):
+            print
+            print "Current proxy count:", self.world.GetProxyCount()
+            print "World proxy count if added:", self.world.GetProxyCount()+md.GetInsideTriangleCount() 
+            print "Max proxies (Box2D setting):", (box2d.b2_maxProxies-10)
+            print "Error: Not enough proxies to insert the mesh!"
             md.Reset()
             return
 
@@ -456,7 +461,7 @@ class BreakableBody(test_main.Framework):
 
         super(BreakableBody, self).Step(settings)
     
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         global g_maxAllowableForce
         if key==K_MINUS:
             if g_maxAllowableForce > 0.0:
@@ -484,6 +489,7 @@ class BreakableBody(test_main.Framework):
                 self.CreateSoftBody( box2d.b2Vec2(0.0,0.0),  0, tm.tmO_SEGMENTBOUNDARY|tm.tmO_GRADING|tm.tmO_CHECKINTERSECT,
                     pd, dj, self.drawVertices) 
 
+                self.drawVertices = []
                 self.drawCount = 0
                 self.drawMode = False
 
