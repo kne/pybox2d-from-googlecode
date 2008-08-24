@@ -35,7 +35,7 @@
 # 2) Jonathan Shewchuk
 #    http://www.cs.cmu.edu/~quake/triangle.html
 # 3) Recursive triangle eating
-#    François Labelle
+#    Francois Labelle
 #    http://www.cs.berkeley.edu/~flab/
 # 4) example - at the end of this file
 #
@@ -413,9 +413,9 @@ class TriangleMesh(object):
 
             for k in range(i+1, end):
                 if k < end-1:
-                    k = k+1
+                    k1 = k+1
                 else:
-                    k = start
+                    k1 = start
                 if self.Intersect( v[i],v[i1], v[k],v[k1] ):
                     return True
         return False
