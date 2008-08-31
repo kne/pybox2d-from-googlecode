@@ -279,8 +279,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2Mat22(GetAngle():%s GetInverse():%s col1:%s col2:%s)" %\
-            tuple([str(a) for a in (self.GetAngle(),self.GetInverse(),self.col1,self.col2)])
+        return "b2Mat22(GetAngle():%s col1:%s col2:%s)" %\
+            tuple([str(a) for a in (self.GetAngle(),self.col1,self.col2)])
     %}
 }
 

@@ -185,7 +185,7 @@ def main_loop(world, screen, demolist, app):
             app.event(event)
 
         # Tell the GUI to update itself, then blit it to the screen
-        app.update(app_surface)
+        app.update(app_surface) # pygame 1.8.1/pgu problem? 1.8.0 works fine
         screen.blit(app_surface, (0,0))
 
         # Wake up non/slow-moving shapes
@@ -193,7 +193,7 @@ def main_loop(world, screen, demolist, app):
 
         # Step the world 
         # (calls the debugdraw functions, so this is where the balls are drawn)
-        world.Step(1/hz, 5)
+        world.Step(1/hz, 10, 8)
 
         clock.tick(hz)        
         #fps = clock.get_fps()
@@ -207,9 +207,7 @@ def add_demos(demolist):
 
     ignore_list=("main")
 
-    files = glob.glob("test_*.py")
-
-    for f in files:
+    for f in glob.glob("test_*.py"):
         name = f[5:-3]
         if name.lower() in ignore_list:
             continue
