@@ -6,7 +6,7 @@ classes = ('b2AABB','b2BlockAllocator','b2Body','b2BodyDef','b2Bound','b2BroadPh
 def evaluate(name):
     """Return a rather verbose string representation of a joint"""
     ignoreList = ('this', 'thisown', 'next', 'prev', 'm_next', 'm_prev')
-    ignoreAccessor = ('prev', 'next', 'jointlist', 'bodylist', 'shapelist', 'world', 'body1', 'body2', 'joint1', 'joint2')
+    ignoreAccessor = ('prev', 'next', 'jointlist', 'bodylist', 'shapelist', 'world', 'body1', 'body2', 'joint1', 'joint2', 'inverse')
     def checkArgs(prop):
         # uses a really stupid method of determining if it's really just an accessor
         # or if it's used like GetLocalPoint(). introspection like func_code doesn't seem
