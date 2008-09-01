@@ -9,4 +9,13 @@
 
  * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
 
+=== Physics Jam Results ===
+
+The OLPC Physics jam took place on Aug 29-31, 2008. The results from the groups are here:
+
+ * [http://rollcats.com/ Rollcats]
+ * [http://wiki.laptop.org/go/Bridge Bridge]
+ * [http://wiki.laptop.org/go/XOlympics XOlympics]
+ * [http://wiki.laptop.org/go/Babel Babel]
+
 Please let me know if you use pybox2d in any of your projects and I will gladly link to them here.
