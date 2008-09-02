@@ -525,3 +525,21 @@ public:
     %}
 }
 
+%extend b2LineJointDef {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2LineJointDef(body1:%s body2:%s collideConnected:%s enableLimit:%s enableMotor:%s localAnchor1:%s localAnchor2:%s localAxis1:%s lowerTranslation:%s maxMotorForce:%s motorSpeed:%s type:%s upperTranslation:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.enableLimit,self.enableMotor,self.localAnchor1,self.localAnchor2,self.localAxis1,self.lowerTranslation,self.maxMotorForce,self.motorSpeed,self.type,self.upperTranslation,self.userData)])
+    %}
+}
+
+%extend b2LineJoint {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2LineJoint(GetAnchor1():%s GetAnchor2():%s GetJointSpeed():%s GetJointTranslation():%s GetLowerLimit():%s GetMotorForce():%s GetMotorSpeed():%s GetType():%s GetUpperLimit():%s IsLimitEnabled():%s IsMotorEnabled():%s m_K:%s m_a1:%s m_a2:%s m_axis:%s m_enableLimit:%s m_enableMotor:%s m_impulse:%s m_limitState:%s m_localAnchor1:%s m_localAnchor2:%s m_localXAxis1:%s m_localYAxis1:%s m_lowerTranslation:%s m_maxMotorForce:%s m_motorImpulse:%s m_motorMass:%s m_motorSpeed:%s m_perp:%s m_s1:%s m_s2:%s m_upperTranslation:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetJointSpeed(),self.GetJointTranslation(),self.GetLowerLimit(),self.GetMotorForce(),self.GetMotorSpeed(),self.GetType(),self.GetUpperLimit(),self.IsLimitEnabled(),self.IsMotorEnabled(),self.m_K,self.m_a1,self.m_a2,self.m_axis,self.m_enableLimit,self.m_enableMotor,self.m_impulse,self.m_limitState,self.m_localAnchor1,self.m_localAnchor2,self.m_localXAxis1,self.m_localYAxis1,self.m_lowerTranslation,self.m_maxMotorForce,self.m_motorImpulse,self.m_motorMass,self.m_motorSpeed,self.m_perp,self.m_s1,self.m_s2,self.m_upperTranslation)])
+    %}
+}
+
