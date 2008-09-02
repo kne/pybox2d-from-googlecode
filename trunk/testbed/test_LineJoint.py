@@ -22,42 +22,41 @@
 from pygame.locals import *
 import test_main
 from test_main import box2d
-class SphereStack (test_main.Framework):
-    name="SphereStack"
-    m_bodies = [ ]
-    e_count = 10
-    
+
+class LineJoint (test_main.Framework):
+    name="LineJoint"
     def __init__(self):
-        super(SphereStack, self).__init__()
+        super(LineJoint, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
-        
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
     
-        sd=box2d.b2CircleDef()
-        sd.radius = 1.0
+        sd=box2d.b2PolygonDef()
+        sd.SetAsBox(0.5, 2.0)
         sd.density = 1.0
         
-        for i in xrange(self.e_count):
-            bd=box2d.b2BodyDef()
-            bd.position.Set(0.0, 2.0 + 3.0 * i)
-            
-            self.m_bodies.append( self.world.CreateBody(bd) )
-            self.m_bodies[-1].CreateShape(sd)
-            self.m_bodies[-1].SetMassFromShapes()
-    
-    def Step(self, settings):
-        #for body in self.m_bodies:
-        #    print "%g " % body.GetWorldCenter().y,
-        #for body in self.m_bodies:
-        #    print "%g " % body.GetLinearVelocity().y,
-        #print ""
         
-        super(SphereStack, self).Step(settings)
+        bd=box2d.b2BodyDef()
+        bd.position.Set(0.0, 7.0)
+        body = self.world.CreateBody(bd)
+        body.CreateShape(sd)
+        body.SetMassFromShapes()
+        
+        jd = box2d.b2LineJointDef()
+        axis=box2d.b2Vec2(2.0, 1.0)
+        axis.Normalize()
+        jd.Initialize(ground, body, box2d.b2Vec2(0.0, 8.5), axis)
+        jd.motorSpeed = 0.0
+        jd.maxMotorForce = 100.0
+        jd.enableMotor = True
+        jd.lowerTranslation = -4.0
+        jd.upperTranslation = 4.0
+        jd.enableLimit = True
+        self.world.CreateJoint(jd)
     
 if __name__=="__main__":
-    test_main.main(SphereStack)
+    test_main.main(LineJoint)
