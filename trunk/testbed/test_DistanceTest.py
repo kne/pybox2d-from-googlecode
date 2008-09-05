@@ -54,7 +54,6 @@ class DistanceTest (test_main.Framework):
         self.m_body2.SetMassFromShapes()
 
         self.world.SetGravity(box2d.b2Vec2(0.0, 0.0))
-        self.world.SetPositionCorrection(False)
      
     def Step(self, settings) :
         x1=box2d.b2Vec2()
@@ -64,31 +63,16 @@ class DistanceTest (test_main.Framework):
         self.DrawString(5, self.textLine, "distance = %g" % distance)
         self.textLine += 15
 
-          # ?
-          #g_GJK_Iterations = 5
-          #self.DrawString(5, self.textLine, "iterations = %d" % g_GJK_Iterations)
-          #self.textLine += 15
-          
-#          glPointSize(4.0)
-#          glColor3(1.0, 0.0, 0.0)
-#          glBegin(GL_POINTS)
-#          glVertex2(x1.x, x1.y)
-#          glVertex2(x2.x, x2.y)
-#          glEnd()
-#          glPointSize(1.0)
-#          
-#          glColor3(1.0, 1.0, 0.0)
-#          glBegin(GL_LINES)
-#          glVertex2(x1.x, x1.y)
-#          glVertex2(x2.x, x2.y)
-#          glEnd()
+        self.debugDraw.DrawPoint(x1, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
+        self.debugDraw.DrawPoint(x2, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
+        self.debugDraw.DrawSegment(x1, x2, box2d.b2Color(1.0, 1.0, 0.0))
 
         settings.pause = True
         super(DistanceTest, self).Step(settings)
         settings.pause = False
      
     def Keyboard(self, key) :
-        p = self.m_body2.GetPosition=box2d.b2Vec2()
+        p = self.m_body2.GetPosition()
         a = self.m_body2.GetAngle()
 
         if key==K_a:

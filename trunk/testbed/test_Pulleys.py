@@ -69,7 +69,7 @@ class Pulleys (test_main.Framework):
 
         self.m_joint1 = self.world.CreateJoint(pulleyDef).getAsType() 
      
-    def Step(self, settings) :
+    def Step(self, settings):
         ratio = self.m_joint1.GetRatio()
         L = self.m_joint1.GetLength1() + ratio * self.m_joint1.GetLength2()
         self.DrawString(5, self.textLine, "L1 + %.2f * L2 = %.2f" % (ratio, L))

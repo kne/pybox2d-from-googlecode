@@ -30,7 +30,7 @@ class PolyCollision (test_main.Framework):
     def __init__(self):
         super(PolyCollision, self).__init__()
 
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef()
         sd.setVertex(0,-9.0, -1.1)
         sd.setVertex(1,7.0, -1.1)
         sd.setVertex(2,5.0, -0.9)
@@ -38,23 +38,22 @@ class PolyCollision (test_main.Framework):
         sd.vertexCount = 4
         sd.density = 0.0
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 10.0)
         self.m_body1 = self.world.CreateBody(bd)
         self.m_body1.CreateShape(sd)
 
-        sd=box2d.b2PolygonDef() #box2d.b2PolygonDef sd
+        sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 0.5)
         sd.density = 1.0
 
-        bd=box2d.b2BodyDef() #box2d.b2BodyDef bd
+        bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 10.0)
         self.m_body2 = self.world.CreateBody(bd)
         self.m_body2.CreateShape(sd)
         self.m_body2.SetMassFromShapes()
 
         self.world.SetGravity(box2d.b2Vec2_zero)
-        self.world.SetPositionCorrection(False)
      
     def Step(self, settings) :
         settings.pause = True

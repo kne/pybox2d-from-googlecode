@@ -396,14 +396,10 @@ class Theme:
         
         if box == 0: return
         
-        if type(box) == tuple:
-            s.fill(box,r)
-            return
+        if not isinstance(box,pygame.Surface):
+             s.fill(box,r)
+             return
         
-        if type(box) == pygame.Color:
-            # pybox2d -- not sure why this is happening
-            return
-
         x,y,w,h=r.x,r.y,r.w,r.h
         ww,hh=box.get_width()/3,box.get_height()/3
         xx,yy=x+w,y+h
@@ -471,7 +467,7 @@ class Background(widget.Widget):
     def paint(self,s):
         r = pygame.Rect(0,0,s.get_width(),s.get_height())
         v = self.value.style.background
-        if type(v) == tuple:
+        if not isinstance(v,pygame.Surface):
             s.fill(v)
         else: 
             self.theme.render(s,v,r)

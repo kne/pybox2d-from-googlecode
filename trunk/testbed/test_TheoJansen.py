@@ -93,7 +93,7 @@ class TheoJansen (test_main.Framework):
         # acting like a suspension system.
         #djd.dampingRatio = 0.5
         #djd.frequencyHz = 10.0
-        # svn r149, not usable yet
+        # usable, but doesn't act like it seems it should?
         
         djd.Initialize(body1, body2, p2 + self.m_offset, p5 + self.m_offset)
         self.world.CreateJoint(djd).getAsType() 
@@ -186,13 +186,13 @@ class TheoJansen (test_main.Framework):
         self.CreateLeg(-1.0, wheelAnchor)
         self.CreateLeg(1.0, wheelAnchor)
     
-    def Step(self, settings) :
+    def Step(self, settings):
         self.DrawString(5, self.textLine, "Keys: left = a, brake = s, right = d, toggle motor = m")
         self.textLine += 15
         
         super(TheoJansen, self).Step(settings)
     
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_a:
             self.m_chassis.WakeUp()
             self.m_motorJoint.SetMotorSpeed(-self.m_motorSpeed)
