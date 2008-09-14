@@ -19,8 +19,9 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from test_main import *
+import rabbyt
 
-from math import sqrt
+from math import sqrt, sin, cos,atan
 
 class UFOContactListener(box2d.b2ContactListener):
     """
@@ -102,6 +103,8 @@ class UFOControls(object):
         self.open = open = self.world.CreateBody(bd)
         open.CreateShape(sd)
 
+        Sprites(gearw, "Rollcats_bottom.png", 1.0, 1.0, 0.0, 0.0, self.renderer.toScreen)
+
     def move(self, amount):
         self.gearw.ApplyForce( box2d.b2Vec2(amount,0.0), box2d.b2Vec2(0.0,0.0))
 
@@ -178,10 +181,15 @@ class UFOGrip(object):
         sd.density = 1.0
 
         bd=box2d.b2BodyDef()
+        bd.fixedRotation = True ### testing ###
         bd.position = topc.GetWorldCenter() - box2d.b2Vec2(0,10.0)
         self.mainc = mainc = self.world.CreateBody(bd)
         mainc.CreateShape(sd)
         mainc.SetMassFromShapes()
+
+        Sprites(topc, "chain.png", 1.0, 10.0, 0.0, 0.0, self.renderer.toScreen, 0, mainc) # link
+        Sprites(topc, "Rollcats_bottom.png", 1.0, 1.0, 0.0, 0.0, self.renderer.toScreen)
+        Sprites(mainc, "Rollcats_bottom.png", 1.0, 1.0, 0.0, 0.0, self.renderer.toScreen)
 
         # prismatic joint for horizontal movement of control circle
         jd=box2d.b2PrismaticJointDef() 
@@ -191,6 +199,25 @@ class UFOGrip(object):
         jd.enableLimit = True
 
         self.gearw_pj = self.world.CreateJoint(jd).getAsType()
+
+        # left side stopper
+        sd=box2d.b2CircleDef() 
+        sd.radius = 0.5
+        sd.density = 0.0
+
+        bd=box2d.b2BodyDef()
+        bd.position = self.topcstartpos + box2d.b2Vec2(-18.0,0.0)
+        leftstopper = self.world.CreateBody(bd)
+        leftstopper.CreateShape(sd)
+
+        bd=box2d.b2BodyDef()
+        bd.position = self.topcstartpos + box2d.b2Vec2(25.0,0.0)
+        rightstopper = self.world.CreateBody(bd)
+        rightstopper.CreateShape(sd)
+
+        Sprites(leftstopper, "topbar.png", 10.0, 1.0, 0.0, 0.0, self.renderer.toScreen, 0, rightstopper) # link
+        #p1 = renderer.toScreen( (tc.x + self.gearw_pj.GetLowerLimit(), tc.y ) )
+        #p2 = renderer.toScreen( (tc.x + self.gearw_pj.GetUpperLimit(), tc.y ) )
 
         # vertical distance joint to main control circle
         jd=box2d.b2DistanceJointDef() 
@@ -223,21 +250,27 @@ class UFOGrip(object):
         grips  = []
         joints = []            
         
+        step = -extents.x + overlap
+
         jd=box2d.b2RevoluteJointDef() 
         jd.enableLimit  = True
 
-        step = -extents.x + overlap
+        ###test###
+        jd.maxMotorTorque = 800.0
+        jd.motorSpeed = 0.0
+        jd.enableMotor = True
+        ###test###
+
+        jd.lowerAngle   = 0.2 * box2d.b2_pi  #36 degrees (left)
+        jd.upperAngle   = 0.4 * box2d.b2_pi  #72 degrees (down)
 
         if left:
             jd.localAnchor1 = box2d.b2Vec2(-extents.x/2, 0)
             jd.localAnchor2 = box2d.b2Vec2( extents.x/2, 0)
-            jd.lowerAngle   = 0.2 * box2d.b2_pi  # 0 degrees (left)
-            jd.upperAngle   = 0.4 * box2d.b2_pi  #90 degrees (down)
-        else:
+        else: 
             jd.localAnchor1 = box2d.b2Vec2( extents.x/2, 0)
             jd.localAnchor2 = box2d.b2Vec2(-extents.x/2, 0)
-            jd.lowerAngle   =-0.4 * box2d.b2_pi  # 0 degrees (right)
-            jd.upperAngle   =-0.2 * box2d.b2_pi  #90 degrees (down)
+            jd.lowerAngle, jd.upperAngle=-jd.upperAngle, -jd.lowerAngle #swap, negative
             step = -step
 
             for i in xrange(tipsd.vertexCount):
@@ -246,7 +279,8 @@ class UFOGrip(object):
 
         bd=box2d.b2BodyDef()
         bd.position = startpos
-        bd.angularDamping = 500.0
+        #bd.angularDamping = 0.0 ###testing###
+        #bd.linearDamping = 0.0 ###testing###
 
         for i in xrange(count):
             grips.append(self.world.CreateBody(bd))
@@ -254,8 +288,13 @@ class UFOGrip(object):
 
             if i==count-1:
                 grip.CreateShape(tipsd)
+                if left:
+                    Sprites(grip, "grip-tip.png", extents.x, extents.y, 0.0, 0.0, self.renderer.toScreen, 180)
+                else:
+                    Sprites(grip, "grip-tip.png", extents.x, extents.y, 0.0, 0.0, self.renderer.toScreen)
             else:
                 grip.CreateShape(sd)
+                Sprites(grip, "grip-piece.png", extents.x, extents.y, 0.0, 0.0, self.renderer.toScreen)
 
             grip.SetMassFromShapes()
 
@@ -263,6 +302,7 @@ class UFOGrip(object):
             if i==0:
                 jd.localAnchor1 = box2d.b2Vec2(-overlap, 0)
                 jd.body1 = self.mainc
+                Sprites(grip, "grip-piece.png", extents.x, extents.y, 0.0, 0.0, self.renderer.toScreen)
             else:
                 jd.localAnchor1 = box2d.b2Vec2(-extents.x/2, 0)
                 jd.body1 = grips[-2]
@@ -277,20 +317,79 @@ class UFOGrip(object):
 
         return grips, joints
 
+    def moveToward(self, joint, angle):
+        #print "Current angle: %f Desired angle: %f"%(joint.GetJointAngle() * 180.0/box2d.b2_pi, angle * 180.0/box2d.b2_pi)
+        angleError = joint.GetJointAngle() - angle
+        gain = 1.0
+        joint.SetMotorSpeed(-gain * angleError)
+
     def Step(self):
+        # big problem with the grip is that eventually the torque causes
+        # a rotation at the base (top) of the grip itself, which makes it
+        # flip around itself! all the things below are tests to see if there's
+        # a way around it...
+        if self.isClosed:
+            closing_speed=100.0
+            speed=closing_speed
+            for joint in self.ljoints[1:]:
+                joint.SetMotorSpeed(speed)
+            for joint in self.rjoints[1:]:
+                joint.SetMotorSpeed(-speed)
+            return
+            for joint in self.ljoints[1:]:                
+                self.moveToward(joint,  0.2 * box2d.b2_pi)
+            for joint in self.rjoints[1:]:
+                self.moveToward(joint, -0.2 * box2d.b2_pi)
+            #self.moveToward(self.ljoints[-1],  0.4 * box2d.b2_pi)
+            #self.moveToward(self.rjoints[-1], -0.4 * box2d.b2_pi)
+        else:
+            for joint in self.ljoints[1:]:
+                self.moveToward(joint, -0.4 * box2d.b2_pi)
+            for joint in self.rjoints[1:]:
+                self.moveToward(joint,  0.4 * box2d.b2_pi)
+            #self.moveToward(self.ljoints[-1],  0.2 * box2d.b2_pi)
+            #self.moveToward(self.rjoints[-1], -0.2 * box2d.b2_pi)
+        return 
+        ###test###
+        opening_speed=5000.0
+        closing_speed=100.0
+        if self.isClosed:
+            speed=closing_speed
+            for joint in self.ljoints[1:]:
+                joint.SetMotorSpeed(speed)
+            for joint in self.rjoints[1:]:
+                joint.SetMotorSpeed(-speed)
+        else:
+            speed=opening_speed
+            for joint in self.ljoints[1:]:
+                joint.SetMotorSpeed(-speed)
+            for joint in self.rjoints[1:]:
+                joint.SetMotorSpeed(speed)
+
+        for object in [self.mainc] + self.lgrips + self.rgrips:
+            v = object.GetLinearVelocity()
+            if abs(v.x) > 1.0:
+                v.x = 1.0
+            if abs(v.y) > 1.0:
+                v.y = 1.0
+            object.SetLinearVelocity(v)
+        return        
+        ###test###
+
         if self.isClosed:
             force = box2d.b2Vec2(self.force, 0.0)
+            zero = box2d.b2Vec2_zero
         else:
             force = box2d.b2Vec2(-self.force, 0.0)
-
+        
         # keep the grip open/closed
         # left side
-        grip = self.lgrips[-1]
+        grip = self.lgrips[1] # was using the tip, but this seems to be more stable
         point = grip.GetWorldPoint(box2d.b2Vec2(-self.extents.x/2-self.overlap,0.0))
         grip.ApplyForce(force, point)
 
         # right side
-        grip = self.rgrips[-1]
+        grip = self.rgrips[1]
         point = grip.GetWorldPoint(box2d.b2Vec2(self.extents.x/2+self.overlap,0.0))
         force = -force
         grip.ApplyForce(force, point)
@@ -298,42 +397,20 @@ class UFOGrip(object):
     def toggleClosed(self):
         self.isClosed = not self.isClosed
      
-    def drawLinks(self, p1, p2, color, height=0.5):
-        renderer = self.renderer
-        tx, ty = renderer.toScreen_v( p1 )
-        mx, my = renderer.toScreen_v( p2 )
-        dist = sqrt( (tx - mx) ** 2 + (ty - my) ** 2 )
-        
-        imgheight = height * renderer.viewZoom
-        imgwidth  = imgheight
-
-        if imgheight < 2:            
-            pygame.draw.aaline(renderer.surface, color, (tx,ty), (mx,my))
-            return
-
-        count = dist / imgheight
-        step  = 1.0 / count
-        t=0.0
-        for i in range(int(count)):
-            x = (1.0 - t) * tx + t*mx
-            y = (1.0 - t) * ty + t*my
-            pygame.draw.circle(renderer.surface, color, (x,y), imgheight/2, 1)
-            t+=step
-
     def draw(self):
+        return
+
         renderer = self.renderer
 
         # draw the top track
         tc = self.topcstartpos
-        p1 = box2d.b2Vec2( tc.x + self.gearw_pj.GetLowerLimit(), tc.y ) 
-        p2 = box2d.b2Vec2( tc.x + self.gearw_pj.GetUpperLimit(), tc.y ) 
         color=(255,0,127)
-        self.drawLinks(p1, p2, color)
+        self.drawLinks(p1, p2, color) 
 
         # draw a chain from the top control circle to the grip
-        p1 = self.topc.GetWorldPoint(box2d.b2Vec2_zero)
-        p2 = self.mainc.GetWorldPoint(box2d.b2Vec2_zero)
-        color=(255,255,255,127)
+        p3 = renderer.toScreen_v( self.topc.GetWorldPoint(box2d.b2Vec2_zero) )
+        p4 = renderer.toScreen_v( self.mainc.GetWorldPoint(box2d.b2Vec2_zero) )
+        color=(255,255,255)
         self.drawLinks(p1, p2, color)
 
     def disassembleJohnnyFive(self):
@@ -350,6 +427,80 @@ class UFOGrip(object):
         self.world.DestroyJoint(self.ropej)
         self.ropej  = self.world.CreateJoint(self.ropejd).getAsType() 
 
+class Sprites(object):
+    # A bit of inspiration from the RollCats code :) Thanks!
+    sprites = []
+    instances = []
+    sprite = None
+    isLink = False
+    def __init__(self, body, imageName, imageWidthMeters, imageHeightMeters, imageOffsetXMeters, imageOffsetYMeters, worldToScreenFunction, baseangle=0.0, body2=None):
+        super(Sprites, self).__init__()
+
+        # Save a copy of the screen's rectangle
+        self.w2s = worldToScreenFunction
+        self.body = body
+        if body2:
+            self.body2 = body2
+            self.isLink = True
+        self.imageName      =imageName
+        self.imageDimensions= (imageWidthMeters, imageHeightMeters)
+        self.offsetX        = imageOffsetXMeters
+        self.offsetY        = imageOffsetYMeters
+        self.baseAngle = baseangle
+        self.reload()
+
+        # get the dimensions of the image on the screen
+        newWidth = abs( self.w2s( self.imageDimensions )[0] - self.w2s( (0,0) )[0])
+        newHeight =abs( self.w2s( self.imageDimensions )[1] - self.w2s( (0,0) )[1])
+        
+        xy = self.w2s( (self.offsetX, self.offsetY) )
+        self.sprite = rabbyt.Sprite(texture=imageName, shape=(-newWidth/2,newHeight/2,newWidth/2,-newHeight/2), xy=xy)
+        Sprites.instances.append(self)
+        Sprites.sprites.append(self.sprite)
+
+    def reload(self):
+        if not self.sprite: return
+        if self.isLink: 
+            self.updateLink()
+            return
+        newWidth = abs( self.w2s( self.imageDimensions )[0] - self.w2s( (0,0) )[0])
+        newHeight =abs( self.w2s( self.imageDimensions )[1] - self.w2s( (0,0) )[1])
+        self.sprite.shape=(-newWidth/2,newHeight/2,newWidth/2,-newHeight/2)
+
+    def update(self):
+        if not self.body: return
+        if self.isLink: 
+            self.updateLink()
+            return
+        angle = self.body.GetAngle()*180.0/box2d.b2_pi + self.baseAngle
+        pos = self.body.GetWorldPoint( box2d.b2Vec2_zero )
+        xy = self.w2s( (pos.x+self.offsetX, pos.y+self.offsetY) )
+        self.sprite.x, self.sprite.y = xy
+        self.sprite.rot = angle
+
+    def updateLink(self):
+        self.isLink = True
+        p1 = self.body.GetWorldCenter()
+        p2 = self.body2.GetWorldCenter()
+        line = p2 - p1
+        dist = line.Normalize()
+        midpoint = p1 + 0.5*dist*line
+
+        if p1.y - p2.y > box2d.FLT_EPSILON:
+            self.sprite.rot = atan( (p2.x-p1.x) / (p1.y-p2.y))*180.0/box2d.b2_pi
+        else:
+            self.sprite.rot = 0
+
+        if self.sprite.rot == 0:
+            # okay, this is only a temporary fix
+            newWidth = abs( self.w2s( (dist, self.imageDimensions[1]) )[0] - self.w2s( (0,0) )[0])
+            newHeight =abs( self.w2s( (dist, self.imageDimensions[1]) )[1] - self.w2s( (0,0) )[1])
+        else:
+            newWidth = abs( self.w2s( (self.imageDimensions[0], dist) )[0] - self.w2s( (0,0) )[0])
+            newHeight =abs( self.w2s( (self.imageDimensions[0], dist) )[1] - self.w2s( (0,0) )[1])
+        self.sprite.shape=(-newWidth/2,newHeight/2,newWidth/2,-newHeight/2)
+        self.sprite.x, self.sprite.y = self.w2s( (midpoint.x, midpoint.y) )
+
 class UFOCatcher (Framework):
     name="UFOCatcher"
     stackheight = 5
@@ -359,15 +510,24 @@ class UFOCatcher (Framework):
     removeList = []
     grip = None
     drawList = []
+    imageZoom=0.0 #cached image zoom
+    image = None
     def ReachedGoal(self, body):
         if body not in self.removeList:
             print "Reached goal!"
+            self.objects.remove(body)
             self.removeList.append(body)
 
     def __init__(self):
+        self.viewCenter = 10.0 * box2d.b2Vec2(30.0, 40.0)
+        self.viewZoom = 10.0
+
         super(UFOCatcher, self).__init__()
     
-        self.renderer = self.debugDraw ####
+        self.renderer = self.debugDraw
+        self.lastZoom = self.renderer.viewZoom
+        self.lastCenter=self.renderer.viewCenter.tuple()
+        self.lastCenter_s=self.renderer.toScreen( self.lastCenter )
         self.contactListener = UFOContactListener(self)
         self.world.SetContactListener(self.contactListener)
 
@@ -375,19 +535,31 @@ class UFOCatcher (Framework):
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
         ground = self.world.CreateBody(bd)
+        Sprites(ground, "ground.png", 100.0, 20.0, 0.0, 0.0, self.renderer.toScreen)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         ground.CreateShape(sd)
 
-        # side walls
-        sd=box2d.b2PolygonDef()
-        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(-15.0, 15.0), 0)
-        ground.CreateShape(sd)
+        # left side wall
+        bd=box2d.b2BodyDef()
+        bd.position.Set(0.0, 0.0)
+        wall = self.world.CreateBody(bd)
+        Sprites(wall, "wall.png", 1.0, 10.0, -15.0, 5.0, self.renderer.toScreen)
 
         sd=box2d.b2PolygonDef()
-        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(15.0, 15.0), 0)
-        ground.CreateShape(sd)
+        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(-15.0, 5.0), 0)
+        wall.CreateShape(sd)
+
+        # right side wall
+        bd=box2d.b2BodyDef()
+        bd.position.Set(0.0, 0.0)
+        wall = self.world.CreateBody(bd)
+        Sprites(wall, "wall.png", 1.0, 10.0, 15.0, 5.0, self.renderer.toScreen)
+
+        sd=box2d.b2PolygonDef()
+        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(15.0, 5.0), 0)
+        wall.CreateShape(sd)
 
         # goal (base)
         bd=box2d.b2BodyDef()
@@ -397,6 +569,7 @@ class UFOCatcher (Framework):
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(5.0, 1.0)
         goal.CreateShape(sd)
+        Sprites(goal, "goal.png", 10.6, 5.0, 0.0, 1.0, self.renderer.toScreen)
 
         # goal walls
         sd=box2d.b2PolygonDef()
@@ -424,40 +597,61 @@ class UFOCatcher (Framework):
 
         bd=box2d.b2BodyDef()
         
+        self.debugDraw.DrawSolidCircle = lambda a,b,c,d: False #DrawSolidCircle(self, center_v, radius, axis, color): 
+        self.debugDraw.DrawSolidPolygon = lambda a,b,c: False #DrawSolidPolygon(self, in_vertices, vertexCount, color):
+
         for y in xrange(self.stackheight):
             bd.position.Set(0.0, 2.0 + 3.0 * y)
-            
-            self.objects.append( self.world.CreateBody(bd) )
+            body = self.world.CreateBody(bd)
+
+            Sprites(body, "rollcat_assembly_required.png", 2.0, 2.0, 0.0, 0.0, self.renderer.toScreen)
+
+            self.objects.append( body )
             self.objects[-1].CreateShape(sd)
             self.objects[-1].SetMassFromShapes()
 
     def Step(self, settings):
-        self.renderer.DrawString(5, self.renderer.textLine, "Let's ufo catch!")
-        self.renderer.textLine += 15
+        rabbyt.clear()
+
+        for sprite in Sprites.instances:
+            sprite.update()
+
+        rnd = self.renderer
+
+        rabbyt.render_unsorted(Sprites.sprites)
+
+        if rnd.viewZoom != self.lastZoom:
+            for sprite in Sprites.instances:
+                sprite.reload()
+            self.lastZoom=rnd.viewZoom
+
+        rnd.DrawString(5, rnd.textLine, "Let's ufo catch!")
+        rnd.textLine += 15
 
         for body in self.removeList:
             self.world.DestroyBody(body)
-
         self.removeList = []
+
+        # draw the sprites
+        screen = rnd.surface
 
         self.grip.Step()
 
-        #self.debugDraw.DrawPoint(point, settings.pointSize, box2d.b2Color(1.0,0.0,1.0))
-        #self.debugDraw.DrawPoint(point, settings.pointSize, box2d.b2Color(1.0,1.0,0.0))
-
-        super(UFOCatcher, self).Step(settings)
+        displayList = []
 
         for object in self.drawList:
             object.draw()
 
+        super(UFOCatcher, self).Step(settings)
+        
     def MouseDown(self, p):
         self.controls.MouseDown(p)
 
     def Keyboard(self, key):
         if key == K_w:
-            self.grip.ropeExtend(-0.1)
+            self.grip.ropeExtend(-0.2)
         elif key == K_s:
-            self.grip.ropeExtend( 0.1)
+            self.grip.ropeExtend( 0.2)
         elif key == K_a:
             self.controls.move( 100.0 )
         elif key == K_d:

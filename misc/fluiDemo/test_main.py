@@ -44,14 +44,10 @@ Notes:
 """
 import pygame
 import Box2D2 as box2d
-import rabbyt
 #import psyco # a few fps faster with psyco
 from pygame.locals import *
 from settings import fwSettings
 from pgu import gui
-import os.path
-
-rabbyt.data_directory = os.path.dirname(__file__)
 
 class fwDestructionListener(box2d.b2DestructionListener):
     """
@@ -153,11 +149,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
     viewCenter = None
     viewOffset = None
     width, height = 0, 0
-    textLine=0
-    font=None
-    def __init__(self): 
-        super(fwDebugDraw, self).__init__()
-        self.font = pygame.font.Font(None, 15)
+    def __init__(self): super(fwDebugDraw, self).__init__()
     def _setValues(self, viewZoom, viewCenter, viewOffset, width, height):
         """
         Sets the view zoom, center, offset, and width and height of the screen such that access 
@@ -176,31 +168,89 @@ class fwDebugDraw(box2d.b2DebugDraw):
         return (int(255*color.r), int(255*color.g), int(255*color.b))
 
     def DrawPoint(self, p, size, color):
-        pass
+        """
+        Draw a single point at point p given a pixel size and color.
+        """
+        self.DrawCircle(p, size/self.viewZoom, color, drawwidth=1)
         
-    def DrawString(self, x, y, str, color=(229,153,153,255)):
-        pass
-
     def DrawAABB(self, aabb, color):
-        pass
+        """
+        Draw a wireframe around the AABB with the given color.
+        """
+        points = [(aabb.lowerBound.x, aabb.lowerBound.y ),
+                  (aabb.upperBound.x, aabb.lowerBound.y ),
+                  (aabb.upperBound.x, aabb.upperBound.y ),
+                  (aabb.lowerBound.x, aabb.upperBound.y ) ]
+        pygame.draw.aalines(self.surface, color, True, [self.toScreen(p) for p in points])
 
     def DrawSegment(self, p1, p2, color):
-        pass
+        """
+        Draw the line segment from p1-p2 with the specified color.
+        """
+        color = self.convertColor(color)
+        pygame.draw.aaline(self.surface, color, self.toScreen_v(p1), self.toScreen_v(p2))
 
     def DrawXForm(self, xf):
-        pass
+        """
+        Draw the transform xf on the screen
+        """
+        p1 = xf.position
+        k_axisScale = 0.4
+        p2 = self.toScreen_v(p1 + k_axisScale * xf.R.col1)
+        p3 = self.toScreen_v(p1 + k_axisScale * xf.R.col2)
+        p1 = self.toScreen_v(p1)
+
+        color = (255,0,0)
+        pygame.draw.aaline(self.surface, color, p1, p2)
+
+        color = (0,255,0)
+        pygame.draw.aaline(self.surface, color, p1, p3)
 
     def DrawCircle(self, center, radius, color, drawwidth=1):
-        pass
+        """
+        Draw a wireframe circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        """
+        color = self.convertColor(color)
+        radius *= self.viewZoom
+        if radius < 1: radius = 1
+        else: radius = int(radius)
+
+        center = self.toScreen_v(center)
+        pygame.draw.circle(self.surface, color, center, radius, drawwidth)
 
     def DrawSolidCircle(self, center_v, radius, axis, color):
-        pass
+        """
+        Draw a solid circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        """
+        color = self.convertColor(color)
+        radius *= self.viewZoom
+        if radius < 1: radius = 1
+        else: radius = int(radius)
+
+        center = self.toScreen_v(center_v)
+        pygame.draw.circle(self.surface, (color[0]/2, color[1]/2, color[1]/2, 127), center, radius, 0)
+
+        pygame.draw.circle(self.surface, color, center, radius, 1)
+
+        p = radius * axis
+        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p.x, center[1] + p.y)) 
 
     def DrawPolygon(self, in_vertices, vertexCount, color):
-        pass
+        """
+        Draw a wireframe polygon given the world vertices in_vertices (tuples) with the specified color.
+        """
+        color = self.convertColor(color)
+        vertices = [self.toScreen(v) for v in in_vertices]
+        pygame.draw.polygon(self.surface, color, vertices, 1)
         
     def DrawSolidPolygon(self, in_vertices, vertexCount, color):
-        pass
+        """
+        Draw a filled polygon given the world vertices in_vertices (tuples) with the specified color.
+        """
+        color = self.convertColor(color)
+        vertices = [self.toScreen(v) for v in in_vertices]
+        pygame.draw.polygon(self.surface, (color[0]/2, color[1]/2, color[1]/2, 127), vertices, 0)
+        pygame.draw.polygon(self.surface, color, vertices, 1)
 
     def toScreen_v(self, pt):
         """
@@ -213,7 +263,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         Input:  (x, y) - a tuple in world coordinates
         Output: (x, y) - a tuple in screen coordinates
         """
-        return ((pt[0] * self.viewZoom) - self.viewOffset.x, ((pt[1] * self.viewZoom) - self.viewOffset.y))
+        return ((pt[0] * self.viewZoom) - self.viewOffset.x, self.height - ((pt[1] * self.viewZoom) - self.viewOffset.y))
     def scaleValue(self, value):
         """
         Input: value - unscaled value
@@ -345,11 +395,13 @@ class Framework(object):
     debugDraw = None
 
     # Screen-related
-    viewZoom = 10.0
-    viewCenter = box2d.b2Vec2(0,10.0*20.0) # y = viewZoom * (pos)
-    viewOffset = box2d.b2Vec2(0,0)
+    viewZoom = 100.0
+    viewCenter = 100.0*box2d.b2Vec2(2.0,2.0) # y = viewZoom * (pos)
+    viewOffset = None
     screenSize = None
     rMouseDown = False
+    textLine = 30
+    font = None
     fps = 0
 
     # GUI-related (PGU)
@@ -362,11 +414,9 @@ class Framework(object):
         caption= "Python Box2D Testbed - " + self.name
         pygame.display.set_caption(caption)
 
-        self.screen = pygame.display.set_mode( (640,480), pygame.OPENGL | pygame.DOUBLEBUF )
-        rabbyt.set_viewport((640, 480))
-        rabbyt.set_default_attribs()
-        
+        self.screen = pygame.display.set_mode( (640,480) )
         self.screenSize = box2d.b2Vec2(*self.screen.get_size())
+        self.font = pygame.font.Font(None, 15)
 
         # GUI Initialization
         self.gui_app = gui.App()
@@ -471,10 +521,7 @@ class Framework(object):
 
         while running:
             running = self.checkEvents()
-            #self.screen.fill( (0,0,0) )
-
-            rabbyt.set_time(pygame.time.get_ticks())
-            rabbyt.scheduler.pump()
+            self.screen.fill( (0,0,0) )
 
             # Check keys that should be checked every loop (not only on initial keydown)
             self.CheckKeys()
@@ -482,8 +529,8 @@ class Framework(object):
             # Run the simulation loop 
             self.SimulationLoop()
 
-            #if self.settings.drawMenu:
-            #    self.gui_app.paint(self.screen)
+            if self.settings.drawMenu:
+                self.gui_app.paint(self.screen)
 
             pygame.display.flip()
             clock.tick(self.settings.hz)
@@ -495,7 +542,7 @@ class Framework(object):
         
         ** TODO: Probably should update this to be more logical and easy to use.
         """
-        self.debugDraw.textLine=line
+        self.textLine=line
 
     def Step(self, settings):
         """
@@ -521,8 +568,8 @@ class Framework(object):
             else:
                 timeStep = 0.0
 
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "****PAUSED****")
-            self.debugDraw.textLine += 15
+            self.DrawString(5, self.textLine, "****PAUSED****")
+            self.textLine += 15
 
         # Set the flags based on what the settings show (uses a bitwise or mask)
         flags = 0
@@ -552,24 +599,24 @@ class Framework(object):
             self.bomb = None
 
         if settings.drawStats:
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
+            self.DrawString(5, self.textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
                 self.world.GetProxyCount(), box2d.b2_maxProxies, self.world.GetPairCount(), box2d.b2_maxPairs) )
-            self.debugDraw.textLine += 15
+            self.textLine += 15
 
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "bodies/contacts/joints = %d/%d/%d" %
+            self.DrawString(5, self.textLine, "bodies/contacts/joints = %d/%d/%d" %
                 (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
-            self.debugDraw.textLine += 15
+            self.textLine += 15
 
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "hz %d vel/pos iterations %d/%d" %
+            self.DrawString(5, self.textLine, "hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
-            self.debugDraw.textLine += 15
+            self.textLine += 15
 
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
-            self.debugDraw.textLine += 15
+            self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
+            self.textLine += 15
 
         if settings.drawFPS: #python version only
-            self.debugDraw.DrawString(5, self.debugDraw.textLine, "FPS %d" % self.fps)
-            self.debugDraw.textLine += 15
+            self.DrawString(5, self.textLine, "FPS %d" % self.fps)
+            self.textLine += 15
         
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
@@ -795,7 +842,7 @@ class Framework(object):
         The main simulation loop. Don't override this, override Step instead.
         """
         self.SetTextLine(30)
-        self.debugDraw.DrawString(5, 15, self.name)
+        self.DrawString(5, 15, self.name)
         self.Step(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
@@ -803,6 +850,14 @@ class Framework(object):
         Return a b2Vec2 in world coordinates of the passed in screen coordinates x, y
         """
         return box2d.b2Vec2((x + self.viewOffset.x) / self.viewZoom, ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
+
+    def DrawString(self, x, y, str):
+        """
+        Draw some text, str, at screen coordinates (x, y).
+        """
+        color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
+        text = self.font.render(str, True, color)
+        self.screen.blit(text, (x,y))
 
     # These should be implemented in the subclass: (Step() also if necessary)
     def JointDestroyed(self, joint):

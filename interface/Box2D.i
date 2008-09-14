@@ -419,6 +419,7 @@
     }
 
     %ignore b2PolygonShape::GetVertices; //Inaccessible 
+    %ignore b2PolygonShape::GetNormals;
 
     %extend b2CircleShape {
     public:
@@ -450,13 +451,25 @@
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
             vertices = []
             for i in range(0, self.GetVertexCount()):
-                vertices.append( (self.getCoreVertex(i).x, self.getCoreVertex(i).y ) )
+                vertices.append( (self.getVertex(i).x, self.getVertex(i).y ) )
             return vertices
         def getVertices_b2Vec2(self):
             """Returns all of the vertices as a list of b2Vec2's [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
             vertices = []
             for i in range(0, self.GetVertexCount()):
                 vertices.append(self.getVertex(i))
+            return vertices
+        def getNormals_tuple(self):
+            """Returns all of the normals as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
+            vertices = []
+            for i in range(0, self.GetVertexCount()):
+                vertices.append( (self.getNormal(i).x, self.getNormal(i).y ) )
+            return vertices
+        def getNormals_b2Vec2(self):
+            """Returns all of the normals as a list of b2Vec2's [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
+            vertices = []
+            for i in range(0, self.GetVertexCount()):
+                vertices.append(self.getNormal(i))
             return vertices
         %}
         const b2Vec2* getVertex(uint16 vnum) {
@@ -466,6 +479,10 @@
         const b2Vec2* getCoreVertex(uint16 vnum) {
             if (vnum > b2_maxPolygonVertices || vnum > self->GetVertexCount()) return NULL;
             return &( $self->GetCoreVertices() [vnum] );
+        }
+        const b2Vec2* getNormal(uint16 vnum) {
+            if (vnum > b2_maxPolygonVertices || vnum > self->GetVertexCount()) return NULL;
+            return &( $self->GetNormals() [vnum] );
         }
     }
     
@@ -558,6 +575,11 @@
         def __idiv__(self, a):
             self.div_float(a)
             return self
+        def dot(self, v):
+            """
+            Dot product with v
+            """
+            return self.x*v.x + self.y*v.y
 
         %}
         b2Vec2 __div__(float32 a) { //convenience function
