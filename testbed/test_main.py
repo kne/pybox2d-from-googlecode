@@ -99,7 +99,7 @@ class fwContactPoint:
     normal = None
     position = None
     velocity = None
-    id  = box2d.b2ContactID()
+    id  = None
     state = 0
 
 class fwContactListener(box2d.b2ContactListener):
@@ -291,8 +291,6 @@ class fwGUI(gui.Table):
                     ("Pairs", "drawPairs"), 
                     ("Contact Points", "drawContactPoints"), 
                     ("Contact Normals", "drawContactNormals"), 
-#                    ("Contact Forces", "drawContactForces"), # unused
-#                    ("Friction Forces", "drawFrictionForces"),  #unused
                     ("Center of Masses", "drawCOMs"), 
                     ("Statistics", "drawStats"),
                     ("FPS", "drawFPS"),

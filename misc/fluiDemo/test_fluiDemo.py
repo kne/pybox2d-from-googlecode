@@ -34,7 +34,7 @@ import random
 from math import sqrt
 
 # Max number of particles 
-MAX_PARTICLES = 500
+MAX_PARTICLES = 100
 DENSITY_OFFSET = 100.0
 GAS_CONSTANT = 0.1
 VISCOSCITY = 0.002
@@ -586,8 +586,12 @@ class SPHSimulation(object):
         particle.applyBuoyancyForce(shape.GetBody())
 
     def checkShape(self, shape):
+        aabb = box2d.b2AABB()
+        shape.ComputeAABB(aabb, shape.GetBody().GetXForm())
+
         for particle in self.particles:
-            self.checkCollideShape(shape, particle)
+            if box2d.b2AABBOverlaps(particle.aabb, aabb):
+                self.checkCollideShape(shape, particle)
 
     def updateAABB(self):
         # okay, so it's a really lame way of doing this. but i'm lazy.
