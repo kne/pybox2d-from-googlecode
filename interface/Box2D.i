@@ -622,12 +622,164 @@
         }
     }
 
+    %inline %{
+        // Add some functions that might be commonly used
+        bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {
+            //If point is in aabb (including a small buffer around it), return true.
+            if (point.x < (aabb.upperBound.x + B2_FLT_EPSILON) &&
+                point.x > (aabb.lowerBound.x - B2_FLT_EPSILON) &&
+                point.y < (aabb.upperBound.y + B2_FLT_EPSILON) &&
+                point.y > (aabb.lowerBound.y - B2_FLT_EPSILON))
+                    return true;
+            return false;
+        }
+        
+        bool b2AABBOverlaps(const b2AABB& aabb, const b2AABB& aabb2) {
+            //If aabb and aabb2 overlap, return true. (modified from b2BroadPhase::InRange)
+            b2Vec2 d = b2Max(aabb.lowerBound - aabb2.upperBound, aabb2.lowerBound - aabb.upperBound);
+            return b2Max(d.x, d.y) < 0.0f;
+        }
+
+        PyObject* collideCircleParticle(b2CircleShape* circle, const b2Vec2& ppos) {
+            //out bCollides, b2Vec2 penetration, b2Vec2 penetrationNormal
+            //Ported to C from Blaze (D)
+            PyObject* ret=PyTuple_New(3);
+            PyTuple_SetItem(ret, 0, SWIG_From_bool(false));
+            PyTuple_SetItem(ret, 1, SWIG_From_bool(false));
+            PyTuple_SetItem(ret, 2, SWIG_From_bool(false));
+
+            b2XForm xf1 = circle->GetBody()->GetXForm();
+
+            b2Vec2 p1 = b2Mul(xf1, circle->GetLocalPosition());
+            b2Vec2 p2 = ppos;
+
+            b2Vec2 d = p2 - p1;
+            float32 distSqr = b2Dot(d, d);
+            float32 r1 = circle->GetRadius();
+            float32 r2 = 0.0f;
+            float32 radiusSum = r1 + r2;
+            if (distSqr > radiusSum * radiusSum) {
+                return ret; // false
+            }
+
+            b2Vec2* normal=new b2Vec2();
+            float32 separation;
+            if (distSqr < B2_FLT_EPSILON) {
+                separation = -radiusSum;
+                normal->Set(0.0f, 1.0f);
+            } else {
+                float32 dist = sqrt(distSqr);
+                separation = dist - radiusSum;
+                float32 a = 1.0f / dist;
+                normal->x = a * d.x;
+                normal->y = a * d.y;
+            }
+
+            b2Vec2* penetration=new b2Vec2();
+            penetration->x = normal->x * separation;
+            penetration->y = normal->y * separation;
+            PyTuple_SetItem(ret, 0, SWIG_From_bool(true));
+            PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(penetration), SWIGTYPE_p_b2Vec2, 0) );
+            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(normal), SWIGTYPE_p_b2Vec2, 0) );
+            return ret;
+        }
+
+        PyObject* b2CollidePolyParticle(b2PolygonShape* polygon, const b2Vec2& ppos, float32 pradius) {
+            //out bCollides, b2Vec2 penetration, b2Vec2 penetrationNormal
+            //Ported to C from Blaze (D)
+            PyObject* ret=PyTuple_New(3);
+            PyTuple_SetItem(ret, 0, SWIG_From_bool(false));
+            PyTuple_SetItem(ret, 1, SWIG_From_bool(false));
+            PyTuple_SetItem(ret, 2, SWIG_From_bool(false));
+
+            const b2XForm xf1 = polygon->GetBody()->GetXForm();
+            b2XForm xf2;
+            xf2.position = ppos;
+
+            // Compute circle position in the frame of the polygon.
+            b2Vec2 c = b2Mul(xf2, b2Vec2_zero);
+            b2Vec2 cLocal = b2MulT(xf1, c);
+
+            // Find the min separating edge.
+            int normalIndex = 0;
+            float32 separation = -B2_FLT_MAX;
+            float32 radius = pradius;
+            b2Vec2* penetration=new b2Vec2();
+
+            int vertexCount = polygon->GetVertexCount();
+            const b2Vec2* vertices = polygon->GetVertices();
+            const b2Vec2* normals = polygon->GetNormals();
+
+            for (int i = 0; i < vertexCount; ++i) {
+                float32 s = b2Dot(normals[i], cLocal - vertices[i]);
+
+                if (s > radius) {
+                    // Early out.
+                    return ret; // false
+                }
+
+                if (s > separation) {
+                    separation = s;
+                    normalIndex = i;
+                }
+            }
+
+            // If the center is inside the polygon ...
+            if (separation < B2_FLT_MAX) {
+                b2Vec2 temp = b2Mul(xf1.R, normals[normalIndex]);
+                b2Vec2* penetrationNormal=new b2Vec2(temp);
+                separation = separation - radius;
+                penetration->x = separation * penetrationNormal->x;
+                penetration->y = separation * penetrationNormal->y;
+                PyTuple_SetItem(ret, 0, SWIG_From_bool(true));
+                PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(penetration), SWIGTYPE_p_b2Vec2, 0) );
+                PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(penetrationNormal), SWIGTYPE_p_b2Vec2, 0) );
+                return ret;
+            }
+
+            // Project the circle center onto the edge segment.
+            int vertIndex1 = normalIndex;
+            int vertIndex2 = vertIndex1 + 1 < vertexCount ? vertIndex1 + 1 : 0;
+            b2Vec2 e = vertices[vertIndex2] - vertices[vertIndex1];
+
+            float32 length = e.Normalize();
+            //assert(length > float.epsilon);
+
+            // Project the center onto the edge.
+            float32 u = b2Dot(cLocal - vertices[vertIndex1], e);
+            b2Vec2 p;
+            if (u <= 0.0f) {
+                p = vertices[vertIndex1];
+            } else if (u >= length) {
+                p = vertices[vertIndex2];
+            } else {
+                p = vertices[vertIndex1] + u * e;
+            }
+
+            b2Vec2 d = cLocal - p;
+            float32 dist = d.Normalize();
+            if (dist > radius) {
+                return ret; //false
+            }
+
+            b2Vec2 temp = b2Mul(xf1.R, d);
+            b2Vec2* penetrationNormal=new b2Vec2(temp);
+            separation = dist - radius;
+            penetration->x = separation * penetrationNormal->x;
+            penetration->y = separation * penetrationNormal->y;
+            PyTuple_SetItem(ret, 0, SWIG_From_bool(true));
+            PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(penetration), SWIGTYPE_p_b2Vec2, 0) );
+            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(penetrationNormal), SWIGTYPE_p_b2Vec2, 0) );
+            return ret;
+        }
+
+    %}
+
     // Additional supporting code
     %pythoncode %{
-    # Checks the Polygon definition to see if upon creation it will cause an assertion.
-    # Raises ValueError if an assertion would be raised.
     B2_FLT_EPSILON = 1.192092896e-07
-    FLT_EPSILON = 1.192092896e-07
+    FLT_EPSILON = B2_FLT_EPSILON
+    B2_FLT_MAX     = 3.402823466e+38
     cvars = ["b2_pi","b2_maxManifoldPoints","b2_maxPolygonVertices","b2_maxProxies","b2_maxPairs",
             "b2_linearSlop","b2_angularSlop","b2_toiSlop","b2_maxTOIContactsPerIsland","b2_maxTOIJointsPerIsland",
             "b2_velocityThreshold","b2_maxLinearCorrection","b2_maxAngularCorrection","b2_maxLinearVelocity",
