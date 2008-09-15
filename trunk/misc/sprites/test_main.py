@@ -103,7 +103,7 @@ class fwContactPoint:
     normal = None
     position = None
     velocity = None
-    id  = None
+    id  = box2d.b2ContactID()
     state = 0
 
 class fwContactListener(box2d.b2ContactListener):
