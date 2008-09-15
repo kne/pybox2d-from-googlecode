@@ -34,12 +34,11 @@ import random
 from math import sqrt
 
 # Max number of particles 
-MAX_PARTICLES = 100
+MAX_PARTICLES = 500
 DENSITY_OFFSET = 100.0
 GAS_CONSTANT = 0.1
 VISCOSCITY = 0.002
 CELL_SPACE = 15.0 / 64.0
-FLT_MAX = 3.402823466e+38 
 
 def get_bodies(world):
     body = world.GetBodyList()
@@ -278,6 +277,7 @@ class FluidParticle(object):
         dp = v.dot(tangent)
         vt = tangent * dp * (1.0 - fric)
         v = vn + vt
+
         self.position -= penetration
         self.positionOld = self.position - v
 
@@ -285,6 +285,7 @@ class FluidParticle(object):
         # Apply buoyancy force to body
         angDrag = 0.25
         linDrag = 0.75
+           
         f = self.force * linDrag
         r = self.position - body.GetPosition()
 
@@ -293,8 +294,6 @@ class FluidParticle(object):
 
         # apply the real torque
         torque = r.x * f.y * angDrag - r.y * f.x * angDrag
-        # torque overflowing in some cases
-        # print torque ####
         body.ApplyTorque(torque)
         
     def computeSweptAABB(self,xf1,xf2):
@@ -320,12 +319,14 @@ class SPHSimulation(object):
     Viscosity = 0.0
     particles = []
     aabb = box2d.b2AABB()
-    def __init__(self):
+    world = None
+    def __init__(self, world):
         self.cellSpace = CELL_SPACE
         self.Viscosity = VISCOSCITY
         self.SKGeneral = SKPoly6(self.cellSpace)
         self.SKPressure= SKSpiky(self.cellSpace)
         self.SKViscos = SKViscosity(self.cellSpace)
+        self.world = world
 
     # Add particle to simulation 
     def addParticle(self, particle):
@@ -348,15 +349,6 @@ class SPHSimulation(object):
     def resetForce(self):
         for p in self.particles: 
             p.force = box2d.b2Vec2(0.0,0.0)
-
-    def testOverlap(self, a, point):
-        # Using epsilon to try and guard against float rounding errors.
-        if (point.x < (a.upperBound.x + box2d.FLT_EPSILON) and
-            point.x > (a.lowerBound.x - box2d.FLT_EPSILON) and
-            point.y < (a.upperBound.y + box2d.FLT_EPSILON) and
-            point.y > (a.lowerBound.y - box2d.FLT_EPSILON)) :
-                return True
-        return False 
 
     def shellSort(self, shapes):
         increment = len(shapes) / 2
@@ -386,9 +378,9 @@ class SPHSimulation(object):
                     break
 
                 # Particle-particle collisions
-                if self.testOverlap(a1, s2.position):
+                if box2d.b2AABBOverlaps(a1, s2.position):
                     s1.addNeighbor(s2.ID)
-                if self.testOverlap(a2, s1.position):
+                if box2d.b2AABBOverlaps(a2, s1.position):
                     s2.addNeighbor(s1.ID)
         
     # Simulates the specified self.particles.
@@ -443,11 +435,13 @@ class SPHSimulation(object):
                     particle.force += force
                     neighbor.force -= force
 
-    # Updates the particles posotions using integration and clips them to the domain space.
+    # Updates the particles positions using integration and clips them to the domain space.
     def updateParticles(self, step, gravity):
         # Update velocity + position using forces
         for particle in self.particles:
             particle.update(step, gravity)
+            if not self.world.InRange(particle.aabb):
+                print "Left world", particle
 
     # Checks the distance between the particles and corrects it, if they are too near.
     def checkParticleDistance(self):
@@ -514,7 +508,7 @@ class SPHSimulation(object):
 
         # Find the min separating edge.
         normalIndex = 0
-        separation = -FLT_MAX
+        separation = -box2d.B2_FLT_MAX
         radius = particle.margin
         vertices = polygon.getVertices_b2Vec2()
         normals = polygon.getNormals_b2Vec2()
@@ -528,6 +522,9 @@ class SPHSimulation(object):
             elif s > separation:
                 separation = s
                 normalIndex = i
+
+        if separation == -box2d.B2_FLT_MAX: # was causing crashes without this!
+            return False, None, None
 
         # If the center is inside the polygon ...
         if separation < box2d.FLT_EPSILON:
@@ -569,10 +566,18 @@ class SPHSimulation(object):
         restitution = particle.restitution * shape.GetRestitution()
         friction = particle.friction * shape.GetFriction()
 
-        if shape.GetType()==box2d.e_circleShape:
-            collide, penetration, penetrationNormal = self.collideCircleFluid(shape, particle)
+        # python version: (20fps)
+        if False:
+            if shape.GetType()==box2d.e_circleShape:
+                collide, penetration, penetrationNormal = self.collideCircleFluid(shape, particle)
+            else:
+                collide, penetration, penetrationNormal = self.collidePolyFluid(shape, particle)
         else:
-            collide, penetration, penetrationNormal = self.collidePolyFluid(shape, particle)
+            # c++ version, built into pybox2d: (30+fps)
+            if shape.GetType()==box2d.e_circleShape:
+                collide, penetration, penetrationNormal = box2d.collideCircleParticle(shape, particle.position)
+            else:
+                collide, penetration, penetrationNormal = box2d.b2CollidePolyParticle(shape, particle.position, particle.margin)
 
         if not collide:
             return
@@ -613,7 +618,7 @@ class fluiDemo (Framework):
     # Number of particles
     numParticles=0
     # Main simulation class instance
-    sim = SPHSimulation()
+    sim = None
     viewZoom = 45.0
     steps=0
 
@@ -621,6 +626,10 @@ class fluiDemo (Framework):
         super(fluiDemo, self).__init__()
         gravity = box2d.b2Vec2(0.0, -9.81)
         self.world.SetGravity(gravity)
+
+        random.seed(0) # make the tests all the same ###test###
+        # Initialize the SPH simulator
+        self.sim = SPHSimulation(self.world)
 
         # Create house
         position = box2d.b2Vec2(5.50, 1.5)
@@ -636,6 +645,7 @@ class fluiDemo (Framework):
         sd.density = 10
         rBody.CreateShape(sd)
         rBody.SetMassFromShapes()
+        rBody.SetUserData("HouseBase")
         
         # Create right roof
         position = box2d.b2Vec2(5.5, 4.1)
@@ -652,6 +662,7 @@ class fluiDemo (Framework):
         sd.restitution = self.restitution
         rBody.CreateShape(sd)
         rBody.SetMassFromShapes()
+        rBody.SetUserData("RightRoof")
         
         # Create left roof
         position = box2d.b2Vec2(5.5, 4.1)
@@ -667,6 +678,7 @@ class fluiDemo (Framework):
         sd.restitution = self.restitution
         rBody.CreateShape(sd)
         rBody.SetMassFromShapes()
+        rBody.SetUserData("LeftRoof")
         
         # Create ball
         position = box2d.b2Vec2(3.0, 3.0)
@@ -683,6 +695,7 @@ class fluiDemo (Framework):
         sd.restitution = self.restitution
         rBody.CreateShape(sd)
         rBody.SetMassFromShapes()
+        rBody.SetUserData("Ball")
         
         # Create floor
         position = box2d.b2Vec2_zero
@@ -695,6 +708,7 @@ class fluiDemo (Framework):
         sd.SetAsBox(30,0.5)
         sd.friction = self.friction
         floor.CreateShape(sd)
+        floor.SetUserData("Floor")
         
         # Create left wall
         position = box2d.b2Vec2(0, 0.5)
@@ -706,6 +720,7 @@ class fluiDemo (Framework):
         sd.SetAsBox(0.5, 6)
         sd.friction = self.friction
         leftWall.CreateShape(sd)
+        leftWall.SetUserData("Leftwall")
         
         # Create right wall
         position = box2d.b2Vec2(10.0, 0.5)
@@ -717,6 +732,7 @@ class fluiDemo (Framework):
         sd.SetAsBox(0.5, 6)
         sd.friction = self.friction
         rightWall.CreateShape(sd)
+        rightWall.SetUserData("Rightwall")
 
     def Step(self, settings) :
         if not settings.pause:
