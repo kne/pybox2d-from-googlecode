@@ -20,7 +20,7 @@
 
 %module(directors="1") Box2D2
 %{
-    #include "../Include/Box2D.h"
+    #include "Box2D.h"
     
     //Define these functions so that SWIG does not fail
     void b2BroadPhase::ValidatePairs() { }
@@ -891,5 +891,5 @@
     %}
 #endif
 
-%include "../Include/Box2D.h"
+%include "Box2D.h"
 
