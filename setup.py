@@ -13,13 +13,14 @@ This script assumes Box2D has already been built via the Makefile,
 with the output in Gen/[float,fixed]/libbox2d.a depending on the build
 
 Windows (MinGW)
+    ** Important! **
+     setup.py install somehow doesn't work without the following,
+     even if you specify -c mingw32 on the cmd line:
     * Create Python\Lib\distutils\distutils.cfg if it doesn't exist and add:
         [build]
         compiler=mingw32
         [build_ext]
         compiler=mingw32
-    * setup.py install somehow doesn't work without the above 
-     (even if you specify -c mingw32 on the cmd line)
     * Then you can 
       setup.py [build/install]
 
@@ -31,17 +32,6 @@ OS X:
  See: http://code.google.com/p/pybox2d/wiki/OSXInstallation
  Assuming you have the dependencies, it should be as simple 
  as the Linux install.
-
-General notes:
- * You can add data files to the release by modifying the directories.
- * These files will be assumed to be in the (release_dir)/[data_subdirs]
- * Set do_file_copy = True to package them 
-
-
-TODO:
-
-This script is really difficult to understand. Needs to be improved for
-non-win32 installations and such.
 """
 
 import distutils
@@ -55,15 +45,11 @@ import os
 # config variables
 
 # include release_dir/data_subdirs in the distribution (win32 only)
-do_copy_data = True  
+# only use if you're packaging a pybox2d-derivative installer
+release_install = True  
 
 # do_copy_data uses this path:
-release_dir = os.path.join("..", "Python") # "d:/dev/pybox2d/"
-
-# copy files from this directory (e.g., setup.py) to the release dir
-# copies: the interfaces, __init__.py, and setup.py to the appropriate release dirs
-# -> see copy_files()
-do_file_copy = True 
+release_dir = os.path.join("..", "Python")
 
 # subdirectories from release_dir
 data_subdirs = ["testbed", "interface", "docs"]
@@ -117,29 +103,17 @@ def distutils_fix():
     build_ext.build_ext.get_ext_filename=patch_get_ext_filename
     print "[setup.py] Patched get_ext_filename"
 
-def copy_files():
-    # Copies files to the release dir for packaging
-    print "Copying files to the release directory..."
-
-    from shutil import copy
-    copy(interface_file, os.path.join(release_dir, "interface"))
-    copy(fixed_interface_file, os.path.join(release_dir, "interface"))
-    copy("__init__.py", release_dir) 
-    copy("setup.py", release_dir)
-
 #-----------------------------------------------------------------
 
 # Create a simple __init__.py for the package
 open("__init__.py","w").write("from Box2D2 import *")
 
-if do_file_copy:
-    copy_files()
-
 # Create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))
 
 # Set the SWIG options
-# [If you get -O unrecognized parameter for SWIG, your version is too old.]
+# * If you get -O unrecognized parameter for SWIG, your version is too old.
+#   You can remove the -O in the following, though upgrading SWIG is recommended.
 build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'inplace':True}
 
 # The shared lib name is _Box2D.so (linux), _Box2D.pyd (windows), etc.
@@ -149,7 +123,7 @@ shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
 link_to = os.path.join("Gen", build_type, "libbox2d.a")
 
 if distutils.util.get_platform() == "win32":
-    if do_copy_data:
+    if release_install:
         add_data(release_dir, data_subdirs)
 
     distutils_win32_fix()
@@ -178,25 +152,30 @@ setup (name = 'Box2D',
     data_files=all_data,
     author      = "kne",
     author_email = "sirkne at gmail dot com",
-    description = "Box2D Python Wrapper",
+    description = "Python Box2D",
     license="zlib",
     url="http://pybox2d.googlecode.com/",
-    long_description = """Wraps Box2D (version %s) for usage in Python.
-    For more information, see the homepage or Box2D's homepage at http://www.box2d.org .
+    long_description = """Box2D (version %s) for usage in Python.
 
     After installing, please be sure to try out the testbed demos (requires pygame).
     See <python directory>box2d/testbed/demos.py .
 
+    For more information, see:
+    
+    pybox2d homepage: http://pybox2d.googlecode.com
+    Box2D's homepage: http://www.box2d.org
     Wiki: http://www.box2d.org/wiki/index.php?title=Box2D_with_Python
-    Ports forum: http://www.box2d.org/forum/viewforum.php?f=5
     """ % (box2d_version),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: zlib/libpng License",
         "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: POSIX",
         "Programming Language :: Python",
         "Games :: Physics Libraries"
     ]
     )
+
 
