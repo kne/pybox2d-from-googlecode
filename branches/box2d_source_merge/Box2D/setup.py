@@ -52,7 +52,7 @@ release_install = True
 release_dir = os.path.join("..", "Python")
 
 # subdirectories from release_dir
-data_subdirs = ["testbed", "interface", "docs"]
+data_subdirs = ["testbed", "docs"]
 
 # interface files to copy (and compile with)
 interface_file = "Box2D.i"
@@ -72,17 +72,21 @@ all_data = []
 
 def add_data(path, subdirs, ignore_extensions = (".pyo", ".pyc")):
     # Adds all valid files from path\[subdirs] to the list all_data
-    for walkdir in [os.path.join(path, subdir) for subdir in subdirs]:
+    for subdir in subdirs:
+        walkdir = os.path.join(path, subdir)
         for root, dirs, files in os.walk(walkdir):
             if ".svn" in root: continue
             file_list=[]
             for filename in files:
-                if ".swp" in filename: continue # vim
+                if filename[0]=='.': continue
                 elif os.path.splitext(filename)[1] in ignore_extensions: continue
-                elif filename[0]=='.': continue
                 file_list.append(os.path.join(root, filename))
             if file_list:
-                all_data.append( (os.path.join("box2d", root[len(path):]), file_list) )
+                # path: ../Python
+                # root: ../Python/testbed
+                # install_path:   testbed
+                install_path = root[len(path)+1:]
+                all_data.append( (os.path.join("box2d", install_path), file_list) )
 
 def distutils_win32_fix():
     # okay, so the problem is that there seems to be no actual way to remove the initBox2D2 from
@@ -99,7 +103,6 @@ def distutils_fix():
     def patch_get_ext_filename(self, ext_name):
         return shared_lib_name
         
-    real_get_ext_filename = build_ext.build_ext.get_ext_filename
     build_ext.build_ext.get_ext_filename=patch_get_ext_filename
     print "[setup.py] Patched get_ext_filename"
 
