@@ -27,6 +27,7 @@
 %}
 
 #ifdef SWIGPYTHON
+    // Add support for == and != in Python for shapes, joints, and bodies.
     %inline %{
         bool __b2PythonJointPointerEquals__(b2Joint* a, b2Joint* b) {
             return a==b;
@@ -36,6 +37,15 @@
         }
         bool __b2PythonShapePointerEquals__(b2Shape* a, b2Shape* b) {
             return a==b;
+        }
+        bool __b2PythonJointPointerNotEqual__(b2Joint* a, b2Joint* b) {
+            return a!=b;
+        }
+        bool __b2PythonBodyPointerNotEqual__(b2Body* a, b2Body* b) {
+            return a!=b;
+        }
+        bool __b2PythonShapePointerNotEqual__(b2Shape* a, b2Shape* b) {
+            return a!=b;
         }
     %}
 
@@ -238,6 +248,7 @@
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
+        __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def typeName(self):
             types = {  e_unknownShape   : "Unknown",
                         e_circleShape   : "Circle",
@@ -289,6 +300,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
@@ -296,6 +308,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
@@ -303,6 +316,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
@@ -310,6 +324,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
  
@@ -317,6 +332,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
@@ -324,6 +340,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
@@ -352,6 +369,7 @@
     public:
         %pythoncode %{
         __eq__ = b2JointCompare
+        __ne__ = lambda self,other: not b2JointCompare(self,other)
         def typeName(self):
             """
             Return the name of the joint from:
@@ -425,6 +443,7 @@
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
+        __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         %}
     }
 
@@ -433,6 +452,7 @@
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
+        __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def __repr__(self):
             return "b2PolygonShape(vertices: %s count: %d)" % (self.getVertices_tuple(), self.GetVertexCount())
         def getCoreVertices_tuple(self):
@@ -610,6 +630,7 @@
     %extend b2Body {
         %pythoncode %{
         __eq__ = b2BodyCompare
+        __ne__ = lambda self,other: not b2BodyCompare(self,other)
         %}
         PyObject* pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
