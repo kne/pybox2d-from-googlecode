@@ -79,170 +79,160 @@ class BoxCutter (Framework):
         body1 = self.world.CreateBody(bd)
         body1.CreateShape(sd)
         body1.SetMassFromShapes()
-    
-    def Cut(self):
-        segmentLength = 30.0
-        
-        segment1=box2d.b2Segment()
-        segment2=box2d.b2Segment()
-        
-        laserStart=box2d.b2Vec2(5.0-0.1,0.0)
-        laserDir=box2d.b2Vec2(segmentLength,0.0)
-        
-        segment1.p1 = self.laserBody.GetWorldPoint(laserStart)
-        segment1.p2 = self.laserBody.GetWorldVector(laserDir)
-        segment1.p2+= segment1.p1
-        
-        segment2.p1 = segment1.p2
-        segment2.p2 = segment1.p1
-        
-        lambda_,normal,shape1 = self.world.RaycastOne(segment1,False,None)
-        if not shape1:
-            return
-        
-        laserColor=box2d.b2Color(0,1.0,0)
-        
-        hitLoc1 = (1-lambda_)*segment1.p1+lambda_*segment1.p2
-        
-        laserColor.g = 0.5
-        
-        #Finding the exit point can be done better I guess. But that's not the main problem.
-        shape2 = None
-        while shape1 != shape2:
-            lambda_,normal,shape2 = self.world.RaycastOne(segment2,False,None)
-            if not shape2:
-                return
-            hitLoc2 = (1-lambda_)*segment2.p1+lambda_*segment2.p2
-            
-            self.debugDraw.DrawSegment(segment2.p1,(1-lambda_)*segment2.p1+lambda_*segment2.p2,laserColor)
-            lambda_ += box2d.B2_FLT_EPSILON #Enter the shape a bit.
-            
-            segment2.p1 = (1-lambda_)*segment2.p1+lambda_*segment2.p2
-        
-        b = shape1.GetBody()
-        if b.GetUserData() != 1 and shape1.GetType() == box2d.e_polygonShape:	#Check if we are a cutable shape.
-            return
 
-        shape = shape1.getAsType()
+    # Split a shape through a segment
+    # Returns:
+    #  False - Error on split
+    #  True  - Normal result is two new shape definitions.    
+    def SplitShape(self, shape, segment, splitSize, newPolygon):
+        lambda_= 1
+        normal=box2d.b2Vec2()
         
-        #Beh, difficult job of defining the new shapes.
-        pd=[box2d.b2PolygonDef(), box2d.b2PolygonDef()]
-        pd[0].density = 5.0
-        pd[1].density = 5.0
+        b = shape.GetBody()
+        xf = b.GetXForm()
+        hit,lambda_,normal=shape.TestSegment(xf, segment, 1.0)
+        if hit != box2d.e_hitCollide:
+            return False
+        entryPoint = (1-lambda_)*segment.p1+lambda_*segment.p2
         
-        localHitLoc1 = b.GetLocalPoint(hitLoc1)
-        localHitLoc2 = b.GetLocalPoint(hitLoc2)
+        reverseSegment=box2d.b2Segment()
+        reverseSegment.p1=segment.p2
+        reverseSegment.p2=segment.p1
+        
+        hit,lambda_,normal=shape.TestSegment(xf, reverseSegment, 1.0)
+        if hit != box2d.e_hitCollide:
+            return False
+
+        exitPoint = (1-lambda_)*reverseSegment.p1+lambda_*reverseSegment.p2
+        
+        localEntryPoint = b.GetLocalPoint(entryPoint)
+        localExitPoint = b.GetLocalPoint(exitPoint)
         vertices = shape.getVertices_b2Vec2()
-        cutAdded = [0,0]
+        cutAdded = [-1,-1]
         last = -1
         for i in range(shape.GetVertexCount()):
             #Find out if this vertex is on the old or new shape.
-            if box2d.b2Dot(box2d.b2Cross(localHitLoc2-localHitLoc1, 1), vertices[i]-localHitLoc1) > 0:
+            if box2d.b2Dot(box2d.b2Cross(localExitPoint-localEntryPoint, 1), vertices[i]-localEntryPoint) > 0:
                 n = 0
             else:
                 n = 1
             if last != n:
                 #If we switch from one shape to the other add the cut vertices.
                 if last == 0:
-                    assert(not cutAdded[0])
-                    cutAdded[0] = 1
-                    pd[last].setVertex(pd[last].vertexCount, localHitLoc2)
-                    pd[last].vertexCount+=1
-                    pd[last].setVertex(pd[last].vertexCount, localHitLoc1)
-                    pd[last].vertexCount+=1
+                    assert(cutAdded[0]==-1)
+                    cutAdded[0] = newPolygon[last].vertexCount
+                    newPolygon[last].setVertex(newPolygon[last].vertexCount, localExitPoint)
+                    newPolygon[last].vertexCount+=1
+                    newPolygon[last].setVertex(newPolygon[last].vertexCount, localEntryPoint)
+                    newPolygon[last].vertexCount+=1
                 elif last == 1:
-                    assert(not cutAdded[last])
-                    cutAdded[last] = 1
-                    pd[last].setVertex(pd[last].vertexCount, localHitLoc1)
-                    pd[last].vertexCount+=1
-                    pd[last].setVertex(pd[last].vertexCount, localHitLoc2)
-                    pd[last].vertexCount+=1
-            pd[n].setVertex(pd[n].vertexCount, vertices[i])
-            pd[n].vertexCount+=1
+                    assert(cutAdded[last]==-1)
+                    cutAdded[last] = newPolygon[last].vertexCount
+                    newPolygon[last].setVertex(newPolygon[last].vertexCount, localEntryPoint)
+                    newPolygon[last].vertexCount+=1
+                    newPolygon[last].setVertex(newPolygon[last].vertexCount, localExitPoint)
+                    newPolygon[last].vertexCount+=1
+            newPolygon[n].setVertex(newPolygon[n].vertexCount, vertices[i])
+            newPolygon[n].vertexCount+=1
             last = n
         
         #Add the cut in case it has not been added yet.
-        if (not cutAdded[0]) :
-            pd[last].setVertex(pd[last].vertexCount, localHitLoc2)
-            pd[last].vertexCount+=1
-            pd[last].setVertex(pd[last].vertexCount, localHitLoc1)
-            pd[last].vertexCount+=1
-        if (not cutAdded[1]) :
-            pd[last].setVertex(pd[last].vertexCount, localHitLoc1)
-            pd[last].vertexCount+=1
-            pd[last].setVertex(pd[last].vertexCount, localHitLoc2)
-            pd[last].vertexCount+=1
+        if cutAdded[0]==-1:
+            cutAdded[0] = newPolygon[0].vertexCount
+            newPolygon[0].setVertex(newPolygon[0].vertexCount, localExitPoint)
+            newPolygon[0].vertexCount+=1
+            newPolygon[0].setVertex(newPolygon[0].vertexCount, localEntryPoint)
+            newPolygon[0].vertexCount+=1
+        if cutAdded[1]==-1:
+            cutAdded[1] = newPolygon[1].vertexCount
+            newPolygon[1].setVertex(newPolygon[1].vertexCount, localEntryPoint)
+            newPolygon[1].vertexCount+=1
+            newPolygon[1].setVertex(newPolygon[1].vertexCount, localExitPoint)
+            newPolygon[1].vertexCount+=1
+        
+        # Cut based on the split size
+        for n in range(2):
+            if cutAdded[n] > 0:
+                offset = newPolygon[n].getVertex(cutAdded[n]-1) - newPolygon[n].getVertex(cutAdded[n])
+            else:
+                offset = newPolygon[n].getVertex(newPolygon[n].vertexCount-1) - newPolygon[n].getVertex(0)
+
+            offset.Normalize()
+            
+            newPolygon[n].setVertex(cutAdded[n], newPolygon[n].getVertex(cutAdded[n]) + splitSize * offset)
+            
+            if cutAdded[n] < newPolygon[n].vertexCount-2:
+                offset = newPolygon[n].getVertex(cutAdded[n]+2) - newPolygon[n].getVertex(cutAdded[n]+1)
+            else:
+                offset = newPolygon[n].getVertex(0) - newPolygon[n].getVertex(newPolygon[n].vertexCount-1)
+            offset.Normalize()
+            
+            newPolygon[n].setVertex(cutAdded[n]+1, newPolygon[n].getVertex(cutAdded[n]+1) + splitSize * offset)
         
         #Check if the new shapes are not too tiny.
         for n in range(2):
-            for i in range(pd[n].vertexCount):
-                for j in range(pd[n].vertexCount):
-                    if i != j and (pd[n].getVertex(i) - pd[n].getVertex(j)).Length() < 0.1:
-                        return
-
+            for i in range(newPolygon[n].vertexCount):
+                for j in range(newPolygon[n].vertexCount):
+                    if i != j and (newPolygon[n].getVertex(i) - newPolygon[n].getVertex(j)).Length() < 0.1:
+                        return False
         # Make sure the shapes are valid before creation
         try:
-            box2d.b2PythonCheckPolygonDef(pd[0])
-            box2d.b2PythonCheckPolygonDef(pd[1])
+            for n in range(2):
+                box2d.b2PythonCheckPolygonDef(newPolygon[0])
         except ValueError, s:
             print "Created bad shape:", s
-            return
+            return False
 
-        b.DestroyShape(shape1)
-        b.CreateShape(pd[0])
-        b.SetMassFromShapes()
-        b.WakeUp()
-        
-        bd=box2d.b2BodyDef()
-        bd.userData = 1
-        bd.position = b.GetPosition()
-        bd.angle = b.GetAngle()
-        newBody = self.world.CreateBody(bd)
-        newBody.CreateShape(pd[1])
-        newBody.SetMassFromShapes()
+        return True
     
-    def Keyboard(self, key):
-        if key==K_c:
-            self.Cut()
-    
-    def CutDraw(self):
-        segment1=box2d.b2Segment()
-        segment2=box2d.b2Segment()
-
+    def Cut(self):
         segmentLength = 30.0
+        
+        segment=box2d.b2Segment()
         
         laserStart=box2d.b2Vec2(5.0-0.1,0.0)
         laserDir=box2d.b2Vec2(segmentLength,0.0)
         
-        segment1.p1 = self.laserBody.GetWorldPoint(laserStart)
-        segment1.p2 = self.laserBody.GetWorldVector(laserDir)
-        segment1.p2+= segment1.p1
+        segment.p1 = self.laserBody.GetWorldPoint(laserStart)
+        segment.p2 = segment.p1 + self.laserBody.GetWorldVector(laserDir)
         
-        segment2.p1 = segment1.p2
-        segment2.p2 = segment1.p1
-        
-        lambda_,normal,shape1 = self.world.RaycastOne(segment1,False,None)
-        
-        laserColor=box2d.b2Color(0,1.0,0)
-        
-        if not shape1:
-            return
+        max_shapes = 64
+        count, shapes = self.world.Raycast(segment, max_shapes, False, None)
+        for i in range(count):
+            #Make sure it's a polygon, we cannot cut circles.
+            if shapes[i].GetType() != box2d.e_polygonShape:
+                continue
 
-        hitLoc1 = (1-lambda_)*segment1.p1+lambda_*segment1.p2
-        hitLoc2 = None
-        shape2 = None
-        while shape1 != shape2:
-            lambda_,normal,shape2 = self.world.RaycastOne(segment2,False,None)
-            if not shape2:
-                return
-            hitLoc2 = (1-lambda_)*segment2.p1+lambda_*segment2.p2
-            lambda_ += box2d.B2_FLT_EPSILON #Enter the shape a bit.
+            polyShape = shapes[i].getAsType()
             
-            segment2.p1 = (1-lambda_)*segment2.p1+lambda_*segment2.p2
-
-        self.debugDraw.DrawPoint(hitLoc1, 5.0,box2d.b2Color(0.0,1.0,0.0))
-        self.debugDraw.DrawPoint(hitLoc2, 5.0,box2d.b2Color(0.0,1.0,0.0))
-        self.debugDraw.DrawSegment(hitLoc1, hitLoc2,laserColor)
+            b = polyShape.GetBody()
+            #Custom check to make sure we don't cut stuff we don't want to cut.
+            if b.GetUserData() != 1:
+                continue #return if we cannot pass trough uncutable shapes.
+            
+            pd=[box2d.b2PolygonDef(),box2d.b2PolygonDef()]
+            pd[0].density = 5.0
+            pd[1].density = 5.0
+            
+            if self.SplitShape(polyShape, segment, 0.1, pd):
+                b.DestroyShape(shapes[i])
+                b.CreateShape(pd[0])
+                b.SetMassFromShapes()
+                b.WakeUp()
+                
+                bd=box2d.b2BodyDef()
+                bd.userData = 1
+                bd.position = b.GetPosition()
+                bd.angle = b.GetAngle()
+                newBody = self.world.CreateBody(bd)
+                newBody.CreateShape(pd[1])
+                newBody.SetMassFromShapes()
+                newBody.SetAngularVelocity(b.GetAngularVelocity())
+                newBody.SetLinearVelocity(b.GetLinearVelocity())
+    
+    def Keyboard(self, key):
+        if key==K_c:
+            self.Cut()
     
     def Step(self, settings):
         super(BoxCutter, self).Step(settings)
@@ -256,32 +246,10 @@ class BoxCutter (Framework):
         laserStart=box2d.b2Vec2(5.0-0.1,0.0)
         laserDir=box2d.b2Vec2(segmentLength,0.0)
         segment.p1 = self.laserBody.GetWorldPoint(laserStart)
-        segment.p2 = self.laserBody.GetWorldVector(laserDir)
-        segment.p2+=segment.p1
-        
-        for rebounds in range(10):
-            lambda_,normal,shape  = self.world.RaycastOne(segment,False,None)
-            
-            laserColor=box2d.b2Color(1.0,0,0)
-            
-            if shape:
-                self.debugDraw.DrawSegment(segment.p1,(1-lambda_)*segment.p1+lambda_*segment.p2,laserColor)
-            else:
-                self.debugDraw.DrawSegment(segment.p1,segment.p2,laserColor)
-                break
+        segment.p2 = segment.p1+self.laserBody.GetWorldVector(laserDir)
+        laserColor=box2d.b2Color(1,0,0)
 
-            #Bounce
-            segmentLength *=(1-lambda_)
-            if segmentLength<=box2d.B2_FLT_EPSILON:
-                break
-            laserStart = (1-lambda_)*segment.p1+lambda_*segment.p2
-            laserDir = segment.p2-segment.p1
-            laserDir.Normalize()
-            laserDir = laserDir -2 * box2d.b2Dot(laserDir,normal) * normal
-            segment.p1 = laserStart-0.1*laserDir
-            segment.p2 = laserStart+segmentLength*laserDir
-        
-        self.CutDraw()
+        self.debugDraw.DrawSegment(segment.p1,segment.p2,laserColor)
 
 if __name__=="__main__":
     main(BoxCutter)
