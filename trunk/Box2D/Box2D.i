@@ -49,11 +49,6 @@
         }
     %}
 
-    #ifdef TARGET_FLOAT32_IS_FIXED
-        //figure out what to do here :)
-        %include "Box2D_fixed.i"
-    #endif
-
     %include "Box2D_printing.i"
 
     //Autodoc puts the basic docstrings for each function
