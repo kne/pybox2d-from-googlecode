@@ -10,7 +10,7 @@ Basic Instructions
  3. Run: setup.py install
 
 This script assumes Box2D has already been built via the Makefile, 
-with the output in Gen/[float,fixed]/libbox2d.a depending on the build
+with the output in Gen/float]/libbox2d.a depending on the build
 
 Windows (MinGW)
     ** Important! **
@@ -56,8 +56,7 @@ data_subdirs = ["testbed", "docs"]
 
 # interface files to copy (and compile with)
 interface_file = "Box2D.i"
-fixed_interface_file = "Box2D_fixed.i"
-build_type="float" #or 'fixed'
+build_type="float"
 
 # release version number
 box2d_version = "2.0.1"
@@ -122,7 +121,7 @@ build_ext_options = {'swig_opts':"-c++ -O -includeall -ignoremissing -w201", 'in
 # The shared lib name is _Box2D.so (linux), _Box2D.pyd (windows), etc.
 shared_lib_name = "_Box2D2" + distutils.sysconfig.get_config_var('SO')
 
-# Link to the appropriate build (fixed/float)
+# Link to the appropriate build
 link_to = os.path.join("Gen", build_type, "libbox2d.a")
 
 if distutils.util.get_platform() == "win32":
