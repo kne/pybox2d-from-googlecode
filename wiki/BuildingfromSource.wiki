@@ -20,6 +20,7 @@ svn checkout http://pybox2d.googlecode.com/svn/trunk/ pybox2d
 cd pybox2d/Box2D/
 make
 }}}
+   Note that if you receive some errors about *-fPIC*, adding -fPIC to your CXXFLAGS (or changing the Makefile) might fix the problem.
   #4 Build and install the pyBox2D library
 {{{
 python setup.py build
