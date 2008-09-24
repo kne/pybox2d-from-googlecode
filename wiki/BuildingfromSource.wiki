@@ -1,5 +1,5 @@
 #summary Building from source for all platforms
-#labels Phase-Deploy
+#labels Phase-Deploy,Featured
 
 ===Building from Source===
 
