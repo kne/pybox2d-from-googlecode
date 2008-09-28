@@ -181,7 +181,7 @@ class UFOGrip(object):
         sd.density = 1.0
 
         bd=box2d.b2BodyDef()
-        bd.fixedRotation = True ### testing ###
+        bd.fixedRotation = True
         bd.position = topc.GetWorldCenter() - box2d.b2Vec2(0,10.0)
         self.mainc = mainc = self.world.CreateBody(bd)
         mainc.CreateShape(sd)
@@ -216,8 +216,6 @@ class UFOGrip(object):
         rightstopper.CreateShape(sd)
 
         Sprites(leftstopper, "topbar.png", 10.0, 1.0, 0.0, 0.0, self.renderer.toScreen, 0, rightstopper) # link
-        #p1 = renderer.toScreen( (tc.x + self.gearw_pj.GetLowerLimit(), tc.y ) )
-        #p2 = renderer.toScreen( (tc.x + self.gearw_pj.GetUpperLimit(), tc.y ) )
 
         # vertical distance joint to main control circle
         jd=box2d.b2DistanceJointDef() 
@@ -279,8 +277,8 @@ class UFOGrip(object):
 
         bd=box2d.b2BodyDef()
         bd.position = startpos
-        #bd.angularDamping = 0.0 ###testing###
-        #bd.linearDamping = 0.0 ###testing###
+        bd.angularDamping = 0.0
+        bd.linearDamping = 0.0
 
         for i in xrange(count):
             grips.append(self.world.CreateBody(bd))
@@ -329,70 +327,17 @@ class UFOGrip(object):
         # flip around itself! all the things below are tests to see if there's
         # a way around it...
         if self.isClosed:
-            closing_speed=100.0
+            closing_speed=1.0
             speed=closing_speed
             for joint in self.ljoints[1:]:
                 joint.SetMotorSpeed(speed)
             for joint in self.rjoints[1:]:
                 joint.SetMotorSpeed(-speed)
-            return
-            for joint in self.ljoints[1:]:                
-                self.moveToward(joint,  0.2 * box2d.b2_pi)
-            for joint in self.rjoints[1:]:
-                self.moveToward(joint, -0.2 * box2d.b2_pi)
-            #self.moveToward(self.ljoints[-1],  0.4 * box2d.b2_pi)
-            #self.moveToward(self.rjoints[-1], -0.4 * box2d.b2_pi)
         else:
             for joint in self.ljoints[1:]:
                 self.moveToward(joint, -0.4 * box2d.b2_pi)
             for joint in self.rjoints[1:]:
                 self.moveToward(joint,  0.4 * box2d.b2_pi)
-            #self.moveToward(self.ljoints[-1],  0.2 * box2d.b2_pi)
-            #self.moveToward(self.rjoints[-1], -0.2 * box2d.b2_pi)
-        return 
-        ###test###
-        opening_speed=5000.0
-        closing_speed=100.0
-        if self.isClosed:
-            speed=closing_speed
-            for joint in self.ljoints[1:]:
-                joint.SetMotorSpeed(speed)
-            for joint in self.rjoints[1:]:
-                joint.SetMotorSpeed(-speed)
-        else:
-            speed=opening_speed
-            for joint in self.ljoints[1:]:
-                joint.SetMotorSpeed(-speed)
-            for joint in self.rjoints[1:]:
-                joint.SetMotorSpeed(speed)
-
-        for object in [self.mainc] + self.lgrips + self.rgrips:
-            v = object.GetLinearVelocity()
-            if abs(v.x) > 1.0:
-                v.x = 1.0
-            if abs(v.y) > 1.0:
-                v.y = 1.0
-            object.SetLinearVelocity(v)
-        return        
-        ###test###
-
-        if self.isClosed:
-            force = box2d.b2Vec2(self.force, 0.0)
-            zero = box2d.b2Vec2_zero
-        else:
-            force = box2d.b2Vec2(-self.force, 0.0)
-        
-        # keep the grip open/closed
-        # left side
-        grip = self.lgrips[1] # was using the tip, but this seems to be more stable
-        point = grip.GetWorldPoint(box2d.b2Vec2(-self.extents.x/2-self.overlap,0.0))
-        grip.ApplyForce(force, point)
-
-        # right side
-        grip = self.rgrips[1]
-        point = grip.GetWorldPoint(box2d.b2Vec2(self.extents.x/2+self.overlap,0.0))
-        force = -force
-        grip.ApplyForce(force, point)
 
     def toggleClosed(self):
         self.isClosed = not self.isClosed

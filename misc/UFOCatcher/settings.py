@@ -36,7 +36,7 @@ class fwSettings(object):
     drawFrictionForces=False
     drawCOMs=False
     enableWarmStarting=True
-    enableTOI=True
+    enableTOI=False # ufo test
     pause=False
     singleStep=False
     drawFPS=True # python version
