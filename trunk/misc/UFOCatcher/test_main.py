@@ -239,8 +239,6 @@ class fwGUI(gui.Table):
                     ("Pairs", "drawPairs"), 
                     ("Contact Points", "drawContactPoints"), 
                     ("Contact Normals", "drawContactNormals"), 
-#                    ("Contact Forces", "drawContactForces"), # unused
-#                    ("Friction Forces", "drawFrictionForces"),  #unused
                     ("Center of Masses", "drawCOMs"), 
                     ("Statistics", "drawStats"),
                     ("FPS", "drawFPS"),
