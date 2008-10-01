@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class VaryingFriction (test_main.Framework):
+from test_main import *
+class VaryingFriction (Framework):
     name="VaryingFriction"
      
     def __init__(self):
@@ -99,4 +97,4 @@ class VaryingFriction (test_main.Framework):
             body.SetMassFromShapes()
      
 if __name__=="__main__":
-     test_main.main(VaryingFriction)
+     main(VaryingFriction)

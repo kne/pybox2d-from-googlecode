@@ -19,9 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import test_main
-from test_main import box2d
-class VaryingRestitution (test_main.Framework):
+from test_main import *
+class VaryingRestitution (Framework):
     name="VaryingRestitution"
      
     def __init__(self):
@@ -52,4 +51,4 @@ class VaryingRestitution (test_main.Framework):
             body.SetMassFromShapes()
 
 if __name__=="__main__":
-     test_main.main(VaryingRestitution)
+     main(VaryingRestitution)

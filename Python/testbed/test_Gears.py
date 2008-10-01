@@ -19,11 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
-class Gears (test_main.Framework):
+class Gears (Framework):
     name="Gears"
     m_joint1=None
     m_joint2=None
@@ -120,4 +118,4 @@ class Gears (test_main.Framework):
         super(Gears, self).Step(settings)
 
 if __name__=="__main__":
-     test_main.main(Gears)
+     main(Gears)

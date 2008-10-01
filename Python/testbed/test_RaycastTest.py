@@ -20,11 +20,9 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
-class RaycastTest (test_main.Framework):
+class RaycastTest (Framework):
     name="RaycastTest"
     laserBody=None
     def __init__(self):
@@ -102,4 +100,4 @@ class RaycastTest (test_main.Framework):
         super(RaycastTest, self).Step(settings)
 
 if __name__=="__main__":
-    test_main.main(RaycastTest)
+    main(RaycastTest)

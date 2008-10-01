@@ -19,11 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
-class Empty(test_main.Framework):
+class Empty(Framework):
     """You can use this class as an outline for your tests.
 
     """
@@ -72,5 +70,5 @@ class Empty(test_main.Framework):
         pass
 
 if __name__=="__main__":
-    test_main.main(Empty)
+    main(Empty)
 

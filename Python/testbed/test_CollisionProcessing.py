@@ -19,10 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import test_main
-from test_main import box2d
+from test_main import *
 
-class CollisionProcessing (test_main.Framework):
+class CollisionProcessing (Framework):
     name="CollisionProcessing"
     def __init__(self):
         super(CollisionProcessing, self).__init__()
@@ -141,4 +140,4 @@ class CollisionProcessing (test_main.Framework):
         super(CollisionProcessing, self).Step(settings)
 
 if __name__=="__main__":
-     test_main.main(CollisionProcessing)
+     main(CollisionProcessing)

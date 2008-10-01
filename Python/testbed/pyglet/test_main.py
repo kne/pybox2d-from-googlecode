@@ -24,6 +24,7 @@
 Backported mostly to pyglet.
 Added more comments, documentation, fixes.
 TODO: Figure out a way to put the GUI in.
+BUG: Vista x64 only? Scheduled timers aren't working well
 
 4/27/2008
 pygame port. All tests now ported.
@@ -562,6 +563,9 @@ class Framework(pyglet.window.Window):
             # Inform the test of the key press
             self.Keyboard(key)
 
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.invalid=False
+
     def on_mouse_press(self, x, y, button, modifiers):
         """
         Mouse down
@@ -610,12 +614,17 @@ class Framework(pyglet.window.Window):
             self.viewCenter -= box2d.b2Vec2(float(dx)/5, float(dy)/5)
             self.updateCenter()
 
+#pyglet test
+#    def on_draw(self):
+#        self.invalid = False
+
     def run(self):
         """
         Main loop.
         """
         if self.settings.hz > 0.0:
             pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
+            pyglet.clock.set_fps_limit(1.0 / self.settings.hz)
         pyglet.app.run()
 
     def SetTextLine(self, line):
@@ -668,7 +677,7 @@ class Framework(pyglet.window.Window):
         # Reset the collision points
         self.points = []
 
-        # Tell Box2D to step (r172)
+        # Tell Box2D to step
         self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
@@ -821,6 +830,7 @@ class Framework(pyglet.window.Window):
         self.Step(self.settings)
 
         self.debugDraw.batch.draw()
+        self.invalid = True
 
         self.fps = pyglet.clock.get_fps()
 

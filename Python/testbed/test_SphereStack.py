@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class SphereStack (test_main.Framework):
+from test_main import *
+class SphereStack (Framework):
     name="SphereStack"
     m_bodies = [ ]
     e_count = 10
@@ -60,4 +58,4 @@ class SphereStack (test_main.Framework):
         super(SphereStack, self).Step(settings)
     
 if __name__=="__main__":
-    test_main.main(SphereStack)
+    main(SphereStack)

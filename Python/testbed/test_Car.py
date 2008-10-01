@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class Car (test_main.Framework):
+from test_main import *
+class Car (Framework):
     name="Car"
     m_leftWheel=None
     m_rightWheel=None
@@ -189,4 +187,4 @@ class Car (test_main.Framework):
            self.m_leftJoint.SetMotorSpeed(-36.0)
              
 if __name__=="__main__":
-     test_main.main(Car)
+     main(Car)

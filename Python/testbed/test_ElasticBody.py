@@ -20,11 +20,10 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-import test_main
-from test_main import box2d
+from test_main import *
 import math
 
-class ElasticBody (test_main.Framework):
+class ElasticBody (Framework):
     name="ElasticBody"
     bodies=[]
     m_ground=None 
@@ -435,4 +434,4 @@ class ElasticBody (test_main.Framework):
         bA.ApplyForce(diff, bB.GetWorldPoint(localB))
 
 if __name__=="__main__":
-     test_main.main(ElasticBody)
+     main(ElasticBody)

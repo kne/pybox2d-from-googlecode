@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class Revolute (test_main.Framework):
+from test_main import *
+class Revolute (Framework):
     name="Revolute"
     def __init__(self):
         super(Revolute, self).__init__()
@@ -78,4 +76,4 @@ class Revolute (test_main.Framework):
         super(Revolute, self).Step(settings)
     
 if __name__=="__main__":
-    test_main.main(Revolute)
+    main(Revolute)

@@ -19,13 +19,11 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
 # A motor driven slider crank with joint friction.
 
-class SliderCrank (test_main.Framework):
+class SliderCrank (Framework):
     name="SliderCrank"
     m_joint1=None
     m_joint2=None
@@ -120,4 +118,4 @@ class SliderCrank (test_main.Framework):
           super(SliderCrank, self).Step(settings)
      
 if __name__=="__main__":
-     test_main.main(SliderCrank)
+     main(SliderCrank)

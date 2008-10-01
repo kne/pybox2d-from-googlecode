@@ -20,9 +20,7 @@ files = [file for file in os.listdir(pygame_path) if checkFile(file)]
 for file in files:
     outfile = open(file, "w")
     for line in open(os.path.join(pygame_path, file), "r").readlines():
-        if line.find("from pygame.locals import *") > -1:
-            line = "import pyglet\n"
-        elif line.find("key==K_") > -1:
+        if line.find("key==K_") > -1:
             # terrible code, use regexps please
             line=line.replace("K_EQUALS", "pyglet.window.key.EQUAL")
             line=line.replace("key==K_", "key==pyglet.window.key.")

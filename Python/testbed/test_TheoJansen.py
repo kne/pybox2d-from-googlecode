@@ -19,14 +19,13 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import test_main
-from test_main import box2d
+from test_main import *
 from pygame.locals import *
 
 # Inspired by a contribution by roman_m (C++ version)
 # Dimensions scooped from APE (http://www.cove.org/ape/index.htm)
 
-class TheoJansen (test_main.Framework):
+class TheoJansen (Framework):
     name="TheoJansen"
     m_offset=box2d.b2Vec2() 
     m_chassis=box2d.b2Vec2()
@@ -210,4 +209,4 @@ class TheoJansen (test_main.Framework):
             self.m_motorJoint.EnableMotor(not self.m_motorJoint.IsMotorEnabled())
     
 if __name__=="__main__":
-    test_main.main(TheoJansen)
+    main(TheoJansen)

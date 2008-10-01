@@ -20,10 +20,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class CCDTest (test_main.Framework):
+from test_main import *
+class CCDTest (Framework):
     name="CCDTest"
     m_angularVelocity = 0.0
     def __init__(self):
@@ -90,4 +88,4 @@ class CCDTest (test_main.Framework):
 
 
 if __name__=="__main__":
-     test_main.main(CCDTest)
+     main(CCDTest)

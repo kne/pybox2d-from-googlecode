@@ -19,11 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
-class Bridge(test_main.Framework):
+class Bridge(Framework):
     name = "Bridge"
     def __init__(self):
         super(Bridge, self).__init__()
@@ -89,4 +87,4 @@ class Bridge(test_main.Framework):
             body.SetMassFromShapes()
  
 if __name__=="__main__":
-    test_main.main(Bridge)
+    main(Bridge)

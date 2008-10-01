@@ -23,9 +23,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 #
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
 import TriangleMesh as tm
 
@@ -259,7 +257,7 @@ for key in data.keys():
     elif key[-9:] == "_segments":
        data[key] = [tm.tmSegmentId((v0,v1)) for v0,v1 in data[key]]
 
-class BreakableBody(test_main.Framework):
+class BreakableBody(Framework):
     name="BreakableBody"
     maxAllowableForce = 0.0
     drawMode  = False
@@ -525,4 +523,4 @@ class BreakableBody(test_main.Framework):
         return (nodes, segments, holes)
 
 if __name__=="__main__":
-    test_main.main(BreakableBody)
+    main(BreakableBody)
