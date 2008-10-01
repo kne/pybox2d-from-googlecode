@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class Prismatic (test_main.Framework):
+from test_main import *
+class Prismatic (Framework):
     name="Prismatic"
     def __init__(self):
         super(Prismatic, self).__init__()
@@ -81,4 +79,4 @@ class Prismatic (test_main.Framework):
         super(Prismatic, self).Step(settings)
     
 if __name__=="__main__":
-    test_main.main(Prismatic)
+    main(Prismatic)

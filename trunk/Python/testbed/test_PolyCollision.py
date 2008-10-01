@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class PolyCollision (test_main.Framework):
+from test_main import *
+class PolyCollision (Framework):
     name="PolyCollision"
     m_body1=None
     m_body2=None
@@ -80,4 +78,4 @@ class PolyCollision (test_main.Framework):
           self.m_body2.SetXForm(p, a)
      
 if __name__=="__main__":
-     test_main.main(PolyCollision)
+     main(PolyCollision)

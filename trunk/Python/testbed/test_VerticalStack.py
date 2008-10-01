@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class VerticalStack (test_main.Framework):
+from test_main import *
+class VerticalStack (Framework):
     name="VerticalStack"
     m_bullet=None
     def __init__(self):
@@ -88,4 +86,4 @@ class VerticalStack (test_main.Framework):
           super(VerticalStack, self).Step(settings)
 
 if __name__=="__main__":
-     test_main.main(VerticalStack)
+     main(VerticalStack)

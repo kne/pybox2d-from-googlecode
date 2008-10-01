@@ -20,10 +20,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class ShapeEditing (test_main.Framework):
+from test_main import *
+class ShapeEditing (Framework):
     name="ShapeEditing"
     m_body=None
     m_shape1=None
@@ -75,4 +73,4 @@ class ShapeEditing (test_main.Framework):
         super(ShapeEditing, self).Step(settings)
 
 if __name__=="__main__":
-     test_main.main(ShapeEditing)
+     main(ShapeEditing)

@@ -19,10 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import test_main
-from test_main import box2d
+from test_main import *
 
-class CollisionFiltering (test_main.Framework):
+class CollisionFiltering (Framework):
     name="CollisionFiltering"
     # This is a test of collision filtering.
     # There is a triangle, a box, and a circle.
@@ -136,4 +135,4 @@ class CollisionFiltering (test_main.Framework):
         body6.SetMassFromShapes()
 
 if __name__=="__main__":
-     test_main.main(CollisionFiltering)
+     main(CollisionFiltering)

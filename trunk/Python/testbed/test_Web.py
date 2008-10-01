@@ -20,13 +20,11 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
 # This tests distance joints, body destruction, and joint destruction.
 
-class Web (test_main.Framework):
+class Web (Framework):
     name="Web"
     m_bodies=[]
     m_joints=[]
@@ -185,4 +183,4 @@ class Web (test_main.Framework):
             # bug here? is this box2d's fault? it passes in shapes!
 
 if __name__=="__main__":
-     test_main.main(Web)
+     main(Web)

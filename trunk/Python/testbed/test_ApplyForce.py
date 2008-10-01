@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class ApplyForce (test_main.Framework):
+from test_main import *
+class ApplyForce (Framework):
     name="ApplyForce"
     m_body=None
     def __init__(self):
@@ -95,4 +93,4 @@ class ApplyForce (test_main.Framework):
             self.m_body.ApplyTorque(-20.0)
 
 if __name__=="__main__":
-     test_main.main(ApplyForce)
+     main(ApplyForce)

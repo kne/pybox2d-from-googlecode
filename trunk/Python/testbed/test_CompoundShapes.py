@@ -19,10 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class CompoundShapes (test_main.Framework):
+from test_main import *
+class CompoundShapes (Framework):
     name="CompoundShapes"
     def __init__(self):
         super(CompoundShapes, self).__init__()
@@ -125,4 +123,4 @@ class CompoundShapes (test_main.Framework):
         body.SetMassFromShapes()
 
 if __name__=="__main__":
-     test_main.main(CompoundShapes)
+     main(CompoundShapes)

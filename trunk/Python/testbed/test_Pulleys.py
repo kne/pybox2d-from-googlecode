@@ -20,10 +20,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
-class Pulleys (test_main.Framework):
+from test_main import *
+class Pulleys (Framework):
     name="Pulleys"
     def __init__(self):
         super(Pulleys, self).__init__()
@@ -77,4 +75,4 @@ class Pulleys (test_main.Framework):
         super(Pulleys, self).Step(settings)
 
 if __name__=="__main__":
-    test_main.main(Pulleys)
+    main(Pulleys)

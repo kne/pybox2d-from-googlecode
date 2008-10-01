@@ -20,15 +20,13 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 from test_main import fwContactTypes
 import math
 
 # Contributed by caspin (C++ version)
 
-class ContactCallbackTest (test_main.Framework):
+class ContactCallbackTest (Framework):
     name="ContactCallbackTest"
      
     m_ball=None 
@@ -174,4 +172,4 @@ class ContactCallbackTest (test_main.Framework):
         super(ContactCallbackTest, self).Step(settings)
 
 if __name__=="__main__":
-     test_main.main(ContactCallbackTest)
+     main(ContactCallbackTest)

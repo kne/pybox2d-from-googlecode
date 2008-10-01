@@ -19,12 +19,10 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 import math
 
-class PolyShapes (test_main.Framework):
+class PolyShapes (Framework):
     name="PolyShapes"
     bodyIndex=0
     bodies=[]
@@ -127,4 +125,4 @@ class PolyShapes (test_main.Framework):
         self.textLine += 15
      
 if __name__=="__main__":
-     test_main.main(PolyShapes)
+     main(PolyShapes)

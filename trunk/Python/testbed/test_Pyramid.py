@@ -19,9 +19,8 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import test_main
-from test_main import box2d
-class Pyramid (test_main.Framework):
+from test_main import *
+class Pyramid (Framework):
     name="Pyramid"
     def __init__(self):
         super(Pyramid, self).__init__()
@@ -57,4 +56,4 @@ class Pyramid (test_main.Framework):
             x += deltaX
 
 if __name__=="__main__":
-     test_main.main(Pyramid)
+     main(Pyramid)

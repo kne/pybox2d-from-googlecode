@@ -19,11 +19,9 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame.locals import *
-import test_main
-from test_main import box2d
+from test_main import *
 
-class LineJoint (test_main.Framework):
+class LineJoint (Framework):
     name="LineJoint"
     def __init__(self):
         super(LineJoint, self).__init__()
@@ -59,4 +57,4 @@ class LineJoint (test_main.Framework):
         self.world.CreateJoint(jd)
     
 if __name__=="__main__":
-    test_main.main(LineJoint)
+    main(LineJoint)
