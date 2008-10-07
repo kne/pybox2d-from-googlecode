@@ -8,7 +8,8 @@
 === Games ===
 
  * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
-
+ * [http://code.google.com/p/gamecomp/ NaN]'s The day mom tied us together, fun and innovative little side scroller (with a cool intro) ([http://www.pyweek.org/e/NaN7/ PyWeek page])
+ 
 === Physics Jam Results ===
 
 The OLPC Physics jam took place on Aug 29-31, 2008. The results from the groups are here:
@@ -17,5 +18,7 @@ The OLPC Physics jam took place on Aug 29-31, 2008. The results from the groups 
  * [http://wiki.laptop.org/go/Bridge Bridge]
  * [http://wiki.laptop.org/go/XOlympics XOlympics]
  * [http://wiki.laptop.org/go/Babel Babel]
+
+=== Others? ===
 
 Please let me know if you use pybox2d in any of your projects and I will gladly link to them here.
