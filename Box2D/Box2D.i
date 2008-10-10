@@ -38,15 +38,6 @@
         bool __b2PythonShapePointerEquals__(b2Shape* a, b2Shape* b) {
             return a==b;
         }
-        bool __b2PythonJointPointerNotEqual__(b2Joint* a, b2Joint* b) {
-            return a!=b;
-        }
-        bool __b2PythonBodyPointerNotEqual__(b2Body* a, b2Body* b) {
-            return a!=b;
-        }
-        bool __b2PythonShapePointerNotEqual__(b2Shape* a, b2Shape* b) {
-            return a!=b;
-        }
     %}
 
     %include "Box2D_printing.i"
@@ -68,9 +59,9 @@
     %rename(b2mul) operator  * (float32 s, const b2Vec2& a);
     %rename(b2equ) operator == (const b2Vec2& a, const b2Vec2& b);
 
-    %rename (b2mul)  b2Vec3::operator * (float32 s, const b2Vec3& a);
-    %rename (b2add)  b2Vec3::operator + (const b2Vec3& a, const b2Vec3& b);
-    %rename (b2sub)  b2Vec3::operator - (const b2Vec3& a, const b2Vec3& b);
+    %rename(b2mul) operator * (float32 s, const b2Vec3& a);
+    %rename(b2add) operator + (const b2Vec3& a, const b2Vec3& b);
+    %rename(b2sub) operator - (const b2Vec3& a, const b2Vec3& b);
     
     //Since Python (apparently) requires __imul__ to return self,
     //these void operators will not do. So, rename them, then call them
@@ -227,15 +218,15 @@
     }
 
     %feature("shadow") GetUserData {
-        def GetUserData(self): # override the C++ version as it does not work. 
+        def GetUserData(self): # override the C++ version
             """Get the specified userData (m_userData)"""
-            return self.pyGetUserData()
+            return self._pyGetUserData()
     }
 
     %feature("shadow") SetUserData {
-        def SetUserData(self, value): # override the C++ version as it does not work. 
+        def SetUserData(self, value): # override the C++ version
             """Get the specified userData (m_userData)"""
-            return self.pySetUserData(value)
+            return self._pySetUserData(value)
     }
 
     //Typecast the shape as necessary so Python can use them properly (2.0)
@@ -248,6 +239,7 @@
             types = {  e_unknownShape   : "Unknown",
                         e_circleShape   : "Circle",
                         e_polygonShape  : "Polygon",
+                        e_edgeShape     : "Edge",
                         e_shapeTypeCount: "ShapeType" }
             return types[self.GetType()]
         def getAsType(self):
@@ -264,12 +256,17 @@
                 return (b2PolygonShape*)$self;
             return NULL;
         }
-        PyObject* pyGetUserData() {
+        b2EdgeShape* asEdge() {
+            if ($self->GetType()==e_edgeShape)
+                return (b2EdgeShape*)$self;
+            return NULL;
+        }
+        PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
             Py_INCREF(ret);
             return ret;
         }
-        void pySetUserData(PyObject* value) {
+        void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
             Py_INCREF(value);
         }
@@ -384,12 +381,12 @@
             """
             return (getattr(self, "as%sJoint" % self.typeName())) ()
         %}
-        PyObject* pyGetUserData() {
+        PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
             Py_INCREF(ret);
             return ret;
         }
-        void pySetUserData(PyObject* value) {
+        void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
             Py_INCREF(value);
         }
@@ -488,19 +485,97 @@
             return vertices
         %}
         const b2Vec2* getVertex(uint16 vnum) {
-            if (vnum > b2_maxPolygonVertices || vnum > self->GetVertexCount()) return NULL;
+            if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->GetVertices() [vnum] );
         }
         const b2Vec2* getCoreVertex(uint16 vnum) {
-            if (vnum > b2_maxPolygonVertices || vnum > self->GetVertexCount()) return NULL;
+            if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->GetCoreVertices() [vnum] );
         }
         const b2Vec2* getNormal(uint16 vnum) {
-            if (vnum > b2_maxPolygonVertices || vnum > self->GetVertexCount()) return NULL;
+            if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->GetNormals() [vnum] );
         }
     }
     
+    %extend b2EdgeChainDef{
+    public:
+        %pythoncode %{
+        def __repr__(self):
+            return "b2EdgeDef(vertices: %s count: %d)" % (self.getVertices_tuple(), self.vertexCount)
+        def __del__(self):
+            """Cleans up by freeing the allocated vertex array"""
+            self._cleanUp()
+        def getVertices_tuple(self):
+            """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
+            vertices = []
+            for i in range(0, self.vertexCount):
+                vertices.append( (self.getVertex(i).x, self.getVertex(i).y ) )
+            return vertices
+        def getVertices_b2Vec2(self):
+            """Returns all of the vertices as a list of b2Vec2's [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
+            vertices = []
+            for i in range(0, self.vertexCount):
+                vertices.append(self.getVertex(i))
+            return vertices
+        def setVertices(self, vertices):
+            """Sets all of the vertices given a tuple 
+                in the format ( (x1,y1), (x2,y2) ... (xN,yN) )
+                where each vertex is either a tuple or a b2Vec2"""
+            self._allocateVertices(len(vertices))
+            for i in range(0, self.vertexCount):
+                if isinstance(vertices[i], b2Vec2):
+                    self.setVertex(i, vertices[i])
+                elif isinstance(vertices[i], (tuple, list)):
+                    self.setVertex(i, vertices[i][0], vertices[i][1])
+                else:
+                    raise ValueError, "Unknown vertex type"
+        def setVertices_tuple(self, vertices):
+            """Sets all of the vertices given a tuple 
+                in the format ( (x1,y1), (x2,y2) ... (xN,yN) )"""
+            self._allocateVertices(len(vertices))
+            for i in range(0, self.vertexCount):
+                self.setVertex(i, vertices[i][0], vertices[i][1])
+        def setVertices_b2Vec2(self, vertices):
+            """Sets all of the vertices given a tuple 
+                in the format ( v1, v2, ..., vN ) where each vertex
+                is a b2Vec2"""
+            self._allocateVertices(len(vertices))
+            for i in range(0, self.vertexCount):
+                self.setVertex(i, vertices[i])
+        %}
+        void _cleanUp() {
+            if ($self->vertexCount > 0 && $self->vertices)
+                delete [] $self->vertices;
+            $self->vertices = NULL;
+            $self->vertexCount = 0;
+        }
+        void _allocateVertices(uint16 _count) {
+            if ($self->vertexCount > 0 && $self->vertices)
+                delete [] $self->vertices;
+            $self->vertexCount = _count;
+            $self->vertices = new b2Vec2 [_count];
+            if (!$self->vertices)
+                PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
+        }
+        b2Vec2* getVertex(uint16 vnum) {
+            if (vnum >= $self->vertexCount) return NULL;
+            return &( $self->vertices[vnum] );
+        }
+        void setVertex(uint16 vnum, b2Vec2& value) {
+            if (vnum < $self->vertexCount)
+                $self->vertices[vnum].Set(value.x, value.y);
+        }
+        void setVertex(uint16 vnum, float32 x, float32 y) {
+            if (vnum < $self->vertexCount)
+                $self->vertices[vnum].Set(x, y);
+        }
+    }
+
+    %extend b2EdgeShape {
+        
+    }
+
     %extend b2PolygonDef{
     public:
         %pythoncode %{
@@ -530,7 +605,7 @@
                 self.setVertex(i, vertices[i][0], vertices[i][1])
         def setVertices_b2Vec2(self, vertices):
             """Sets all of the vertices (up to b2_maxPolygonVertices) given a tuple 
-                in the format ( (x1,y1), (x2,y2) ... (xN,yN) ) where each vertex
+                in the format ( v1, v2, ..., vN ) where each vertex
                 is a b2Vec2"""
             if len(vertices) > b2_maxPolygonVertices:
                 raise ValueError
@@ -539,15 +614,15 @@
                 self.setVertex(i, vertices[i])
         %}
         b2Vec2* getVertex(uint16 vnum) {
-            if (vnum > b2_maxPolygonVertices || vnum > self->vertexCount) return NULL;
+            if (vnum >= b2_maxPolygonVertices || vnum >= self->vertexCount) return NULL;
             return &( $self->vertices[vnum] );
         }
         void setVertex(uint16 vnum, b2Vec2& value) {
-            if (vnum > b2_maxPolygonVertices) return;
+            if (vnum >= b2_maxPolygonVertices) return;
             $self->vertices[vnum].Set(value.x, value.y);
         }
         void setVertex(uint16 vnum, float32 x, float32 y) {
-            if (vnum > b2_maxPolygonVertices) return;
+            if (vnum >= b2_maxPolygonVertices) return;
             $self->vertices[vnum].Set(x, y);
         }
     }
@@ -627,12 +702,12 @@
         __eq__ = b2BodyCompare
         __ne__ = lambda self,other: not b2BodyCompare(self,other)
         %}
-        PyObject* pyGetUserData() {
+        PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
             Py_INCREF(ret);
             return ret;
         }
-        void pySetUserData(PyObject* value) {
+        void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
             Py_INCREF(value);
         }

@@ -2,9 +2,13 @@ from Box2D2 import *
 
 print "Creating world..."
 worldAABB = b2AABB()
+worldAABB=b2AABB()
+worldAABB.lowerBound.Set(-100, -100)
+worldAABB.upperBound.Set(100, 100)
 world = b2World(worldAABB, b2Vec2_zero, True)
 
 print "Testing pretty printing..."
+print world, "\n"
 test=b2AABB(); print test, "\n"
 test=b2BlockAllocator(); print test, "\n"
 test=b2BodyDef(); print test, "\n"
@@ -30,7 +34,10 @@ test=b2ContactFilter(); print test, "\n"
 test=b2ContactID(); print test, "\n"
 test=b2ContactID_features(); print test, "\n"
 #? test=b2ContactManager(); print test, "\n"
-test=b2ContactPoint(); print test, "\n"
+test=b2ContactPoint(); 
+test.shape1 = None
+test.shape2 = None
+print test, "\n"
 test=b2ContactRegister(); print test, "\n"
 #? test=b2ContactResult(); print test, "\n"
 #test=b2DistanceJoint(); print test, "\n"
@@ -54,7 +61,6 @@ test.body1, test.body2= world.GetGroundBody(), body
 test.maxForce= 1000.0 * body.GetMass()
 joint=world.CreateJoint(test).getAsType(); print joint, "\n"
 
-test=b2NullContact(); print test, "\n"
 test=b2OBB(); print test, "\n"
 test=b2Pair(); print test, "\n"
 #test=b2PairCallback(); print test, "\n"
@@ -88,6 +94,7 @@ test=b2Sweep(); print test, "\n"
 test=b2TimeStep(); print test, "\n"
 test=b2Vec2(); print test, "\n"
 test=b2Version(); print test, "\n"
-#test=b2World(); print test, "\n"
-print world, "\n"
 test=b2XForm(); print test, "\n"
+test=b2EdgeChainDef(); print test, "\n"
+
+print "Done"
