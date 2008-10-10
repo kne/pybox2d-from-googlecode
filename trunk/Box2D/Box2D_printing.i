@@ -91,8 +91,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2Contact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_friction:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_restitution:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
-            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_friction,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_restitution,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
+        return "b2Contact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
+            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
     %}
 }
 
@@ -306,8 +306,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2NullContact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_friction:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_restitution:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
-            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_friction,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_restitution,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
+        return "b2NullContact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
+            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
     %}
 }
 
@@ -359,8 +359,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2PolygonShape(GetBody():%s GetCentroid():%s GetCoreVertices():%s GetFilterData():%s GetFriction():%s GetNormals():%s GetOBB():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertexCount():%s IsSensor():%s)" %\
-            tuple([str(a) for a in (self.GetBody(),self.GetCentroid(),self.GetCoreVertices(),self.GetFilterData(),self.GetFriction(),self.GetNormals(),self.GetOBB(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertexCount(),self.IsSensor())])
+        return "b2PolygonShape(GetBody():%s GetCentroid():%s GetCoreVertices():%s GetFilterData():%s GetFriction():%s GetOBB():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertexCount():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCentroid(),self.GetCoreVertices(),self.GetFilterData(),self.GetFriction(),self.GetOBB(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertexCount(),self.IsSensor())])
     %}
 }
 
@@ -540,6 +540,15 @@ public:
     def __repr__(self):
         return "b2LineJoint(GetAnchor1():%s GetAnchor2():%s GetJointSpeed():%s GetJointTranslation():%s GetLowerLimit():%s GetMotorForce():%s GetMotorSpeed():%s GetType():%s GetUpperLimit():%s IsLimitEnabled():%s IsMotorEnabled():%s m_K:%s m_a1:%s m_a2:%s m_axis:%s m_enableLimit:%s m_enableMotor:%s m_impulse:%s m_limitState:%s m_localAnchor1:%s m_localAnchor2:%s m_localXAxis1:%s m_localYAxis1:%s m_lowerTranslation:%s m_maxMotorForce:%s m_motorImpulse:%s m_motorMass:%s m_motorSpeed:%s m_perp:%s m_s1:%s m_s2:%s m_upperTranslation:%s)" %\
             tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetJointSpeed(),self.GetJointTranslation(),self.GetLowerLimit(),self.GetMotorForce(),self.GetMotorSpeed(),self.GetType(),self.GetUpperLimit(),self.IsLimitEnabled(),self.IsMotorEnabled(),self.m_K,self.m_a1,self.m_a2,self.m_axis,self.m_enableLimit,self.m_enableMotor,self.m_impulse,self.m_limitState,self.m_localAnchor1,self.m_localAnchor2,self.m_localXAxis1,self.m_localYAxis1,self.m_lowerTranslation,self.m_maxMotorForce,self.m_motorImpulse,self.m_motorMass,self.m_motorSpeed,self.m_perp,self.m_s1,self.m_s2,self.m_upperTranslation)])
+    %}
+}
+
+%extend b2EdgeShape {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2EdgeShape(GetBody():%s GetCoreVertex1():%s GetCoreVertex2():%s GetCorner1Vector():%s GetCorner2Vector():%s GetDirectionVector():%s GetFilterData():%s GetFriction():%s GetLength():%s GetNormalVector():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertex1():%s GetVertex2():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCoreVertex1(),self.GetCoreVertex2(),self.GetCorner1Vector(),self.GetCorner2Vector(),self.GetDirectionVector(),self.GetFilterData(),self.GetFriction(),self.GetLength(),self.GetNormalVector(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertex1(),self.GetVertex2(),self.IsSensor())])
     %}
 }
 

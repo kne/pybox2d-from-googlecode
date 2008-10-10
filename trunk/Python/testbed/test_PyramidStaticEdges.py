@@ -20,24 +20,30 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from test_main import *
-class Pyramid (Framework):
-    name="Pyramid"
+
+class PyramidStaticEdges (Framework):
+    name="PyramidStaticEdges"
     def __init__(self):
-        super(Pyramid, self).__init__()
+        super(PyramidStaticEdges, self).__init__()
+        verts = [ (50.0,0.0), (-50.0,0.0) ]
+        
+        bd=box2d.b2BodyDef()
+        bd.position.Set( 0.0, 0.0 )
+        body = self.world.CreateBody(bd)
+
+        edgeDef = box2d.b2EdgeChainDef()
+        edgeDef.setVertices_tuple(verts)
+        edgeDef.isALoop = False
+        body.CreateShape(edgeDef)
+        
+        #body.SetMassFromShapes()
+    
         sd=box2d.b2PolygonDef()
-        sd.SetAsBox(50.0, 10.0)
-
-        bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
-        ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
-
-        sd=box2d.b2PolygonDef() 
         a = 0.5
         sd.SetAsBox(a, a)
         sd.density = 5.0
-
-        x=box2d.b2Vec2(-10.0, 0.75)
+        
+        x=box2d.b2Vec2(-10.0, 1.0)
         deltaX=box2d.b2Vec2(0.5625, 2.0)
         deltaY=box2d.b2Vec2(1.125, 0.0)
 
@@ -53,6 +59,6 @@ class Pyramid (Framework):
                 y += deltaY
 
             x += deltaX
-
+    
 if __name__=="__main__":
-     main(Pyramid)
+    main(PyramidStaticEdges)
