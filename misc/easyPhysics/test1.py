@@ -59,22 +59,15 @@ class Renderer (ep.Renderer):
             # flip if necessary
             pass
 
-    def world_to_screen(self, world):
-        # tell ep the screen location of world position
-        # use zoom, screen center
-        screen = world
-        return screen
+world = ep.World(debug_level=2, frequency=60, worldaabb=(-100,-100,100,100), gravity=(0,-10))
+print world.get_config("frequency")
 
-    def screen_to_world(self, screen):
-        # tell ep the world location of screen position
-        world = screen
-        return world
-
-ep.init(frequency=60)
 #ep.set_scale_function(world_to_screen, screen_to_world) # screen to world optional (both optional if display callback not enabled)
 #new idea:
 myRenderer = Renderer()
-ep.set_renderer( myRenderer )
+world.set_config( renderer=myRenderer )
+myRenderer.set_scale_preset("pygame")
+
 # warn if scale functions not symmetric
 # warn if scale is small (<= world 1:screen 2 ?)
 # have basic w2s/s2w functions setup for common libraries, given scale
@@ -82,7 +75,7 @@ ep.set_renderer( myRenderer )
 #ep.set_display_callback(display_fcn) # raise error if scale function not set
 
 shape1  = { 
-            E_TYPE    : E_CIRCLE,
+            ep_Type   : ep_Circle,
             "radius"  : 1.0,
             "position": (0.0, 0.0),
             "collisionGroup" : collisionClass1,
@@ -94,30 +87,30 @@ bodyDef = {
             "shapes"   : [shape1],
           }
 
-ep.create_body(bodyDef)
+world.create(bodyDef)
 
-ep.save_world("world.xml")
-ep.load_world("world2.xml")
+world.save("world.xml")
+world.load("world2.xml")
 
 # initialize pygame/etc
 
 running = True
 while running:
     # display function called here
-    ep.step()
+    world.step()
     # callbacks for rendering called as necessary
 
     gotClick = False #
     # check if events...
     if gotClick: # clicked
         pos = event.pos
-        shapes = ep.pick(pos)
+        shapes = world.pick(pos)
 
     # do something each call
-    for body in ep.get_bodies():
+    for body in world.get_bodies():
         for shape in body.get_shapes():
             if shape.type == e_circleShape:
                 print shape.radius
-    for shape in ep.get_all_shapes():
+    for shape in world.get_all_shapes():
         print shape.radius
     exit(0)

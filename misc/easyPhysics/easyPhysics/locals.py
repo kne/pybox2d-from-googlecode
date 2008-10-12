@@ -49,6 +49,12 @@ for __varname in __box2d_variables+__prefixed_vars:
     globals()[__varname]=getattr(box2d, __varname)
 
 # easyPhysics locals:
-E_TYPE    ="type"
-E_CIRCLE  ="circle"
+ep_Type    ="type"
+ep_Circle  ="circle"
+
+# easyPhysics exceptions:
+class ep_Exception (Exception): pass
+class ep_ArgumentRequired (ep_Exception): pass
+class ep_InvalidParameter (ep_Exception): pass
+class ep_InvalidScalingFunction (ep_Exception): pass
 
