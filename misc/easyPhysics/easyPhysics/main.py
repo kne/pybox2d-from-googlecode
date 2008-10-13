@@ -155,6 +155,38 @@ class Renderer (object):
         else:
             raise ep_InvalidScalingFunction, preset_name
 
+def _type_check(type_, value):
+    if type_ == box2d.b2AABB:
+        if isinstance(value, (list, tuple)):
+            if len(value) != 4:
+                raise ep_InvalidParameter, "Expected length-4 list or tuple (%s)" % key
+            aabb = box2d.b2AABB()
+            aabb.lowerBound.Set(*value[0:2])
+            aabb.upperBound.Set(*value[2:4])
+            return aabb
+        elif isinstance(value, box2d.b2AABB):
+            # note that this does not copy your AABB
+            return value
+        else:
+            raise ep_InvalidParameter, "Expected length-4 list or tuple or b2AABB (%s)" % key
+
+    elif type_ == box2d.b2Vec2:
+        if isinstance(value, (list, tuple)):
+            if len(value) != 2:
+                raise ep_InvalidParameter, "Expected length-2 list or tuple (%s)" % key
+            return box2d.b2Vec2().fromTuple(value)
+        elif isinstance(value, box2d.b2Vec2):
+            # copies the b2Vec2
+            return value.copy()
+        else:
+            raise ep_InvalidParameter, "Expected length-2 list or tuple or b2Vec2 (%s)" % key
+
+    else:
+        if isinstance(value, type_):
+            return value
+        else:
+            raise ep_InvalidParameter, "Expected type %s for parameter %s" % (str(type_), key)
+
 class Config (object):
     def __init__(self, **kw):
         '''Configuration class
@@ -183,37 +215,7 @@ class Config (object):
 
     def __setattr__(self, key, value):
         option = self._options[key]
-        type_  = option['type']
-        if type_ == box2d.b2AABB:
-            if isinstance(value, (list, tuple)):
-                if len(value) != 4:
-                    raise ep_InvalidParameter, "Expected length-4 list or tuple (%s)" % key
-                aabb = box2d.b2AABB()
-                aabb.lowerBound.Set(*value[0:2])
-                aabb.upperBound.Set(*value[2:4])
-                option['value']=aabb
-            elif isinstance(value, box2d.b2AABB):
-                # note that this does not copy your AABB
-                option['value']=value
-            else:
-                raise ep_InvalidParameter, "Expected length-4 list or tuple or b2AABB (%s)" % key
-
-        elif type_ == box2d.b2Vec2:
-            if isinstance(value, (list, tuple)):
-                if len(value) != 2:
-                    raise ep_InvalidParameter, "Expected length-2 list or tuple (%s)" % key
-                option['value']=box2d.b2Vec2().fromTuple(value)
-            elif isinstance(value, box2d.b2Vec2):
-                # copies the b2Vec2
-                option['value']=value.copy()
-            else:
-                raise ep_InvalidParameter, "Expected length-2 list or tuple or b2Vec2 (%s)" % key
-
-        else:
-            if isinstance(value, type_):
-                option['value']=value
-            else:
-                raise ep_InvalidParameter, "Expected type %s for parameter %s" % (str(type_), key)
+        option['value'] = _type_check(option['type'], value)
 
     def _set(self, **kw):
         '''Set some configuration variables.
@@ -272,6 +274,7 @@ class World (object):
         debugstr(2, self.config) 
 
     def init_world(self):
+        config = self.config
         self.world = box2d.b2World(config.worldaabb, config.gravity, config.doSleep)
 
     def get_config(self, key):
@@ -290,14 +293,202 @@ class World (object):
         ''' 
         self.config._set(**kw)
 
-    def delete(self, object):
-        pass
+    def _create_body(self, bodyDef):
+        bd = box2d.b2BodyDef()
+        body = self.world.CreateBody(bd)
+
+        if ep_shapes in bodyDef:
+            for shapedef in bodyDef[ep_shapes]:
+                self._create_generic(shapedef, body)
+
+    def _create_generic(self, defn, shapeBody=None):
+        number = (float, int)
+        lists = (tuple, list)
+        userdata_type = object
+        b2ShapeType = [] # define me
+        b2JointType = [] # define me
+
+        shapetype = {
+            'create_fcn'    : shapeBody.CreateShape,
+            ep_body         : box2d.b2Body,
+            ep_density      : number,
+            ep_filter       : box2d.b2FilterData,
+            ep_friction     : number,
+            ep_isSensor     : bool,
+            ep_localPosition: box2d.b2Vec2,
+            ep_restitution  : number,
+            ep_type         : b2ShapeType,
+            ep_userData     : userdata_type,
+        }
+
+        jointtype = {
+            'create_fcn'       : self.world.CreateJoint,
+            ep_body1           : box2d.b2Body,
+            ep_body2           : box2d.b2Body,
+            ep_collideConnected: bool,
+            ep_type            : b2JointType,
+            ep_userData        : userdata_type,
+        }
+
+        info = {
+            # shapes
+            ep_circle : { 
+                'class'     : box2d.b2CircleDef,
+                'base'      : shapetype,
+                ep_radius   : number,
+             },
+            ep_polygon : {
+                'class'     : box2d.b2PolygonDef,
+                'base'      : shapetype,
+                ep_vertices : lists,
+             },
+            ep_edge    : { 
+                'class'    : box2d.b2EdgeChainDef,
+                'base'     : shapetype,
+                ep_vertices: lists,
+                ep_isALoop : bool,
+             },
+
+            # joints
+            ep_distance : { 
+                'class'         : box2d.b2DistanceJointDef,
+                'base'          : jointtype,
+                ep_localAnchor1 : box2d.b2Vec2,
+                ep_localAnchor2 : box2d.b2Vec2,
+                ep_length       : number,
+             },
+            ep_gear : { 
+                'class'   : box2d.b2GearJointDef,
+                'base'    : jointtype,
+                ep_joint1 : box2d.b2Joint,
+                ep_joint2 : box2d.b2Joint,
+                ep_ratio  : number,
+             },
+            ep_line : { 
+                'class'             : box2d.b2LineJointDef,
+                'base'              : jointtype,
+                ep_enableLimit      : bool,
+                ep_enableMotor      : bool,
+                ep_localAnchor1     : box2d.b2Vec2,
+                ep_localAnchor2     : box2d.b2Vec2,
+                ep_localAxis1       : box2d.b2Vec2,
+                ep_lowerTranslation : number,
+                ep_maxMotorForce    : number,
+                ep_motorSpeed       : number,
+                ep_upperTranslation : number,
+             },
+            ep_mouse : { 
+                'class'        : box2d.b2MouseJointDef,
+                'base'         : jointtype,
+                ep_target      : box2d.b2Vec2,
+                ep_maxForce    : number,
+                ep_frequencyHz : number,
+                ep_dampingRatio: number,
+                ep_timeStep    : number,
+             },
+            ep_prismatic : { 
+                'class'             : box2d.b2PrismaticJointDef,
+                'base'              : jointtype,
+                ep_enableLimit      : bool,
+                ep_enableMotor      : bool,
+                ep_localAnchor1     : box2d.b2Vec2,
+                ep_localAnchor2     : box2d.b2Vec2,
+                ep_localAxis1       : box2d.b2Vec2,
+                ep_lowerTranslation : number,
+                ep_maxMotorForce    : number,
+                ep_motorSpeed       : number,
+                ep_upperTranslation : number,
+                ep_referenceAngle   : number,
+             },
+            ep_pulley : { 
+                'class'           : box2d.b2PulleyJointDef,
+                'base'            : jointtype,
+                ep_groundAnchor1  : box2d.b2Vec2,
+                ep_groundAnchor2  : box2d.b2Vec2,
+                ep_localAnchor1   : box2d.b2Vec2,
+                ep_localAnchor2   : box2d.b2Vec2,
+                ep_length1        : number,
+                ep_maxLength1     : number,
+                ep_length2        : number,
+                ep_maxLength2     : number,
+                ep_ratio          : number,
+             },
+            ep_revolute : { 
+                'class'             : box2d.b2RevoluteJointDef,
+                'base'              : jointtype,
+                ep_localAnchor1     : box2d.b2Vec2,
+                ep_localAnchor2     : box2d.b2Vec2,
+                ep_referenceAngle   : number,
+                ep_enableLimit      : bool,
+                ep_lowerAngle       : number,
+                ep_upperAngle       : number,
+                ep_motorSpeed       : number,
+                ep_maxMotorTorque   : number,
+              },
+        }
+
+        # put this elsewhere:
+        for type_ in info.keys():
+            data = info[type_]
+            for basekey in data['base'].keys():
+                data[basekey] = data['base'][basekey]
+            del data['base']
+
+        try:        
+            type_ = defn[ep_type]
+            data = info[type_]
+        except KeyError:
+            raise ep_InvalidDefinition, "Requires valid type"
+
+        b2def = data['class']()
+
+        print data
+
+        create_fcn = data['create_fcn']
+        return create_fcn(b2def)
 
     def create(self, objectDef):
+        ###Not sure if I like this yet...
         """Create a body/joint/shape
 
+        With a ..........
 
+        If a b2[Shape|Body|Joint]Def is passed in, it will be passed
+        to box2d and created.
+
+        Raises ep_InvalidParameter f the type of the object cannot be determined.
+
+        Returns: The created object
         """
+        shape_defs = (box2d.b2ShapeDef, box2d.b2CircleDef, box2d.b2EdgeChainDef, box2d.b2PolygonDef)
+        joint_defs = (box2d.b2DistanceJointDef, box2d.b2GearJointDef, box2d.b2JointDef, 
+                      box2d.b2LineJointDef, box2d.b2MouseJointDef, box2d.b2PrismaticJointDef, 
+                      box2d.b2PulleyJointDef, box2d.b2RevoluteJointDef)
+        body_defs  = (box2d.b2BodyDef, )
+
+        if isinstance(objectDef, body_defs):
+            return self.world.CreateBody(objectDef)
+        elif isinstance(objectDef, shape_defs):
+            return self.world.CreateShape(objectDef)
+        elif isinstance(objectDef, joint_defs):
+            return self.world.CreateJoint(objectDef)
+        elif isinstance(objectDef, dict):
+            if 'type' in objectDef:
+                return self._create_generic(objectDef)
+###################################
+                
+                if objectDef['type'] in ep_shape_types:
+                    self._create_shape(objectDef)
+                elif objectDef['type'] in ep_joint_types:
+                    self._create_joint(objectDef)
+                else:
+                    raise ep_InvalidParameter, "Unknown object type"
+            else: #assume body
+                return self._create_body(objectDef)
+        else:
+            raise ep_InvalidParameter
+
+    def delete(self, object):
         pass
 
     def save(self, file, format="xml"): # xml/pickle
