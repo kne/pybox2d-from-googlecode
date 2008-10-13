@@ -62,6 +62,7 @@ class Renderer (ep.Renderer):
 world = ep.World(debug_level=2, frequency=60, worldaabb=(-100,-100,100,100), gravity=(0,-10))
 print world.get_config("frequency")
 
+world.init_world()
 #ep.set_scale_function(world_to_screen, screen_to_world) # screen to world optional (both optional if display callback not enabled)
 #new idea:
 myRenderer = Renderer()
@@ -75,7 +76,9 @@ myRenderer.set_scale_preset("pygame")
 #ep.set_display_callback(display_fcn) # raise error if scale function not set
 
 shape1  = { 
-            ep_Type   : ep_Circle,
+            # can use strings or the constants, but using the constants
+            # will help a lot with little typos
+            ep_type   : ep_circle,
             "radius"  : 1.0,
             "position": (0.0, 0.0),
             "collisionGroup" : collisionClass1,
