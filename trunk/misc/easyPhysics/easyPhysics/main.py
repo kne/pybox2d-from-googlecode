@@ -25,10 +25,23 @@ from locals import *
 # globals
 debug_level = 0
 
+# helper functions
 def debugstr(level, string):
     global debug_level
     if debug_level >= level:
         print "(ep)", string
+
+def _dict_format(d, indent=0):
+    ret = ["{"]
+    max_keylen = max( [len(key) for key in d.keys()] ) + 1
+
+    for key in d.keys():
+       if isinstance(d[key], dict):
+           ret.append( _dict_format(d[key], indent+1) )
+       else:
+           ret.append(" %s%s: %s" % (key, ' ' * (max_keylen - len(key)), d[key]))
+    ret.append("}")
+    return ( '\n' + (indent * ' ') ).join(ret)
 
 # classes
 class CollisionClass (object):
@@ -126,7 +139,7 @@ class Renderer (object):
             Returns world point intact.
             """
             x, y = self.expand_vector(world)
-            return self._preset_same_type( world, (x, y))
+            return self._preset_same_type( world, (x, y) )
         def s2w_preset_pyglet(screen):
             """ Pyglet screen to world preset
             Assumes OpenGL projection code similar to that used in the testbed
@@ -144,7 +157,7 @@ class Renderer (object):
 
             worldx = (1.0 - u) * lower.x + u * upper.x
             worldy = (1.0 - v) * lower.y + v * upper.y
-            return self._preset_same_type( screen, (worldx, worldy))
+            return self._preset_same_type( screen, (worldx, worldy) )
 
         w2s = "w2s_preset_%s" % preset_name
         s2w = "s2w_preset_%s" % preset_name
@@ -250,9 +263,142 @@ class Config (object):
         'debugDraw'     : { 'value': True, 'type' : bool },
     }
 
+_basetypes = {
+    'shape' : {
+        'create_fcn'       : lambda world, body: body.CreateShape,
+        ep_body            : box2d.b2Body,
+        ep_density         : ep_number_type,
+        ep_filter          : box2d.b2FilterData,
+        ep_friction        : ep_number_type,
+        ep_isSensor        : bool,
+        ep_localPosition   : box2d.b2Vec2,
+        ep_restitution     : ep_number_type,
+        ep_userData        : ep_userdata_type,
+        ep_collisionGroup  : 0 #ep_custom_type(CollisionGroup),
+     },
+    'joint' : {
+        'create_fcn'       : lambda world, body: world.CreateJoint,
+        ep_body1           : box2d.b2Body,
+        ep_body2           : box2d.b2Body,
+        ep_collideConnected: bool,
+        ep_userData        : ep_userdata_type,
+     },
+     'body' : {
+        ep_massData        : box2d.b2MassData,
+        ep_userData        : ep_userdata_type,
+        ep_position        : box2d.b2Vec2,
+        ep_angle           : ep_number_type,
+        ep_linearDamping   : ep_number_type,
+        ep_angularDamping  : ep_number_type,
+        ep_allowSleep      : bool,
+        ep_isSleeping      : bool,
+        ep_fixedRotation   : bool,
+        ep_isBullet        : bool,
+        ep_collisionGroup  : 0 #ep_custom_type(CollisionGroup),
+     },
+    }
+
+_creation_info = {
+    # shapes
+    ep_circle : { 
+        'class'     : box2d.b2CircleDef,
+        'base'      : _basetypes['shape'],
+        ep_radius   : ep_number_type,
+     },
+    ep_polygon : {
+        'class'     : box2d.b2PolygonDef,
+        'base'      : _basetypes['shape'],
+        ep_vertices : ep_list_type,
+     },
+    ep_edge    : { 
+        'class'    : box2d.b2EdgeChainDef,
+        'base'     : _basetypes['shape'],
+        ep_vertices: ep_list_type,
+        ep_isALoop : bool,
+     },
+
+    # joints
+    ep_distance : { 
+        'class'             : box2d.b2DistanceJointDef,
+        'base'              : _basetypes['joint'],
+        ep_localAnchor1     : box2d.b2Vec2,
+        ep_localAnchor2     : box2d.b2Vec2,
+        ep_length           : ep_number_type,
+     },
+    ep_gear : { 
+        'class'             : box2d.b2GearJointDef,
+        'base'              : _basetypes['joint'],
+        ep_joint1           : box2d.b2Joint,
+        ep_joint2           : box2d.b2Joint,
+        ep_ratio            : ep_number_type,
+     },
+    ep_line : { 
+        'class'             : box2d.b2LineJointDef,
+        'base'              : _basetypes['joint'],
+        ep_enableLimit      : bool,
+        ep_enableMotor      : bool,
+        ep_localAnchor1     : box2d.b2Vec2,
+        ep_localAnchor2     : box2d.b2Vec2,
+        ep_localAxis1       : box2d.b2Vec2,
+        ep_lowerTranslation : ep_number_type,
+        ep_maxMotorForce    : ep_number_type,
+        ep_motorSpeed       : ep_number_type,
+        ep_upperTranslation : ep_number_type,
+     },
+    ep_mouse : { 
+        'class'             : box2d.b2MouseJointDef,
+        'base'              : _basetypes['joint'],
+        ep_target           : box2d.b2Vec2,
+        ep_maxForce         : ep_number_type,
+        ep_frequencyHz      : ep_number_type,
+        ep_dampingRatio     : ep_number_type,
+        ep_timeStep         : ep_number_type,
+     },
+    ep_prismatic : { 
+        'class'             : box2d.b2PrismaticJointDef,
+        'base'              : _basetypes['joint'],
+        ep_enableLimit      : bool,
+        ep_enableMotor      : bool,
+        ep_localAnchor1     : box2d.b2Vec2,
+        ep_localAnchor2     : box2d.b2Vec2,
+        ep_localAxis1       : box2d.b2Vec2,
+        ep_lowerTranslation : ep_number_type,
+        ep_maxMotorForce    : ep_number_type,
+        ep_motorSpeed       : ep_number_type,
+        ep_upperTranslation : ep_number_type,
+        ep_referenceAngle   : ep_number_type,
+     },
+    ep_pulley : { 
+        'class'             : box2d.b2PulleyJointDef,
+        'base'              : _basetypes['joint'],
+        ep_groundAnchor1    : box2d.b2Vec2,
+        ep_groundAnchor2    : box2d.b2Vec2,
+        ep_localAnchor1     : box2d.b2Vec2,
+        ep_localAnchor2     : box2d.b2Vec2,
+        ep_length1          : ep_number_type,
+        ep_maxLength1       : ep_number_type,
+        ep_length2          : ep_number_type,
+        ep_maxLength2       : ep_number_type,
+        ep_ratio            : ep_number_type,
+     },
+    ep_revolute : { 
+        'class'             : box2d.b2RevoluteJointDef,
+        'base'              : _basetypes['joint'],
+        ep_localAnchor1     : box2d.b2Vec2,
+        ep_localAnchor2     : box2d.b2Vec2,
+        ep_referenceAngle   : ep_number_type,
+        ep_enableLimit      : bool,
+        ep_lowerAngle       : ep_number_type,
+        ep_upperAngle       : ep_number_type,
+        ep_motorSpeed       : ep_number_type,
+        ep_maxMotorTorque   : ep_number_type,
+      },
+}
+
 class World (object):
     config = None
     world  = None
+
     def __init__(self, **kw):
         '''Initialize the world and set configuration variables.
         
@@ -270,6 +416,15 @@ class World (object):
         '''
 
         self.config = Config(**kw)
+
+        global _creation_info
+        for type_ in _creation_info.keys():
+            data = _creation_info[type_]
+            if 'base' in data:
+                for basekey in data['base'].keys():
+                    data[basekey] = data['base'][basekey]
+                del data['base']
+
         debugstr(1, "Initialized") 
         debugstr(2, self.config) 
 
@@ -294,6 +449,11 @@ class World (object):
         self.config._set(**kw)
 
     def _create_body(self, bodyDef):
+        '''Create a body based on a dict definition
+        
+        Returns: The created world body
+        '''
+
         bd = box2d.b2BodyDef()
         body = self.world.CreateBody(bd)
 
@@ -301,150 +461,38 @@ class World (object):
             for shapedef in bodyDef[ep_shapes]:
                 self._create_generic(shapedef, body)
 
-    def _create_generic(self, defn, shapeBody=None):
-        number = (float, int)
-        lists = (tuple, list)
-        userdata_type = object
-        b2ShapeType = [] # define me
-        b2JointType = [] # define me
+    def _create_generic(self, defn, shapeBody=None, strictCheck=True):
+        '''Create a body, shape, or joint based on a dict definition
 
-        shapetype = {
-            'create_fcn'    : shapeBody.CreateShape,
-            ep_body         : box2d.b2Body,
-            ep_density      : number,
-            ep_filter       : box2d.b2FilterData,
-            ep_friction     : number,
-            ep_isSensor     : bool,
-            ep_localPosition: box2d.b2Vec2,
-            ep_restitution  : number,
-            ep_type         : b2ShapeType,
-            ep_userData     : userdata_type,
-        }
+        Returns: The created world object
+        '''
 
-        jointtype = {
-            'create_fcn'       : self.world.CreateJoint,
-            ep_body1           : box2d.b2Body,
-            ep_body2           : box2d.b2Body,
-            ep_collideConnected: bool,
-            ep_type            : b2JointType,
-            ep_userData        : userdata_type,
-        }
-
-        info = {
-            # shapes
-            ep_circle : { 
-                'class'     : box2d.b2CircleDef,
-                'base'      : shapetype,
-                ep_radius   : number,
-             },
-            ep_polygon : {
-                'class'     : box2d.b2PolygonDef,
-                'base'      : shapetype,
-                ep_vertices : lists,
-             },
-            ep_edge    : { 
-                'class'    : box2d.b2EdgeChainDef,
-                'base'     : shapetype,
-                ep_vertices: lists,
-                ep_isALoop : bool,
-             },
-
-            # joints
-            ep_distance : { 
-                'class'         : box2d.b2DistanceJointDef,
-                'base'          : jointtype,
-                ep_localAnchor1 : box2d.b2Vec2,
-                ep_localAnchor2 : box2d.b2Vec2,
-                ep_length       : number,
-             },
-            ep_gear : { 
-                'class'   : box2d.b2GearJointDef,
-                'base'    : jointtype,
-                ep_joint1 : box2d.b2Joint,
-                ep_joint2 : box2d.b2Joint,
-                ep_ratio  : number,
-             },
-            ep_line : { 
-                'class'             : box2d.b2LineJointDef,
-                'base'              : jointtype,
-                ep_enableLimit      : bool,
-                ep_enableMotor      : bool,
-                ep_localAnchor1     : box2d.b2Vec2,
-                ep_localAnchor2     : box2d.b2Vec2,
-                ep_localAxis1       : box2d.b2Vec2,
-                ep_lowerTranslation : number,
-                ep_maxMotorForce    : number,
-                ep_motorSpeed       : number,
-                ep_upperTranslation : number,
-             },
-            ep_mouse : { 
-                'class'        : box2d.b2MouseJointDef,
-                'base'         : jointtype,
-                ep_target      : box2d.b2Vec2,
-                ep_maxForce    : number,
-                ep_frequencyHz : number,
-                ep_dampingRatio: number,
-                ep_timeStep    : number,
-             },
-            ep_prismatic : { 
-                'class'             : box2d.b2PrismaticJointDef,
-                'base'              : jointtype,
-                ep_enableLimit      : bool,
-                ep_enableMotor      : bool,
-                ep_localAnchor1     : box2d.b2Vec2,
-                ep_localAnchor2     : box2d.b2Vec2,
-                ep_localAxis1       : box2d.b2Vec2,
-                ep_lowerTranslation : number,
-                ep_maxMotorForce    : number,
-                ep_motorSpeed       : number,
-                ep_upperTranslation : number,
-                ep_referenceAngle   : number,
-             },
-            ep_pulley : { 
-                'class'           : box2d.b2PulleyJointDef,
-                'base'            : jointtype,
-                ep_groundAnchor1  : box2d.b2Vec2,
-                ep_groundAnchor2  : box2d.b2Vec2,
-                ep_localAnchor1   : box2d.b2Vec2,
-                ep_localAnchor2   : box2d.b2Vec2,
-                ep_length1        : number,
-                ep_maxLength1     : number,
-                ep_length2        : number,
-                ep_maxLength2     : number,
-                ep_ratio          : number,
-             },
-            ep_revolute : { 
-                'class'             : box2d.b2RevoluteJointDef,
-                'base'              : jointtype,
-                ep_localAnchor1     : box2d.b2Vec2,
-                ep_localAnchor2     : box2d.b2Vec2,
-                ep_referenceAngle   : number,
-                ep_enableLimit      : bool,
-                ep_lowerAngle       : number,
-                ep_upperAngle       : number,
-                ep_motorSpeed       : number,
-                ep_maxMotorTorque   : number,
-              },
-        }
-
-        # put this elsewhere:
-        for type_ in info.keys():
-            data = info[type_]
-            for basekey in data['base'].keys():
-                data[basekey] = data['base'][basekey]
-            del data['base']
+        if 'type' not in defn: # assume body
+            return self._create_body(defn)
 
         try:        
             type_ = defn[ep_type]
-            data = info[type_]
+            cinfo = _creation_info[type_]
         except KeyError:
             raise ep_InvalidDefinition, "Requires valid type"
 
-        b2def = data['class']()
+        b2def = cinfo['class']()
 
-        print data
+        debugstr(2, "Creating: %s (cinfo: %s)" % (_dict_format(defn), _dict_format(cinfo)))
+        for key in defn.keys():
 
-        create_fcn = data['create_fcn']
+            if key not in cinfo:
+                if key == ep_type:
+                    continue
+                if strictCheck:
+                    raise ep_InvalidDefinition, "Extraneous entry '%s'. Remove or disable strict checking" % key
+                debugstr(2, "Extraneous key '%s' found in definition" % key)
+                continue
+
+            setattr(b2def, key, _type_check(cinfo[key], defn[key]))
+
+
+        create_fcn = cinfo['create_fcn'](self.world, shapeBody)
         return create_fcn(b2def)
 
     def create(self, objectDef):
@@ -453,10 +501,10 @@ class World (object):
 
         With a ..........
 
-        If a b2[Shape|Body|Joint]Def is passed in, it will be passed
+        If a b2[Body|Joint]Def is passed in, it will be passed
         to box2d and created.
 
-        Raises ep_InvalidParameter f the type of the object cannot be determined.
+        Raises ep_InvalidParameter if the type of the object cannot be determined.
 
         Returns: The created object
         """
@@ -469,22 +517,11 @@ class World (object):
         if isinstance(objectDef, body_defs):
             return self.world.CreateBody(objectDef)
         elif isinstance(objectDef, shape_defs):
-            return self.world.CreateShape(objectDef)
+            raise ep_InvalidParameter, "Shape must be created on a body (body.CreateShape)"
         elif isinstance(objectDef, joint_defs):
             return self.world.CreateJoint(objectDef)
         elif isinstance(objectDef, dict):
-            if 'type' in objectDef:
-                return self._create_generic(objectDef)
-###################################
-                
-                if objectDef['type'] in ep_shape_types:
-                    self._create_shape(objectDef)
-                elif objectDef['type'] in ep_joint_types:
-                    self._create_joint(objectDef)
-                else:
-                    raise ep_InvalidParameter, "Unknown object type"
-            else: #assume body
-                return self._create_body(objectDef)
+            return self._create_generic(objectDef)
         else:
             raise ep_InvalidParameter
 

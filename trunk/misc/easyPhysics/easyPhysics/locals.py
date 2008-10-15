@@ -66,9 +66,18 @@ ep_pulley   ="pulley"
 ep_revolute ="revolute"
 
 # body creation
-ep_shapes   ="shapes"
-######### others
-
+ep_shapes        ="shapes"
+ep_massData      ="massData"
+ep_userData      ="userData"
+ep_position      ="position"
+ep_angle         ="angle"
+ep_linearDamping ="linearDamping"
+ep_angularDamping="angularDamping"
+ep_allowSleep    ="allowSleep"
+ep_isSleeping    ="isSleeping"
+ep_fixedRotation ="fixedRotation"
+ep_isBullet      ="isBullet"
+ep_collisionGroup="collisionGroup"
 
 # (Note that not all are shown for each type, since
 #  names overlap between the joints. See main.py
@@ -137,6 +146,11 @@ ep_maxMotorTorque  ="maxMotorTorque"
 
 ep_shape_types=(ep_circle,ep_polygon,ep_edge)
 ep_joint_types=(ep_distance,ep_gear,ep_line,ep_mouse,ep_prismatic,ep_pulley,ep_revolute)
+
+# types for creation:
+ep_number_type   = (int, float)
+ep_list_type     = (list, tuple)
+ep_userdata_type = object
 
 # easyPhysics exceptions:
 class ep_Exception (Exception): pass
