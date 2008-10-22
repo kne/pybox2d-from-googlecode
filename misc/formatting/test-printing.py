@@ -97,4 +97,15 @@ test=b2Version(); print test, "\n"
 test=b2XForm(); print test, "\n"
 test=b2EdgeChainDef(); print test, "\n"
 
+test=b2BuoyancyController(); print test, "\n"
+test=b2ConstantAccelController()
+test.A.Set(0,0)
+print test, "\n"
+test=b2ConstantForceController()
+test.F.Set(0,0)
+print test, "\n"
+#test=b2Controller(); print test, "\n"
+test=b2GravityController(); print test, "\n"
+test=b2TensorDampingController(); 
+print test, "\n"
 print "Done"

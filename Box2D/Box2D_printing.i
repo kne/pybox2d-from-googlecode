@@ -19,8 +19,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2Body(GetAngle():%s GetAngularVelocity():%s GetInertia():%s GetLinearVelocity():%s GetLocalCenter():%s GetMass():%s GetPosition():%s GetWorldCenter():%s GetXForm():%s IsBullet():%s IsDynamic():%s IsFrozen():%s IsSleeping():%s IsStatic():%s)" %\
-            tuple([str(a) for a in (self.GetAngle(),self.GetAngularVelocity(),self.GetInertia(),self.GetLinearVelocity(),self.GetLocalCenter(),self.GetMass(),self.GetPosition(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsSleeping(),self.IsStatic())])
+        return "b2Body(GetAngle():%s GetAngularVelocity():%s GetControllerList():%s GetInertia():%s GetLinearVelocity():%s GetLocalCenter():%s GetMass():%s GetPosition():%s GetWorldCenter():%s GetXForm():%s IsBullet():%s IsDynamic():%s IsFrozen():%s IsSleeping():%s IsStatic():%s)" %\
+            tuple([str(a) for a in (self.GetAngle(),self.GetAngularVelocity(),self.GetControllerList(),self.GetInertia(),self.GetLinearVelocity(),self.GetLocalCenter(),self.GetMass(),self.GetPosition(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsSleeping(),self.IsStatic())])
     %}
 }
 
@@ -73,8 +73,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2CircleShape(GetBody():%s GetFilterData():%s GetFriction():%s GetLocalPosition():%s GetRadius():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
-            tuple([str(a) for a in (self.GetBody(),self.GetFilterData(),self.GetFriction(),self.GetLocalPosition(),self.GetRadius(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
+        return "b2CircleShape(GetBody():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetLocalPosition():%s GetRadius():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetLocalPosition(),self.GetRadius(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
     %}
 }
 
@@ -359,8 +359,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2PolygonShape(GetBody():%s GetCentroid():%s GetCoreVertices():%s GetFilterData():%s GetFriction():%s GetOBB():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertexCount():%s IsSensor():%s)" %\
-            tuple([str(a) for a in (self.GetBody(),self.GetCentroid(),self.GetCoreVertices(),self.GetFilterData(),self.GetFriction(),self.GetOBB(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertexCount(),self.IsSensor())])
+        return "b2PolygonShape(GetBody():%s GetCentroid():%s GetCoreVertices():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetOBB():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertexCount():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCentroid(),self.GetCoreVertices(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetOBB(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertexCount(),self.IsSensor())])
     %}
 }
 
@@ -440,8 +440,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2Shape(GetBody():%s GetFilterData():%s GetFriction():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
-            tuple([str(a) for a in (self.GetBody(),self.GetFilterData(),self.GetFriction(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
+        return "b2Shape(GetBody():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
     %}
 }
 
@@ -458,7 +458,7 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2StackAllocator(GetMaxAllocation():%s)" % (['self.GetMaxAllocation()'])
+        return "b2StackAllocator(GetMaxAllocation():%s)" % (self.GetMaxAllocation())
     %}
 }
 
@@ -502,8 +502,8 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2World(GetBodyCount():%s GetContactCount():%s GetGravity():%s GetGroundBody():%s GetJointCount():%s GetPairCount():%s GetProxyCount():%s)" %\
-            tuple([str(a) for a in (self.GetBodyCount(),self.GetContactCount(),self.GetGravity(),self.GetGroundBody(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount())])
+        return "b2World(GetBodyCount():%s GetContactCount():%s GetControllerCount():%s GetControllerList():%s GetGravity():%s GetGroundBody():%s GetJointCount():%s GetPairCount():%s GetProxyCount():%s)" %\
+            tuple([str(a) for a in (self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetControllerList(),self.GetGravity(),self.GetGroundBody(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount())])
     %}
 }
 
@@ -547,8 +547,59 @@ public:
 public:
     %pythoncode %{
     def __repr__(self):
-        return "b2EdgeShape(GetBody():%s GetCoreVertex1():%s GetCoreVertex2():%s GetCorner1Vector():%s GetCorner2Vector():%s GetDirectionVector():%s GetFilterData():%s GetFriction():%s GetLength():%s GetNormalVector():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertex1():%s GetVertex2():%s IsSensor():%s)" %\
-            tuple([str(a) for a in (self.GetBody(),self.GetCoreVertex1(),self.GetCoreVertex2(),self.GetCorner1Vector(),self.GetCorner2Vector(),self.GetDirectionVector(),self.GetFilterData(),self.GetFriction(),self.GetLength(),self.GetNormalVector(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertex1(),self.GetVertex2(),self.IsSensor())])
+        return "b2EdgeShape(GetBody():%s GetCoreVertex1():%s GetCoreVertex2():%s GetCorner1Vector():%s GetCorner2Vector():%s GetDensity():%s GetDirectionVector():%s GetFilterData():%s GetFriction():%s GetLength():%s GetNormalVector():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertex1():%s GetVertex2():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCoreVertex1(),self.GetCoreVertex2(),self.GetCorner1Vector(),self.GetCorner2Vector(),self.GetDensity(),self.GetDirectionVector(),self.GetFilterData(),self.GetFriction(),self.GetLength(),self.GetNormalVector(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertex1(),self.GetVertex2(),self.IsSensor())])
+    %}
+}
+
+%extend b2BuoyancyController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2BuoyancyController(angularDrag:%s density:%s gravity:%s linearDrag:%s normal:%s offset:%s useDensity:%s useWorldGravity:%s velocity:%s)" %\
+            tuple([str(a) for a in (self.angularDrag,self.density,self.gravity,self.linearDrag,self.normal,self.offset,self.useDensity,self.useWorldGravity,self.velocity)])
+    %}
+}
+
+%extend b2ConstantAccelController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ConstantAccelController(A:%s)" % (self.A)
+    %}
+}
+
+%extend b2ConstantForceController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ConstantForceController(F:%s)" % (self.F)
+    %}
+}
+
+%extend b2Controller {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2Controller()"
+    %}
+}
+
+%extend b2GravityController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2GravityController(G:%s invSqr:%s)" %\
+            tuple([str(a) for a in (self.G,self.invSqr)])
+    %}
+}
+
+%extend b2TensorDampingController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2TensorDampingController(T:%s maxTimestep:%s)" %\
+            tuple([str(a) for a in (self.T,self.maxTimestep)])
     %}
 }
 
