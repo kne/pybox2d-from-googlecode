@@ -59,8 +59,8 @@ interface_file = "Box2D.i"
 build_type="float"
 
 # release version number
-box2d_version = "2.0.1"
-release_number = 5
+box2d_version = "2.0.2"
+release_number = 0
 
 # all_data holds the filenames to include in the distribution
 # -> shouldn't be used on linux, as it'll copy to '/' for some reason.
