@@ -52,6 +52,8 @@ void b2EdgeShape::UpdateSweepRadius(const b2Vec2& center)
 
 bool b2EdgeShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
 {
+	B2_NOT_USED(p);
+	B2_NOT_USED(transform);
 	return false;
 }
 
@@ -121,6 +123,20 @@ void b2EdgeShape::ComputeMass(b2MassData* massData) const
 	// inertia about the local origin
 	massData->I = 0;
 }
+
+/// @see b2Shape::ComputeSubmergedArea
+float32 b2EdgeShape::ComputeSubmergedArea(	const b2Vec2& normal,
+											float32 offset,
+											const b2XForm& xf, 
+											b2Vec2* c) const
+{
+	B2_NOT_USED(normal); 
+	B2_NOT_USED(offset); 
+	B2_NOT_USED(xf); 
+	B2_NOT_USED(c); 
+	return 0.0;
+}
+
 
 b2Vec2 b2EdgeShape::Support(const b2XForm& xf, const b2Vec2& d) const
 {

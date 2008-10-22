@@ -40,6 +40,12 @@ For discussion please visit http://www.box2d.org/forum
 #include "Dynamics/b2WorldCallbacks.h"
 #include "Dynamics/b2World.h"
 #include "Dynamics/b2Body.h"
+#include "Dynamics/Controllers/b2BuoyancyController.h"
+#include "Dynamics/Controllers/b2ConstantAccelController.h"
+#include "Dynamics/Controllers/b2ConstantForceController.h"
+#include "Dynamics/Controllers/b2Controller.h"
+#include "Dynamics/Controllers/b2GravityController.h"
+#include "Dynamics/Controllers/b2TensorDampingController.h"
 
 #include "Dynamics/Contacts/b2Contact.h"
 
