@@ -21,10 +21,19 @@
 
 
 from test_main import *
-class DynamicEdges (Framework):
-    name="DynamicEdges"
+class EdgesBuoyancy (Framework):
+    name="EdgesBuoyancy"
     def __init__(self):
-        super(DynamicEdges, self).__init__()
+        super(EdgesBuoyancy, self).__init__()
+        self.bc=box2d.b2BuoyancyController()
+        self.world.AddController(self.bc)
+        
+        self.bc.offset = 15
+        self.bc.normal.Set(0,1)
+        self.bc.density = 2
+        self.bc.linearDrag = 2
+        self.bc.angularDrag = 1
+        
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
         body = self.world.CreateBody(bd) 
@@ -52,6 +61,7 @@ class DynamicEdges (Framework):
             body.CreateShape(sd1)
             body.CreateShape(sd2)
             body.SetMassFromShapes()
+            self.bc.AddBody(body)
     
         sd1=box2d.b2PolygonDef()
         sd1.SetAsBox(0.25, 0.5)
@@ -70,6 +80,7 @@ class DynamicEdges (Framework):
             body.CreateShape(sd1)
             body.CreateShape(sd2)
             body.SetMassFromShapes()
+            self.bc.AddBody(body)
     
         xf1=box2d.b2XForm()
         xf1.R.Set(0.3524 * box2d.b2_pi)
@@ -102,6 +113,7 @@ class DynamicEdges (Framework):
             body.CreateShape(sd1)
             body.CreateShape(sd2)
             body.SetMassFromShapes()
+            self.bc.AddBody(body)
     
         sd_bottom=box2d.b2PolygonDef()
         sd_bottom.SetAsBox( 1.5, 0.15 )
@@ -122,6 +134,7 @@ class DynamicEdges (Framework):
         body.CreateShape(sd_left)
         body.CreateShape(sd_right)
         body.SetMassFromShapes()
+        self.bc.AddBody(body)
     
         loop1=[
             (0.063134534,8.3695248),
@@ -242,6 +255,7 @@ class DynamicEdges (Framework):
         body.CreateShape(edgeDef)
         
         body.SetMassFromShapes()
+        self.bc.AddBody(body)
         
         body = self.world.CreateBody(bd)
         weight.radius = 5.0
@@ -252,6 +266,7 @@ class DynamicEdges (Framework):
         body.CreateShape(edgeDef)
         
         body.SetMassFromShapes()
+        self.bc.AddBody(body)
 
 if __name__=="__main__":
-    main(DynamicEdges)
+    main(EdgesBuoyancy)

@@ -19,6 +19,12 @@ SOURCES = \
 	./Dynamics/Contacts/b2EdgeAndCircleContact.cpp \
 	./Dynamics/Contacts/b2PolyAndEdgeContact.cpp \
 	./Dynamics/Contacts/b2ContactSolver.cpp \
+	./Dynamics/Controllers/b2BuoyancyController.cpp \
+	./Dynamics/Controllers/b2ConstantAccelController.cpp \
+	./Dynamics/Controllers/b2ConstantForceController.cpp \
+	./Dynamics/Controllers/b2Controller.cpp \
+	./Dynamics/Controllers/b2GravityController.cpp \
+	./Dynamics/Controllers/b2TensorDampingController.cpp \
 	./Dynamics/b2WorldCallbacks.cpp \
 	./Dynamics/Joints/b2MouseJoint.cpp \
 	./Dynamics/Joints/b2PulleyJoint.cpp \

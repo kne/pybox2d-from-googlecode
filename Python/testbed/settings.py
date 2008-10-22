@@ -25,6 +25,7 @@ class fwSettings(object):
     positionIterations=8
     drawStats=False
     drawShapes=True
+    drawControllers=True
     drawJoints=True
     drawCoreShapes=False
     drawAABBs=False

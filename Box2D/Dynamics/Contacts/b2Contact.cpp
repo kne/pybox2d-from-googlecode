@@ -37,7 +37,6 @@ void b2Contact::InitializeRegisters()
 	AddType(b2CircleContact::Create, b2CircleContact::Destroy, e_circleShape, e_circleShape);
 	AddType(b2PolyAndCircleContact::Create, b2PolyAndCircleContact::Destroy, e_polygonShape, e_circleShape);
 	AddType(b2PolygonContact::Create, b2PolygonContact::Destroy, e_polygonShape, e_polygonShape);
-	
 	AddType(b2EdgeAndCircleContact::Create, b2EdgeAndCircleContact::Destroy, e_edgeShape, e_circleShape);
 	AddType(b2PolyAndEdgeContact::Create, b2PolyAndEdgeContact::Destroy, e_polygonShape, e_edgeShape);
 }

@@ -20,8 +20,8 @@
 #include "../b2Body.h"
 #include "../b2WorldCallbacks.h"
 #include "../../Common/b2BlockAllocator.h"
-#include "../../Collision/Shapes/b2CircleShape.h"
 #include "../../Collision/Shapes/b2EdgeShape.h"
+#include "../../Collision/Shapes/b2CircleShape.h"
 
 #include <new>
 #include <cstring>

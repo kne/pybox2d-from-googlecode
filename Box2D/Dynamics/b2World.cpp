@@ -39,10 +39,12 @@ b2World::b2World(const b2AABB& worldAABB, const b2Vec2& gravity, bool doSleep)
 	m_bodyList = NULL;
 	m_contactList = NULL;
 	m_jointList = NULL;
+	m_controllerList = NULL;
 
 	m_bodyCount = 0;
 	m_contactCount = 0;
 	m_jointCount = 0;
+	m_controllerCount = 0;
 
 	m_warmStarting = true;
 	m_continuousPhysics = true;
@@ -140,6 +142,16 @@ void b2World::DestroyBody(b2Body* b)
 		}
 
 		DestroyJoint(jn0->joint);
+	}
+
+	//Detach controllers attached to this body
+	b2ControllerEdge* ce = b->m_controllerList;
+	while(ce)
+	{
+		b2ControllerEdge* ce0 = ce;
+		ce = ce->nextController;
+
+		ce0->controller->RemoveBody(b);
 	}
 
 	// Delete the attached shapes. This destroys broad-phase
@@ -310,6 +322,32 @@ void b2World::DestroyJoint(b2Joint* j)
 	}
 }
 
+b2Controller* b2World::AddController(b2Controller* def)
+{
+	def->m_next = m_controllerList;
+	def->m_prev = NULL;
+	if(m_controllerList)
+		m_controllerList->m_prev = def;
+	m_controllerList = def;
+	++m_controllerCount;
+
+	def->m_world = this;
+
+	return def;
+}
+
+void b2World::RemoveController(b2Controller* controller)
+{
+	b2Assert(m_controllerCount>0);
+	if(controller->m_next)
+		controller->m_next->m_prev = controller->m_prev;
+	if(controller->m_prev)
+		controller->m_prev->m_next = controller->m_next;
+	if(controller == m_controllerList)
+		m_controllerList = controller->m_next;
+	--m_controllerCount;
+}
+
 void b2World::Refilter(b2Shape* shape)
 {
 	b2Assert(m_lock == false);
@@ -320,6 +358,12 @@ void b2World::Refilter(b2Shape* shape)
 // Find islands, integrate and solve constraints, solve position constraints
 void b2World::Solve(const b2TimeStep& step)
 {
+	// Step all controlls
+	for(b2Controller* controller = m_controllerList;controller;controller=controller->m_next)
+	{
+		controller->Step(step);
+	}
+
 	// Size the island for the worst case.
 	b2Island island(m_bodyCount, m_contactCount, m_jointCount, &m_stackAllocator, m_contactListener);
 
@@ -504,12 +548,10 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		c->m_flags &= ~(b2Contact::e_toiFlag | b2Contact::e_islandFlag);
 	}
 
-#ifdef B2_TOI_JOINTS
 	for (b2Joint* j = m_jointList; j; j = j->m_next)
 	{
             j->m_islandFlag = false;
 	}
-#endif
 
 	// Find TOI events and solve them.
 	for (;;)
@@ -689,7 +731,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				other->m_flags |= b2Body::e_islandFlag;
 			}
 			
-#ifdef B2_TOI_JOINTS
 			for (b2JointEdge* jn = b->m_jointList; jn; jn = jn->next)
 			{
 				if (island.m_jointCount == island.m_jointCapacity)
@@ -723,7 +764,6 @@ void b2World::SolveTOI(const b2TimeStep& step)
 				queue[queueStart + queueSize++] = other;
 				other->m_flags |= b2Body::e_islandFlag;
 			}
-#endif
 
 		}
 
@@ -732,6 +772,7 @@ void b2World::SolveTOI(const b2TimeStep& step)
 		subStep.dt = (1.0f - minTOI) * step.dt;
 		b2Assert(subStep.dt > B2_FLT_EPSILON);
 		subStep.inv_dt = 1.0f / subStep.dt;
+		subStep.dtRatio = 0.0f;
 		subStep.velocityIterations = step.velocityIterations;
 		subStep.positionIterations = step.positionIterations;
 
@@ -942,7 +983,7 @@ void b2World::DrawShape(b2Shape* shape, const b2XForm& xf, const b2Color& color,
 			}
 		}
 		break;
-		
+
 	case e_edgeShape:
 		{
 			b2EdgeShape* edge = (b2EdgeShape*)shape;
@@ -1041,6 +1082,14 @@ void b2World::DrawDebugData()
 			{
 				DrawJoint(j);
 			}
+		}
+	}
+
+	if (flags & b2DebugDraw::e_controllerBit)
+	{
+		for (b2Controller* c = m_controllerList; c; c= c->GetNext())
+		{
+			c->Draw(m_debugDraw);
 		}
 	}
 
