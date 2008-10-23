@@ -20,6 +20,9 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
+10/22/2008
+Updated to SVN r177 (with user contribution: b2Controller support)
+
 8/23/2008
 Backported mostly to pyglet.
 Added more comments, documentation, fixes.
@@ -663,6 +666,7 @@ class Framework(pyglet.window.Window):
         flags = 0
         if settings.drawShapes:     flags |= box2d.b2DebugDraw.e_shapeBit
         if settings.drawJoints:     flags |= box2d.b2DebugDraw.e_jointBit
+        if settings.drawControllers:flags |= box2d.b2DebugDraw.e_controllerBit
         if settings.drawCoreShapes: flags |= box2d.b2DebugDraw.e_coreShapeBit
         if settings.drawAABBs:      flags |= box2d.b2DebugDraw.e_aabbBit
         if settings.drawOBBs:       flags |= box2d.b2DebugDraw.e_obbBit

@@ -65,9 +65,9 @@ class Buoyancy (Framework):
             
             self.bc.AddBody(body)
         
-            anchor=box2d.b2Vec2(-15.0 + 1.0 * numPlanks, 5.0)
-            jd.Initialize(prevBody, ground, anchor)
-            self.world.CreateJoint(jd).getAsType()
+        anchor=box2d.b2Vec2(-15.0 + 1.0 * numPlanks, 5.0)
+        jd.Initialize(prevBody, ground, anchor)
+        self.world.CreateJoint(jd).getAsType()
         
         for i in range(2):
             sd=box2d.b2PolygonDef()
