@@ -255,7 +255,9 @@ class EdgesBuoyancy (Framework):
         body.CreateShape(edgeDef)
         
         body.SetMassFromShapes()
-        self.bc.AddBody(body)
+        #self.bc.AddBody(body)
+        # edges and buoyancy aren't quite working yet
+        # you can uncomment this and see what happens
         
         body = self.world.CreateBody(bd)
         weight.radius = 5.0
@@ -266,7 +268,7 @@ class EdgesBuoyancy (Framework):
         body.CreateShape(edgeDef)
         
         body.SetMassFromShapes()
-        self.bc.AddBody(body)
+        #self.bc.AddBody(body)
 
 if __name__=="__main__":
     main(EdgesBuoyancy)

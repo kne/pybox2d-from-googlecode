@@ -17,6 +17,7 @@
 */
 
 #include "b2EdgeShape.h"
+#include "../../Dynamics/b2Body.h"
 
 b2EdgeShape::b2EdgeShape(const b2Vec2& v1, const b2Vec2& v2, const b2ShapeDef* def)
 : b2Shape(def)
@@ -130,11 +131,51 @@ float32 b2EdgeShape::ComputeSubmergedArea(	const b2Vec2& normal,
 											const b2XForm& xf, 
 											b2Vec2* c) const
 {
-	B2_NOT_USED(normal); 
-	B2_NOT_USED(offset); 
-	B2_NOT_USED(xf); 
-	B2_NOT_USED(c); 
-	return 0.0;
+	//Vertices in world co-ordinates
+	b2Vec2 v0 = m_body->GetPosition();
+	v0 += (offset - b2Dot(v0, normal)) * normal;
+	b2Vec2 v1 = b2Mul(xf, m_v1);
+	b2Vec2 v2 = b2Mul(xf, m_v2);
+	
+	//Depths
+	float32 d1 = b2Dot(v1, normal) - offset;
+	float32 d2 = b2Dot(v2, normal) - offset;
+	
+	b2Vec2 p2,p3;
+	if(d1<0)
+	{
+		if(d2<0){
+			p2=v1;
+			p3=v2;
+		}else{
+			p2=v1;
+			p3=v1+ ((0-d1)/(d2-d1)) * (v2 - v1);
+		}
+	}else{
+		if(d2<0){
+			p2=v1+ ((0-d1)/(d2-d1)) * (v2 - v1);
+			p3=v2;
+		}else{
+			return 0;
+		}
+	}
+	
+	b2Vec2 p1=v0;
+	
+	b2Vec2 e1 = p2 - p1;
+	b2Vec2 e2 = p3 - p1;
+
+	float32 D = b2Cross(e1, e2);
+
+	float32 triangleArea = 0.5f * D;
+
+	// Area weighted centroid
+	const float32 k_inv3 = 1.0f / 3.0f;
+
+	b2Vec2 center = triangleArea * k_inv3 * (p1 + p2 + p3);
+	
+	*c = center;
+	return triangleArea;
 }
 
 
