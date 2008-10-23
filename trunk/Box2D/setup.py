@@ -40,6 +40,7 @@ from distutils.command import build_ext
 
 import glob
 import os
+import sys
 
 #-----------------------------------------------------------------
 # config variables
@@ -132,6 +133,9 @@ if distutils.util.get_platform() == "win32":
 
     print "Win32 detected. Attempting to use MinGW."
     build_ext_options['compiler']='mingw32'
+elif "bdist_mpkg" in sys.argv: # osx
+    if release_install:
+        add_data(release_dir, data_subdirs)
 
 # Fix the library name
 distutils_fix()
