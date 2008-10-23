@@ -1,0 +1,42 @@
+#summary Installer information for various platforms
+#labels Featured,Phase-Deploy
+
+= OS X =
+
+== Dependencies ==
+
+Requires the Python versions from the official [http://www.python.org/download/ site]. 
+
+== pygame ==
+
+*pygame* is not included in the installer. If you want to try the testbed applications (and you should), you must install a few additional things. From the [http://www.pygame.org pygame] site:
+
+[http://www.pygame.org/ftp/pygame-1.8.1release-py2.5-macosx10.5.zip pygame-1.8.1release-py2.5-macosx10.5.zip] (for Python 2.5)
+
+[http://www.pygame.org/ftp/pygame-1.8.1release-py2.4-macosx10.5.zip pygame-1.8.1release-py2.4-macosx10.5.zip] (for Python 2.4)
+
+[http://www.pygame.org/ftp/pyobjc-1.4-py2.5-macosx10.4.mpkg.zip pyobjc-1.4-py2.5-macosx10.4.mpkg.zip] (required to use pygame)
+
+== Directories ==
+
+You will find the testbed and manual installed in: */usr/local/share/box2d*
+
+The library itself is installed in Python's site-packages directory: */Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/!Box2D2*
+
+If, for some reason, you delete the site-packages and need to reinstall it (and the installer isn't putting the files there), you can try deleting */Library/Receipts/Box2D*
+
+= Windows =
+
+== Dependencies ==
+
+Requires the Python versions from the official [http://www.python.org/download/ site]. 
+
+== pygame ==
+
+*pygame* is not included in the installer. If you want to try the testbed applications (and you should), you must install [http://www.pygame.org pygame] for your version of Python (to see your Python's version, go to the command prompt and type {{{python -V}}}.)
+
+== Directories ==
+
+You will find the testbed and manual installed in: *C:\Python25\box2d*
+
+The library itself is installed in Python's site-packages directory: *C:\Python25\lib\site-packages\!Box2D2\*
