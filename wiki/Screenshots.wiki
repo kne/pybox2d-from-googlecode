@@ -5,15 +5,32 @@
 
 Here's a few screenshots of the testbed demos:
 
+= New for 2.0.2b0 =
+http://pybox2d.googlecode.com/svn/trunk/screenshots/buoyancy.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_Buoyancy.py test_Buoyancy.py]
+
+http://pybox2d.googlecode.com/svn/trunk/screenshots/staticedges.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_StaticEdges.py test_StaticEdges.py]
+
+http://pybox2d.googlecode.com/svn/trunk/screenshots/pyramidstaticedges.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_PyramidStaticEdges.py test_PyramidStaticEdges.py]
+
+http://pybox2d.googlecode.com/svn/trunk/screenshots/dynamicedges.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_DynamicEdges.py test_DynamicEdges.py]
+
+http://pybox2d.googlecode.com/svn/trunk/screenshots/breakablebody.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_BreakableBody.py test_BreakableBody.py]
+
 = Screenshots =
 
 http://pybox2d.googlecode.com/svn/trunk/screenshots/theojansen.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_TheoJansen.py test_TheoJansen.py]
-
-http://pybox2d.googlecode.com/svn/trunk/screenshots/breakablebody.png
-
-[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_BreakableBody.py test_BreakableBody.py]
 
 http://pybox2d.googlecode.com/svn/trunk/screenshots/applyforce.png
 
