@@ -28,6 +28,23 @@ First release that's not based on a major Box2D release. It combines Box2D SVN r
  * Raycasts (see !RayCast test and !BoxCutter test)
  * !TestSegment support
  * !BreakableBody test (forum [http://www.box2d.org/forum/viewtopic.php?f=3&t=836 post])
+ * Fixed: == was working, but != comparisons weren't.
+ * Access to polygon normals, core vertices, etc.
+ * cvar list fixed
+ * Off by one bug fixed for vertices
+
+New time step will require a few minor updates to your code:
+
+Old:
+{{{
+world.Step(timeStep, iterationCount)
+}}}
+
+New:
+{{{
+world.Step(timeStep, velocityIterations, positionIterations)
+}}}
+velocityIterations is usually 10, and positionIterations is usually 8.
 
 ===2.0.1b4 (6/1/2008)===
 
