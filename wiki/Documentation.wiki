@@ -17,17 +17,17 @@ The version numbers follow the main Box2D releases (currently 2.0.1) with a rele
 
 ===2.0.2b0 (10/23/2008)===
 
-First release that's not based on a major Box2D release. It combines Box2D SVN r177 and contributions from shaktool (thin line segment) and BorisTheBrave (controllers/buoyancy).
+First release that's not based on a major Box2D release. It combines Box2D SVN r177 and contributions from shaktool (thin line segment) and !BorisTheBrave (controllers/buoyancy).
 
  * Thin line segment support (forum [http://www.box2d.org/forum/viewtopic.php?f=3&t=1577 post])
  * Buoyancy with generic controller support (forum [http://www.box2d.org/forum/viewtopic.php?f=3&t=1664 post])
  * Pyglet 1.1 testbed (still has some issues. run convert-from-pygame.py to convert the tests from pygame)
  * OS X [Installer]
  * Python 2.6 support
- * Line joints (see test_LineJoint)
- * Raycasts (see test_RayCast or test_BoxCutter)
- * TestSegment
- * test_BreakableBody (forum [http://www.box2d.org/forum/viewtopic.php?f=3&t=836 post])
+ * Line joints (see !LineJoint test)
+ * Raycasts (see !RayCast test and !BoxCutter test)
+ * !TestSegment support
+ * !BreakableBody test (forum [http://www.box2d.org/forum/viewtopic.php?f=3&t=836 post])
 
 ===2.0.1b4 (6/1/2008)===
 
@@ -35,7 +35,7 @@ First release that's not based on a major Box2D release. It combines Box2D SVN r
  * Major clean ups with Box2D.i
  * Added some docstrings to Box2D.i functions
  * Added b2PolygonDef.checkValues(): checks the Polygon definition to see if upon creation it will cause an assertion to fail (raises ValueError)
- * Wrapped shape.GetCoreVertices() like GetVertices() (for test_TimeOfImpact)
+ * Wrapped shape.!GetCoreVertices() like !GetVertices() (for test_ !TimeOfImpact)
  * test_Web fixed
  * All stuff prettily printed by a semi-automated process now
  * Updated test_Bridge.py to SVN rev 156
@@ -43,7 +43,7 @@ First release that's not based on a major Box2D release. It combines Box2D SVN r
 
 ===2.0.1b3 (5/7/2008)===
 
- * Updated the interface to allow SetUserData() (absolutely necessary for setting the ground's userdata)
+ * Updated the interface to allow !SetUserData() (absolutely necessary for setting the ground's userdata)
  * Fixed b2PolygonShape (.vertexCount is now private, so the accessor is used instead)
  * Release for Python 2.4
  * Linux (possibly OS X) support with setup.py
