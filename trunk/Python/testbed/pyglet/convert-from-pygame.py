@@ -4,8 +4,8 @@ ignore = [ "main" ]
 import os
 import re
 
-print "Running this will overwrite files."
-os.system("pause")
+print "Running this will overwrite files. Press enter to continue."
+raw_input()
 
 def checkFile(file):
     if file[-3:]==".py" and file[:5]=="test_":
