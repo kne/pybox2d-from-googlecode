@@ -502,6 +502,13 @@ class Framework(pyglet.window.Window):
         self.world.SetContactListener(self.contactListener)
         self.world.SetDebugDraw(self.debugDraw)
 
+    def on_close(self):
+        """
+        Callback: user tried to close the window
+        """
+        pyglet.clock.unschedule(self.SimulationLoop)
+        super(Framework, self).on_close()
+
     def on_show(self):
         """
         Callback: the window was shown.
@@ -627,7 +634,6 @@ class Framework(pyglet.window.Window):
         """
         if self.settings.hz > 0.0:
             pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
-            pyglet.clock.set_fps_limit(1.0 / self.settings.hz)
         pyglet.app.run()
 
     def SetTextLine(self, line):
