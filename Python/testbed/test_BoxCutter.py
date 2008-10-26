@@ -178,7 +178,7 @@ class BoxCutter (Framework):
         # Make sure the shapes are valid before creation
         try:
             for n in range(2):
-                box2d.b2PythonCheckPolygonDef(newPolygon[0])
+                box2d.b2PythonCheckPolygonDef(newPolygon[n])
         except ValueError, s:
             print "Created bad shape:", s
             return False
