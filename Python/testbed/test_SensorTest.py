@@ -81,8 +81,14 @@ class SensorTest (Framework):
                 continue
 
             ground = self.m_sensor.GetBody()
-            circle = self.m_sensor.getAsType() ### ?
-            center = ground.GetWorldPoint(circle.GetLocalPosition())
+            typedshape = self.m_sensor.getAsType()
+            if isinstance(typedshape, box2d.b2CircleShape):
+                center = ground.GetWorldPoint(typedshape.GetLocalPosition())
+            elif isinstance(typedshape, box2d.b2PolygonShape):
+                center = ground.GetWorldPoint(typedshape.GetCentroid())
+            else:
+                print "don't know how to get the center of this shape, using (0,0)"
+                center = ground.GetWorldPoint(box2d.b2Vec2(0.0, 0.0))
 
             d = center - point.position
 
