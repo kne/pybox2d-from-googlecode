@@ -20,6 +20,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 class fwSettings(object):
+    backend="pygame"
     hz=60.0
     velocityIterations=10
     positionIterations=8
