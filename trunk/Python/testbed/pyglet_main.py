@@ -49,6 +49,7 @@ from pyglet import gl
 import Box2D2 as box2d
 #import psyco # a few fps faster with psyco
 from settings import fwSettings
+from pyglet_keymapper import *
 import math
 
 class fwDestructionListener(box2d.b2DestructionListener):
@@ -444,7 +445,7 @@ class Framework(pyglet.window.Window):
     bombSpawning = False
     bombSpawnPoint = None
     mouseJoint = None
-    settings = fwSettings()
+    settings = fwSettings
     mouseWorld = None
 
     # Box2D-callbacks
