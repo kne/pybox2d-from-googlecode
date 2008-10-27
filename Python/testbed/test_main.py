@@ -387,7 +387,7 @@ class Framework(object):
     world = None
     bomb = None
     mouseJoint = None
-    settings = fwSettings()
+    settings = fwSettings
     bombSpawning = False
     bombSpawnPoint = None
     mouseWorld = None
