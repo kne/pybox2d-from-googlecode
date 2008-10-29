@@ -1,8 +1,9 @@
 #summary Projects using pyBox2D
 
-=== Libraries ===
+=== Libraries / Add-ons ===
 
- * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API
+ * [http://code.google.com/p/pybox2d-foil/ pybox2d-foil] Airfoil physics simulation for pyBox2D by [http://code.google.com/u/snickell/ snickell]
+ * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API (dead?)
  * [http://wiki.laptop.org/go/Physics_(activity) OLPC Physics Activity] Basis for the OLPC Physics [http://developers.slashdot.org/article.pl?sid=08/08/18/2258228 Game Jam]
 
 === Games ===
