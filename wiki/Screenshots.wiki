@@ -1,127 +1,123 @@
 #summary Python/testbed Screenshots
 #labels Featured,Screenshots
 
-= Introduction =
-
-Here's a few screenshots of the testbed demos:
-
 = New for 2.0.2b0 =
-http://pybox2d.googlecode.com/svn/trunk/screenshots/buoyancy.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/buoyancy.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Buoyancy.py test_Buoyancy.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/staticedges.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/staticedges.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_StaticEdges.py test_StaticEdges.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/pyramidstaticedges.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/pyramidstaticedges.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_PyramidStaticEdges.py test_PyramidStaticEdges.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/dynamicedges.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/dynamicedges.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_DynamicEdges.py test_DynamicEdges.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/breakablebody.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/breakablebody.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_BreakableBody.py test_BreakableBody.py]
 
 = Screenshots =
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/theojansen.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/theojansen.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_TheoJansen.py test_TheoJansen.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/applyforce.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/applyforce.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_ApplyForce.py test_ApplyForce.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/biped.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/biped.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Biped.py test_Biped.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/bridge.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/bridge.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Bridge.py test_Bridge.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/car.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/car.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Car.py test_Car.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/ccdtest.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/ccdtest.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_CCDTest.py test_CCDTest.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/chain.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/chain.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Chain.py test_Chain.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/collisionfiltering.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/collisionfiltering.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_CollisionFiltering.py test_CollisionFiltering.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/compoundshapes.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/compoundshapes.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_CompoundShapes.py test_CompoundShapes.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/contactcallbacktest.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/contactcallbacktest.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_ContactCallbackTest.py test_ContactCallbackTest.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/distancetest.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/distancetest.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_DistanceTest.py test_DistanceTest.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/dominos-0.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/dominos-0.png
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/dominos-1.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/dominos-1.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Dominos.py test_Dominos.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/elasticbody.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/elasticbody.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_ElasticBody.py test_ElasticBody.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/gears.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/gears.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Gears.py test_Gears.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/motorsandlimits.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/motorsandlimits.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_MotorsAndLimits.py test_MotorsAndLimits.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/polyshapes.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/polyshapes.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_PolyShapes.py test_PolyShapes.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/pulleys.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/pulleys.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Pulleys.py test_Pulleys.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/pyramid.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/pyramid.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Pyramid.py test_Pyramid.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/sensortest.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/sensortest.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_SensorTest.py test_SensorTest.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/slidercrank.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/slidercrank.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_SliderCrank.py test_SliderCrank.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/varyingfriction.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/varyingfriction.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_VaryingFriction.py test_VaryingFriction.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/varyingrestitution.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/varyingrestitution.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_VaryingRestitution.py test_VaryingRestitution.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/verticalstack.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/verticalstack.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_VerticalStack.py test_VerticalStack.py]
 
-http://pybox2d.googlecode.com/svn/trunk/screenshots/web.png
+http://pybox2d.googlecode.com/svn/branches/screenshots/web.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/Python/testbed/test_Web.py test_Web.py]
