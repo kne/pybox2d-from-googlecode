@@ -22,7 +22,11 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef MSVC
 #define B2_NOT_USED(x) x
+#else
+#define B2_NOT_USED(x)
+#endif
 #define b2Assert(A) assert(A)
 
 // need to include NDS jtypes.h instead of 

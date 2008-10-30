@@ -95,11 +95,11 @@ setup (name = "Box2D",
         "Games :: Physics Libraries"
     ],
        
-    packages = ['Box2D'],
-    package_dir = {'Box2D': 'Box2D'},
-    py_modules = ['Box2D2'],
+#    packages = ['Box2D'],
+#    package_dir = {'Box2D': 'Box2D'},
+    py_modules = ['Box2D'],
     options={'build_ext':{'swig_opts':swig_arguments}},
     ext_modules = [Extension('_Box2D', ['Box2D/Box2D.i'] + box2d_source_files,
-                    language="c++"),]
+                    extra_compile_args=["-I."], language="c++"),]
     )
 
