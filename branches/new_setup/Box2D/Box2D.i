@@ -18,7 +18,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-%module(directors="1") Box2D2
+%module(directors="1") Box2D
 %{
     #include "Box2D.h"
     
