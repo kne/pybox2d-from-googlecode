@@ -34,10 +34,13 @@ b2EdgeShape::b2EdgeShape(const b2Vec2& v1, const b2Vec2& v2, const b2ShapeDef* d
 	m_normal.Set(m_direction.y, -m_direction.x);
 	
 	m_coreV1 = -b2_toiSlop * (m_normal - m_direction) + m_v1;
-	m_coreV1 = -b2_toiSlop * (m_normal + m_direction) + m_v2;
+	m_coreV2 = -b2_toiSlop * (m_normal + m_direction) + m_v2;
 	
 	m_cornerDir1 = m_normal;
 	m_cornerDir2 = -1.0f * m_normal;
+
+	m_nextEdge=NULL;
+	m_prevEdge=NULL;
 }
 
 void b2EdgeShape::UpdateSweepRadius(const b2Vec2& center)

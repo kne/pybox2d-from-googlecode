@@ -27,6 +27,19 @@
 %}
 
 #ifdef SWIGPYTHON
+    #ifdef USE_EXCEPTIONS
+        // See Common/b2Settings.h also
+        %include "exception.i"
+
+        %exception {
+            try {
+                $action
+            } catch(b2AssertException) {
+                // error already set, pass it on to python
+            }
+        }
+    #endif
+
     // Add support for == and != in Python for shapes, joints, and bodies.
     %inline %{
         bool __b2PythonJointPointerEquals__(b2Joint* a, b2Joint* b) {

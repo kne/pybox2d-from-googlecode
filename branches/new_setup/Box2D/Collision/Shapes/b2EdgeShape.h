@@ -28,6 +28,7 @@ struct b2EdgeChainDef : public b2ShapeDef
 	{
 		type = e_edgeShape;
 		vertexCount = 0;
+		vertices = NULL;
 		isALoop = true;
 	}
 	/// The vertices in local coordinates. You must manage the memory
