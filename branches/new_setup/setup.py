@@ -14,6 +14,7 @@ If that worked, then:
 import os
 from distutils.core import setup, Extension
 from distutils.sysconfig import get_python_inc
+from glob import glob
 
 # release version number
 box2d_version = "2.0.2"
@@ -22,48 +23,17 @@ release_number = 0
 # Create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))
 
-box2d_source_files = [
-    'Box2D/Dynamics/b2Body.cpp',
-    'Box2D/Dynamics/b2Island.cpp',
-    'Box2D/Dynamics/b2World.cpp',
-    'Box2D/Dynamics/b2ContactManager.cpp',
-    'Box2D/Dynamics/Contacts/b2Contact.cpp',
-    'Box2D/Dynamics/Contacts/b2PolyContact.cpp',
-    'Box2D/Dynamics/Contacts/b2CircleContact.cpp',
-    'Box2D/Dynamics/Contacts/b2PolyAndCircleContact.cpp',
-    'Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.cpp',
-    'Box2D/Dynamics/Contacts/b2PolyAndEdgeContact.cpp',
-    'Box2D/Dynamics/Contacts/b2ContactSolver.cpp',
-    'Box2D/Dynamics/Controllers/b2BuoyancyController.cpp',
-    'Box2D/Dynamics/Controllers/b2ConstantAccelController.cpp',
-    'Box2D/Dynamics/Controllers/b2ConstantForceController.cpp',
-    'Box2D/Dynamics/Controllers/b2Controller.cpp',
-    'Box2D/Dynamics/Controllers/b2GravityController.cpp',
-    'Box2D/Dynamics/Controllers/b2TensorDampingController.cpp',
-    'Box2D/Dynamics/b2WorldCallbacks.cpp',
-    'Box2D/Dynamics/Joints/b2MouseJoint.cpp',
-    'Box2D/Dynamics/Joints/b2PulleyJoint.cpp',
-    'Box2D/Dynamics/Joints/b2Joint.cpp',
-    'Box2D/Dynamics/Joints/b2RevoluteJoint.cpp',
-    'Box2D/Dynamics/Joints/b2PrismaticJoint.cpp',
-    'Box2D/Dynamics/Joints/b2DistanceJoint.cpp',
-    'Box2D/Dynamics/Joints/b2GearJoint.cpp',
-    'Box2D/Dynamics/Joints/b2LineJoint.cpp',
-    'Box2D/Common/b2StackAllocator.cpp',
-    'Box2D/Common/b2Math.cpp',
-    'Box2D/Common/b2BlockAllocator.cpp',
-    'Box2D/Common/b2Settings.cpp',
-    'Box2D/Collision/b2Collision.cpp',
-    'Box2D/Collision/b2Distance.cpp',
-    'Box2D/Collision/Shapes/b2Shape.cpp',
-    'Box2D/Collision/Shapes/b2CircleShape.cpp',
-    'Box2D/Collision/Shapes/b2PolygonShape.cpp',
-    'Box2D/Collision/Shapes/b2EdgeShape.cpp',
-    'Box2D/Collision/b2TimeOfImpact.cpp',
-    'Box2D/Collision/b2PairManager.cpp',
-    'Box2D/Collision/b2CollidePoly.cpp',
-    'Box2D/Collision/b2CollideCircle.cpp',
-    'Box2D/Collision/b2BroadPhase.cpp']
+source_paths = [
+    'Box2D/Dynamics/',
+    'Box2D/Dynamics/Contacts/',
+    'Box2D/Dynamics/Controllers/',
+    'Box2D/Dynamics/Joints/',
+    'Box2D/Common/',
+    'Box2D/Collision/',
+    ]
+
+# glob all of the paths and then flatten the list into one
+box2d_source_files = sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 swig_arguments = '-c++ -O -includeall -ignoremissing -w201'
 
@@ -76,13 +46,13 @@ setup (name = "Box2D",
     url="http://pybox2d.googlecode.com/",
     long_description = """Box2D (version %s) for usage in Python.
 
-    After installing, please be sure to try out the testbed demos (requires pygame).
-    See <python directory>box2d/testbed/demos.py .
+After installing, please be sure to try out the testbed demos (requires pygame).
+See <python directory>box2d/testbed/demos.py .
 
-    For more information, see:
+For more information, see:
 
-    pybox2d homepage: http://pybox2d.googlecode.com
-    Box2D's homepage: http://www.box2d.org
+pybox2d homepage: http://pybox2d.googlecode.com
+Box2D's homepage: http://www.box2d.org
     """ % (box2d_version),
     classifiers=[
         "Development Status :: 4 - Beta",
