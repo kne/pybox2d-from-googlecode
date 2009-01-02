@@ -21,6 +21,8 @@
 
 #include "b2Controller.h"
 
+class b2ConstantAccelControllerDef;
+
 /// Applies a force every frame
 class b2ConstantAccelController : public b2Controller{
 public:
@@ -30,6 +32,23 @@ public:
 	/// @see b2Controller::Step
 	void Step(const b2TimeStep& step);
 
+protected:
+	void Destroy(b2BlockAllocator* allocator);
+
+private:
+	friend class b2ConstantAccelControllerDef;
+	b2ConstantAccelController(const b2ConstantAccelControllerDef* def);
+
+};
+
+/// This class is used to build constant acceleration controllers
+class b2ConstantAccelControllerDef : public b2ControllerDef
+{
+public:
+	/// The force to apply
+	b2Vec2 A;
+private:
+	b2ConstantAccelController* Create(b2BlockAllocator* allocator);
 };
 
 #endif

@@ -21,6 +21,8 @@
 
 #include "b2Controller.h"
 
+class b2TensorDampingControllerDef;
+
 /// Applies top down linear damping to the controlled bodies
 /// The damping is calculated by multiplying velocity by a matrix in local co-ordinates.
 class b2TensorDampingController : public b2Controller{
@@ -33,7 +35,7 @@ public:
 	(-a 0;0 -b)		Differing x and y damping. Useful e.g. for top-down wheels.
 	*/
 	//By the way, tensor in this case just means matrix, don't let the terminology get you down.
-	
+
 	/// Set this to a positive number to clamp the maximum amount of damping done.
 	float32 maxTimestep;
 	// Typically one wants maxTimestep to be 1/(max eigenvalue of T), so that damping will never cause something to reverse direction
@@ -41,15 +43,27 @@ public:
 	/// @see b2Controller::Step
 	void Step(const b2TimeStep& step);
 
-	/// Helper function to set T in a common case
+protected:
+	void Destroy(b2BlockAllocator* allocator);
+
+private:
+	friend class b2TensorDampingControllerDef;
+	b2TensorDampingController(const b2TensorDampingControllerDef* def);
+
+};
+
+/// This class is used to build tensor damping controllers
+class b2TensorDampingControllerDef : public b2ControllerDef
+{
+public:
+	/// Tensor to use in damping model
+	b2Mat22 T;
+	/// Set this to a positive number to clamp the maximum amount of damping done.
+	float32 maxTimestep;
+	/// Sets damping independantly along the x and y axes
 	void SetAxisAligned(float32 xDamping,float32 yDamping);
-
-	b2TensorDampingController() :
-		T(),
-		maxTimestep(0)
-	{
-	}
-
+private:
+	b2TensorDampingController* Create(b2BlockAllocator* allocator);
 };
 
 #endif

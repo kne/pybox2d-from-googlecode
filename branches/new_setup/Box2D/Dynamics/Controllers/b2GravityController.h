@@ -21,7 +21,9 @@
 
 #include "b2Controller.h"
 
-/// Applies simplified gravity between every pair of bodies 
+class b2GravityControllerDef;
+
+/// Applies simplified gravity between every pair of bodies
 class b2GravityController : public b2Controller{
 public:
 	/// Specifies the strength of the gravitiation force
@@ -32,12 +34,26 @@ public:
 	/// @see b2Controller::Step
 	void Step(const b2TimeStep& step);
 
-	b2GravityController() :
-		G(1),
-		invSqr(true)
-	{
-	}
+protected:
+	void Destroy(b2BlockAllocator* allocator);
 
+private:
+	friend class b2GravityControllerDef;
+	b2GravityController(const b2GravityControllerDef* def);
+
+
+};
+
+/// This class is used to build gravity controllers
+class b2GravityControllerDef : public b2ControllerDef
+{
+public:
+	/// Specifies the strength of the gravitiation force
+	float32 G;
+	/// If true, gravity is proportional to r^-2, otherwise r^-1
+	bool invSqr;
+private:
+	b2GravityController* Create(b2BlockAllocator* allocator);
 };
 
 #endif

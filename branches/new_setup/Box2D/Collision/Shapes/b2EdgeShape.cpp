@@ -17,7 +17,6 @@
 */
 
 #include "b2EdgeShape.h"
-#include "../../Dynamics/b2Body.h"
 
 b2EdgeShape::b2EdgeShape(const b2Vec2& v1, const b2Vec2& v2, const b2ShapeDef* def)
 : b2Shape(def)
@@ -25,6 +24,9 @@ b2EdgeShape::b2EdgeShape(const b2Vec2& v1, const b2Vec2& v2, const b2ShapeDef* d
 	b2Assert(def->type == e_edgeShape);
 
 	m_type = e_edgeShape;
+	
+	m_prevEdge = NULL;
+	m_nextEdge = NULL;
 	
 	m_v1 = v1;
 	m_v2 = v2;
@@ -38,9 +40,6 @@ b2EdgeShape::b2EdgeShape(const b2Vec2& v1, const b2Vec2& v2, const b2ShapeDef* d
 	
 	m_cornerDir1 = m_normal;
 	m_cornerDir2 = -1.0f * m_normal;
-
-	m_nextEdge=NULL;
-	m_prevEdge=NULL;
 }
 
 void b2EdgeShape::UpdateSweepRadius(const b2Vec2& center)
@@ -56,8 +55,8 @@ void b2EdgeShape::UpdateSweepRadius(const b2Vec2& center)
 
 bool b2EdgeShape::TestPoint(const b2XForm& transform, const b2Vec2& p) const
 {
-	B2_NOT_USED(p);
 	B2_NOT_USED(transform);
+	B2_NOT_USED(p);
 	return false;
 }
 
@@ -69,7 +68,7 @@ b2SegmentCollide b2EdgeShape::TestSegment(const b2XForm& transform,
 {
 	b2Vec2 r = segment.p2 - segment.p1;
 	b2Vec2 v1 = b2Mul(transform, m_v1);
-	b2Vec2 d = b2Mul(transform, m_v2); - v1;
+	b2Vec2 d = b2Mul(transform, m_v2) - v1;
 	b2Vec2 n = b2Cross(d, 1.0f);
 
 	const float32 k_slop = 100.0f * B2_FLT_EPSILON;
@@ -128,60 +127,6 @@ void b2EdgeShape::ComputeMass(b2MassData* massData) const
 	massData->I = 0;
 }
 
-/// @see b2Shape::ComputeSubmergedArea
-float32 b2EdgeShape::ComputeSubmergedArea(	const b2Vec2& normal,
-											float32 offset,
-											const b2XForm& xf, 
-											b2Vec2* c) const
-{
-	//Vertices in world co-ordinates
-	b2Vec2 v0 = m_body->GetPosition();
-	v0 += (offset - b2Dot(v0, normal)) * normal;
-	b2Vec2 v1 = b2Mul(xf, m_v1);
-	b2Vec2 v2 = b2Mul(xf, m_v2);
-	
-	//Depths
-	float32 d1 = b2Dot(v1, normal) - offset;
-	float32 d2 = b2Dot(v2, normal) - offset;
-	
-	b2Vec2 p2,p3;
-	if(d1<0)
-	{
-		if(d2<0){
-			p2=v1;
-			p3=v2;
-		}else{
-			p2=v1;
-			p3=v1+ ((0-d1)/(d2-d1)) * (v2 - v1);
-		}
-	}else{
-		if(d2<0){
-			p2=v1+ ((0-d1)/(d2-d1)) * (v2 - v1);
-			p3=v2;
-		}else{
-			return 0;
-		}
-	}
-	
-	b2Vec2 p1=v0;
-	
-	b2Vec2 e1 = p2 - p1;
-	b2Vec2 e2 = p3 - p1;
-
-	float32 D = b2Cross(e1, e2);
-
-	float32 triangleArea = 0.5f * D;
-
-	// Area weighted centroid
-	const float32 k_inv3 = 1.0f / 3.0f;
-
-	b2Vec2 center = triangleArea * k_inv3 * (p1 + p2 + p3);
-	
-	*c = center;
-	return triangleArea;
-}
-
-
 b2Vec2 b2EdgeShape::Support(const b2XForm& xf, const b2Vec2& d) const
 {
 	b2Vec2 v1 = b2Mul(xf, m_coreV1);
@@ -203,4 +148,55 @@ void b2EdgeShape::SetNextEdge(b2EdgeShape* edge, const b2Vec2& core, const b2Vec
 	m_coreV2 = core;
 	m_cornerDir2 = cornerDir;
 	m_cornerConvex2 = convex;
+}
+
+float32 b2EdgeShape::ComputeSubmergedArea(	const b2Vec2& normal,
+												float32 offset,
+												const b2XForm& xf, 
+												b2Vec2* c) const
+{
+	//Note that v0 is independant of any details of the specific edge
+	//We are relying on v0 being consistent between multiple edges of the same body
+	b2Vec2 v0 = offset * normal;
+	//b2Vec2 v0 = xf.position + (offset - b2Dot(normal, xf.position)) * normal;
+
+	b2Vec2 v1 = b2Mul(xf, m_v1);
+	b2Vec2 v2 = b2Mul(xf, m_v2);
+
+	float32 d1 = b2Dot(normal, v1) - offset;
+	float32 d2 = b2Dot(normal, v2) - offset;
+
+	if(d1>0)
+	{
+		if(d2>0)
+		{
+			return 0;
+		}
+		else
+		{
+			v1 = -d2 / (d1 - d2) * v1 + d1 / (d1 - d2) * v2;
+		}
+	}
+	else
+	{
+		if(d2>0)
+		{
+			v2 = -d2 / (d1 - d2) * v1 + d1 / (d1 - d2) * v2;
+		}
+		else
+		{
+			//Nothing
+		}
+	}
+
+	// v0,v1,v2 represents a fully submerged triangle
+	float32 k_inv3 = 1.0f / 3.0f;
+
+	// Area weighted centroid
+	*c = k_inv3 * (v0 + v1 + v2);
+
+	b2Vec2 e1 = v1 - v0;
+	b2Vec2 e2 = v2 - v0;
+
+	return 0.5f * b2Cross(e1, e2);
 }

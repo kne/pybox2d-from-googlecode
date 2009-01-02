@@ -20,25 +20,10 @@
 #include "../../Common/b2BlockAllocator.h"
 
 
-b2Controller::b2Controller()
-{
-	m_bodyList = NULL;
-	m_bodyCount = 0;
-}
-
-b2Controller::b2Controller(b2World* world)
-{
-	m_bodyList = NULL;
-	m_bodyCount = 0;
-
-	m_world = world;
-}
-
 b2Controller::~b2Controller()
 {
 	//Remove attached bodies
-	while(m_bodyCount>0)
-		RemoveBody(m_bodyList->body);
+	Clear();
 }
 
 void b2Controller::AddBody(b2Body* body)
@@ -98,3 +83,28 @@ void b2Controller::RemoveBody(b2Body* body)
 	//Free the edge
 	m_world->m_blockAllocator.Free(edge, sizeof(b2ControllerEdge));
 }
+
+void b2Controller::Clear(){
+
+	while(m_bodyList)
+	{
+		b2ControllerEdge* edge = m_bodyList;
+
+		//Remove edge from controller list
+		m_bodyList = edge->nextBody;
+
+		//Remove edge from body list
+		if(edge->prevController)
+			edge->prevController->nextController = edge->nextController;
+		if(edge->nextController)
+			edge->nextController->prevController = edge->prevController;
+		if(edge == edge->body->m_controllerList)
+			edge->body->m_controllerList = edge->nextController;
+
+		//Free the edge
+		m_world->m_blockAllocator.Free(edge, sizeof(b2ControllerEdge));
+	}
+
+	m_bodyCount = 0;
+}
+

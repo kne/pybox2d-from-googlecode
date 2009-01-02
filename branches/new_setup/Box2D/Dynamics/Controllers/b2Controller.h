@@ -29,7 +29,7 @@ class b2Controller;
 
 /// A controller edge is used to connect bodies and controllers together
 /// in a bipartite graph.
-struct b2ControllerEdge 
+struct b2ControllerEdge
 {
 	b2Controller* controller;		///< provides quick access to other end of this edge.
 	b2Body* body;					///< the body
@@ -39,14 +39,13 @@ struct b2ControllerEdge
 	b2ControllerEdge* nextController;		///< the next controller edge in the body's joint list
 };
 
+class b2ControllerDef;
 
 /// Base class for controllers. Controllers are a convience for encapsulating common
 /// per-step functionality.
 class b2Controller
 {
 public:
-	b2Controller();
-	b2Controller(b2World* m_world);
 	virtual ~b2Controller();
 
 	/// Controllers override this to implement per-step functionality.
@@ -61,7 +60,10 @@ public:
 	/// Removes a body from the controller list.
 	void RemoveBody(b2Body* body);
 
-	/// Get the next body in the world's body list.
+	/// Removes all bodies from the controller list.
+	void Clear();
+
+	/// Get the next controller in the world's body list.
 	b2Controller* GetNext();
 
 	/// Get the parent world of this body.
@@ -69,6 +71,8 @@ public:
 
 	/// Get the attached body list
 	b2ControllerEdge* GetBodyList();
+
+
 protected:
 	friend class b2World;
 
@@ -77,9 +81,29 @@ protected:
 	b2ControllerEdge* m_bodyList;
 	int32 m_bodyCount;
 
+	b2Controller(const b2ControllerDef* def):
+		m_prev(NULL),
+		m_next(NULL),
+		m_bodyCount(0),
+		m_bodyList(NULL),
+		m_world(NULL)
+		{
+			B2_NOT_USED(def);
+		}
+	virtual void Destroy(b2BlockAllocator* allocator) = 0;
+
 private:
 	b2Controller* m_prev;
 	b2Controller* m_next;
+
+	static void Destroy(b2Controller* controller, b2BlockAllocator* allocator);
+};
+
+class b2ControllerDef
+{
+private:
+	friend class b2World;
+	virtual b2Controller* Create(b2BlockAllocator* allocator) = 0;
 };
 
 inline b2Controller* b2Controller::GetNext()
@@ -95,6 +119,11 @@ inline b2World* b2Controller::GetWorld()
 inline b2ControllerEdge* b2Controller::GetBodyList()
 {
 	return m_bodyList;
+}
+
+inline void b2Controller::Destroy(b2Controller* controller, b2BlockAllocator* allocator)
+{
+	controller->Destroy(allocator);
 }
 
 #endif

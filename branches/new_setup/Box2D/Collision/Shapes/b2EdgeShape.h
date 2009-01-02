@@ -28,8 +28,8 @@ struct b2EdgeChainDef : public b2ShapeDef
 	{
 		type = e_edgeShape;
 		vertexCount = 0;
-		vertices = NULL;
 		isALoop = true;
+		vertices = NULL;
 	}
 	/// The vertices in local coordinates. You must manage the memory
 	/// of this array on your own, outside of Box2D. 
@@ -67,12 +67,13 @@ public:
 	/// @see b2Shape::ComputeMass
 	void ComputeMass(b2MassData* massData) const;
 
+	/// @warning This only gives a consistent and sensible answer when when summed over a body only contains loops of edges
 	/// @see b2Shape::ComputeSubmergedArea
 	float32 ComputeSubmergedArea(	const b2Vec2& normal,
 									float32 offset,
 									const b2XForm& xf, 
 									b2Vec2* c) const;
-
+	
 	/// Linear distance from vertex1 to vertex2:
 	float32 GetLength() const;
 

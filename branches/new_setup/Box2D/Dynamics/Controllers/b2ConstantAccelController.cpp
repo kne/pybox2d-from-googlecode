@@ -18,6 +18,11 @@
 
 #include "b2ConstantAccelController.h"
 
+b2ConstantAccelController::b2ConstantAccelController(const b2ConstantAccelControllerDef* def) : b2Controller(def)
+{
+	A = def->A;
+}
+
 void b2ConstantAccelController::Step(const b2TimeStep& step)
 {
 	for(b2ControllerEdge *i=m_bodyList;i;i=i->nextBody){
@@ -26,4 +31,16 @@ void b2ConstantAccelController::Step(const b2TimeStep& step)
 			continue; 
 		body->SetLinearVelocity(body->GetLinearVelocity()+step.dt*A);
 	}
+}
+
+void b2ConstantAccelController::Destroy(b2BlockAllocator* allocator)
+{
+	allocator->Free(this, sizeof(b2ConstantAccelController));
+}
+
+
+b2ConstantAccelController* b2ConstantAccelControllerDef::Create(b2BlockAllocator* allocator)
+{
+	void* mem = allocator->Allocate(sizeof(b2ConstantAccelController));
+	return new (mem) b2ConstantAccelController(this);
 }
