@@ -41,7 +41,7 @@ box2d_source_files = ['Box2D/Box2D.i'] + \
 swig_arguments = '-c++ -O -includeall -ignoremissing -w201'
 
 pybox2d_extension = \
-    Extension('_Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')
+    Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')
 
 LONG_DESCRIPTION = \
 """Box2D (version %s) for usage in Python.
