@@ -2,18 +2,13 @@
 
 cd ..
 
-CXXFLAGS="-force_cpusubtype_ALL -mmacosx-version-min=10.4"
-export CXXFLAGS
-
-rm -rf dist
-
 # python 2.5
-rm _Box2D.so Box2D.py
+rm -rf dist build temp Box2D.py _Box2D.so
 python2.5 setup.py build
 /Library/Frameworks/Python.framework/Versions/2.5/bin/bdist_mpkg
 
 # python 2.6
-rm _Box2D.so Box2D.py
+rm -rf dist build temp Box2D.py _Box2D.so
 python2.6 setup.py build
 /Library/Frameworks/Python.framework/Versions/2.6/bin/bdist_mpkg
 
