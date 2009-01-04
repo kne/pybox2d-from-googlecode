@@ -75,6 +75,8 @@ setup_dict = dict(
     url              ="http://pybox2d.googlecode.com/",
     long_description = LONG_DESCRIPTION,
     classifiers      = CLASSIFIERS,
+    packages         = ['Box2D'],
+    package_dir      = {'Box2D': '.'},
     options          = { 'build_ext': { 'swig_opts' : swig_arguments } },
     ext_modules      = [ pybox2d_extension ]
     )
