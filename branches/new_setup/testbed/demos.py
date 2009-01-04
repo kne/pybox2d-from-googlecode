@@ -21,7 +21,7 @@
 
 import os
 import pygame
-import Box2D2 as box2d
+import Box2D as box2d
 from pygame.locals import *
 from settings import fwSettings
 from pgu import gui
