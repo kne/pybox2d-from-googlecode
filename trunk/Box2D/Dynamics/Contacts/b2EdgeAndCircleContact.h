@@ -21,6 +21,8 @@
 
 #include "../../Common/b2Math.h"
 #include "../../Collision/b2Collision.h"
+#include "../../Collision/Shapes/b2EdgeShape.h"
+#include "../../Collision/Shapes/b2CircleShape.h"
 #include "b2Contact.h"
 
 class b2BlockAllocator;

@@ -25,15 +25,15 @@ class EdgesBuoyancy (Framework):
     name="EdgesBuoyancy"
     def __init__(self):
         super(EdgesBuoyancy, self).__init__()
-        self.bc=box2d.b2BuoyancyController()
-        self.world.AddController(self.bc)
-        
-        self.bc.offset = 15
-        self.bc.normal.Set(0,1)
-        self.bc.density = 2
-        self.bc.linearDrag = 2
-        self.bc.angularDrag = 1
-        
+
+        bcd = box2d.b2BuoyancyControllerDef() 
+        bcd.offset = 15
+        bcd.normal.Set(0,1)
+        bcd.density = 2
+        bcd.linearDrag = 2
+        bcd.angularDrag = 1
+        self.bc = self.world.CreateController(bcd)
+
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)
         body = self.world.CreateBody(bd) 

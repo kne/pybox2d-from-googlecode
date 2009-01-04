@@ -22,8 +22,19 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef MSVC
 #define B2_NOT_USED(x) x
+#else
+#define B2_NOT_USED(x)
+#endif
+
+#ifdef USE_ASSERTIONS
+#include <Python.h>
+class b2AssertException {};
+#define b2Assert(A) if (!(A)) { PyErr_SetString(PyExc_AssertionError, #A); throw b2AssertException(); }
+#else
 #define b2Assert(A) assert(A)
+#endif
 
 // need to include NDS jtypes.h instead of 
 // usual typedefs because NDS jtypes defines

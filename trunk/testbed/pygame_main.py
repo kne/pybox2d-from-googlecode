@@ -46,7 +46,7 @@ Notes:
 -kne
 """
 import pygame
-import Box2D2 as box2d
+import Box2D as box2d
 #import psyco # a few fps faster with psyco
 from pygame.locals import *
 from settings import fwSettings
@@ -420,7 +420,16 @@ class Framework(object):
 
         self.screen = pygame.display.set_mode( (640,480) )
         self.screenSize = box2d.b2Vec2(*self.screen.get_size())
-        self.font = pygame.font.Font(None, 15)
+        
+        try:
+            self.font = pygame.font.Font(None, 15)
+        except IOError:
+            try:
+                self.font = pygame.font.Font("freesansbold.ttf", 15)
+            except IOError:
+                print "Unable to load default font or 'freesansbold.ttf'"
+                print "Disabling text drawing."
+                self.DrawString = lambda x,y,z: 0
 
         # GUI Initialization
         self.gui_app = gui.App()

@@ -148,7 +148,7 @@ public:
 	b2Vec3 m_impulse;
 	float32 m_motorImpulse;
 
-	b2Mat33 m_mass;		// effective mass for point-to-point constraint.
+	b2Mat33 m_mass;			// effective mass for point-to-point constraint.
 	float32 m_motorMass;	// effective mass for motor/limit angular constraint.
 	
 	bool m_enableMotor;
@@ -160,7 +160,6 @@ public:
 	float32 m_lowerAngle;
 	float32 m_upperAngle;
 	b2LimitState m_limitState;
-	
 };
 
 inline float32 b2RevoluteJoint::GetMotorSpeed() const

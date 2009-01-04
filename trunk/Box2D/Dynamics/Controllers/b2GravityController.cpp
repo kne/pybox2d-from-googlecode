@@ -18,6 +18,12 @@
 
 #include "b2GravityController.h"
 
+b2GravityController::b2GravityController(const b2GravityControllerDef* def) : b2Controller(def)
+{
+	G = def->G;
+	invSqr = def->invSqr;
+}
+
 void b2GravityController::Step(const b2TimeStep& step)
 {
 	B2_NOT_USED(step);
@@ -46,5 +52,15 @@ void b2GravityController::Step(const b2TimeStep& step)
 			}
 		}
 	}
+}
 
+void b2GravityController::Destroy(b2BlockAllocator* allocator)
+{
+	allocator->Free(this, sizeof(b2GravityController));
+}
+
+b2GravityController* b2GravityControllerDef::Create(b2BlockAllocator* allocator)
+{
+	void* mem = allocator->Allocate(sizeof(b2GravityController));
+	return new (mem) b2GravityController(this);
 }

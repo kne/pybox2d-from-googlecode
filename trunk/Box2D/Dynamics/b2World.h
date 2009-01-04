@@ -35,6 +35,7 @@ class b2Shape;
 class b2Contact;
 class b2BroadPhase;
 class b2Controller;
+class b2ControllerDef;
 
 struct b2TimeStep
 {
@@ -100,10 +101,10 @@ public:
 	void DestroyJoint(b2Joint* joint);
 
 	/// Add a controller to the world.
-	b2Controller* AddController(b2Controller* def);
+	b2Controller* CreateController(b2ControllerDef* def);
 
 	/// Removes a controller from the world.
-	void RemoveController(b2Controller* controller);
+	void DestroyController(b2Controller* controller);
 
 	/// The world provides a single static ground body with no collision shapes.
 	/// You can use this to simplify the creation of joints and static shapes.

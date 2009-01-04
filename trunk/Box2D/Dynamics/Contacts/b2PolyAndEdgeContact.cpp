@@ -278,7 +278,7 @@ void b2PolyAndEdgeContact::b2CollidePolyAndEdge(b2Manifold* manifold,
 			manifold->normal = b2Mul(xf1.R, normals[separationIndex]);
 			manifold->points[0].separation = separationMax;
 			manifold->points[0].id.features.incidentEdge = (uint8)separationIndex;
-			manifold->points[0].id.features.incidentVertex = (uint8)b2_nullFeature;
+			manifold->points[0].id.features.incidentVertex = b2_nullFeature;
 			manifold->points[0].id.features.referenceEdge = 0;
 			manifold->points[0].id.features.flip = 0;
 			if (separationV1) {

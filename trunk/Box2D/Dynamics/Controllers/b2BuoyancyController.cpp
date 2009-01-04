@@ -18,6 +18,19 @@
 
 #include "b2BuoyancyController.h"
 
+b2BuoyancyController::b2BuoyancyController(const b2BuoyancyControllerDef* def) : b2Controller(def)
+{
+	normal = def->normal;
+	offset = def->offset;
+	density = def->density;
+	velocity = def->velocity;
+	linearDrag = def->linearDrag;
+	angularDrag = def->angularDrag;
+	useDensity = def->useDensity;
+	useWorldGravity = def->useWorldGravity;
+	gravity = def->gravity;
+}
+
 void b2BuoyancyController::Step(const b2TimeStep& step)
 {
 	B2_NOT_USED(step);
@@ -56,6 +69,7 @@ void b2BuoyancyController::Step(const b2TimeStep& step)
 		}
 		areac.x/=area;
 		areac.y/=area;
+		b2Vec2 localCentroid = b2MulT(body->GetXForm(),areac);
 		massc.x/=mass;
 		massc.y/=mass;
 		if(area<B2_FLT_EPSILON)
@@ -83,4 +97,15 @@ void b2BuoyancyController::Draw(b2DebugDraw *debugDraw)
 	b2Color color(0,0,0.8f);
 
 	debugDraw->DrawSegment(p1, p2, color);
+}
+
+void b2BuoyancyController::Destroy(b2BlockAllocator* allocator)
+{
+	allocator->Free(this, sizeof(b2BuoyancyController));
+}
+
+b2BuoyancyController* b2BuoyancyControllerDef::Create(b2BlockAllocator* allocator)
+{
+	void* mem = allocator->Allocate(sizeof(b2BuoyancyController));
+	return new (mem) b2BuoyancyController(this);
 }

@@ -18,7 +18,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-%module(directors="1") Box2D2
+%module(directors="1") Box2D
 %{
     #include "Box2D.h"
     
@@ -27,6 +27,19 @@
 %}
 
 #ifdef SWIGPYTHON
+    #ifdef USE_EXCEPTIONS
+        // See Common/b2Settings.h also
+        %include "exception.i"
+
+        %exception {
+            try {
+                $action
+            } catch(b2AssertException) {
+                // error already set, pass it on to python
+            }
+        }
+    #endif
+
     // Add support for == and != in Python for shapes, joints, and bodies.
     %inline %{
         bool __b2PythonJointPointerEquals__(b2Joint* a, b2Joint* b) {

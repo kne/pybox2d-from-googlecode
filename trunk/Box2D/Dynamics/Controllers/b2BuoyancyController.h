@@ -21,6 +21,8 @@
 
 #include "b2Controller.h"
 
+class b2BuoyancyControllerDef;
+
 /// Calculates buoyancy forces for fluids in the form of a half plane.
 class b2BuoyancyController : public b2Controller{
 public:
@@ -49,18 +51,52 @@ public:
 	/// @see b2Controller::Draw
 	void Draw(b2DebugDraw *debugDraw);
 
-	b2BuoyancyController():
-			normal(0,1),
-			offset(0),
-			density(0),
-			velocity(0,0),
-			linearDrag(0),
-			angularDrag(0),
-			useDensity(false),
-			useWorldGravity(true),
-			gravity(0,0)
+protected:
+	void Destroy(b2BlockAllocator* allocator);
+
+private:
+	friend class b2BuoyancyControllerDef;
+	b2BuoyancyController(const b2BuoyancyControllerDef* def);
+};
+
+/// This class is used to build buoyancy controllers
+class b2BuoyancyControllerDef : public b2ControllerDef
+{
+public:
+	/// The outer surface normal
+	b2Vec2 normal;
+	/// The height of the fluid surface along the normal
+	float32 offset;
+	/// The fluid density
+	float32 density;
+	/// Fluid velocity, for drag calculations
+	b2Vec2 velocity;
+	/// Linear drag co-efficient
+	float32 linearDrag;
+	/// Linear drag co-efficient
+	float32 angularDrag;
+	/// If false, bodies are assumed to be uniformly dense, otherwise use the shapes densities
+	bool useDensity; //False by default to prevent a gotcha
+	/// If true, gravity is taken from the world instead of the gravity parameter.
+	bool useWorldGravity;
+	/// Gravity vector, if the world's gravity is not used
+	b2Vec2 gravity;
+
+	b2BuoyancyControllerDef():
+		normal(0,1),
+		offset(0),
+		density(0),
+		velocity(0,0),
+		linearDrag(0),
+		angularDrag(0),
+		useDensity(false),
+		useWorldGravity(true),
+		gravity(0,0)
 	{
 	}
+
+private:
+	b2BuoyancyController* Create(b2BlockAllocator* allocator);
 };
 
 #endif

@@ -46,7 +46,7 @@ Notes:
 
 import pyglet
 from pyglet import gl
-import Box2D2 as box2d
+import Box2D as box2d
 #import psyco # a few fps faster with psyco
 from settings import fwSettings
 from pyglet_keymapper import *

@@ -114,6 +114,7 @@ b2Body::~b2Body()
 	// shapes and joints are destroyed in b2World::Destroy
 }
 
+
 float32 connectEdges(b2EdgeShape * const & s1, b2EdgeShape * const & s2, float32 angle1)
 {
 	float32 angle2 = b2Atan2(s2->GetDirectionVector().y, s2->GetDirectionVector().x);
@@ -134,7 +135,11 @@ b2Shape* b2Body::CreateShape(b2ShapeDef* def)
 	{
 		return NULL;
 	}
-
+	
+	
+	// TODO: Decide on a better place to initialize edgeShapes. (b2Shape::Create() can't
+	//       return more than one shape to add to parent body... maybe it should add
+	//       shapes directly to the body instead of returning them?)
 	if (def->type == e_edgeShape) {
 		b2EdgeChainDef* edgeDef = (b2EdgeChainDef*)def;
 		b2Vec2 v1;
@@ -177,7 +182,7 @@ b2Shape* b2Body::CreateShape(b2ShapeDef* def)
 		if (edgeDef->isALoop) connectEdges(s1, s0, angle);
 		return s0;
 	}
-
+	
 	b2Shape* s = b2Shape::Create(def, &m_world->m_blockAllocator);
 
 	s->m_next = m_shapeList;

@@ -18,6 +18,12 @@
 
 #include "b2TensorDampingController.h"
 
+b2TensorDampingController::b2TensorDampingController(const b2TensorDampingControllerDef* def) : b2Controller(def)
+{
+	T = def->T;
+	maxTimestep = def->maxTimestep;
+}
+
 void b2TensorDampingController::Step(const b2TimeStep& step)
 {
 	float32 timestep = step.dt;
@@ -40,7 +46,7 @@ void b2TensorDampingController::Step(const b2TimeStep& step)
 	}
 }
 
-void b2TensorDampingController::SetAxisAligned(float32 xDamping, float32 yDamping)
+void b2TensorDampingControllerDef::SetAxisAligned(float32 xDamping, float32 yDamping)
 {
 	T.col1.x = -xDamping;
 	T.col1.y = 0;
@@ -51,4 +57,16 @@ void b2TensorDampingController::SetAxisAligned(float32 xDamping, float32 yDampin
 	}else{
 		maxTimestep = 0;
 	}
+}
+
+void b2TensorDampingController::Destroy(b2BlockAllocator* allocator)
+{
+	allocator->Free(this, sizeof(b2TensorDampingController));
+}
+
+
+b2TensorDampingController* b2TensorDampingControllerDef::Create(b2BlockAllocator* allocator)
+{
+	void* mem = allocator->Allocate(sizeof(b2TensorDampingController));
+	return new (mem) b2TensorDampingController(this);
 }
