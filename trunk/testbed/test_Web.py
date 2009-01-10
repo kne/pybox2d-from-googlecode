@@ -34,7 +34,7 @@ class Web (Framework):
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
@@ -45,38 +45,35 @@ class Web (Framework):
 
         bd=box2d.b2BodyDef()
 
-        bd.position.Set(-5.0, 5.0)
+        bd.position = (-5.0, 5.0)
         self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[0].CreateShape(sd)
         self.m_bodies[0].SetMassFromShapes()
 
-        bd.position.Set(5.0, 5.0)
+        bd.position = (5.0, 5.0)
         self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[1].CreateShape(sd)
         self.m_bodies[1].SetMassFromShapes()
 
-        bd.position.Set(5.0, 15.0)
+        bd.position = (5.0, 15.0)
         self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[2].CreateShape(sd)
         self.m_bodies[2].SetMassFromShapes()
 
-        bd.position.Set(-5.0, 15.0)
+        bd.position = (-5.0, 15.0)
         self.m_bodies.append(self.world.CreateBody(bd))
         self.m_bodies[3].CreateShape(sd)
         self.m_bodies[3].SetMassFromShapes()
 
         jd=box2d.b2DistanceJointDef()
-        p1=box2d.b2Vec2()
-        p2=box2d.b2Vec2()
-        d=box2d.b2Vec2()
 
         jd.frequencyHz = 4.0
         jd.dampingRatio = 0.5
 
         jd.body1 = ground
         jd.body2 = self.m_bodies[0]
-        jd.localAnchor1.Set(-10.0, 10.0)
-        jd.localAnchor2.Set(-0.5, -0.5)
+        jd.localAnchor1 = (-10.0, 10.0)
+        jd.localAnchor2 = (-0.5, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -85,8 +82,8 @@ class Web (Framework):
 
         jd.body1 = ground
         jd.body2 = self.m_bodies[1]
-        jd.localAnchor1.Set(10.0, 10.0)
-        jd.localAnchor2.Set(0.5, -0.5)
+        jd.localAnchor1 = (10.0, 10.0)
+        jd.localAnchor2 = (0.5, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -95,8 +92,8 @@ class Web (Framework):
 
         jd.body1 = ground
         jd.body2 = self.m_bodies[2]
-        jd.localAnchor1.Set(10.0, 30.0)
-        jd.localAnchor2.Set(0.5, 0.5)
+        jd.localAnchor1 = (10.0, 30.0)
+        jd.localAnchor2 = (0.5, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -105,8 +102,8 @@ class Web (Framework):
 
         jd.body1 = ground
         jd.body2 = self.m_bodies[3]
-        jd.localAnchor1.Set(-10.0, 30.0)
-        jd.localAnchor2.Set(-0.5, 0.5)
+        jd.localAnchor1 = (-10.0, 30.0)
+        jd.localAnchor2 = (-0.5, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -115,8 +112,8 @@ class Web (Framework):
 
         jd.body1 = self.m_bodies[0]
         jd.body2 = self.m_bodies[1]
-        jd.localAnchor1.Set(0.5, 0.0)
-        jd.localAnchor2.Set(-0.5, 0.0)
+        jd.localAnchor1 = (0.5, 0.0)
+        jd.localAnchor2 = (-0.5, 0.0)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -125,8 +122,8 @@ class Web (Framework):
 
         jd.body1 = self.m_bodies[1]
         jd.body2 = self.m_bodies[2]
-        jd.localAnchor1.Set(0.0, 0.5)
-        jd.localAnchor2.Set(0.0, -0.5)
+        jd.localAnchor1 = (0.0, 0.5)
+        jd.localAnchor2 = (0.0, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -135,8 +132,8 @@ class Web (Framework):
 
         jd.body1 = self.m_bodies[2]
         jd.body2 = self.m_bodies[3]
-        jd.localAnchor1.Set(-0.5, 0.0)
-        jd.localAnchor2.Set(0.5, 0.0)
+        jd.localAnchor1 = (-0.5, 0.0)
+        jd.localAnchor2 = (0.5, 0.0)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
@@ -145,8 +142,8 @@ class Web (Framework):
 
         jd.body1 = self.m_bodies[3]
         jd.body2 = self.m_bodies[0]
-        jd.localAnchor1.Set(0.0, -0.5)
-        jd.localAnchor2.Set(0.0, 0.5)
+        jd.localAnchor1 = (0.0, -0.5)
+        jd.localAnchor2 = (0.0, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1

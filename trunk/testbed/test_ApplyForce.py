@@ -25,7 +25,7 @@ class ApplyForce (Framework):
     m_body=None
     def __init__(self):
         super(ApplyForce, self).__init__()
-        self.world.SetGravity(box2d.b2Vec2(0.0, 0.0))
+        self.world.SetGravity((0.0, 0.0))
 
         k_restitution = 0.4
 
@@ -37,38 +37,39 @@ class ApplyForce (Framework):
         sd.density = 0.0
         sd.restitution = k_restitution
 
-        sd.SetAsBox(0.2, 20.0, box2d.b2Vec2(-20.0, 0.0), 0.0)
+        sd.SetAsBox(0.2, 20.0, (-20.0, 0.0), 0.0)
         ground.CreateShape(sd)
 
-        sd.SetAsBox(0.2, 20.0, box2d.b2Vec2(20.0, 0.0), 0.0)
+        sd.SetAsBox(0.2, 20.0, (20.0, 0.0), 0.0)
         ground.CreateShape(sd)
 
-        sd.SetAsBox(0.2, 20.0, box2d.b2Vec2(0.0, -20.0), 0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.2, 20.0, (0.0, -20.0), 0.5 * box2d.b2_pi)
         ground.CreateShape(sd)
 
-        sd.SetAsBox(0.2, 20.0, box2d.b2Vec2(0.0, 20.0), -0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.2, 20.0, (0.0, 20.0), -0.5 * box2d.b2_pi)
         ground.CreateShape(sd)
 
         xf1 = box2d.b2XForm ()
         xf1.R.Set(0.3524 * box2d.b2_pi)
-        xf1.position = box2d.b2Mul(xf1.R, box2d.b2Vec2(1.0, 0.0))
+        xf1.position = box2d.b2Mul(xf1.R, (1.0, 0.0))
 
         sd1=box2d.b2PolygonDef() 
         sd1.vertexCount = 3
-        sd1.setVertex(0, box2d.b2Mul(xf1, box2d.b2Vec2(-1.0, 0.0)))
-        sd1.setVertex(1, box2d.b2Mul(xf1, box2d.b2Vec2(1.0, 0.0)))
-        sd1.setVertex(2, box2d.b2Mul(xf1, box2d.b2Vec2(0.0, 0.5)))
+        sd1.setVertex(0, box2d.b2Mul(xf1, (-1.0, 0.0)))
+        sd1.setVertex(1, box2d.b2Mul(xf1, (1.0, 0.0)))
+        sd1.setVertex(2, box2d.b2Mul(xf1, (0.0, 0.5)))
         sd1.density = 2.0
 
         xf2 = box2d.b2XForm ()
         xf2.R.Set(-0.3524 * box2d.b2_pi)
-        xf2.position = box2d.b2Mul(xf2.R, box2d.b2Vec2(-1.0, 0.0))
+        print "hallo"
+        xf2.position = box2d.b2Mul(xf2.R, (-1.0, 0.0))
 
         sd2=box2d.b2PolygonDef() 
         sd2.vertexCount = 3
-        sd2.setVertex(0, box2d.b2Mul(xf2, box2d.b2Vec2(-1.0, 0.0)))
-        sd2.setVertex(1, box2d.b2Mul(xf2, box2d.b2Vec2(1.0, 0.0)))
-        sd2.setVertex(2, box2d.b2Mul(xf2, box2d.b2Vec2(0.0, 0.5)))
+        sd2.setVertex(0, box2d.b2Mul(xf2, (-1.0, 0.0)))
+        sd2.setVertex(1, box2d.b2Mul(xf2, (1.0, 0.0)))
+        sd2.setVertex(2, box2d.b2Mul(xf2, (0.0, 0.5)))
         sd2.density = 2.0
 
         bd=box2d.b2BodyDef() 
@@ -84,8 +85,8 @@ class ApplyForce (Framework):
      
     def Keyboard(self, key) :
         if key==K_w:
-            f = self.m_body.GetWorldVector(box2d.b2Vec2(0.0, -200.0))
-            p = self.m_body.GetWorldPoint(box2d.b2Vec2(0.0, 2.0))
+            f = self.m_body.GetWorldVector((0.0, -200.0))
+            p = self.m_body.GetWorldPoint((0.0, 2.0))
             self.m_body.ApplyForce(f, p)
         elif key==K_a:
             self.m_body.ApplyTorque(20.0)

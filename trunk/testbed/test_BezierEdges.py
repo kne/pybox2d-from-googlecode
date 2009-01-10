@@ -61,7 +61,7 @@ class BezierEdges (Framework):
     def __init__(self):
         super(BezierEdges, self).__init__()
 
-        self.control_points = [ box2d.b2Vec2().fromTuple(t) for t in
+        self.control_points = [ box2d.b2Vec2(*t) for t in
                                     [(0,0), (0,1), (0, 2), (0, 3)]]
 
         # ground edge

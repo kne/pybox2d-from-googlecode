@@ -83,6 +83,83 @@
     %rename(sub_vector) b2Vec2::operator -= (const b2Vec2& v);
     %rename(mul_float ) b2Vec2::operator *= (float32 a);
 
+    %typemap(in) b2Vec2* self {
+        int res1 = SWIG_ConvertPtr($input, (void**)&$1, SWIGTYPE_p_b2Vec2, 0);
+        if (!SWIG_IsOK(res1)) {
+            SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+        }
+    }
+    
+    /*%typemap(freearg) b2Vec2* self {
+    }
+    %typemap(freearg) b2Vec2&, b2Vec2* {
+    }*/
+
+    //Resolve ambiguities in overloaded functions when you pass a tuple or list when 
+    //SWIG expects a b2Vec2
+    %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec2*,b2Vec2& {
+       $1 = (PyList_Check($input)  || 
+             PyTuple_Check($input) || 
+             SWIG_CheckState(SWIG_ConvertPtr($input, 0, SWIGTYPE_p_b2Vec2, 0))
+            ) ? 1 : 0;
+    }
+
+    // Allow b2Vec2* arguments be passed in as tuples or lists
+    %typemap(in) b2Vec2* (b2Vec2 temp) {
+        //input - $input -> ($1_type) $1 $1_descriptor
+        if (PyTuple_Check($input) || PyList_Check($input)) {
+            int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
+            if (sz != 2) {
+                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+            }
+            int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
+            if (!SWIG_IsOK(res1)) {
+                PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+            } 
+            res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.y);
+            if (!SWIG_IsOK(res1)) {
+                PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+            } 
+        } else if ($input==Py_None) {
+            temp.Set(0.0f,0.0f);
+        } else {
+            int res1 = SWIG_ConvertPtr($input, (void**)&$1, $1_descriptor, 0);
+            if (!SWIG_IsOK(res1)) {
+                SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+            }
+            temp =(b2Vec2&) *$1;
+        }
+        $1 = &temp;
+    }
+
+    // Allow b2Vec2& arguments be passed in as tuples or lists
+    %typemap(in) b2Vec2& (b2Vec2 temp) {
+        //input - $input -> ($1_type) $1 $1_descriptor
+        if (PyTuple_Check($input) || PyList_Check($input)) {
+            int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
+            if (sz != 2) {
+                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+            }
+            int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
+            if (!SWIG_IsOK(res1)) {
+                PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+            } 
+            res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.y);
+            if (!SWIG_IsOK(res1)) {
+                PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+            } 
+        } else if ($input == Py_None) {
+            temp.Set(0.0f,0.0f);
+        } else {
+            int res1 = SWIG_ConvertPtr($input, (void**)&$1, $1_descriptor, 0);
+            if (!SWIG_IsOK(res1)) {
+                SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+            }
+            temp =(b2Vec2&) *$1;
+        }
+        $1 = &temp;
+    }
+
     //Allow access to (m_)userData
     %typemap(in) void* userData, void* m_userData {
         //In
@@ -276,8 +353,12 @@
         }
         PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
-            Py_INCREF(ret);
-            return ret;
+            if (!ret) {
+                return Py_None;
+            } else {
+                Py_INCREF(ret);
+                return ret;
+            }
         }
         void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
@@ -396,8 +477,12 @@
         %}
         PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
-            Py_INCREF(ret);
-            return ret;
+            if (!ret) {
+                return Py_None;
+            } else {
+                Py_INCREF(ret);
+                return ret;
+            }
         }
         void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
@@ -654,6 +739,8 @@
         def fromTuple(self, tuple):
             """
             Set the vector to the values found in the tuple (x,y)
+            You can also use, of course:
+                value = b2Vec2(*tuple)
             """
             self.x, self.y = tuple
             return self
@@ -717,8 +804,12 @@
         %}
         PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
-            Py_INCREF(ret);
-            return ret;
+            if (!ret) {
+                return Py_None;
+            } else {
+                Py_INCREF(ret);
+                return ret;
+            }
         }
         void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
