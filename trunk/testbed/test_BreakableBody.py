@@ -300,31 +300,31 @@ class BreakableBody(Framework):
         pd.density          = 1.0/70.0
         pd.friction         = 0.4
         pd.restitution      = 0.01
-        self.CreateSoftBody( box2d.b2Vec2(sx,sy), 0, 0, pd, dj, nodes, segments, holes)
+        self.CreateSoftBody( (sx,sy), 0, 0, pd, dj, nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('ring')
         dj.frequencyHz      = 20
         pd.density          = 1.0/36.0
         pd.friction         = 0.1
         pd.restitution      = 0.5
-        self.CreateSoftBody( box2d.b2Vec2(sx+6,sy), 0, 0, pd, dj,nodes, segments, holes)
+        self.CreateSoftBody( (sx+6,sy), 0, 0, pd, dj,nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('x')
         dj.frequencyHz      = 0.0
         pd.density          = 0.2
         pd.friction         = 1.0
         pd.restitution      = 0.1
-        self.CreateSoftBody( box2d.b2Vec2(sx+13,sy),  0,  0,  pd, dj,nodes, segments, holes)
+        self.CreateSoftBody( (sx+13,sy),  0,  0,  pd, dj,nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('two')
         dj.frequencyHz      = 20.0
         pd.density          = 0.01
         pd.friction         = 0.3
         pd.restitution      = 0.3
-        self.CreateSoftBody( box2d.b2Vec2(sx+20,sy),  0, 0,   pd, dj, nodes, segments, holes)
+        self.CreateSoftBody( (sx+20,sy),  0, 0,   pd, dj, nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('D')
-        self.CreateSoftBody( box2d.b2Vec2(sx+28,sy),  0, 0,   pd, dj, nodes, segments, holes)
+        self.CreateSoftBody( (sx+28,sy),  0, 0,   pd, dj, nodes, segments, holes)
         
         nodes, segments, holes = self.ExampleData('b')
         dj.frequencyHz      = 20
@@ -332,7 +332,7 @@ class BreakableBody(Framework):
         pd.restitution      = 0.01
         pd.density          = 0.01
         pd.friction         = 0.9
-        self.CreateSoftBody( box2d.b2Vec2(-5,5*gy),  0, 0,   pd, dj ,nodes, segments, holes)
+        self.CreateSoftBody( (-5,5*gy),  0, 0,   pd, dj ,nodes, segments, holes)
 
         cd=box2d.b2CircleDef()
         bd=box2d.b2BodyDef()
@@ -383,17 +383,18 @@ class BreakableBody(Framework):
         pd.vertexCount = 3
 
         for i in range(md.GetTriangleCount()):
-            if ( triangles[i].inside ):
-                pd.setVertex(0,triangles[i].v[0].x, triangles[i].v[0].y)
-                pd.setVertex(1,triangles[i].v[1].x, triangles[i].v[1].y)
-                pd.setVertex(2,triangles[i].v[2].x, triangles[i].v[2].y)
-                try: # python version only
+            if triangles[i].inside:
+                pd.setVertices([triangles[i].v[0],
+                                triangles[i].v[1],
+                                triangles[i].v[2]])
+
+                try:
                     pd.checkValues()
                 except ValueError:
                     print "** Created an invalid shape"
                     exit(0)
 
-                bd.position.Set(pos.x,pos.y)
+                bd.position=pos
                 b = self.world.CreateBody(bd)
                 b.CreateShape(pd)
                 b.SetMassFromShapes()

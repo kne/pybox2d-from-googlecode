@@ -86,9 +86,8 @@ class Dominos (Framework):
         b3.SetMassFromShapes()
 
         jd=box2d.b2RevoluteJointDef() 
-        anchor=box2d.b2Vec2() 
 
-        anchor.Set(-2.0, 1.0)
+        anchor=box2d.b2Vec2(-2.0, 1.0) 
         jd.Initialize(b1, b3, anchor)
         jd.collideConnected = True
         self.world.CreateJoint(jd).getAsType() 

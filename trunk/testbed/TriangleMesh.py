@@ -58,6 +58,7 @@
 #
 
 from math import sin, cos, atan2, sqrt, pow, floor, log
+from test_main import box2d
 
 # errors and warnings
 tmE_OK               =0
@@ -105,10 +106,12 @@ tmErrorMessages = { tmE_OK: "ok",
                     tmE_NOINSIDETRIANGLES: "there are no inside triangles,all might be eaten",
                     tmE_INTERSECTS: "intersecting boundary segments found" }
 
-class tmVertex(object):
+class tmVertex(box2d.b2Vec2):
     # x, y
     def __init__(self, tuple=(0.0, 0.0)):
+        super(tmVertex, self).__init__()
         self.x, self.y = tuple
+
     def __repr__(self):
         return "(%f, %f)" % (self.x, self.y)
 

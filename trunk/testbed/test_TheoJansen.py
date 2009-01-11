@@ -27,12 +27,12 @@ from pygame.locals import *
 
 class TheoJansen (Framework):
     name="TheoJansen"
-    m_offset=box2d.b2Vec2() 
-    m_chassis=box2d.b2Vec2()
-    m_wheel=None
-    m_motorJoint=None
-    m_motorOn = False
-    m_motorSpeed = 0
+    offset=box2d.b2Vec2() 
+    chassis=box2d.b2Vec2()
+    wheel=None
+    motorJoint=None
+    motorOn = False
+    motorSpeed = 0
 
     def CreateLeg(self, s, wheelAnchor):
         p1=box2d.b2Vec2(5.4 * s, -6.1)
@@ -70,8 +70,8 @@ class TheoJansen (Framework):
 
         bd1=box2d.b2BodyDef()
         bd2=box2d.b2BodyDef()
-        bd1.position = self.m_offset
-        bd2.position = p4 + self.m_offset
+        bd1.position = self.offset
+        bd2.position = p4 + self.offset
         
         bd1.angularDamping = 10.0
         bd2.angularDamping = 10.0
@@ -94,28 +94,28 @@ class TheoJansen (Framework):
         #djd.frequencyHz = 10.0
         # usable, but doesn't act like it seems it should?
         
-        djd.Initialize(body1, body2, p2 + self.m_offset, p5 + self.m_offset)
+        djd.Initialize(body1, body2, p2 + self.offset, p5 + self.offset)
         self.world.CreateJoint(djd).getAsType() 
         
-        djd.Initialize(body1, body2, p3 + self.m_offset, p4 + self.m_offset)
+        djd.Initialize(body1, body2, p3 + self.offset, p4 + self.offset)
         self.world.CreateJoint(djd).getAsType() 
         
-        djd.Initialize(body1, self.m_wheel, p3 + self.m_offset, wheelAnchor + self.m_offset)
+        djd.Initialize(body1, self.wheel, p3 + self.offset, wheelAnchor + self.offset)
         self.world.CreateJoint(djd).getAsType() 
         
-        djd.Initialize(body2, self.m_wheel, p6 + self.m_offset, wheelAnchor + self.m_offset)
+        djd.Initialize(body2, self.wheel, p6 + self.offset, wheelAnchor + self.offset)
         self.world.CreateJoint(djd).getAsType() 
         
         rjd=box2d.b2RevoluteJointDef() 
         
-        rjd.Initialize(body2, self.m_chassis, p4 + self.m_offset)
+        rjd.Initialize(body2, self.chassis, p4 + self.offset)
         self.world.CreateJoint(rjd).getAsType() 
     
     def __init__(self):
         super(TheoJansen, self).__init__()
-        self.m_offset.Set(0.0, 8.0)
-        self.m_motorSpeed = 2.0
-        self.m_motorOn = True
+        self.offset = (0.0, 8.0)
+        self.motorSpeed = 2.0
+        self.motorOn = True
         pivot=box2d.b2Vec2(0.0, 0.8)
         
         sd=box2d.b2PolygonDef() 
@@ -149,39 +149,39 @@ class TheoJansen (Framework):
         sd.SetAsBox(2.5, 1.0)
         sd.filter.groupIndex = -1
         bd=box2d.b2BodyDef() 
-        bd.position = pivot + self.m_offset
-        self.m_chassis = self.world.CreateBody(bd)
-        self.m_chassis.CreateShape(sd)
-        self.m_chassis.SetMassFromShapes()
+        bd.position = pivot + self.offset
+        self.chassis = self.world.CreateBody(bd)
+        self.chassis.CreateShape(sd)
+        self.chassis.SetMassFromShapes()
         
         sd = box2d.b2CircleDef()
         sd.density = 1.0
         sd.radius = 1.6
         sd.filter.groupIndex = -1
         bd=box2d.b2BodyDef() 
-        bd.position = pivot + self.m_offset
-        self.m_wheel = self.world.CreateBody(bd)
-        self.m_wheel.CreateShape(sd)
-        self.m_wheel.SetMassFromShapes()
+        bd.position = pivot + self.offset
+        self.wheel = self.world.CreateBody(bd)
+        self.wheel.CreateShape(sd)
+        self.wheel.SetMassFromShapes()
     
         jd=box2d.b2RevoluteJointDef() 
-        jd.Initialize(self.m_wheel, self.m_chassis, pivot + self.m_offset)
+        jd.Initialize(self.wheel, self.chassis, pivot + self.offset)
         jd.collideConnected = False
-        jd.motorSpeed = self.m_motorSpeed
+        jd.motorSpeed = self.motorSpeed
         jd.maxMotorTorque = 400.0
-        jd.enableMotor = self.m_motorOn
-        self.m_motorJoint = self.world.CreateJoint(jd).getAsType()
+        jd.enableMotor = self.motorOn
+        self.motorJoint = self.world.CreateJoint(jd).getAsType()
     
         wheelAnchor = pivot + box2d.b2Vec2(0.0, -0.8)
         
         self.CreateLeg(-1.0, wheelAnchor)
         self.CreateLeg(1.0, wheelAnchor)
         
-        self.m_wheel.SetXForm(self.m_wheel.GetPosition(), 120.0 * box2d.b2_pi / 180.0)
+        self.wheel.SetXForm(self.wheel.GetPosition(), 120.0 * box2d.b2_pi / 180.0)
         self.CreateLeg(-1.0, wheelAnchor)
         self.CreateLeg(1.0, wheelAnchor)
         
-        self.m_wheel.SetXForm(self.m_wheel.GetPosition(), -120.0 * box2d.b2_pi / 180.0)
+        self.wheel.SetXForm(self.wheel.GetPosition(), -120.0 * box2d.b2_pi / 180.0)
         self.CreateLeg(-1.0, wheelAnchor)
         self.CreateLeg(1.0, wheelAnchor)
     
@@ -193,20 +193,20 @@ class TheoJansen (Framework):
     
     def Keyboard(self, key):
         if key==K_a:
-            self.m_chassis.WakeUp()
-            self.m_motorJoint.SetMotorSpeed(-self.m_motorSpeed)
+            self.chassis.WakeUp()
+            self.motorJoint.SetMotorSpeed(-self.motorSpeed)
             
         elif key==K_s:
-            self.m_chassis.WakeUp()
-            self.m_motorJoint.SetMotorSpeed(0.0)
+            self.chassis.WakeUp()
+            self.motorJoint.SetMotorSpeed(0.0)
             
         elif key==K_d:
-            self.m_chassis.WakeUp()
-            self.m_motorJoint.SetMotorSpeed(self.m_motorSpeed)
+            self.chassis.WakeUp()
+            self.motorJoint.SetMotorSpeed(self.motorSpeed)
             
         elif key==K_m:
-            self.m_chassis.WakeUp()
-            self.m_motorJoint.EnableMotor(not self.m_motorJoint.IsMotorEnabled())
+            self.chassis.WakeUp()
+            self.motorJoint.EnableMotor(not self.motorJoint.IsMotorEnabled())
     
 if __name__=="__main__":
     main(TheoJansen)

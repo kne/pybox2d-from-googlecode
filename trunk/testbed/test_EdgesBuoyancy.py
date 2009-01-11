@@ -84,24 +84,24 @@ class EdgesBuoyancy (Framework):
     
         xf1=box2d.b2XForm()
         xf1.R.Set(0.3524 * box2d.b2_pi)
-        xf1.position = box2d.b2Mul(xf1.R, box2d.b2Vec2(1.0, 0.0))
+        xf1.position = box2d.b2Mul(xf1.R, (1.0, 0.0))
         
         sd1=box2d.b2PolygonDef()
         sd1.vertexCount = 3
-        sd1.setVertex(0, box2d.b2Mul(xf1, box2d.b2Vec2(-1.0, 0.0)))
-        sd1.setVertex(1, box2d.b2Mul(xf1, box2d.b2Vec2(1.0, 0.0)))
-        sd1.setVertex(2, box2d.b2Mul(xf1, box2d.b2Vec2(0.0, 0.5)))
+        sd1.setVertex(0, box2d.b2Mul(xf1, (-1.0, 0.0)))
+        sd1.setVertex(1, box2d.b2Mul(xf1, (1.0, 0.0)))
+        sd1.setVertex(2, box2d.b2Mul(xf1, (0.0, 0.5)))
         sd1.density = 2.0
         
         xf2=box2d.b2XForm()
         xf2.R.Set(-0.3524 * box2d.b2_pi)
-        xf2.position = box2d.b2Mul(xf2.R, box2d.b2Vec2(-1.0, 0.0))
+        xf2.position = box2d.b2Mul(xf2.R, (-1.0, 0.0))
         
         sd2=box2d.b2PolygonDef()
         sd2.vertexCount = 3
-        sd2.setVertex(0, box2d.b2Mul(xf2, box2d.b2Vec2(-1.0, 0.0)))
-        sd2.setVertex(1, box2d.b2Mul(xf2, box2d.b2Vec2(1.0, 0.0)))
-        sd2.setVertex(2, box2d.b2Mul(xf2, box2d.b2Vec2(0.0, 0.5)))
+        sd2.setVertex(0, box2d.b2Mul(xf2, (-1.0, 0.0)))
+        sd2.setVertex(1, box2d.b2Mul(xf2, (1.0, 0.0)))
+        sd2.setVertex(2, box2d.b2Mul(xf2, (0.0, 0.5)))
         sd2.density = 2.0
         
         for i in range(10):

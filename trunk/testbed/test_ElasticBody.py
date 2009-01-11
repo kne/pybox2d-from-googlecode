@@ -33,9 +33,6 @@ class ElasticBody (Framework):
     def __init__(self):
         super(ElasticBody, self).__init__()
 
-        bodies = self.bodies
-        for i in range(64):
-            bodies.append(None)
         # Bottom static body
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 2.0)
@@ -230,7 +227,7 @@ class ElasticBody (Framework):
         pusher.SetMassFromShapes()
         pusher.CreateShape(sd)
         jd.Initialize(rightmotor,pusher,rightmotor.GetWorldCenter()+(-8.0,0),
-        pusher.GetWorldCenter()+box2d.b2Vec2(5.0,0) )
+            pusher.GetWorldCenter()+(5.0,0) )
         self.world.CreateJoint(jd).getAsType()
         # Static bodies above motors
         sd=box2d.b2PolygonDef() 
@@ -261,10 +258,10 @@ class ElasticBody (Framework):
         g.CreateShape(sd)
         cd.radius   = 1.0	
         cd.friction = 1.0
-        cd.localPosition = box2d.b2Vec2(29,-6)
+        cd.localPosition = (29,-6)
         g.CreateShape(cd)
         cd.radius   = 0.7
-        cd.localPosition = box2d.b2Vec2(-2,-4.5)
+        cd.localPosition = (-2,-4.5)
         g.CreateShape(cd)
         # Elevator
         bd=box2d.b2BodyDef() 
@@ -313,7 +310,7 @@ class ElasticBody (Framework):
         cd.radius   = 0.7
         cd.density  = 1
         cd.friction = 0.01
-        cd.localPosition = box2d.b2Vec2(0,0)
+        cd.localPosition = (0,0)
         body.CreateShape(cd)
         body.SetMassFromShapes()
 
@@ -329,14 +326,19 @@ class ElasticBody (Framework):
         bd.position.Set(17.5,96.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
+
         # "Elastic body" 64 bodies - something like a lin. elastic compound
         # connected via dynamic forces (springs)
+        bodies = self.bodies
+        for i in range(64):
+            bodies.append(None)
+
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.55, 0.55)
         sd.density    = 1.5
         sd.friction   = 0.01
         sd.filter.groupIndex = -1
-        startpoint=box2d.b2Vec2(30,20)
+        startpoint=(30,20)
         bd=box2d.b2BodyDef() 
         bd.isBullet   = False
         bd.allowSleep = False
@@ -344,7 +346,7 @@ class ElasticBody (Framework):
             for j in range(8):
                 bd.position.Set(j*1.02, 2.51 + 1.02 * i)
                 bd.position  += startpoint
-                body  = self.world.CreateBody(bd) #
+                body  = self.world.CreateBody(bd)
                 bodies[8*i+j] = body
                 body.CreateShape(sd)
                 body.SetMassFromShapes()
@@ -354,43 +356,43 @@ class ElasticBody (Framework):
         bodies = self.bodies
         for i in range(8):
             for j in range(8):
-                zero=box2d.b2Vec2(0.0,0.0)
-                down=box2d.b2Vec2(0.0, -0.5)
-                up=box2d.b2Vec2(0.0, 0.5)
-                right=box2d.b2Vec2(0.5, 0.0)
-                left=box2d.b2Vec2(-0.5, 0.0)
-                ind = i*8+j
+                zero =(0.0,0.0)
+                down =(0.0, -0.5)
+                up   =(0.0, 0.5)
+                right=(0.5, 0.0)
+                left =(-0.5, 0.0)
+                ind  = i*8+j
                 indr = ind+1
                 indd = ind+8
                 spring = 500.0
-                damp = 5.0
-                if (j<7):
+                damp   = 5.0
+                if j<7:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[indr]),zero,spring, damp, 1.0)
                     self.AddSpringForce((bodies[ind]),right,(bodies[indr]),left,0.5*spring, damp, 0.0)
-                if (i<7):
+                if i<7:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[indd]),zero,spring, damp, 1.0)
                     self.AddSpringForce((bodies[ind]),up,(bodies[indd]),down,0.5*spring,damp,0.0)
                 inddr = indd + 1
                 inddl = indd - 1
                 drdist = math.sqrt(2.0)
-                if (i < 7 and j < 7):
+                if i < 7 and j < 7:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[inddr]),zero,spring, damp, drdist)
-                if (i < 7 and j > 0):
+                if i < 7 and j > 0:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[inddl]),zero,spring, damp, drdist)
 
                 indr = ind+2
                 indd = ind+8*2
-                if (j<6):
+                if j<6:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[indr]),zero,spring, damp, 2.0)
-                if (i<6):
+                if i<6:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[indd]),zero,spring,damp,2.0)
 
                 inddr = indd + 2
                 inddl = indd - 2
                 drdist = math.sqrt(2.0)*2.0
-                if (i < 6 and j < 6):
+                if i < 6 and j < 6:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[inddr]),zero,spring, damp, drdist)
-                if (i < 6 and j > 1):
+                if i < 6 and j > 1:
                     self.AddSpringForce((bodies[ind]),zero,(bodies[inddl]),zero,spring, damp, drdist)
 
         # Check if bodies are near elevator
@@ -398,18 +400,17 @@ class ElasticBody (Framework):
         p1 = bodies[0].GetWorldCenter()
         p2 = bodies[63].GetWorldCenter()
         #    self.m_elev:   elevator prism. joint
-        e = self.m_elev.GetWorldCenter() + box2d.b2Vec2(0,7)
+        e = self.m_elev.GetWorldCenter() + (0,7)
 
         # maybe not the best way to do it...
         # Bodies reached the elevator side
-        if ( p1.x>e.x or p2.x>e.x ):
-            # go up
-            if ( ( p1.y<e.y or p2.y<e.y ) and ( self.m_joint_elev.GetJointTranslation()<=self.m_joint_elev.GetLowerLimit()+1 ) ):
+        if p1.x>e.x or p2.x>e.x:            # go up
+            if ( p1.y<e.y or p2.y<e.y ) and ( self.m_joint_elev.GetJointTranslation()<=self.m_joint_elev.GetLowerLimit()+1 ):
                 self.m_joint_elev.SetMotorSpeed(20)
                 #print "lift goes up trans: %G" % self.m_joint_elev.GetJointTranslation()
 
         # go down
-        if ( (self.m_joint_elev.GetJointTranslation()>=self.m_joint_elev.GetUpperLimit()-2) ):
+        if self.m_joint_elev.GetJointTranslation() >= self.m_joint_elev.GetUpperLimit()-2:
             self.m_joint_elev.SetMotorSpeed(-15)
             #printf("lift goes down: %G\n",self.m_joint_elev.GetJointTranslation())
 
@@ -428,6 +429,7 @@ class ElasticBody (Framework):
         dx = diff.Normalize() #normalizes diff and puts length into dx
         vrel = vdiff.x*diff.x + vdiff.y*diff.y
         forceMag = -k*(dx-desiredDist) - friction*vrel
+
         diff *= forceMag 
         bB.ApplyForce(diff, bA.GetWorldPoint(localA))
         diff *= -1.0

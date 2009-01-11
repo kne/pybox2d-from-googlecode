@@ -67,7 +67,7 @@ class SensorTest (Framework):
         # Traverse the contact results. Apply a force on shapes
         # that overlap the sensor.
         for point in self.points:
-            if (point.state == fwContactTypes.contactPersisted):
+            if point.state == fwContactTypes.contactPersisted:
                 continue
             
             shape1, shape2=point.shape1, point.shape2
@@ -92,7 +92,7 @@ class SensorTest (Framework):
 
             d = center - point.position
 
-            if (d.LengthSquared() < box2d.B2_FLT_EPSILON * box2d.B2_FLT_EPSILON):
+            if d.LengthSquared() < box2d.B2_FLT_EPSILON * box2d.B2_FLT_EPSILON:
                 continue
 
             d.Normalize()

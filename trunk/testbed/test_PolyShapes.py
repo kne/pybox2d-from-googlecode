@@ -95,15 +95,15 @@ class PolyShapes (Framework):
           bd.position.Set(x, 10.0)
           bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
           
-          if (index == 4):
-               bd.angularDamping = 0.02
+          if index == 4:
+              bd.angularDamping = 0.02
           
           self.bodies.append(self.world.CreateBody(bd) )
           
-          if (index < 4):
-               self.bodies[-1].CreateShape(self.sds[index])
-          else :
-               self.bodies[-1].CreateShape(self.circleDef)
+          if index < 4:
+              self.bodies[-1].CreateShape(self.sds[index])
+          else:
+              self.bodies[-1].CreateShape(self.circleDef)
           self.bodies[-1].SetMassFromShapes()
           
     def DestroyBody(self):

@@ -51,7 +51,7 @@ class DistanceTest (Framework):
         self.m_shape2 = self.m_body2.CreateShape(sd)
         self.m_body2.SetMassFromShapes()
 
-        self.world.SetGravity(box2d.b2Vec2(0.0, 0.0))
+        self.world.SetGravity((0.0, 0.0))
      
     def Step(self, settings):
         distance, x1, x2 = box2d.b2Distance(self.m_shape1, self.m_body1.GetXForm(), self.m_shape2, self.m_body2.GetXForm())
