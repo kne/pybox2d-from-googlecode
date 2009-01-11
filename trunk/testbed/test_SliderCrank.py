@@ -99,7 +99,7 @@ class SliderCrank (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
           if key==K_f:
                self.m_joint2.m_enableMotor = not self.m_joint2.m_enableMotor
                self.m_joint2.GetBody2().WakeUp()
@@ -108,7 +108,7 @@ class SliderCrank (Framework):
                self.m_joint1.m_enableMotor = not self.m_joint1.m_enableMotor
                self.m_joint1.GetBody2().WakeUp()
      
-    def Step(self, settings) :
+    def Step(self, settings):
           self.DrawString(5, self.textLine, "Keys: (f) toggle friction, (m) toggle motor")
           self.textLine += 15
 

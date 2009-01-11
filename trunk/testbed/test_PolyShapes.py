@@ -88,38 +88,38 @@ class PolyShapes (Framework):
 
         self.bodyIndex = 0
 
-    def Create(self, index) :
+    def Create(self, index):
           bd=box2d.b2BodyDef() 
           
           x = box2d.b2Random(-2.0, 2.0)
           bd.position.Set(x, 10.0)
           bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
           
-          if (index == 4) :
+          if (index == 4):
                bd.angularDamping = 0.02
           
           self.bodies.append(self.world.CreateBody(bd) )
           
-          if (index < 4) :
+          if (index < 4):
                self.bodies[-1].CreateShape(self.sds[index])
           else :
                self.bodies[-1].CreateShape(self.circleDef)
           self.bodies[-1].SetMassFromShapes()
           
-    def DestroyBody(self) :
+    def DestroyBody(self):
          for body in self.bodies:
             self.bodies.remove(body)
             self.world.DestroyBody(body)
             return
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_1 or key==K_2 or key==K_3 or key==K_4 or key==K_5:
             self.Create(key - K_1)
 
         elif key==K_d:
             self.DestroyBody()
      
-    def Step(self, settings) :
+    def Step(self, settings):
         super(PolyShapes, self).Step(settings)
         self.DrawString(5, self.textLine, "Press 1-5 to drop stuff")
         self.textLine += 15

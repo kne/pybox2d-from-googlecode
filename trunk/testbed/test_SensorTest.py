@@ -63,7 +63,7 @@ class SensorTest (Framework):
             body.CreateShape(sd)
             body.SetMassFromShapes()
 
-    def Step(self, settings) :
+    def Step(self, settings):
         # Traverse the contact results. Apply a force on shapes
         # that overlap the sensor.
         for point in self.points:

@@ -350,7 +350,7 @@ class ElasticBody (Framework):
                 body.SetMassFromShapes()
 
          #  Apply dynamic forces (springs) and check elevator state
-    def Step(self, settings) :
+    def Step(self, settings):
         bodies = self.bodies
         for i in range(8):
             for j in range(8):
@@ -409,14 +409,14 @@ class ElasticBody (Framework):
                 #print "lift goes up trans: %G" % self.m_joint_elev.GetJointTranslation()
 
         # go down
-        if ( (self.m_joint_elev.GetJointTranslation()>=self.m_joint_elev.GetUpperLimit()-2) ) :
+        if ( (self.m_joint_elev.GetJointTranslation()>=self.m_joint_elev.GetUpperLimit()-2) ):
             self.m_joint_elev.SetMotorSpeed(-15)
             #printf("lift goes down: %G\n",self.m_joint_elev.GetJointTranslation())
 
         super(ElasticBody, self).Step(settings)
 
     # Add a spring force
-    def AddSpringForce(self, bA, localA, bB, localB, k, friction, desiredDist) :
+    def AddSpringForce(self, bA, localA, bB, localB, k, friction, desiredDist):
         pA = bA.GetWorldPoint(localA)
         pB = bB.GetWorldPoint(localB)
         diff=pB - pA

@@ -150,7 +150,7 @@ class Web (Framework):
         jd.length = d.Length()
         self.m_joints.append(self.world.CreateJoint(jd).getAsType())
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         # Note: these functions are still causing some problems
         if key==K_b:
             for body in self.m_bodies:
@@ -164,14 +164,14 @@ class Web (Framework):
                 self.world.DestroyJoint(joint)
                 break
 
-    def Step(self, settings) :
+    def Step(self, settings):
           self.DrawString(5, self.textLine, "This demonstrates a soft distance joint.")
           self.textLine += 15
           self.DrawString(5, self.textLine, "Press: (b) to delete a body, (j) to delete a joint")
           self.textLine += 15
           super(Web, self).Step(settings)
      
-    def JointDestroyed(self, joint) :
+    def JointDestroyed(self, joint):
         if joint in self.m_joints:
             print "Joint destroyed and removed from the list"
             self.m_joints.remove(joint)

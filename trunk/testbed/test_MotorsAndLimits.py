@@ -93,7 +93,7 @@ class MotorsAndLimits (Framework):
 
         self.m_joint3 = self.world.CreateJoint(pjd).getAsType()
 
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_l:
             self.m_joint2.EnableLimit(not self.m_joint2.IsLimitEnabled())
             self.m_joint3.EnableLimit(not self.m_joint3.IsLimitEnabled())

@@ -34,7 +34,7 @@ class TheoJansen (Framework):
     m_motorOn = False
     m_motorSpeed = 0
 
-    def CreateLeg(self, s, wheelAnchor) :
+    def CreateLeg(self, s, wheelAnchor):
         p1=box2d.b2Vec2(5.4 * s, -6.1)
         p2=box2d.b2Vec2(7.2 * s, -1.2)
         p3=box2d.b2Vec2(4.3 * s, -1.9)

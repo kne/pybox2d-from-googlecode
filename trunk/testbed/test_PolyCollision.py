@@ -53,12 +53,12 @@ class PolyCollision (Framework):
 
         self.world.SetGravity(box2d.b2Vec2_zero)
      
-    def Step(self, settings) :
+    def Step(self, settings):
         settings.pause = True
         super(PolyCollision, self).Step(settings)
         settings.pause = False
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
           p = self.m_body2.GetPosition()
           a = self.m_body2.GetAngle()
           

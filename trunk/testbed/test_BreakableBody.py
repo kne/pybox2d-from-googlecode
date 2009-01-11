@@ -383,7 +383,7 @@ class BreakableBody(Framework):
         pd.vertexCount = 3
 
         for i in range(md.GetTriangleCount()):
-            if ( triangles[i].inside ) :
+            if ( triangles[i].inside ):
                 pd.setVertex(0,triangles[i].v[0].x, triangles[i].v[0].y)
                 pd.setVertex(1,triangles[i].v[1].x, triangles[i].v[1].y)
                 pd.setVertex(2,triangles[i].v[2].x, triangles[i].v[2].y)
@@ -513,7 +513,7 @@ class BreakableBody(Framework):
             super(BreakableBody, self).MouseUp(p)
         
     # examples
-    def ExampleData(self, which) :
+    def ExampleData(self, which):
         print "\nLoading data:", which
 
         nodes      = data["%s_nodes" % which]

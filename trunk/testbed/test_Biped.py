@@ -369,128 +369,128 @@ class BipedDef(object):
 
     def SetGroupIndex(self, i):
         for o in self.iter_polys:
-            o.filter.groupIndex		= i
+            o.filter.groupIndex	= i
 
     def SetLinearDamping(self, f):
         for d in self.iter_defs:
             d.linearDamping = f
 
-    def SetAngularDamping(self, f) :
+    def SetAngularDamping(self, f):
         for d in self.iter_defs:
             d.angularDamping = f
 
-    def SetMotorTorque(self,  f) :
+    def SetMotorTorque(self, f):
         for j in self.iter_joints:
             j.maxMotorTorque = f
 
-    def SetMotorSpeed(self,  f) :
+    def SetMotorSpeed(self,  f):
         for j in self.iter_joints:
             j.motorSpeed = f
 
-    def SetDensity(self,  f) :
+    def SetDensity(self,  f):
         for o in self.iter_polys:
-            o.density		= f
+            o.density = f
 
-    def SetRestitution(self,  f) :
+    def SetRestitution(self, f):
         for o in self.iter_polys:
-            o.restitution		= f
+            o.restitution = f
 
-    def EnableLimit(self) :
+    def EnableLimit(self):
         self.SetLimit(True)
 
-    def DisableLimit(self) :
+    def DisableLimit(self):
         self.SetLimit(False)
 
-    def SetLimit(self, b) :
+    def SetLimit(self, b):
         for j in self.iter_joints:
             j.enableLimit = b
 
-    def EnableMotor(self) :
+    def EnableMotor(self):
         self.SetMotor(True)
 
-    def DisableMotor(self) :
+    def DisableMotor(self):
         self.SetMotor(False)
 
-    def SetMotor(self, b) :
+    def SetMotor(self, b):
         for j in self.iter_joints:
             j.enableMotor = b
 
-    def DefaultVertices(self) :
+    def DefaultVertices(self):
         global k_scale
         # feet
         for poly in (self.LFootPoly, self.RFootPoly):
-            poly.vertexCount = 5
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.033,.143))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.023,.033))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.267,.035))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.265,.065))
-            poly.setVertex(4, k_scale * box2d.b2Vec2(.117,.143))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.033,.143),
+                k_scale * box2d.b2Vec2(.023,.033),
+                k_scale * box2d.b2Vec2(.267,.035),
+                k_scale * box2d.b2Vec2(.265,.065),
+                k_scale * box2d.b2Vec2(.117,.143)])
         # calves
         for poly in (self.LCalfPoly, self.RCalfPoly):
-            poly.vertexCount = 4
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.089,.016))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.178,.016))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.205,.417))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.095,.417))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.089,.016),
+                k_scale * box2d.b2Vec2(.178,.016),
+                k_scale * box2d.b2Vec2(.205,.417),
+                k_scale * box2d.b2Vec2(.095,.417)])
         # thighs
         for poly in (self.LThighPoly, self.RThighPoly):
-            poly.vertexCount = 4
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.137,.032))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.243,.032))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.318,.343))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.142,.343))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.137,.032),
+                k_scale * box2d.b2Vec2(.243,.032),
+                k_scale * box2d.b2Vec2(.318,.343),
+                k_scale * box2d.b2Vec2(.142,.343)])
         # pelvis
-        self.PelvisPoly.vertexCount = 5
-        self.PelvisPoly.setVertex(0, k_scale * box2d.b2Vec2(.105,.051))
-        self.PelvisPoly.setVertex(1, k_scale * box2d.b2Vec2(.277,.053))
-        self.PelvisPoly.setVertex(2, k_scale * box2d.b2Vec2(.320,.233))
-        self.PelvisPoly.setVertex(3, k_scale * box2d.b2Vec2(.112,.233))
-        self.PelvisPoly.setVertex(4, k_scale * box2d.b2Vec2(.067,.152))
+        self.PelvisPoly.setVertices([
+            k_scale * box2d.b2Vec2(.105,.051),
+            k_scale * box2d.b2Vec2(.277,.053),
+            k_scale * box2d.b2Vec2(.320,.233),
+            k_scale * box2d.b2Vec2(.112,.233),
+            k_scale * box2d.b2Vec2(.067,.152)])
         # stomach
-        self.StomachPoly.vertexCount = 4
-        self.StomachPoly.setVertex(0, k_scale * box2d.b2Vec2(.088,.043))
-        self.StomachPoly.setVertex(1, k_scale * box2d.b2Vec2(.284,.043))
-        self.StomachPoly.setVertex(2, k_scale * box2d.b2Vec2(.295,.231))
-        self.StomachPoly.setVertex(3, k_scale * box2d.b2Vec2(.100,.231))
+        self.StomachPoly.setVertices([
+            k_scale * box2d.b2Vec2(.088,.043),
+            k_scale * box2d.b2Vec2(.284,.043),
+            k_scale * box2d.b2Vec2(.295,.231),
+            k_scale * box2d.b2Vec2(.100,.231)])
         # chest
-        self.ChestPoly.vertexCount = 4
-        self.ChestPoly.setVertex(0, k_scale * box2d.b2Vec2(.091,.042))
-        self.ChestPoly.setVertex(1, k_scale * box2d.b2Vec2(.283,.042))
-        self.ChestPoly.setVertex(2, k_scale * box2d.b2Vec2(.177,.289))
-        self.ChestPoly.setVertex(3, k_scale * box2d.b2Vec2(.065,.289))
+        self.ChestPoly.setVertices([
+            k_scale * box2d.b2Vec2(.091,.042),
+            k_scale * box2d.b2Vec2(.283,.042),
+            k_scale * box2d.b2Vec2(.177,.289),
+            k_scale * box2d.b2Vec2(.065,.289)])
         # head
         self.HeadCirc.radius = k_scale * .115
         # neck
-        self.NeckPoly.vertexCount = 4
-        self.NeckPoly.setVertex(0, k_scale * box2d.b2Vec2(.038,.054))
-        self.NeckPoly.setVertex(1, k_scale * box2d.b2Vec2(.149,.054))
-        self.NeckPoly.setVertex(2, k_scale * box2d.b2Vec2(.154,.102))
-        self.NeckPoly.setVertex(3, k_scale * box2d.b2Vec2(.054,.113))
+        self.NeckPoly.setVertices([
+            k_scale * box2d.b2Vec2(.038,.054),
+            k_scale * box2d.b2Vec2(.149,.054),
+            k_scale * box2d.b2Vec2(.154,.102),
+            k_scale * box2d.b2Vec2(.054,.113)])
         # upper arms
         for poly in (self.LUpperArmPoly, self.RUpperArmPoly):
-            poly.vertexCount = 5
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.092,.059))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.159,.059))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.169,.335))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.078,.335))
-            poly.setVertex(4, k_scale * box2d.b2Vec2(.064,.248))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.092,.059),
+                k_scale * box2d.b2Vec2(.159,.059),
+                k_scale * box2d.b2Vec2(.169,.335),
+                k_scale * box2d.b2Vec2(.078,.335),
+                k_scale * box2d.b2Vec2(.064,.248)])
         # forearms
         for poly in (self.LForearmPoly, self.RForearmPoly):
-            poly.vertexCount = 4
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.082,.054))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.138,.054))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.149,.296))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.088,.296))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.082,.054),
+                k_scale * box2d.b2Vec2(.138,.054),
+                k_scale * box2d.b2Vec2(.149,.296),
+                k_scale * box2d.b2Vec2(.088,.296)])
         # hands
         for poly in (self.LHandPoly, self.RHandPoly):
-            poly.vertexCount = 5
-            poly.setVertex(0, k_scale * box2d.b2Vec2(.066,.031))
-            poly.setVertex(1, k_scale * box2d.b2Vec2(.123,.020))
-            poly.setVertex(2, k_scale * box2d.b2Vec2(.160,.127))
-            poly.setVertex(3, k_scale * box2d.b2Vec2(.127,.178))
-            poly.setVertex(4, k_scale * box2d.b2Vec2(.074,.178))
+            poly.setVertices([
+                k_scale * box2d.b2Vec2(.066,.031),
+                k_scale * box2d.b2Vec2(.123,.020),
+                k_scale * box2d.b2Vec2(.160,.127),
+                k_scale * box2d.b2Vec2(.127,.178),
+                k_scale * box2d.b2Vec2(.074,.178)])
 
-    def DefaultJoints(self) :
+    def DefaultJoints(self):
         global k_scale
         #b.LAnkleDef.body1		= LFoot
         #b.LAnkleDef.body2		= LCalf
@@ -604,7 +604,7 @@ class BipedDef(object):
         self.LWristDef.lowerAngle		= self.RWristDef.lowerAngle		= -0.174532925
         self.LWristDef.upperAngle		= self.RWristDef.upperAngle		= 0.174532925
 
-    def DefaultPositions(self) :
+    def DefaultPositions(self):
         global k_scale
         for foot in (self.LFootDef, self.RFootDef):
             foot.position		= k_scale * box2d.b2Vec2(-.122,-.901)

@@ -53,7 +53,7 @@ class DistanceTest (Framework):
 
         self.world.SetGravity(box2d.b2Vec2(0.0, 0.0))
      
-    def Step(self, settings) :
+    def Step(self, settings):
         distance, x1, x2 = box2d.b2Distance(self.m_shape1, self.m_body1.GetXForm(), self.m_shape2, self.m_body2.GetXForm())
 
         self.DrawString(5, self.textLine, "distance = %g" % distance)
@@ -67,7 +67,7 @@ class DistanceTest (Framework):
         super(DistanceTest, self).Step(settings)
         settings.pause = False
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         p = self.m_body2.GetPosition()
         a = self.m_body2.GetAngle()
 

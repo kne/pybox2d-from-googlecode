@@ -58,7 +58,7 @@ class VerticalStack (Framework):
 
         self.m_bullet = None 
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key == K_COMMA:
             if self.m_bullet:
                 self.world.DestroyBody(self.m_bullet)
@@ -79,7 +79,7 @@ class VerticalStack (Framework):
 
             self.m_bullet.SetLinearVelocity(box2d.b2Vec2(400.0, 0.0))
      
-    def Step(self, settings) :
+    def Step(self, settings):
           self.DrawString(5, self.textLine, "Press: (,) to launch a bullet.")
           self.textLine += 15
 

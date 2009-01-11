@@ -106,7 +106,7 @@ class CollisionProcessing (Framework):
         body6.CreateShape(circleShapeDef)
         body6.SetMassFromShapes()
      
-    def Step(self, settings) :
+    def Step(self, settings):
         # We are going to destroy some bodies according to contact
         # points. We must buffer the bodies that should be destroyed
         # because they may belong to multiple contact points.

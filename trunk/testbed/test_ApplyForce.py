@@ -82,7 +82,7 @@ class ApplyForce (Framework):
         self.m_body.CreateShape(sd2)
         self.m_body.SetMassFromShapes()
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_w:
             f = self.m_body.GetWorldVector((0.0, -200.0))
             p = self.m_body.GetWorldPoint((0.0, 2.0))

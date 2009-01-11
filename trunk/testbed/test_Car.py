@@ -167,13 +167,13 @@ class Car (Framework):
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
      
-    def Step(self, settings) :
+    def Step(self, settings):
         self.DrawString(5, self.textLine, "Keys: left = a, brake = s, right = d")
         self.textLine += 15
 
         super(Car, self).Step(settings)
      
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_a:
            self.m_leftJoint.SetMaxMotorTorque(800.0)
            self.m_leftJoint.SetMotorSpeed(12.0)

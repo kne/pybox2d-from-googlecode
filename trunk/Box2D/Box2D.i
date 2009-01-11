@@ -619,28 +619,13 @@
         def setVertices(self, vertices):
             """Sets all of the vertices given a tuple 
                 in the format ( (x1,y1), (x2,y2) ... (xN,yN) )
-                where each vertex is either a tuple or a b2Vec2"""
-            self._allocateVertices(len(vertices))
-            for i in range(0, self.vertexCount):
-                if isinstance(vertices[i], b2Vec2):
-                    self.setVertex(i, vertices[i])
-                elif isinstance(vertices[i], (tuple, list)):
-                    self.setVertex(i, vertices[i][0], vertices[i][1])
-                else:
-                    raise ValueError, "Unknown vertex type"
-        def setVertices_tuple(self, vertices):
-            """Sets all of the vertices given a tuple 
-                in the format ( (x1,y1), (x2,y2) ... (xN,yN) )"""
-            self._allocateVertices(len(vertices))
-            for i in range(0, self.vertexCount):
-                self.setVertex(i, vertices[i][0], vertices[i][1])
-        def setVertices_b2Vec2(self, vertices):
-            """Sets all of the vertices given a tuple 
-                in the format ( v1, v2, ..., vN ) where each vertex
-                is a b2Vec2"""
+                where each vertex is either a list/tuple/b2Vec2"""
             self._allocateVertices(len(vertices))
             for i in range(0, self.vertexCount):
                 self.setVertex(i, vertices[i])
+        setVertices_tuple = setVertices  # pre 202b1 compatibility
+        setVertices_b2Vec2 = setVertices # pre 202b1 compatibility
+
         %}
         void _cleanUp() {
             if ($self->vertexCount > 0 && $self->vertices)
@@ -693,23 +678,18 @@
             for i in range(0, self.vertexCount):
                 vertices.append(self.getVertex(i))
             return vertices
-        def setVertices_tuple(self, vertices):
-            """Sets all of the vertices (up to b2_maxPolygonVertices) given a tuple 
-                in the format ( (x1,y1), (x2,y2) ... (xN,yN) )"""
+        def setVertices(self, vertices):
+            """Sets all of the vertices given a tuple 
+                in the format ( (x1,y1), (x2,y2) ... (xN,yN) )
+                where each vertex is a list/tuple/b2Vec2"""
             if len(vertices) > b2_maxPolygonVertices:
                 raise ValueError
             self.vertexCount = len(vertices)
             for i in range(0, self.vertexCount):
-                self.setVertex(i, vertices[i][0], vertices[i][1])
-        def setVertices_b2Vec2(self, vertices):
-            """Sets all of the vertices (up to b2_maxPolygonVertices) given a tuple 
-                in the format ( v1, v2, ..., vN ) where each vertex
-                is a b2Vec2"""
-            if len(vertices) > b2_maxPolygonVertices:
-                raise ValueError
-            self.vertexCount = len(vertices)
-            for i in range(0, self.vertexCount):
-                self.setVertex(i, vertices[i])
+                self.setVertex(i, vertices[i]) # possible on pyBox2D >= r2.0.2b1
+        setVertices_tuple = setVertices  # pre 202b1 compatibility
+        setVertices_b2Vec2 = setVertices # pre 202b1 compatibility
+
         %}
         b2Vec2* getVertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->vertexCount) return NULL;

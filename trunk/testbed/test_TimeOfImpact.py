@@ -51,7 +51,7 @@ class TimeOfImpact (Framework):
         self.m_shape2 = self.m_body2.CreateShape(sd).getAsType()
         self.m_body2.SetMassFromShapes()
 
-    def Step(self, settings) :
+    def Step(self, settings):
         sweep1=box2d.b2Sweep()
         sweep1.c0.Set(0.0, 20.0)
         sweep1.a0 = 0.0

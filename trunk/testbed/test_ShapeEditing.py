@@ -49,7 +49,7 @@ class ShapeEditing (Framework):
 
         self.m_shape2 = None
              
-    def Keyboard(self, key) :
+    def Keyboard(self, key):
         if key==K_c:
             if not self.m_shape2:
                 sd=box2d.b2CircleDef()
@@ -67,7 +67,7 @@ class ShapeEditing (Framework):
                 self.m_body.SetMassFromShapes()
                 self.m_body.WakeUp()
 
-    def Step(self, settings) :
+    def Step(self, settings):
         self.DrawString(5, self.textLine, "Press: (c) create a shape, (d) destroy a shape.")
         self.textLine += 15
         super(ShapeEditing, self).Step(settings)
