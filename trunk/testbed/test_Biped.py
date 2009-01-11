@@ -40,16 +40,16 @@ class Test_Biped(Framework):
         sd.density = 0.0
         sd.restitution = k_restitution
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(-10.0, 0.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (-10.0, 0.0), 0.0)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(10.0, 0.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(0.0, -10.0), 0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.1, 10.0, (0.0, -10.0), 0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(0.0, 10.0), -0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.1, 10.0, (0.0, 10.0), -0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
         self.m_biped = Biped(self.world, box2d.b2Vec2(0.0, 20.0))

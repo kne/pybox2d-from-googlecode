@@ -817,6 +817,22 @@
         }
     }
 
+    %rename (__b2Distance__) b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* shape1, const b2XForm& xf1, const b2Shape* shape2, const b2XForm& xf2);
+    %inline %{
+        //Add a b2Distance:
+        // dist, x1, x2 = b2Distance(shape1, xf1, shape2, xf2)
+        PyObject* b2Distance(const b2Shape* shape1, const b2XForm& xf1, const b2Shape* shape2, const b2XForm& xf2) {
+            PyObject* ret=PyTuple_New(3);
+            b2Vec2* x1=new b2Vec2;
+            b2Vec2* x2=new b2Vec2;
+            float dist=b2Distance(x1,x2,shape1,xf1,shape2,xf2);
+            PyTuple_SetItem(ret, 0, SWIG_From_float(dist)); 
+            PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(x1), SWIGTYPE_p_b2Vec2, 0 ));
+            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(x2), SWIGTYPE_p_b2Vec2, 0 ));
+            return ret;
+        }
+    %}
+
     %inline %{
         // Add some functions that might be commonly used
         bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {

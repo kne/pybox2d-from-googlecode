@@ -898,6 +898,9 @@ class Framework(object):
         """
         pass
 
+    def __del__(self):
+        pass
+
 def main(test_class):
     """
     Loads the test class and executes it.
@@ -905,6 +908,8 @@ def main(test_class):
     print "----------------------------------"
     print "Loading %s..." % test_class.name
     test = test_class()
+    if fwSettings.onlyInit:
+        return
     test.run()
 
 if __name__=="__main__":

@@ -52,7 +52,7 @@ class MotorsAndLimits (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-        rjd.Initialize(prevBody, body, box2d.b2Vec2(0.0, y))
+        rjd.Initialize(prevBody, body, (0.0, y))
         rjd.motorSpeed = 1.0 * box2d.b2_pi
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
@@ -66,7 +66,7 @@ class MotorsAndLimits (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-        rjd.Initialize(prevBody, body, box2d.b2Vec2(6.0, y))
+        rjd.Initialize(prevBody, body, (6.0, y))
         rjd.motorSpeed = 0.5 * box2d.b2_pi
         rjd.maxMotorTorque = 2000.0
         rjd.enableMotor = True
@@ -83,7 +83,7 @@ class MotorsAndLimits (Framework):
         body.SetMassFromShapes()
 
         pjd=box2d.b2PrismaticJointDef() 
-        pjd.Initialize(ground, body, box2d.b2Vec2(-10.0, 10.0), box2d.b2Vec2(1.0, 0.0))
+        pjd.Initialize(ground, body, (-10.0, 10.0), (1.0, 0.0))
         pjd.motorSpeed = 10.0
         pjd.maxMotorForce = 1000.0
         pjd.enableMotor = True

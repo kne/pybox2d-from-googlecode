@@ -38,7 +38,7 @@ class SensorTest (Framework):
 
         if True:
             sd=box2d.b2PolygonDef() 
-            sd.SetAsBox(10.0, 2.0, box2d.b2Vec2(0.0, 20.0), 0.0)
+            sd.SetAsBox(10.0, 2.0, (0.0, 20.0), 0.0)
             sd.isSensor = True
             self.m_sensor = ground.CreateShape(sd)
 

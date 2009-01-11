@@ -975,6 +975,8 @@ def main(test_class):
     print "----------------------------------"
     print "Loading %s..." % test_class.name
     test = test_class()
+    if fwSettings.onlyInit:
+        return
     test.run()
 
 if __name__=="__main__":

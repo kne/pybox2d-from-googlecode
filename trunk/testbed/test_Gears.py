@@ -81,7 +81,7 @@ class Gears (Framework):
         body3.SetMassFromShapes()
 
         jd3=box2d.b2PrismaticJointDef() 
-        jd3.Initialize(ground, body3, bd3.position, box2d.b2Vec2(0.0, 1.0))
+        jd3.Initialize(ground, body3, bd3.position, (0.0, 1.0))
         jd3.lowerTranslation = -5.0
         jd3.upperTranslation = 5.0
         jd3.enableLimit = True

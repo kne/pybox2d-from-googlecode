@@ -29,13 +29,13 @@ import math
 class ContactCallbackTest (Framework):
     name="ContactCallbackTest"
      
-    m_ball=None 
-    m_bullet=None 
-    m_ball_shape=None 
+    ball=None 
+    bullet=None 
+    ball_shape=None 
      
     def __init__(self):
         super(ContactCallbackTest, self).__init__()
-
+    
         sd=box2d.b2PolygonDef() 
         sd.friction = 0
         sd.vertexCount = 3
@@ -124,15 +124,15 @@ class ContactCallbackTest (Framework):
         sd.setVertex(0,-10,0)
         self.world.GetGroundBody().CreateShape(sd)
 
-        sd.SetAsBox(.5,6,box2d.b2Vec2(10.5,6),0)
+        sd.SetAsBox(.5,6,(10.5,6),0)
         self.world.GetGroundBody().CreateShape(sd)
 
-        sd.SetAsBox(.5,6,box2d.b2Vec2(-10.5,6),0)
+        sd.SetAsBox(.5,6,(-10.5,6),0)
         self.world.GetGroundBody().CreateShape(sd)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(9.5,60)
-        self.m_ball = self.world.CreateBody( bd ) 
+        bd.position=(9.5,60)
+        self.ball = self.world.CreateBody( bd ) 
 
         cd=box2d.b2PolygonDef() 
         cd.vertexCount = 8
@@ -149,8 +149,8 @@ class ContactCallbackTest (Framework):
         cd.setVertex(7,-0.5 * s, 0.0)
         cd.density = 1.0
 
-        self.m_ball_shape = self.m_ball.CreateShape(cd)
-        self.m_ball.SetMassFromShapes()
+        self.ball_shape = self.ball.CreateShape(cd)
+        self.ball.SetMassFromShapes()
 
     def Step(self, settings):
         strings = []

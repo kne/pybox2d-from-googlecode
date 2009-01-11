@@ -285,7 +285,7 @@ class BreakableBody(Framework):
         # bottom
         sd.SetAsBox( H(gx), H(gy) )
         ground.CreateShape(sd)
-        sd.SetAsBox( H(dx), H(gy), box2d.b2Vec2(-dx,sy-1.0), 0.0 )
+        sd.SetAsBox( H(dx), H(gy), (-dx,sy-1.0), 0.0 )
         ground.CreateShape(sd)
 
         # dyn bodies

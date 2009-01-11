@@ -44,6 +44,7 @@ class fwSettings(object):
     drawFPS=True # python version
     pointSize=2.5 # python version (pixel radius for drawing points)
     drawMenu=True #toggle by pressing F1
+    onlyInit=False # run the test's initialization without graphics, and then quit (for testing)
 
 from optparse import OptionParser
 

@@ -53,7 +53,7 @@ class SliderCrank (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-        rjd.Initialize(prevBody, body, box2d.b2Vec2(0.0, 5.0))
+        rjd.Initialize(prevBody, body, (0.0, 5.0))
         rjd.motorSpeed = 1.0 * box2d.b2_pi
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
@@ -68,7 +68,7 @@ class SliderCrank (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-        rjd.Initialize(prevBody, body, box2d.b2Vec2(0.0, 9.0))
+        rjd.Initialize(prevBody, body, (0.0, 9.0))
         rjd.enableMotor = False
         self.world.CreateJoint(rjd).getAsType()
 
@@ -81,11 +81,11 @@ class SliderCrank (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
 
-        rjd.Initialize(prevBody, body, box2d.b2Vec2(0.0, 17.0))
+        rjd.Initialize(prevBody, body, (0.0, 17.0))
         self.world.CreateJoint(rjd).getAsType()
 
         pjd=box2d.b2PrismaticJointDef() 
-        pjd.Initialize(ground, body, box2d.b2Vec2(0.0, 17.0), box2d.b2Vec2(0.0, 1.0))
+        pjd.Initialize(ground, body, (0.0, 17.0), (0.0, 1.0))
 
         pjd.maxMotorForce = 1000.0
         pjd.enableMotor = True

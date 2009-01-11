@@ -32,7 +32,7 @@ class TimeOfImpact (Framework):
         sd=box2d.b2PolygonDef() 
         sd.density = 0.0
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(10.0, 0.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
 
         bd=box2d.b2BodyDef() 
         bd.position.Set(0.0, 20.0)

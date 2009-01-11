@@ -58,7 +58,7 @@ class DynamicEdges (Framework):
         sd1.density = 2.0
         
         sd2=box2d.b2PolygonDef()
-        sd2.SetAsBox(0.25, 0.5, box2d.b2Vec2(0.0, -0.5), 0.5 * box2d.b2_pi)
+        sd2.SetAsBox(0.25, 0.5, (0.0, -0.5), 0.5 * box2d.b2_pi)
         sd2.density = 2.0
         
         for i in range(10):
@@ -73,24 +73,24 @@ class DynamicEdges (Framework):
     
         xf1=box2d.b2XForm()
         xf1.R.Set(0.3524 * box2d.b2_pi)
-        xf1.position = box2d.b2Mul(xf1.R, box2d.b2Vec2(1.0, 0.0))
+        xf1.position = box2d.b2Mul(xf1.R, (1.0, 0.0))
         
         sd1=box2d.b2PolygonDef()
         sd1.vertexCount = 3
-        sd1.setVertex(0, box2d.b2Mul(xf1, box2d.b2Vec2(-1.0, 0.0)))
-        sd1.setVertex(1, box2d.b2Mul(xf1, box2d.b2Vec2(1.0, 0.0)))
-        sd1.setVertex(2, box2d.b2Mul(xf1, box2d.b2Vec2(0.0, 0.5)))
+        sd1.setVertex(0, box2d.b2Mul(xf1, (-1.0, 0.0)))
+        sd1.setVertex(1, box2d.b2Mul(xf1, (1.0, 0.0)))
+        sd1.setVertex(2, box2d.b2Mul(xf1, (0.0, 0.5)))
         sd1.density = 2.0
         
         xf2=box2d.b2XForm()
         xf2.R.Set(-0.3524 * box2d.b2_pi)
-        xf2.position = box2d.b2Mul(xf2.R, box2d.b2Vec2(-1.0, 0.0))
+        xf2.position = box2d.b2Mul(xf2.R, (-1.0, 0.0))
         
         sd2=box2d.b2PolygonDef()
         sd2.vertexCount = 3
-        sd2.setVertex(0, box2d.b2Mul(xf2, box2d.b2Vec2(-1.0, 0.0)))
-        sd2.setVertex(1, box2d.b2Mul(xf2, box2d.b2Vec2(1.0, 0.0)))
-        sd2.setVertex(2, box2d.b2Mul(xf2, box2d.b2Vec2(0.0, 0.5)))
+        sd2.setVertex(0, box2d.b2Mul(xf2, (-1.0, 0.0)))
+        sd2.setVertex(1, box2d.b2Mul(xf2, (1.0, 0.0)))
+        sd2.setVertex(2, box2d.b2Mul(xf2, (0.0, 0.5)))
         sd2.density = 2.0
         
         for i in range(10):
@@ -108,11 +108,11 @@ class DynamicEdges (Framework):
         sd_bottom.density = 4.0
         
         sd_left=box2d.b2PolygonDef()
-        sd_left.SetAsBox(0.15, 2.7, box2d.b2Vec2(-1.45, 2.35), 0.2)
+        sd_left.SetAsBox(0.15, 2.7, (-1.45, 2.35), 0.2)
         sd_left.density = 4.0
         
         sd_right=box2d.b2PolygonDef()
-        sd_right.SetAsBox(0.15, 2.7, box2d.b2Vec2(1.45, 2.35), -0.2)
+        sd_right.SetAsBox(0.15, 2.7, (1.45, 2.35), -0.2)
         sd_right.density = 4.0
         
         bd=box2d.b2BodyDef()

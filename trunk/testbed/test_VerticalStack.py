@@ -26,14 +26,14 @@ class VerticalStack (Framework):
     def __init__(self):
         super(VerticalStack, self).__init__()
         sd=box2d.b2PolygonDef()
-        sd.SetAsBox(50.0, 10.0, box2d.b2Vec2(0.0, -10.0), 0.0)
+        sd.SetAsBox(50.0, 10.0, (0.0, -10.0), 0.0)
 
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 0.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(20.0, 10.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (20.0, 10.0), 0.0)
         ground.CreateShape(sd)
 
         xs = [0.0, -10.0, -5.0, 5.0, 10.0]

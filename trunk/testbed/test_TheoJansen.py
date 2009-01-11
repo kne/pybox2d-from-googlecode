@@ -126,10 +126,10 @@ class TheoJansen (Framework):
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
         
-        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(-50.0, 15.0), 0.0)
+        sd.SetAsBox(0.5, 5.0, (-50.0, 15.0), 0.0)
         ground.CreateShape(sd)
         
-        sd.SetAsBox(0.5, 5.0, box2d.b2Vec2(50.0, 15.0), 0.0)
+        sd.SetAsBox(0.5, 5.0, (50.0, 15.0), 0.0)
         ground.CreateShape(sd)
         
         for i in range(40):

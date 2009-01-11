@@ -47,7 +47,7 @@ class LineJoint (Framework):
         jd = box2d.b2LineJointDef()
         axis=box2d.b2Vec2(2.0, 1.0)
         axis.Normalize()
-        jd.Initialize(ground, body, box2d.b2Vec2(0.0, 8.5), axis)
+        jd.Initialize(ground, body, (0.0, 8.5), axis)
         jd.motorSpeed = 0.0
         jd.maxMotorForce = 100.0
         jd.enableMotor = True

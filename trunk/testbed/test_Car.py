@@ -116,7 +116,7 @@ class Car (Framework):
         box=box2d.b2PolygonDef() 
         bd=box2d.b2BodyDef() 
 
-        box.SetAsBox(9.5, 0.5, box2d.b2Vec2_zero, 0.1 * box2d.b2_pi)
+        box.SetAsBox(9.5, 0.5, (0,0), 0.1 * box2d.b2_pi)
         box.friction = 0.62
         bd.position.Set(27.0 - 30.0, 3.1)
 
@@ -127,7 +127,7 @@ class Car (Framework):
         box=box2d.b2PolygonDef() 
         bd=box2d.b2BodyDef() 
 
-        box.SetAsBox(9.5, 0.5, box2d.b2Vec2_zero, -0.1 * box2d.b2_pi)
+        box.SetAsBox(9.5, 0.5, (0,0), -0.1 * box2d.b2_pi)
         box.friction = 0.62
         bd.position.Set(55.0 - 30.0, 3.1)
 
@@ -138,7 +138,7 @@ class Car (Framework):
         box=box2d.b2PolygonDef() 
         bd=box2d.b2BodyDef() 
 
-        box.SetAsBox(9.5, 0.5, box2d.b2Vec2_zero, 0.03 * box2d.b2_pi)
+        box.SetAsBox(9.5, 0.5, (0,0), 0.03 * box2d.b2_pi)
         box.friction = 0.62
         bd.position.Set(41.0, 2.0)
 
@@ -149,7 +149,7 @@ class Car (Framework):
         box=box2d.b2PolygonDef() 
         bd=box2d.b2BodyDef() 
 
-        box.SetAsBox(5.0, 0.5, box2d.b2Vec2_zero, 0.15 * box2d.b2_pi)
+        box.SetAsBox(5.0, 0.5, (0,0), 0.15 * box2d.b2_pi)
         box.friction = 0.62
         bd.position.Set(50.0, 4.0)
 

@@ -47,10 +47,10 @@ class Prismatic (Framework):
         pjd=box2d.b2PrismaticJointDef()
         
         # Bouncy limit
-        pjd.Initialize(ground, body, box2d.b2Vec2(0.0, 0.0), box2d.b2Vec2(1.0, 0.0))
+        pjd.Initialize(ground, body, (0.0, 0.0), (1.0, 0.0))
         
         # Non-bouncy limit
-        #pjd.Initialize(ground, body, box2d.b2Vec2(-10.0, 10.0), box2d.b2Vec2(1.0, 0.0))
+        #pjd.Initialize(ground, body, (-10.0, 10.0), (1.0, 0.0))
         
         pjd.motorSpeed = 10.0
         pjd.maxMotorForce = 1000.0

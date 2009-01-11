@@ -56,7 +56,7 @@ class Dominos (Framework):
             body.SetMassFromShapes()
 
         sd=box2d.b2PolygonDef() 
-        sd.SetAsBox(7.0, 0.25, box2d.b2Vec2_zero, 0.3)
+        sd.SetAsBox(7.0, 0.25, (0,0), 0.3)
 
         bd=box2d.b2BodyDef() 
         bd.position.Set(1.0, 6.0)
@@ -117,13 +117,13 @@ class Dominos (Framework):
         sd.density = 10.0
         sd.friction = 0.1
 
-        sd.SetAsBox(1.0, 0.1, box2d.b2Vec2(0.0, -0.9), 0.0)
+        sd.SetAsBox(1.0, 0.1, (0.0, -0.9), 0.0)
         b5.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 1.0, box2d.b2Vec2(-0.9, 0.0), 0.0)
+        sd.SetAsBox(0.1, 1.0, (-0.9, 0.0), 0.0)
         b5.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 1.0, box2d.b2Vec2(0.9, 0.0), 0.0)
+        sd.SetAsBox(0.1, 1.0, (0.9, 0.0), 0.0)
         b5.CreateShape(sd)
 
         b5.SetMassFromShapes()

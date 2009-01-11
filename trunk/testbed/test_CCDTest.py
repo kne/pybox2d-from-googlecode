@@ -38,16 +38,16 @@ class CCDTest (Framework):
         sd.density = 0.0
         sd.restitution = k_restitution
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(-10.0, 0.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (-10.0, 0.0), 0.0)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(10.0, 0.0), 0.0)
+        sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(0.0, -10.0), 0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.1, 10.0, (0.0, -10.0), 0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
-        sd.SetAsBox(0.1, 10.0, box2d.b2Vec2(0.0, 10.0), -0.5 * box2d.b2_pi)
+        sd.SetAsBox(0.1, 10.0, (0.0, 10.0), -0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
         sd_bottom=box2d.b2PolygonDef() 
@@ -55,11 +55,11 @@ class CCDTest (Framework):
         sd_bottom.density = 4.0
 
         sd_left=box2d.b2PolygonDef() 
-        sd_left.SetAsBox(0.15, 2.7, box2d.b2Vec2(-1.45, 2.35), 0.2)
+        sd_left.SetAsBox(0.15, 2.7, (-1.45, 2.35), 0.2)
         sd_left.density = 4.0
 
         sd_right=box2d.b2PolygonDef() 
-        sd_right.SetAsBox(0.15, 2.7, box2d.b2Vec2(1.45, 2.35), -0.2)
+        sd_right.SetAsBox(0.15, 2.7, (1.45, 2.35), -0.2)
         sd_right.density = 4.0
 
         bd=box2d.b2BodyDef() 

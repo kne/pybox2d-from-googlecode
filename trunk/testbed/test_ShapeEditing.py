@@ -42,7 +42,7 @@ class ShapeEditing (Framework):
         self.m_body = self.world.CreateBody(bodydef)
 
         sd=box2d.b2PolygonDef()
-        sd.SetAsBox(4.0, 4.0, box2d.b2Vec2(0.0, 0.0), 0.0)
+        sd.SetAsBox(4.0, 4.0, (0.0, 0.0), 0.0)
         sd.density = 10.0
         self.m_shape1 = self.m_body.CreateShape(sd)
         self.m_body.SetMassFromShapes()

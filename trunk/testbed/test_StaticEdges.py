@@ -50,7 +50,7 @@ class StaticEdges (Framework):
         sd1.density = 2.0
         
         sd2=box2d.b2PolygonDef()
-        sd2.SetAsBox(0.25, 0.5, box2d.b2Vec2(0.0, -0.5), 0.5 * box2d.b2_pi)
+        sd2.SetAsBox(0.25, 0.5, (0.0, -0.5), 0.5 * box2d.b2_pi)
         sd2.density = 2.0
         
         for i in range(10):

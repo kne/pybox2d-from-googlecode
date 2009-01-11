@@ -106,13 +106,13 @@ def main():
     
     # The borders of the screen
     sd = box2d.b2PolygonDef()
-    sd.SetAsBox(1, height/z, box2d.b2Vec2(-width/(2*z)-1, 0), 0)
+    sd.SetAsBox(1, height/z, (-width/(2*z)-1, 0), 0)
     ground.CreateShape(sd)
-    sd.SetAsBox(1, height/z, box2d.b2Vec2(width/(2*z)+1, 0), 0)
+    sd.SetAsBox(1, height/z, (width/(2*z)+1, 0), 0)
     ground.CreateShape(sd)
-    sd.SetAsBox(width/z, 1, box2d.b2Vec2(0,-height/(2*z)-1), 0)
+    sd.SetAsBox(width/z, 1, (0,-height/(2*z)-1), 0)
     ground.CreateShape(sd)
-    sd.SetAsBox(width/z, 1, box2d.b2Vec2(0,height/(2*z)+1), 0)
+    sd.SetAsBox(width/z, 1, (0,height/(2*z)+1), 0)
     ground.CreateShape(sd)
 
     # The shape for the file list

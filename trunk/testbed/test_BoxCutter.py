@@ -190,8 +190,8 @@ class BoxCutter (Framework):
         
         segment=box2d.b2Segment()
         
-        laserStart=box2d.b2Vec2(5.0-0.1,0.0)
-        laserDir=box2d.b2Vec2(segmentLength,0.0)
+        laserStart=(5.0-0.1,0.0)
+        laserDir  =(segmentLength,0.0)
         
         segment.p1 = self.laserBody.GetWorldPoint(laserStart)
         segment.p2 = segment.p1 + self.laserBody.GetWorldVector(laserDir)
@@ -243,8 +243,8 @@ class BoxCutter (Framework):
         segmentLength = 30.0
         
         segment=box2d.b2Segment()
-        laserStart=box2d.b2Vec2(5.0-0.1,0.0)
-        laserDir=box2d.b2Vec2(segmentLength,0.0)
+        laserStart=(5.0-0.1,0.0)
+        laserDir  =(segmentLength,0.0)
         segment.p1 = self.laserBody.GetWorldPoint(laserStart)
         segment.p2 = segment.p1+self.laserBody.GetWorldVector(laserDir)
         laserColor=box2d.b2Color(1,0,0)

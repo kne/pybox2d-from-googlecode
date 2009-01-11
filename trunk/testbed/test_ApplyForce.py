@@ -62,7 +62,6 @@ class ApplyForce (Framework):
 
         xf2 = box2d.b2XForm ()
         xf2.R.Set(-0.3524 * box2d.b2_pi)
-        print "hallo"
         xf2.position = box2d.b2Mul(xf2.R, (-1.0, 0.0))
 
         sd2=box2d.b2PolygonDef() 

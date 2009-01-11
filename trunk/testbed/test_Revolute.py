@@ -49,7 +49,7 @@ class Revolute (Framework):
         body.SetAngularVelocity(w)
         body.SetLinearVelocity(box2d.b2Vec2(-8.0 * w, 0.0))
         
-        rjd.Initialize(ground, body, box2d.b2Vec2(0.0, 12.0))
+        rjd.Initialize(ground, body, (0.0, 12.0))
         rjd.motorSpeed = 1.0 * box2d.b2_pi
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = False
