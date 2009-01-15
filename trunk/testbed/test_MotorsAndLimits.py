@@ -22,9 +22,9 @@
 from test_main import *
 class MotorsAndLimits (Framework):
     name="MotorsAndLimits"
-    m_joint1=None
-    m_joint2=None
-    m_joint3=None
+    joint1=None
+    joint2=None
+    joint3=None
     def __init__(self):
         super(MotorsAndLimits, self).__init__()
         sd=box2d.b2PolygonDef() 
@@ -57,7 +57,7 @@ class MotorsAndLimits (Framework):
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
 
-        self.m_joint1 = self.world.CreateJoint(rjd).getAsType()
+        self.joint1 = self.world.CreateJoint(rjd).getAsType()
 
         prevBody = body
 
@@ -74,7 +74,7 @@ class MotorsAndLimits (Framework):
         rjd.upperAngle = 0.5 * box2d.b2_pi
         rjd.enableLimit = True
 
-        self.m_joint2 = self.world.CreateJoint(rjd).getAsType()
+        self.joint2 = self.world.CreateJoint(rjd).getAsType()
 
         bd.position.Set(-10.0, 10.0)
         bd.angle = 0.5 * box2d.b2_pi
@@ -91,32 +91,32 @@ class MotorsAndLimits (Framework):
         pjd.upperTranslation = 20.0
         pjd.enableLimit = True
 
-        self.m_joint3 = self.world.CreateJoint(pjd).getAsType()
+        self.joint3 = self.world.CreateJoint(pjd).getAsType()
 
     def Keyboard(self, key):
         if key==K_l:
-            self.m_joint2.EnableLimit(not self.m_joint2.IsLimitEnabled())
-            self.m_joint3.EnableLimit(not self.m_joint3.IsLimitEnabled())
-            self.m_joint2.GetBody1().WakeUp()
-            self.m_joint3.GetBody2().WakeUp()
+            self.joint2.EnableLimit(not self.joint2.IsLimitEnabled())
+            self.joint3.EnableLimit(not self.joint3.IsLimitEnabled())
+            self.joint2.GetBody1().WakeUp()
+            self.joint3.GetBody2().WakeUp()
 
         elif key==K_m:
-            self.m_joint1.EnableMotor(not self.m_joint1.IsMotorEnabled())
-            self.m_joint2.EnableMotor(not self.m_joint2.IsMotorEnabled())
-            self.m_joint3.EnableMotor(not self.m_joint3.IsMotorEnabled())
-            self.m_joint2.GetBody1().WakeUp()
-            self.m_joint3.GetBody2().WakeUp()
+            self.joint1.EnableMotor(not self.joint1.IsMotorEnabled())
+            self.joint2.EnableMotor(not self.joint2.IsMotorEnabled())
+            self.joint3.EnableMotor(not self.joint3.IsMotorEnabled())
+            self.joint2.GetBody1().WakeUp()
+            self.joint3.GetBody2().WakeUp()
 
         elif key==K_p:
-            self.m_joint3.GetBody2().WakeUp()
-            self.m_joint3.SetMotorSpeed(-self.m_joint3.GetMotorSpeed())
+            self.joint3.GetBody2().WakeUp()
+            self.joint3.SetMotorSpeed(-self.joint3.GetMotorSpeed())
      
     def Step(self, settings):
         self.DrawString(5, self.textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed")
         self.textLine += 15
-        torque1 = self.m_joint1.GetMotorTorque()
-        torque2 = self.m_joint2.GetMotorTorque()
-        force3 = self.m_joint3.GetMotorForce()
+        torque1 = self.joint1.GetMotorTorque()
+        torque2 = self.joint2.GetMotorTorque()
+        force3 = self.joint3.GetMotorForce()
         self.DrawString(5, self.textLine, "Motor Torque = %.0f, %.0f : Motor Force = %.0f" % (torque1,torque2, force3))
         self.textLine += 15
         super(MotorsAndLimits, self).Step(settings)

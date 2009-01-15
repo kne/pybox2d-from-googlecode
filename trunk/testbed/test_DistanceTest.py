@@ -22,10 +22,10 @@
 from test_main import *
 class DistanceTest (Framework):
     name="DistanceTest"
-    m_body1=None
-    m_body2=None
-    m_shape1=None
-    m_shape2=None
+    body1=None
+    body2=None
+    shape1=None
+    shape2=None
     def __init__(self):
         super(DistanceTest, self).__init__()
         sd=box2d.b2PolygonDef() 
@@ -34,8 +34,8 @@ class DistanceTest (Framework):
 
         bd=box2d.b2BodyDef() 
         bd.position.Set(0.0, 10.0)
-        self.m_body1 = self.world.CreateBody(bd)
-        self.m_shape1 = self.m_body1.CreateShape(sd)
+        self.body1 = self.world.CreateBody(bd)
+        self.shape1 = self.body1.CreateShape(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.vertexCount = 3
@@ -47,14 +47,14 @@ class DistanceTest (Framework):
         #bd.position.Set(-48.377853, 0.49244255)
         #bd.rotation = 90.475891
         bd.position.Set(0.0, 10.0)
-        self.m_body2 = self.world.CreateBody(bd)
-        self.m_shape2 = self.m_body2.CreateShape(sd)
-        self.m_body2.SetMassFromShapes()
+        self.body2 = self.world.CreateBody(bd)
+        self.shape2 = self.body2.CreateShape(sd)
+        self.body2.SetMassFromShapes()
 
         self.world.SetGravity((0.0, 0.0))
      
     def Step(self, settings):
-        distance, x1, x2 = box2d.b2Distance(self.m_shape1, self.m_body1.GetXForm(), self.m_shape2, self.m_body2.GetXForm())
+        distance, x1, x2 = box2d.b2Distance(self.shape1, self.body1.GetXForm(), self.shape2, self.body2.GetXForm())
 
         self.DrawString(5, self.textLine, "distance = %g" % distance)
         self.textLine += 15
@@ -68,8 +68,8 @@ class DistanceTest (Framework):
         settings.pause = False
      
     def Keyboard(self, key):
-        p = self.m_body2.GetPosition()
-        a = self.m_body2.GetAngle()
+        p = self.body2.GetPosition()
+        a = self.body2.GetAngle()
 
         if key==K_a:
            p.x -= 0.1
@@ -83,7 +83,7 @@ class DistanceTest (Framework):
            a += 0.1 * box2d.b2_pi
         elif key==K_e:
            a -= 0.1 * box2d.b2_pi
-        self.m_body2.SetXForm(p, a)
+        self.body2.SetXForm(p, a)
      
 if __name__=="__main__":
      main(DistanceTest)

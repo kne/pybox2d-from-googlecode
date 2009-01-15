@@ -22,8 +22,8 @@
 from test_main import *
 class PolyCollision (Framework):
     name="PolyCollision"
-    m_body1=None
-    m_body2=None
+    body1=None
+    body2=None
 
     def __init__(self):
         super(PolyCollision, self).__init__()
@@ -38,8 +38,8 @@ class PolyCollision (Framework):
 
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 10.0)
-        self.m_body1 = self.world.CreateBody(bd)
-        self.m_body1.CreateShape(sd)
+        self.body1 = self.world.CreateBody(bd)
+        self.body1.CreateShape(sd)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 0.5)
@@ -47,9 +47,9 @@ class PolyCollision (Framework):
 
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, 10.0)
-        self.m_body2 = self.world.CreateBody(bd)
-        self.m_body2.CreateShape(sd)
-        self.m_body2.SetMassFromShapes()
+        self.body2 = self.world.CreateBody(bd)
+        self.body2.CreateShape(sd)
+        self.body2.SetMassFromShapes()
 
         self.world.SetGravity(box2d.b2Vec2_zero)
      
@@ -59,8 +59,8 @@ class PolyCollision (Framework):
         settings.pause = False
      
     def Keyboard(self, key):
-          p = self.m_body2.GetPosition()
-          a = self.m_body2.GetAngle()
+          p = self.body2.GetPosition()
+          a = self.body2.GetAngle()
           
           if key==K_a:
                p.x -= 0.1
@@ -75,7 +75,7 @@ class PolyCollision (Framework):
           elif key==K_e:
                a -= 0.1 * box2d.b2_pi
 
-          self.m_body2.SetXForm(p, a)
+          self.body2.SetXForm(p, a)
      
 if __name__=="__main__":
      main(PolyCollision)

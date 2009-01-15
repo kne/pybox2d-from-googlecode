@@ -58,7 +58,7 @@ shapeDef.density = 1
 shapeDef.friction = 0.3
  
 # Add the shape to the body.
-body.CreateShape(shapeDef)
+shape=body.CreateShape(shapeDef)
  
 # Now tell the dynamic body to compute it's mass properties base on its shape.
 body.SetMassFromShapes()

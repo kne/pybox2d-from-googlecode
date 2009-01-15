@@ -55,6 +55,8 @@
 
     %include "Box2D_printing.i"
 
+    /* ---- features ---- */
+
     //Autodoc puts the basic docstrings for each function
     %feature("autodoc", "1");
 
@@ -64,6 +66,19 @@
     %feature("director") b2BoundaryListener;
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
+    %feature("shadow") GetUserData {
+        def GetUserData(self): # override the C++ version
+            """Get the specified userData (m_userData)"""
+            return self._pyGetUserData()
+    }
+
+    %feature("shadow") SetUserData {
+        def SetUserData(self, value): # override the C++ version
+            """Get the specified userData (m_userData)"""
+            return self._pySetUserData(value)
+    }
+
+    /* ---- renames ---- */
 
     //These operators do not work unless explicitly defined like this 
     %rename(b2add) operator  + (const b2Vec2& a, const b2Vec2& b);
@@ -83,6 +98,11 @@
     %rename(sub_vector) b2Vec2::operator -= (const b2Vec2& v);
     %rename(mul_float ) b2Vec2::operator *= (float32 a);
 
+    %rename(_GetShapeList) b2Body::GetShapeList; //Modify these to return actual lists, not linked lists
+    %rename(_GetBodyList)  b2World::GetBodyList;
+    %rename(_GetJointList) b2World::GetJointList;
+
+    /* ---- typemaps ---- */
     %typemap(in) b2Vec2* self {
         int res1 = SWIG_ConvertPtr($input, (void**)&$1, SWIGTYPE_p_b2Vec2, 0);
         if (!SWIG_IsOK(res1)) {
@@ -90,11 +110,6 @@
         }
     }
     
-    /*%typemap(freearg) b2Vec2* self {
-    }
-    %typemap(freearg) b2Vec2&, b2Vec2* {
-    }*/
-
     //Resolve ambiguities in overloaded functions when you pass a tuple or list when 
     //SWIG expects a b2Vec2
     %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec2*,b2Vec2& {
@@ -181,6 +196,27 @@
         Py_INCREF($result);
     }
 
+    %typemap(directorin) b2Vec2* vertices {
+        $input = PyTuple_New(vertexCount);
+        PyObject* vertex;
+        for (int i=0; i < vertexCount; i++) {
+            vertex = PyTuple_New(2);
+            PyTuple_SetItem(vertex, 0, PyFloat_FromDouble((float32)vertices[i].x));
+            PyTuple_SetItem(vertex, 1, PyFloat_FromDouble((float32)vertices[i].y));
+
+            PyTuple_SetItem($input, i, vertex);
+        }
+    }
+
+    /* ---- ignores ---- */
+    /*Re-implement these inaccessible members on the Python side:*/
+    %ignore b2PolygonDef::vertices;
+    %ignore b2EdgeChainDef::vertices;
+    %ignore b2PolygonShape::vertices;
+    %ignore b2PolygonShape::GetVertices; //Inaccessible 
+    %ignore b2PolygonShape::GetNormals;
+
+    /* ---- extending classes ---- */
     %extend b2Shape {
     public:
         PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
@@ -293,36 +329,48 @@
             delete [] shapes;
             return ret;
         }
+
+        %pythoncode %{
+            def GetJointList(self):
+                """
+                Get a list of the joints in this world
+                """
+                jointList = []
+                joint = self._GetJointList()
+                while joint:
+                    jointList.append(joint)
+                    joint = joint.GetNext()
+                jointList.reverse() # jointlist is in reverse order
+                return jointList
+            def GetBodyList(self):
+                """
+                Get a list of the bodies in this world
+                """
+                bodyList = []
+                body = self._GetBodyList()
+                while body:
+                    bodyList.append(body)
+                    body = body.GetNext()
+                bodyList.reverse() # bodylist is in reverse order
+                return bodyList
+
+            gravity   = property(GetGravity   , SetGravity)
+            jointList = property(GetJointList , None)
+            bodyList  = property(GetBodyList  , None)
+            groundBody= property(GetGroundBody, None)
+            worldAABB = property(GetWorldAABB , None)
+            doSleep   = property(CanSleep     , None)
+        %}
     }
         
-    %typemap(directorin) b2Vec2* vertices {
-        $input = PyTuple_New(vertexCount);
-        PyObject* vertex;
-        for (int i=0; i < vertexCount; i++) {
-            vertex = PyTuple_New(2);
-            PyTuple_SetItem(vertex, 0, PyFloat_FromDouble((float32)vertices[i].x));
-            PyTuple_SetItem(vertex, 1, PyFloat_FromDouble((float32)vertices[i].y));
-
-            PyTuple_SetItem($input, i, vertex);
-        }
-    }
-
-    %feature("shadow") GetUserData {
-        def GetUserData(self): # override the C++ version
-            """Get the specified userData (m_userData)"""
-            return self._pyGetUserData()
-    }
-
-    %feature("shadow") SetUserData {
-        def SetUserData(self, value): # override the C++ version
-            """Get the specified userData (m_userData)"""
-            return self._pySetUserData(value)
-    }
-
     //Typecast the shape as necessary so Python can use them properly (2.0)
     %extend b2Shape {
     public:
         %pythoncode %{
+        filter     = property(GetFilterData, SetFilterData)
+        friction   = property(GetFriction, SetFriction)
+        restitution= property(GetRestitution, SetRestitution)
+        density    = property(GetDensity, SetDensity)
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def typeName(self):
@@ -364,6 +412,9 @@
             self->SetUserData((void*)value);
             Py_INCREF(value);
         }
+        %pythoncode %{
+            userData=property(_pyGetUserData, _pySetUserData)
+        %}
     }
    
     //Support using == on bodies, joints, and shapes
@@ -382,54 +433,165 @@
             return __b2PythonJointPointerEquals__(a, b)
     %}
 
+    // Clean up naming. We do not need m_* on the Python end.
+    %rename(localAnchor) b2MouseJoint::m_localAnchor;
+    %rename(target)      b2MouseJoint::m_target;
+    %rename(impulse)     b2MouseJoint::m_impulse;
+    %rename(mass)        b2MouseJoint::m_mass;
+    %rename(C)           b2MouseJoint::m_C;
+    %rename(maxForce)    b2MouseJoint::m_maxForce;
+    %rename(frequencyHz) b2MouseJoint::m_frequencyHz;
+    %rename(dampingRatio)b2MouseJoint::m_dampingRatio;
+    %rename(beta)        b2MouseJoint::m_beta;
+    %rename(gamma)       b2MouseJoint::m_gamma;
     %extend b2MouseJoint {
     public:
         %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
+    %rename(ground1)       b2GearJoint::m_ground1;
+    %rename(ground2)       b2GearJoint::m_ground2;
+    %rename(revolute1)     b2GearJoint::m_revolute1;
+    %rename(prismatic1)    b2GearJoint::m_prismatic1;
+    %rename(revolute2)     b2GearJoint::m_revolute2;
+    %rename(prismatic2)    b2GearJoint::m_prismatic2;
+    %rename(groundAnchor1) b2GearJoint::m_groundAnchor1;
+    %rename(groundAnchor2) b2GearJoint::m_groundAnchor2;
+    %rename(localAnchor1)  b2GearJoint::m_localAnchor1;
+    %rename(localAnchor2)  b2GearJoint::m_localAnchor2;
+    %rename(J)             b2GearJoint::m_J;
+    %rename(constant)      b2GearJoint::m_constant;
+    %rename(ratio)         b2GearJoint::m_ratio;
+    %rename(mass)          b2GearJoint::m_mass;
+    %rename(impulse)       b2GearJoint::m_impulse;
     %extend b2GearJoint {
     public:
         %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
+            joint1 = property(lambda self: (self.revolute1 and self.revolute1) or self.prismatic1, None)
+            joint2 = property(lambda self: (self.revolute2 and self.revolute2) or self.prismatic2, None)
         %}
     }
+
+    %rename(localAnchor1) b2DistanceJoint::m_localAnchor1;
+    %rename(localAnchor2) b2DistanceJoint::m_localAnchor2;
+    %rename(u)            b2DistanceJoint::m_u;
+    %rename(frequencyHz)  b2DistanceJoint::m_frequencyHz;
+    %rename(dampingRatio) b2DistanceJoint::m_dampingRatio;
+    %rename(gamma)        b2DistanceJoint::m_gamma;
+    %rename(bias)         b2DistanceJoint::m_bias;
+    %rename(impulse)      b2DistanceJoint::m_impulse;
+    %rename(mass)         b2DistanceJoint::m_mass;
+    %rename(length)       b2DistanceJoint::m_length;
 
     %extend b2DistanceJoint {
     public:
         %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
+    %rename(localAnchor1)    b2PrismaticJoint::m_localAnchor1;
+    %rename(localAnchor2)    b2PrismaticJoint::m_localAnchor2;
+    %rename(localXAxis1)     b2PrismaticJoint::m_localXAxis1;
+    %rename(localYAxis1)     b2PrismaticJoint::m_localYAxis1;
+    %rename(referenceAngle)  b2PrismaticJoint::m_refAngle; // symmetry with defn
+    %rename(axis)            b2PrismaticJoint::m_axis;
+    %rename(perp)            b2PrismaticJoint::m_perp;
+    %rename(s1)              b2PrismaticJoint::m_s1;
+    %rename(s2)              b2PrismaticJoint::m_s2;
+    %rename(a1)              b2PrismaticJoint::m_a1;
+    %rename(a2)              b2PrismaticJoint::m_a2;
+    %rename(K)               b2PrismaticJoint::m_K;
+    %rename(impulse)         b2PrismaticJoint::m_impulse;
+    %rename(motorMass)       b2PrismaticJoint::m_motorMass;
+    %rename(motorImpulse)    b2PrismaticJoint::m_motorImpulse;
+    %rename(lowerTranslation)b2PrismaticJoint::m_lowerTranslation;
+    %rename(upperTranslation)b2PrismaticJoint::m_upperTranslation;
+    %rename(maxMotorForce)   b2PrismaticJoint::m_maxMotorForce;
+    %rename(motorSpeed)      b2PrismaticJoint::m_motorSpeed;
+    %rename(enableLimit)     b2PrismaticJoint::m_enableLimit;
+    %rename(enableMotor)     b2PrismaticJoint::m_enableMotor;
+    %rename(limitState)      b2PrismaticJoint::m_limitState;
     %extend b2PrismaticJoint {
     public:
         %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
-        %}
-    }
- 
-   %extend b2PulleyJoint {
-    public:
-        %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
         %}
     }
 
-   %extend b2RevoluteJoint {
+    %rename(ground)          b2PulleyJoint::m_ground;
+    %rename(groundAnchor1)   b2PulleyJoint::m_groundAnchor1;
+    %rename(groundAnchor2)   b2PulleyJoint::m_groundAnchor2;
+    %rename(localAnchor1)    b2PulleyJoint::m_localAnchor1;
+    %rename(localAnchor2)    b2PulleyJoint::m_localAnchor2;
+    %rename(u1)              b2PulleyJoint::m_u1;
+    %rename(u2)              b2PulleyJoint::m_u2;
+    %rename(constant)        b2PulleyJoint::m_constant;
+    %rename(ratio)           b2PulleyJoint::m_ratio;
+    %rename(maxLength1)      b2PulleyJoint::m_maxLength1;
+    %rename(maxLength2)      b2PulleyJoint::m_maxLength2;
+    %rename(pulleyMass)      b2PulleyJoint::m_pulleyMass;
+    %rename(limitMass1)      b2PulleyJoint::m_limitMass1;
+    %rename(limitMass2)      b2PulleyJoint::m_limitMass2;
+    %rename(impulse)         b2PulleyJoint::m_impulse;
+    %rename(limitImpulse1)   b2PulleyJoint::m_limitImpulse1;
+    %rename(limitImpulse2)   b2PulleyJoint::m_limitImpulse2;
+    %rename(state)           b2PulleyJoint::m_state;
+    %rename(limitState1)     b2PulleyJoint::m_limitState1;
+    %rename(limitState2)     b2PulleyJoint::m_limitState2;
+    %extend b2PulleyJoint {
     public:
         %pythoncode %{
-        __eq__ = b2JointCompare
-        __ne__ = lambda self,other: not b2JointCompare(self,other)
+        length1 = property(GetLength1, None)
+        length2 = property(GetLength2, None)
         %}
     }
 
+    %rename(localAnchor1)     b2RevoluteJoint::m_localAnchor1;
+    %rename(localAnchor2)     b2RevoluteJoint::m_localAnchor2;
+    %rename(impulse)          b2RevoluteJoint::m_impulse;
+    %rename(motorImpulse)     b2RevoluteJoint::m_motorImpulse;
+    %rename(mass)             b2RevoluteJoint::m_mass;
+    %rename(motorMass)        b2RevoluteJoint::m_motorMass;
+    %rename(enableMotor)      b2RevoluteJoint::m_enableMotor;
+    %rename(maxMotorTorque)   b2RevoluteJoint::m_maxMotorTorque;
+    %rename(motorSpeed)       b2RevoluteJoint::m_motorSpeed;
+    %rename(enableLimit)      b2RevoluteJoint::m_enableLimit;
+    %rename(referenceAngle)   b2RevoluteJoint::m_referenceAngle;
+    %rename(lowerAngle)       b2RevoluteJoint::m_lowerAngle;
+    %rename(upperAngle)       b2RevoluteJoint::m_upperAngle;
+    %rename(limitState)       b2RevoluteJoint::m_limitState;
+    %extend b2RevoluteJoint {
+    public:
+        %pythoncode %{
+        %}
+    }
+
+    %rename(localAnchor1)    b2LineJoint::m_localAnchor1;
+    %rename(localAnchor2)    b2LineJoint::m_localAnchor2;
+    %rename(localXAxis1)     b2LineJoint::m_localXAxis1;
+    %rename(localYAxis1)     b2LineJoint::m_localYAxis1;
+    %rename(axis)            b2LineJoint::m_axis;
+    %rename(perp)            b2LineJoint::m_perp;
+    %rename(s1)              b2LineJoint::m_s1;
+    %rename(s2)              b2LineJoint::m_s2;
+    %rename(a1)              b2LineJoint::m_a1;
+    %rename(a2)              b2LineJoint::m_a2;
+    %rename(K)               b2LineJoint::m_K;
+    %rename(impulse)         b2LineJoint::m_impulse;
+    %rename(motorMass)       b2LineJoint::m_motorMass;
+    %rename(motorImpulse)    b2LineJoint::m_motorImpulse;
+    %rename(lowerTranslation)b2LineJoint::m_lowerTranslation;
+    %rename(upperTranslation)b2LineJoint::m_upperTranslation;
+    %rename(maxMotorForce)   b2LineJoint::m_maxMotorForce;
+    %rename(motorSpeed)      b2LineJoint::m_motorSpeed;
+    %rename(enableLimit)     b2LineJoint::m_enableLimit;
+    %rename(enableMotor)     b2LineJoint::m_enableMotor;
+    %rename(limitState)      b2LineJoint::m_limitState;
+    %extend b2LineJoint {
+    public:
+        %pythoncode %{
+        %}
+    }
     %include "Dynamics/Joints/b2Joint.h"
 
     %extend b2JointDef {
@@ -456,6 +618,11 @@
         %pythoncode %{
         __eq__ = b2JointCompare
         __ne__ = lambda self,other: not b2JointCompare(self,other)
+        type    =property(GetType    , None)
+        userData=property(GetUserData, None)
+        body1   =property(GetBody1   , None)
+        body2   =property(GetBody2   , None)
+        collideConnected=property(GetCollideConnected, None)
         def typeName(self):
             """
             Return the name of the joint from:
@@ -467,7 +634,8 @@
                       e_distanceJoint : "Distance",
                       e_prismaticJoint: "Prismatic",
                       e_pulleyJoint   : "Pulley",
-                      e_revoluteJoint : "Revolute" }
+                      e_revoluteJoint : "Revolute",
+                      e_lineJoint     : "Line" }
             return types[self.GetType()]
         def getAsType(self):
             """
@@ -488,6 +656,9 @@
             self->SetUserData((void*)value);
             Py_INCREF(value);
         }
+        %pythoncode %{
+            userData=property(_pyGetUserData, _pySetUserData)
+        %}
 
         b2MouseJoint* asMouseJoint() {
             if ($self->GetType()==e_mouseJoint)
@@ -524,16 +695,21 @@
                 return (b2RevoluteJoint*)$self;
             return NULL;
         }
-    }
 
-    %ignore b2PolygonShape::GetVertices; //Inaccessible 
-    %ignore b2PolygonShape::GetNormals;
+        b2LineJoint* asLineJoint() {
+            if ($self->GetType()==e_lineJoint)
+                return (b2LineJoint*)$self;
+            return NULL;
+        }
+    }
 
     %extend b2CircleShape {
     public:
         %pythoncode %{
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
+        radius = property(GetRadius, None)
+        localPosition = property(GetLocalPosition, None)
         %}
     }
 
@@ -581,6 +757,9 @@
             for i in range(0, self.GetVertexCount()):
                 vertices.append(self.getNormal(i))
             return vertices
+        vertices = property(getVertices_tuple, None)
+        coreVertices = property(getCoreVertices_tuple, None)
+        normals = property(getNormals_tuple, None)
         %}
         const b2Vec2* getVertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
@@ -596,7 +775,8 @@
         }
     }
     
-    %extend b2EdgeChainDef{
+
+    %extend b2EdgeChainDef {
     public:
         %pythoncode %{
         def __repr__(self):
@@ -625,6 +805,7 @@
                 self.setVertex(i, vertices[i])
         setVertices_tuple = setVertices  # pre 202b1 compatibility
         setVertices_b2Vec2 = setVertices # pre 202b1 compatibility
+        vertices = property(getVertices_tuple, setVertices)
 
         %}
         void _cleanUp() {
@@ -689,6 +870,7 @@
                 self.setVertex(i, vertices[i]) # possible on pyBox2D >= r2.0.2b1
         setVertices_tuple = setVertices  # pre 202b1 compatibility
         setVertices_b2Vec2 = setVertices # pre 202b1 compatibility
+        vertices = property(getVertices_tuple, setVertices)
 
         %}
         b2Vec2* getVertex(uint16 vnum) {
@@ -768,7 +950,7 @@
         b2Vec2 __rmul__(float32 a) {
             return b2Vec2($self->x * a, $self->y * a);
         }
-        b2Vec2 __rdiv__(float32 a) { //perhaps not _correct_, but convenient
+        b2Vec2 __rdiv__(float32 a) {
             return b2Vec2($self->x / a, $self->y / a);
         }
         void div_float(float32 a) {
@@ -778,12 +960,8 @@
     }
 
     %extend b2Body {
-        %pythoncode %{
-        __eq__ = b2BodyCompare
-        __ne__ = lambda self,other: not b2BodyCompare(self,other)
-        %}
         PyObject* _pyGetUserData() {
-            PyObject* ret=(PyObject*)self->GetUserData();
+            PyObject* ret=(PyObject*)$self->GetUserData();
             if (!ret) {
                 return Py_None;
             } else {
@@ -792,9 +970,72 @@
             }
         }
         void _pySetUserData(PyObject* value) {
-            self->SetUserData((void*)value);
+            $self->SetUserData((void*)value);
             Py_INCREF(value);
         }
+        %pythoncode %{
+            __eq__ = b2BodyCompare
+            __ne__ = lambda self,other: not b2BodyCompare(self,other)
+
+            def setAngle(self, angle):
+                """
+                Set the angle without altering the position
+
+                angle in radians.
+                """
+                self.SetXForm(self.position, angle)
+            def setPosition(self, position):
+                """
+                Set the position without altering the angle
+                """
+                self.SetXForm(position, self.GetAngle())
+
+            def getMassData(self):
+                """
+                Get a b2MassData object that represents this b2Body
+
+                NOTE: To just get the mass, use body.mass (body.GetMass())
+                """
+
+                ret = b2MassData()
+                ret.mass = self.GetMass()
+                ret.I    = self.GetInertia()
+                ret.center=self.GetLocalCenter()
+                return ret
+            
+            def GetShapeList(self, asType=True):
+                """
+                Get a list of the shapes in this body
+
+                Defaults to returning the typecasted objects.
+
+                e.g., if there is a b2CircleShape and a b2PolygonShape:
+                GetShapeList(True) = [b2CircleShape, b2PolygonShape]
+                GetShapeList(False)= [b2Shape, b2Shape]
+                """
+                shapeList = []
+                shape = self._GetShapeList()
+                while shape:
+                    if asType:
+                        shape=shape.getAsType()
+                    shapeList.append(shape)
+                    shape = shape.GetNext()
+                return shapeList
+
+            massData      = property(getMassData, SetMass)
+            userData      = property(_pyGetUserData, _pySetUserData)
+            position      = property(GetPosition, setPosition)
+            angle         = property(GetAngle, setAngle)
+            linearDamping = property(GetLinearDamping, None)
+            angularDamping= property(GetAngularDamping, None)
+            allowSleep    = property(CanSleep, AllowSleeping)
+            isSleeping    = property(IsSleeping, None)
+            fixedRotation = property(IsRotationFixed, None)
+            isBullet      = property(IsBullet, SetBullet)
+            angularVelocity=property(GetAngularVelocity,SetAngularVelocity)
+            linearVelocity =property(GetLinearVelocity,SetLinearVelocity)
+            shapeList      =property(GetShapeList, None)
+        %}
     }
 
     %rename (__b2Distance__) b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* shape1, const b2XForm& xf1, const b2Shape* shape2, const b2XForm& xf2);
@@ -813,6 +1054,7 @@
         }
     %}
 
+    /* Additional supporting C++ code */
     %inline %{
         // Add some functions that might be commonly used
         bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {
@@ -966,7 +1208,7 @@
 
     %}
 
-    // Additional supporting code
+    /* Additional supporting python code */
     %pythoncode %{
     B2_FLT_EPSILON = 1.192092896e-07
     FLT_EPSILON = B2_FLT_EPSILON
@@ -1080,6 +1322,46 @@
 
         return True
     %}
+
+    /* Some final naming cleanups, for as of yet unused/unsupported classes */
+    //b2PairManager
+    %rename(broadPhase)      b2PairManager::m_broadPhase;
+    %rename(callback)        b2PairManager::m_callback;
+    %rename(pairs)           b2PairManager::m_pairs;
+    %rename(freePair)        b2PairManager::m_freePair;
+    %rename(pairCount)       b2PairManager::m_pairCount;
+    %rename(pairBuffer)      b2PairManager::m_pairBuffer;
+    %rename(pairBufferCount) b2PairManager::m_pairBufferCount;
+    %rename(hashTable)       b2PairManager::m_hashTable;
+
+    //b2BroadPhase
+    %rename(pairManager)        b2BroadPhase::m_pairManager;
+    %rename(proxyPool)          b2BroadPhase::m_proxyPool;
+    %rename(freeProxy)          b2BroadPhase::m_freeProxy;
+    %rename(bounds)             b2BroadPhase::m_bounds;
+    %rename(queryResults)       b2BroadPhase::m_queryResults;
+    %rename(querySortKeys)      b2BroadPhase::m_querySortKeys;
+    %rename(queryResultCount)   b2BroadPhase::m_queryResultCount;
+    %rename(worldAABB)          b2BroadPhase::m_worldAABB;
+    %rename(quantizationFactor) b2BroadPhase::m_quantizationFactor;
+    %rename(proxyCount)         b2BroadPhase::m_proxyCount;
+    %rename(timeStamp)          b2BroadPhase::m_timeStamp;
+    
+    //b2Contact
+    %rename(flags)             b2Contact::m_flags;
+    %rename(manifoldCount)     b2Contact::m_manifoldCount;
+    %rename(prev)              b2Contact::m_prev;
+    %rename(next)              b2Contact::m_next;
+    %rename(node1)             b2Contact::m_node1;
+    %rename(node2)             b2Contact::m_node2;
+    %rename(shape1)            b2Contact::m_shape1;
+    %rename(shape2)            b2Contact::m_shape2;
+    %rename(toi)               b2Contact::m_toi;
+
+    //b2ContactManager
+    %rename(world)             b2ContactManager::m_world;
+    %rename(nullContact)       b2ContactManager::m_nullContact;
+    %rename(destroyImmediate)  b2ContactManager::m_destroyImmediate;
 #endif
 
 %include "Box2D.h"

@@ -24,7 +24,7 @@ from test_main import fwContactTypes
 
 class SensorTest (Framework):
     name="SensorTest"
-    m_sensor=None
+    sensor=None
     def __init__(self):
         super(SensorTest, self).__init__()
         bd=box2d.b2BodyDef() 
@@ -40,7 +40,7 @@ class SensorTest (Framework):
             sd=box2d.b2PolygonDef() 
             sd.SetAsBox(10.0, 2.0, (0.0, 20.0), 0.0)
             sd.isSensor = True
-            self.m_sensor = ground.CreateShape(sd)
+            self.sensor = ground.CreateShape(sd)
 
         else:
             # Alternative test:
@@ -48,7 +48,7 @@ class SensorTest (Framework):
             cd.isSensor = True
             cd.radius = 5.0
             cd.localPosition.Set(0.0, 20.0)
-            self.m_sensor = ground.CreateShape(cd)
+            self.sensor = ground.CreateShape(cd)
 
         sd=box2d.b2CircleDef() 
         sd.radius = 1.0
@@ -73,18 +73,18 @@ class SensorTest (Framework):
             shape1, shape2=point.shape1, point.shape2
             other=None
             
-            if shape1 == self.m_sensor:
+            if shape1 == self.sensor:
                 other = shape2.GetBody()
-            elif shape2 == self.m_sensor:
+            elif shape2 == self.sensor:
                 other = shape1.GetBody()
             else:
                 continue
 
-            ground = self.m_sensor.GetBody()
-            typedshape = self.m_sensor.getAsType()
-            if self.m_sensor.GetType() == box2d.e_circleShape:
+            ground = self.sensor.GetBody()
+            typedshape = self.sensor.getAsType()
+            if self.sensor.GetType() == box2d.e_circleShape:
                 center = ground.GetWorldPoint(typedshape.GetLocalPosition())
-            elif self.m_sensor.GetType() == box2d.e_polygonShape:
+            elif self.sensor.GetType() == box2d.e_polygonShape:
                 center = ground.GetWorldPoint(typedshape.GetCentroid())
             else:
                 print "don't know how to get the center of this shape, using (0,0)"

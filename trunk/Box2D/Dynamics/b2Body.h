@@ -145,6 +145,12 @@ public:
 	/// @return the current world rotation angle in radians.
 	float32 GetAngle() const;
 
+	/// Get the linear damping.
+	float32 GetLinearDamping() const;
+
+	/// Get the angular damping.
+	float32 GetAngularDamping() const;
+
 	/// Get the world position of the center of mass.
 	const b2Vec2& GetWorldCenter() const;
 
@@ -245,6 +251,12 @@ public:
 
 	/// You can disable sleeping on this body.
 	void AllowSleeping(bool flag);
+
+	/// Get whether or not this body is allowed to sleep.
+	bool CanSleep() const;
+
+	/// Get whether or not this body is allowed to rotate.
+	bool IsRotationFixed() const;
 
 	/// Wake up this body so it will begin simulating.
 	void WakeUp();
@@ -405,6 +417,17 @@ inline float32 b2Body::GetAngularVelocity() const
 	return m_angularVelocity;
 }
 
+inline float32 b2Body::GetLinearDamping() const
+{
+	return m_linearDamping;
+}
+
+
+inline float32 b2Body::GetAngularDamping() const
+{
+	return m_angularDamping;
+}
+
 inline float32 b2Body::GetMass() const
 {
 	return m_mass;
@@ -493,6 +516,16 @@ inline void b2Body::AllowSleeping(bool flag)
 		m_flags &= ~e_allowSleepFlag;
 		WakeUp();
 	}
+}
+
+inline bool b2Body::CanSleep() const
+{
+	return (m_flags & e_allowSleepFlag) == e_allowSleepFlag;
+}
+
+inline bool b2Body::IsRotationFixed() const
+{
+	return (m_flags & e_fixedRotationFlag) == e_fixedRotationFlag;
 }
 
 inline void b2Body::WakeUp()

@@ -32,7 +32,11 @@ class EdgesBuoyancy (Framework):
         bcd.density = 2
         bcd.linearDrag = 2
         bcd.angularDrag = 1
+        print "1"
+        print bcd
         self.bc = self.world.CreateController(bcd)
+        ## todo: fix
+        print "2"
 
         bd=box2d.b2BodyDef()
         bd.position.Set(0.0, -10.0)

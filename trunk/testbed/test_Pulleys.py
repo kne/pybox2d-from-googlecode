@@ -65,11 +65,11 @@ class Pulleys (Framework):
         groundAnchor2=box2d.b2Vec2(10.0, y + b + L)
         pulleyDef.Initialize(body1, body2, groundAnchor1, groundAnchor2, anchor1, anchor2, 2.0)
 
-        self.m_joint1 = self.world.CreateJoint(pulleyDef).getAsType() 
+        self.joint1 = self.world.CreateJoint(pulleyDef).getAsType() 
      
     def Step(self, settings):
-        ratio = self.m_joint1.GetRatio()
-        L = self.m_joint1.GetLength1() + ratio * self.m_joint1.GetLength2()
+        ratio = self.joint1.GetRatio()
+        L = self.joint1.GetLength1() + ratio * self.joint1.GetLength2()
         self.DrawString(5, self.textLine, "L1 + %.2f * L2 = %.2f" % (ratio, L))
         self.textLine += 15
         super(Pulleys, self).Step(settings)

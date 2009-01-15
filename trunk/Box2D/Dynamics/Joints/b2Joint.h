@@ -135,6 +135,9 @@ public:
 	/// Set the user data pointer.
 	void SetUserData(void* data);
 
+	/// Get whether or not joint bodies can collide
+	bool GetCollideConnected();
+
 	//--------------- Internals Below -------------------
 protected:
 	friend class b2World;
@@ -219,6 +222,11 @@ inline void* b2Joint::GetUserData()
 inline void b2Joint::SetUserData(void* data)
 {
 	m_userData = data;
+}
+
+inline bool b2Joint::GetCollideConnected()
+{
+	return m_collideConnected;
 }
 
 inline void b2Joint::ComputeXForm(b2XForm* xf, const b2Vec2& center, const b2Vec2& localCenter, float32 angle) const

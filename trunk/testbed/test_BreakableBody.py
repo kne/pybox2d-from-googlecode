@@ -217,14 +217,14 @@ data = {
         (4.00, 3.00)),
 
     # '-' beam
-    'beam_nodes' : (
+    'beanodes' : (
         (0.00, 0.00),
         (32.00, 0.00),
         (32.00, 3.00),
         (0.00, 3.00)),
 
-    'beam_segments' : None,
-    'beam_holes' : None,
+    'beasegments' : None,
+    'beaholes' : None,
 
     # 'b' a box
     'b_nodes' : (
@@ -421,18 +421,12 @@ class BreakableBody(Framework):
         # clean TriangleMesh
         md.Reset()
     
-    def GetJoints(self):
-        list=self.world.GetJointList()
-        while list:
-            yield list
-            list = list.GetNext()
-
     # maybe here to check for maximal reaction forces to break a body
     def Step(self, settings):
         global g_maxAllowableForce
         F=0.0
         jStressed = 0
-        for j in self.GetJoints():
+        for j in self.world.jointList:
             tmp = j.GetReactionForce(settings.hz).Length() # for newer builds
             #tmp = j.GetReactionForce().Length() # works for older builds
             if tmp>F:

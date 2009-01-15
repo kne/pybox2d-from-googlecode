@@ -25,8 +25,8 @@ from test_main import *
 
 class SliderCrank (Framework):
     name="SliderCrank"
-    m_joint1=None
-    m_joint2=None
+    joint1=None
+    joint2=None
 
     def __init__(self):
         super(SliderCrank, self).__init__()
@@ -57,7 +57,7 @@ class SliderCrank (Framework):
         rjd.motorSpeed = 1.0 * box2d.b2_pi
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
-        self.m_joint1 = self.world.CreateJoint(rjd).getAsType()
+        self.joint1 = self.world.CreateJoint(rjd).getAsType()
 
         prevBody = body
 
@@ -90,7 +90,7 @@ class SliderCrank (Framework):
         pjd.maxMotorForce = 1000.0
         pjd.enableMotor = True
 
-        self.m_joint2 = self.world.CreateJoint(pjd).getAsType()
+        self.joint2 = self.world.CreateJoint(pjd).getAsType()
 
         # Create a payload
         sd.density = 2.0
@@ -101,18 +101,18 @@ class SliderCrank (Framework):
 
     def Keyboard(self, key):
           if key==K_f:
-               self.m_joint2.m_enableMotor = not self.m_joint2.m_enableMotor
-               self.m_joint2.GetBody2().WakeUp()
+               self.joint2.enableMotor = not self.joint2.enableMotor
+               self.joint2.GetBody2().WakeUp()
                
           elif key==K_m:
-               self.m_joint1.m_enableMotor = not self.m_joint1.m_enableMotor
-               self.m_joint1.GetBody2().WakeUp()
+               self.joint1.enableMotor = not self.joint1.enableMotor
+               self.joint1.GetBody2().WakeUp()
      
     def Step(self, settings):
           self.DrawString(5, self.textLine, "Keys: (f) toggle friction, (m) toggle motor")
           self.textLine += 15
 
-          torque = self.m_joint1.GetMotorTorque()
+          torque = self.joint1.GetMotorTorque()
           self.DrawString(5, self.textLine, "Motor Torque = %.0f" % (torque))
           self.textLine += 15
           super(SliderCrank, self).Step(settings)

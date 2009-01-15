@@ -22,7 +22,7 @@
 from test_main import *
 class ApplyForce (Framework):
     name="ApplyForce"
-    m_body=None
+    body=None
     def __init__(self):
         super(ApplyForce, self).__init__()
         self.world.SetGravity((0.0, 0.0))
@@ -77,20 +77,20 @@ class ApplyForce (Framework):
 
         bd.position.Set(0.0, 1.05)
         bd.angle = box2d.b2_pi
-        self.m_body = self.world.CreateBody(bd)
-        self.m_body.CreateShape(sd1)
-        self.m_body.CreateShape(sd2)
-        self.m_body.SetMassFromShapes()
+        self.body = self.world.CreateBody(bd)
+        self.body.CreateShape(sd1)
+        self.body.CreateShape(sd2)
+        self.body.SetMassFromShapes()
      
     def Keyboard(self, key):
         if key==K_w:
-            f = self.m_body.GetWorldVector((0.0, -200.0))
-            p = self.m_body.GetWorldPoint((0.0, 2.0))
-            self.m_body.ApplyForce(f, p)
+            f = self.body.GetWorldVector((0.0, -200.0))
+            p = self.body.GetWorldPoint((0.0, 2.0))
+            self.body.ApplyForce(f, p)
         elif key==K_a:
-            self.m_body.ApplyTorque(20.0)
+            self.body.ApplyTorque(20.0)
         elif key==K_d:
-            self.m_body.ApplyTorque(-20.0)
+            self.body.ApplyTorque(-20.0)
 
 if __name__=="__main__":
      main(ApplyForce)

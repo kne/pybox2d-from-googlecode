@@ -22,7 +22,7 @@
 from test_main import *
 class SphereStack (Framework):
     name="SphereStack"
-    m_bodies = [ ]
+    bodies = [ ]
     e_count = 10
     
     def __init__(self):
@@ -44,14 +44,14 @@ class SphereStack (Framework):
             bd=box2d.b2BodyDef()
             bd.position.Set(0.0, 2.0 + 3.0 * i)
             
-            self.m_bodies.append( self.world.CreateBody(bd) )
-            self.m_bodies[-1].CreateShape(sd)
-            self.m_bodies[-1].SetMassFromShapes()
+            self.bodies.append( self.world.CreateBody(bd) )
+            self.bodies[-1].CreateShape(sd)
+            self.bodies[-1].SetMassFromShapes()
     
     def Step(self, settings):
-        #for body in self.m_bodies:
+        #for body in self.bodies:
         #    print "%g " % body.GetWorldCenter().y,
-        #for body in self.m_bodies:
+        #for body in self.bodies:
         #    print "%g " % body.GetLinearVelocity().y,
         #print ""
         

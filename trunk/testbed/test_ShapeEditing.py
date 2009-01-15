@@ -23,9 +23,9 @@
 from test_main import *
 class ShapeEditing (Framework):
     name="ShapeEditing"
-    m_body=None
-    m_shape1=None
-    m_shape2=None
+    body=None
+    shape1=None
+    shape2=None
     def __init__(self):
         super(ShapeEditing, self).__init__()
         sd=box2d.b2PolygonDef()
@@ -39,33 +39,33 @@ class ShapeEditing (Framework):
 
         bodydef=box2d.b2BodyDef()
         bodydef.position.Set(0.0, 10.0)
-        self.m_body = self.world.CreateBody(bodydef)
+        self.body = self.world.CreateBody(bodydef)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(4.0, 4.0, (0.0, 0.0), 0.0)
         sd.density = 10.0
-        self.m_shape1 = self.m_body.CreateShape(sd)
-        self.m_body.SetMassFromShapes()
+        self.shape1 = self.body.CreateShape(sd)
+        self.body.SetMassFromShapes()
 
-        self.m_shape2 = None
+        self.shape2 = None
              
     def Keyboard(self, key):
         if key==K_c:
-            if not self.m_shape2:
+            if not self.shape2:
                 sd=box2d.b2CircleDef()
                 sd.radius = 3.0
                 sd.density = 10.0
                 sd.localPosition.Set(0.5, -4.0)
-                self.m_shape2 = self.m_body.CreateShape(sd)
-                self.m_body.SetMassFromShapes()
-                self.m_body.WakeUp()
+                self.shape2 = self.body.CreateShape(sd)
+                self.body.SetMassFromShapes()
+                self.body.WakeUp()
 
         elif key==K_d:
-            if self.m_shape2:
-                self.m_body.DestroyShape(self.m_shape2)
-                self.m_shape2 = None
-                self.m_body.SetMassFromShapes()
-                self.m_body.WakeUp()
+            if self.shape2:
+                self.body.DestroyShape(self.shape2)
+                self.shape2 = None
+                self.body.SetMassFromShapes()
+                self.body.WakeUp()
 
     def Step(self, settings):
         self.DrawString(5, self.textLine, "Press: (c) create a shape, (d) destroy a shape.")

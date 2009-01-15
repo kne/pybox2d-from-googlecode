@@ -47,7 +47,10 @@ class Empty(Framework):
         """Called upon every step.
         You should always call
          -> super(Your_Test_Class, self).Step(settings)
-        at the _end_ of your function.
+        at the beginning or end of your function.
+
+        If placed at the beginning, it will cause the actual physics step to happen first.
+        If placed at the end, it will cause the physics step to happen after your code.
         """
 
         # do stuff

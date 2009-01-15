@@ -168,7 +168,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         """
         Take a floating point color in range (0..1,0..1,0..1) and convert it to (255,255,255)
         """
-        return (int(255*color.r), int(255*color.g), int(255*color.b))
+        if isinstance(color, box2d.b2Color):
+            return (int(255*color.r), int(255*color.g), int(255*color.b))
+        return (int(255*color[0]), int(255*color[1]), int(255*color[2]))
 
     def DrawPoint(self, p, size, color):
         """
@@ -348,6 +350,20 @@ class fwGUI(gui.Table):
                 # Add the label and then the switch/checkbox
                 self.td(gui.Label(text, color=fg), align=1)
                 self.td(gui.Switch(value=getattr(settings, variable),name=variable))
+
+    def updateGUI(self, settings):
+        """
+        Change all of the GUI elements based on the current settings
+        """
+        for text, variable in self.checkboxes:
+            if not variable: continue
+            if hasattr(settings, variable):
+                self.form[variable].value = getattr(settings, variable)
+
+        # Now do the sliders
+        self.form['hz'].value       = settings.hz
+        self.form['posIters'].value = settings.positionIterations
+        self.form['velIters'].value = settings.velocityIterations
 
     def updateSettings(self, settings):
         """
@@ -565,9 +581,6 @@ class Framework(object):
         and drawing additional information.
         """
 
-        # Update the settings based on the GUI
-        self.gui_table.updateSettings(settings)
-
         # Don't do anything if the setting's Hz are <= 0
         if settings.hz > 0.0:
             timeStep = 1.0 / settings.hz
@@ -638,14 +651,14 @@ class Framework(object):
             p1 = body.GetWorldPoint(self.mouseJoint.m_localAnchor)
             p2 = self.mouseJoint.m_target
 
-            self.debugDraw.DrawPoint(p1, settings.pointSize, box2d.b2Color(0,1.0,0))
-            self.debugDraw.DrawPoint(p2, settings.pointSize, box2d.b2Color(0,1.0,0))
-            self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(p1, settings.pointSize, (0,1.0,0))
+            self.debugDraw.DrawPoint(p2, settings.pointSize, (0,1.0,0))
+            self.debugDraw.DrawSegment(p1, p2, (0.8,0.8,0.8))
 
         # Draw the slingshot bomb
         if self.bombSpawning:
-            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, box2d.b2Color(0,0,1.0))
-            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, box2d.b2Color(0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, (0,0,1.0))
+            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, (0.8,0.8,0.8))
 
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
@@ -654,16 +667,16 @@ class Framework(object):
 
             for point in self.points:
                 if point.state == fwContactTypes.contactAdded:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, box2d.b2Color(0.3, 0.95, 0.3))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.95, 0.3))
                 elif point.state == fwContactTypes.contactPersisted:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, box2d.b2Color(0.3, 0.3, 0.95))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.3, 0.95))
                 else: #elif point.state == fwContactTypes.contactRemoved:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, box2d.b2Color(0.95, 0.3, 0.3))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.95, 0.3, 0.3))
 
                 if settings.drawContactNormals:
                     p1 = point.position
                     p2 = p1 + k_axisScale * point.normal
-                    self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(0.4, 0.9, 0.4))
+                    self.debugDraw.DrawSegment(p1, p2, (0.4, 0.9, 0.4))
 
     def _Keyboard_Event(self, key):
         """
@@ -857,7 +870,10 @@ class Framework(object):
         """
         self.SetTextLine(30)
         self.DrawString(5, 15, self.name)
+
+        self.gui_table.updateSettings(self.settings)
         self.Step(self.settings)
+        self.gui_table.updateGUI(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
         """

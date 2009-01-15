@@ -22,11 +22,11 @@
 from test_main import *
 class Car (Framework):
     name="Car"
-    m_leftWheel=None
-    m_rightWheel=None
-    m_vehicle=None
-    m_leftJoint=None
-    m_rightJoint=None
+    leftWheel=None
+    rightWheel=None
+    vehicle=None
+    leftJoint=None
+    rightJoint=None
 
     def __init__(self):
         super(Car, self).__init__()
@@ -62,10 +62,10 @@ class Car (Framework):
         bd=box2d.b2BodyDef() 
         bd.position.Set(-35.0, 2.8)
 
-        self.m_vehicle = self.world.CreateBody(bd)
-        self.m_vehicle.CreateShape(poly1)
-        self.m_vehicle.CreateShape(poly2)
-        self.m_vehicle.SetMassFromShapes()
+        self.vehicle = self.world.CreateBody(bd)
+        self.vehicle.CreateShape(poly1)
+        self.vehicle.CreateShape(poly2)
+        self.vehicle.SetMassFromShapes()
 
         # vehicle wheels
         circ = box2d.b2CircleDef()
@@ -78,28 +78,28 @@ class Car (Framework):
         bd.allowSleep = False
         bd.position.Set(-33.8, 2.0)
 
-        self.m_rightWheel = self.world.CreateBody(bd)
-        self.m_rightWheel.CreateShape(circ)
-        self.m_rightWheel.SetMassFromShapes()
+        self.rightWheel = self.world.CreateBody(bd)
+        self.rightWheel.CreateShape(circ)
+        self.rightWheel.SetMassFromShapes()
 
         bd.position.Set(-36.2, 2.0)
-        self.m_leftWheel = self.world.CreateBody(bd)
-        self.m_leftWheel.CreateShape(circ)
-        self.m_leftWheel.SetMassFromShapes()
+        self.leftWheel = self.world.CreateBody(bd)
+        self.leftWheel.CreateShape(circ)
+        self.leftWheel.SetMassFromShapes()
 
         # join wheels to chassis
         anchor=box2d.b2Vec2() 
         jd=box2d.b2RevoluteJointDef() 
-        jd.Initialize(self.m_vehicle, self.m_leftWheel, self.m_leftWheel.GetWorldCenter())
+        jd.Initialize(self.vehicle, self.leftWheel, self.leftWheel.GetWorldCenter())
         jd.collideConnected = False
         jd.enableMotor = True
         jd.maxMotorTorque = 10.0
         jd.motorSpeed = 0.0
-        self.m_leftJoint = self.world.CreateJoint(jd).getAsType() 
+        self.leftJoint = self.world.CreateJoint(jd).getAsType() 
 
-        jd.Initialize(self.m_vehicle, self.m_rightWheel, self.m_rightWheel.GetWorldCenter())
+        jd.Initialize(self.vehicle, self.rightWheel, self.rightWheel.GetWorldCenter())
         jd.collideConnected = False
-        self.m_rightJoint = self.world.CreateJoint(jd).getAsType() 
+        self.rightJoint = self.world.CreateJoint(jd).getAsType() 
 
         # ground
         box=box2d.b2PolygonDef() 
@@ -175,16 +175,16 @@ class Car (Framework):
      
     def Keyboard(self, key):
         if key==K_a:
-           self.m_leftJoint.SetMaxMotorTorque(800.0)
-           self.m_leftJoint.SetMotorSpeed(12.0)
+           self.leftJoint.SetMaxMotorTorque(800.0)
+           self.leftJoint.SetMotorSpeed(12.0)
            
         elif key==K_s:
-           self.m_leftJoint.SetMaxMotorTorque(100.0)
-           self.m_leftJoint.SetMotorSpeed(0.0)
+           self.leftJoint.SetMaxMotorTorque(100.0)
+           self.leftJoint.SetMotorSpeed(0.0)
            
         elif key==K_d:
-           self.m_leftJoint.SetMaxMotorTorque(1200.0)
-           self.m_leftJoint.SetMotorSpeed(-36.0)
+           self.leftJoint.SetMaxMotorTorque(1200.0)
+           self.leftJoint.SetMotorSpeed(-36.0)
              
 if __name__=="__main__":
      main(Car)

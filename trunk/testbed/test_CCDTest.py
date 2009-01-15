@@ -23,7 +23,7 @@
 from test_main import *
 class CCDTest (Framework):
     name="CCDTest"
-    m_angularVelocity = 0.0
+    angularVelocity = 0.0
     def __init__(self):
         super(CCDTest, self).__init__()
         # Note that this test has a lot of commented-out versions that aren't implemented here.

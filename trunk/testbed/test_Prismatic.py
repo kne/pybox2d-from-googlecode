@@ -59,21 +59,21 @@ class Prismatic (Framework):
         pjd.upperTranslation = 20.0
         pjd.enableLimit = True
         
-        self.m_joint = self.world.CreateJoint(pjd).getAsType()
+        self.joint = self.world.CreateJoint(pjd).getAsType()
     
     def Keyboard(self, key):
         if key==K_l:
-            self.m_joint.EnableLimit(not self.m_joint.IsLimitEnabled())
+            self.joint.EnableLimit(not self.joint.IsLimitEnabled())
         elif key==K_m:
-            self.m_joint.EnableMotor(not self.m_joint.IsMotorEnabled())
+            self.joint.EnableMotor(not self.joint.IsMotorEnabled())
         elif key==K_p:
-            self.m_joint.SetMotorSpeed(-self.m_joint.GetMotorSpeed())
+            self.joint.SetMotorSpeed(-self.joint.GetMotorSpeed())
     
     def Step(self, settings):
         self.DrawString(5, self.textLine, "Keys: (l) limits, (m) motors, (p) speed")
         self.textLine += 15
         
-        force = self.m_joint.GetMotorForce()
+        force = self.joint.GetMotorForce()
         self.DrawString(5, self.textLine, "Motor Force = %f.0" % force)
         self.textLine += 15
         super(Prismatic, self).Step(settings)

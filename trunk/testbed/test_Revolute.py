@@ -58,19 +58,19 @@ class Revolute (Framework):
         rjd.enableLimit = True
         rjd.collideConnected = True
         
-        self.m_joint = self.world.CreateJoint(rjd).getAsType()
+        self.joint = self.world.CreateJoint(rjd).getAsType()
     
     def Keyboard(self, key):
         if key==K_l:
-            self.m_joint.EnableLimit(self.m_joint.IsLimitEnabled())
+            self.joint.EnableLimit(self.joint.IsLimitEnabled())
         elif key==K_s:
-            self.m_joint.EnableMotor(False)
+            self.joint.EnableMotor(False)
     
     def Step(self, settings):
         #self.DrawString(5, self.textLine, "Keys: (l) limits, (a) left, (s) off, (d) right")
         self.DrawString(5, self.textLine, "Keys: (l) limits, (s) off") # a/d unimplemented
         self.textLine += 15
-        #torque1 = self.m_joint1.GetMotorTorque()
+        #torque1 = self.joint1.GetMotorTorque()
         #self.DrawString(5, self.textLine, "Motor Torque = %f.0, %f.0 : Motor Force = %f.0" % (torque1, torque2, force3))
         #self.textLine += 15
         super(Revolute, self).Step(settings)

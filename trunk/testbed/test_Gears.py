@@ -23,11 +23,11 @@ from test_main import *
 
 class Gears (Framework):
     name="Gears"
-    m_joint1=None
-    m_joint2=None
-    m_joint3=None
-    m_joint4=None
-    m_joint5=None
+    joint1=None
+    joint2=None
+    joint3=None
+    joint4=None
+    joint5=None
     def __init__(self):
         super(Gears, self).__init__()
         bd=box2d.b2BodyDef() 
@@ -62,7 +62,7 @@ class Gears (Framework):
         jd1.localAnchor1 = ground.GetLocalPoint(bd1.position)
         jd1.localAnchor2 = body1.GetLocalPoint(bd1.position)
         jd1.referenceAngle = body1.GetAngle() - ground.GetAngle()
-        self.m_joint1 = self.world.CreateJoint(jd1).getAsType()
+        self.joint1 = self.world.CreateJoint(jd1).getAsType()
 
         bd2=box2d.b2BodyDef() 
         bd2.position.Set(0.0, 12.0)
@@ -72,7 +72,7 @@ class Gears (Framework):
 
         jd2=box2d.b2RevoluteJointDef() 
         jd2.Initialize(ground, body2, bd2.position)
-        self.m_joint2 = self.world.CreateJoint(jd2).getAsType()
+        self.joint2 = self.world.CreateJoint(jd2).getAsType()
 
         bd3=box2d.b2BodyDef() 
         bd3.position.Set(2.5, 12.0)
@@ -86,32 +86,32 @@ class Gears (Framework):
         jd3.upperTranslation = 5.0
         jd3.enableLimit = True
 
-        self.m_joint3 = self.world.CreateJoint(jd3).getAsType()
+        self.joint3 = self.world.CreateJoint(jd3).getAsType()
 
         jd4=box2d.b2GearJointDef() 
         jd4.body1 = body1
         jd4.body2 = body2
-        jd4.joint1 = self.m_joint1
-        jd4.joint2 = self.m_joint2
+        jd4.joint1 = self.joint1
+        jd4.joint2 = self.joint2
         jd4.ratio = circle2.radius / circle1.radius
-        self.m_joint4 = self.world.CreateJoint(jd4).getAsType()
+        self.joint4 = self.world.CreateJoint(jd4).getAsType()
 
         jd5=box2d.b2GearJointDef() 
         jd5.body1 = body2
         jd5.body2 = body3
-        jd5.joint1 = self.m_joint2
-        jd5.joint2 = self.m_joint3
+        jd5.joint1 = self.joint2
+        jd5.joint2 = self.joint3
         jd5.ratio = -1.0 / circle2.radius
-        self.m_joint5 = self.world.CreateJoint(jd5).getAsType()
+        self.joint5 = self.world.CreateJoint(jd5).getAsType()
              
     def Step(self, settings):
-        ratio = self.m_joint4.GetRatio()
-        value = self.m_joint1.GetJointAngle() + ratio * self.m_joint2.GetJointAngle()
+        ratio = self.joint4.GetRatio()
+        value = self.joint1.GetJointAngle() + ratio * self.joint2.GetJointAngle()
         self.DrawString(5, self.textLine, "theta1 + %.2f * theta2 = %.2f" % (ratio, value))
         self.textLine += 15
 
-        ratio = self.m_joint5.GetRatio()
-        value = self.m_joint2.GetJointAngle() + ratio * self.m_joint3.GetJointTranslation()
+        ratio = self.joint5.GetRatio()
+        value = self.joint2.GetJointAngle() + ratio * self.joint3.GetJointTranslation()
         self.DrawString(5, self.textLine, "theta2 + %.2f * delta = %.2f" % (ratio, value))
         self.textLine += 15
 

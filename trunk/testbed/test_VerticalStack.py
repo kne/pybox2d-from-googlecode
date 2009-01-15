@@ -22,7 +22,7 @@
 from test_main import *
 class VerticalStack (Framework):
     name="VerticalStack"
-    m_bullet=None
+    bullet=None
     def __init__(self):
         super(VerticalStack, self).__init__()
         sd=box2d.b2PolygonDef()
@@ -56,13 +56,13 @@ class VerticalStack (Framework):
                 body.CreateShape(sd)
                 body.SetMassFromShapes()
 
-        self.m_bullet = None 
+        self.bullet = None 
      
     def Keyboard(self, key):
         if key == K_COMMA:
-            if self.m_bullet:
-                self.world.DestroyBody(self.m_bullet)
-                self.m_bullet = None
+            if self.bullet:
+                self.world.DestroyBody(self.bullet)
+                self.bullet = None
 
             sd=box2d.b2CircleDef()
             sd.density = 20.0
@@ -73,11 +73,11 @@ class VerticalStack (Framework):
             bd.isBullet = True
             bd.position.Set(-31.0, 5.0)
 
-            self.m_bullet = self.world.CreateBody(bd)
-            self.m_bullet.CreateShape(sd)
-            self.m_bullet.SetMassFromShapes()
+            self.bullet = self.world.CreateBody(bd)
+            self.bullet.CreateShape(sd)
+            self.bullet.SetMassFromShapes()
 
-            self.m_bullet.SetLinearVelocity(box2d.b2Vec2(400.0, 0.0))
+            self.bullet.SetLinearVelocity(box2d.b2Vec2(400.0, 0.0))
      
     def Step(self, settings):
           self.DrawString(5, self.textLine, "Press: (,) to launch a bullet.")

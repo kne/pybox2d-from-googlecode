@@ -23,10 +23,10 @@
 from test_main import *
 class TimeOfImpact (Framework):
     name="TimeOfImpact"
-    m_body1=None
-    m_body2=None
-    m_shape1=None
-    m_shape2=None
+    body1=None
+    body2=None
+    shape1=None
+    shape2=None
     def __init__(self):
         super(TimeOfImpact, self).__init__()
         sd=box2d.b2PolygonDef() 
@@ -37,8 +37,8 @@ class TimeOfImpact (Framework):
         bd=box2d.b2BodyDef() 
         bd.position.Set(0.0, 20.0)
         bd.angle = 0.0
-        self.m_body1 = self.world.CreateBody(bd)
-        self.m_shape1 = self.m_body1.CreateShape(sd)
+        self.body1 = self.world.CreateBody(bd)
+        self.shape1 = self.body1.CreateShape(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.25, 0.25)
@@ -47,9 +47,9 @@ class TimeOfImpact (Framework):
         bd=box2d.b2BodyDef() 
         bd.position.Set(9.6363468, 28.050615)
         bd.angle = 1.6408679
-        self.m_body2 = self.world.CreateBody(bd)
-        self.m_shape2 = self.m_body2.CreateShape(sd).getAsType()
-        self.m_body2.SetMassFromShapes()
+        self.body2 = self.world.CreateBody(bd)
+        self.shape2 = self.body2.CreateShape(sd).getAsType()
+        self.body2.SetMassFromShapes()
 
     def Step(self, settings):
         sweep1=box2d.b2Sweep()
@@ -58,7 +58,7 @@ class TimeOfImpact (Framework):
         sweep1.c = sweep1.c0
         sweep1.a = sweep1.a0
         sweep1.t0 = 0.0
-        sweep1.localCenter = self.m_body1.GetLocalCenter()
+        sweep1.localCenter = self.body1.GetLocalCenter()
 
         sweep2=box2d.b2Sweep()
         sweep2.c0.Set(9.6363468, 28.050615)
@@ -66,25 +66,25 @@ class TimeOfImpact (Framework):
         sweep2.c = sweep2.c0 + box2d.b2Vec2(-0.075121880, 0.27358246)
         sweep2.a = sweep2.a0 - 10.434675
         sweep2.t0 = 0.0
-        sweep2.localCenter = self.m_body2.GetLocalCenter()
+        sweep2.localCenter = self.body2.GetLocalCenter()
 
-        toi = box2d.b2TimeOfImpact(self.m_shape1, sweep1, self.m_shape2, sweep2)
+        toi = box2d.b2TimeOfImpact(self.shape1, sweep1, self.shape2, sweep2)
 
         self.DrawString(5, self.textLine, "toi = %g" % (toi))
         self.textLine += 15
 
         xf2=box2d.b2XForm ()
         sweep2.GetXForm(xf2, toi)
-        vertexCount = self.m_shape2.GetVertexCount()
+        vertexCount = self.shape2.GetVertexCount()
         vertices = []
 
-        localVertices = self.m_shape2.getVertices_b2Vec2()
+        localVertices = self.shape2.getVertices_b2Vec2()
         for vertex in localVertices:
             vertices.append( box2d.b2Mul(xf2, vertex).tuple() )
 
         self.debugDraw.DrawPolygon(vertices, vertexCount, box2d.b2Color(0.5, 0.7, 0.9))
 
-        localVertices = self.m_shape2.getCoreVertices_b2Vec2()
+        localVertices = self.shape2.getCoreVertices_b2Vec2()
         for vertex in localVertices:
             vertices.append( box2d.b2Mul(xf2, vertex).tuple() )
         self.debugDraw.DrawPolygon(vertices, vertexCount, box2d.b2Color(0.5, 0.7, 0.9))

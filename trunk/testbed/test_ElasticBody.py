@@ -26,9 +26,9 @@ import math
 class ElasticBody (Framework):
     name="ElasticBody"
     bodies=[]
-    m_ground=None 
-    m_elev=None
-    m_joint_elev=None
+    ground=None 
+    elev=None
+    joint_elev=None
     # Main...
     def __init__(self):
         super(ElasticBody, self).__init__()
@@ -40,8 +40,8 @@ class ElasticBody (Framework):
         sd.restitution = 0.1
         bd=box2d.b2BodyDef() 
         bd.position.Set(-1.0, -7.5)
-        self.m_ground = self.world.CreateBody(bd)
-        self.m_ground.CreateShape(sd)
+        self.ground = self.world.CreateBody(bd)
+        self.ground.CreateShape(sd)
         # Upper static body
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(20.0, 0.50,(0,0),0.047*box2d.b2_pi)
@@ -269,27 +269,27 @@ class ElasticBody (Framework):
         sd=box2d.b2PolygonDef() 
 
         bd.position.Set(40.0,4.0)
-        self.m_elev = self.world.CreateBody(bd)
+        self.elev = self.world.CreateBody(bd)
 
         sd.SetAsBox(0.5, 2.5,(3.0,-3.0), 0)
         sd.density     = 1
         sd.friction    = 0.01
-        self.m_elev.CreateShape(sd)
+        self.elev.CreateShape(sd)
         sd.SetAsBox(7.0, 0.5, (-3.5,-5.5), 0)
-        self.m_elev.CreateShape(sd)
+        self.elev.CreateShape(sd)
         sd.SetAsBox(0.5, 2.5, (-11,-3.5), 0)
-        self.m_elev.CreateShape(sd)
-        self.m_elev.SetMassFromShapes()
+        self.elev.CreateShape(sd)
+        self.elev.SetMassFromShapes()
 
         jp=box2d.b2PrismaticJointDef() 
-        jp.Initialize(self.m_ground,self.m_elev, bd.position, (0.0, 1.0))
+        jp.Initialize(self.ground,self.elev, bd.position, (0.0, 1.0))
         jp.lowerTranslation =  0.0
         jp.upperTranslation = 100.0
         jp.enableLimit = True
         jp.enableMotor = True
         jp.maxMotorForce = 10000
         jp.motorSpeed    = 0
-        self.m_joint_elev = self.world.CreateJoint(jp).getAsType()
+        self.joint_elev = self.world.CreateJoint(jp).getAsType()
 
         # Korb
         sd.SetAsBox(2.3, 0.5,(1,0.0), 0.0)
@@ -315,7 +315,7 @@ class ElasticBody (Framework):
         body.SetMassFromShapes()
 
         jr=box2d.b2RevoluteJointDef() 
-        jr.Initialize(self.m_elev,body, bd.position)
+        jr.Initialize(self.elev,body, bd.position)
         jr.enableLimit = True
         jr.lowerAngle  = -0.2
         jr.upperAngle  = box2d.b2_pi*1.1
@@ -399,20 +399,20 @@ class ElasticBody (Framework):
         #  Look if the body to lift is near the elevator
         p1 = bodies[0].GetWorldCenter()
         p2 = bodies[63].GetWorldCenter()
-        #    self.m_elev:   elevator prism. joint
-        e = self.m_elev.GetWorldCenter() + (0,7)
+        #    self.elev:   elevator prism. joint
+        e = self.elev.GetWorldCenter() + (0,7)
 
         # maybe not the best way to do it...
         # Bodies reached the elevator side
         if p1.x>e.x or p2.x>e.x:            # go up
-            if ( p1.y<e.y or p2.y<e.y ) and ( self.m_joint_elev.GetJointTranslation()<=self.m_joint_elev.GetLowerLimit()+1 ):
-                self.m_joint_elev.SetMotorSpeed(20)
-                #print "lift goes up trans: %G" % self.m_joint_elev.GetJointTranslation()
+            if (p1.y<e.y or p2.y<e.y ) and ( self.joint_elev.GetJointTranslation()<=self.joint_elev.GetLowerLimit()+1):
+                self.joint_elev.SetMotorSpeed(20)
+                #print "lift goes up trans: %G" % self.joint_elev.GetJointTranslation()
 
         # go down
-        if self.m_joint_elev.GetJointTranslation() >= self.m_joint_elev.GetUpperLimit()-2:
-            self.m_joint_elev.SetMotorSpeed(-15)
-            #printf("lift goes down: %G\n",self.m_joint_elev.GetJointTranslation())
+        if self.joint_elev.GetJointTranslation() >= self.joint_elev.GetUpperLimit()-2:
+            self.joint_elev.SetMotorSpeed(-15)
+            #printf("lift goes down: %G\n",self.joint_elev.GetJointTranslation())
 
         super(ElasticBody, self).Step(settings)
 

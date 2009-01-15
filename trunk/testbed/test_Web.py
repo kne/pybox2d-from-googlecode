@@ -26,8 +26,8 @@ from test_main import *
 
 class Web (Framework):
     name="Web"
-    m_bodies=[]
-    m_joints=[]
+    bodies=[]
+    joints=[]
     def __init__(self):
         super(Web, self).__init__()
         sd=box2d.b2PolygonDef()
@@ -46,24 +46,24 @@ class Web (Framework):
         bd=box2d.b2BodyDef()
 
         bd.position = (-5.0, 5.0)
-        self.m_bodies.append(self.world.CreateBody(bd))
-        self.m_bodies[0].CreateShape(sd)
-        self.m_bodies[0].SetMassFromShapes()
+        self.bodies.append(self.world.CreateBody(bd))
+        self.bodies[0].CreateShape(sd)
+        self.bodies[0].SetMassFromShapes()
 
         bd.position = (5.0, 5.0)
-        self.m_bodies.append(self.world.CreateBody(bd))
-        self.m_bodies[1].CreateShape(sd)
-        self.m_bodies[1].SetMassFromShapes()
+        self.bodies.append(self.world.CreateBody(bd))
+        self.bodies[1].CreateShape(sd)
+        self.bodies[1].SetMassFromShapes()
 
         bd.position = (5.0, 15.0)
-        self.m_bodies.append(self.world.CreateBody(bd))
-        self.m_bodies[2].CreateShape(sd)
-        self.m_bodies[2].SetMassFromShapes()
+        self.bodies.append(self.world.CreateBody(bd))
+        self.bodies[2].CreateShape(sd)
+        self.bodies[2].SetMassFromShapes()
 
         bd.position = (-5.0, 15.0)
-        self.m_bodies.append(self.world.CreateBody(bd))
-        self.m_bodies[3].CreateShape(sd)
-        self.m_bodies[3].SetMassFromShapes()
+        self.bodies.append(self.world.CreateBody(bd))
+        self.bodies[3].CreateShape(sd)
+        self.bodies[3].SetMassFromShapes()
 
         jd=box2d.b2DistanceJointDef()
 
@@ -71,96 +71,96 @@ class Web (Framework):
         jd.dampingRatio = 0.5
 
         jd.body1 = ground
-        jd.body2 = self.m_bodies[0]
+        jd.body2 = self.bodies[0]
         jd.localAnchor1 = (-10.0, 10.0)
         jd.localAnchor2 = (-0.5, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
         jd.body1 = ground
-        jd.body2 = self.m_bodies[1]
+        jd.body2 = self.bodies[1]
         jd.localAnchor1 = (10.0, 10.0)
         jd.localAnchor2 = (0.5, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
         jd.body1 = ground
-        jd.body2 = self.m_bodies[2]
+        jd.body2 = self.bodies[2]
         jd.localAnchor1 = (10.0, 30.0)
         jd.localAnchor2 = (0.5, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
         jd.body1 = ground
-        jd.body2 = self.m_bodies[3]
+        jd.body2 = self.bodies[3]
         jd.localAnchor1 = (-10.0, 30.0)
         jd.localAnchor2 = (-0.5, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
-        jd.body1 = self.m_bodies[0]
-        jd.body2 = self.m_bodies[1]
+        jd.body1 = self.bodies[0]
+        jd.body2 = self.bodies[1]
         jd.localAnchor1 = (0.5, 0.0)
         jd.localAnchor2 = (-0.5, 0.0)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
-        jd.body1 = self.m_bodies[1]
-        jd.body2 = self.m_bodies[2]
+        jd.body1 = self.bodies[1]
+        jd.body2 = self.bodies[2]
         jd.localAnchor1 = (0.0, 0.5)
         jd.localAnchor2 = (0.0, -0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
-        jd.body1 = self.m_bodies[2]
-        jd.body2 = self.m_bodies[3]
+        jd.body1 = self.bodies[2]
+        jd.body2 = self.bodies[3]
         jd.localAnchor1 = (-0.5, 0.0)
         jd.localAnchor2 = (0.5, 0.0)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
 
-        jd.body1 = self.m_bodies[3]
-        jd.body2 = self.m_bodies[0]
+        jd.body1 = self.bodies[3]
+        jd.body2 = self.bodies[0]
         jd.localAnchor1 = (0.0, -0.5)
         jd.localAnchor2 = (0.0, 0.5)
         p1 = jd.body1.GetWorldPoint(jd.localAnchor1)
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.m_joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd).getAsType())
      
     def Keyboard(self, key):
         # Note: these functions are still causing some problems
         if key==K_b:
-            for body in self.m_bodies:
-                self.m_bodies.remove(body)
+            for body in self.bodies:
+                self.bodies.remove(body)
                 self.world.DestroyBody(body)
                 break
 
         elif key==K_j:
-            for joint in self.m_joints:
-                self.m_joints.remove(joint)
+            for joint in self.joints:
+                self.joints.remove(joint)
                 self.world.DestroyJoint(joint)
                 break
 
@@ -172,9 +172,9 @@ class Web (Framework):
           super(Web, self).Step(settings)
      
     def JointDestroyed(self, joint):
-        if joint in self.m_joints:
+        if joint in self.joints:
             print "Joint destroyed and removed from the list"
-            self.m_joints.remove(joint)
+            self.joints.remove(joint)
         else:
             print "Joint destroyed but not found in list", joint
             # bug here? is this box2d's fault? it passes in shapes!

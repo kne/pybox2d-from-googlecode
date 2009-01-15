@@ -140,22 +140,16 @@ def main():
     main_loop(world, screen, demolist, app)
 
 def get_shapes(world):
-    for body in get_bodies(world):
+    for body in world.bodyList:
         shape = body.GetShapeList()
         while shape:
             yield (body, shape.getAsType())
             shape=shape.GetNext()
 
-def get_bodies(world):
-    body = world.GetBodyList()
-    while body:
-        yield body
-        body = body.GetNext()
-
 def update_shapes(world):
     # Check to see if any objects are sleeping or coming to a stop. 
     # Then give them a little push.
-    for body in get_bodies(world):
+    for body in world.bodyList:
         v = body.GetLinearVelocity()
         if body.IsSleeping() or v.LengthSquared() < 0.2:
             i = body.GetWorldVector(box2d.b2Vec2(box2d.b2Random(-200,200), box2d.b2Random(-200,200)))

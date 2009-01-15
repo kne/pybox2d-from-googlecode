@@ -26,7 +26,7 @@ k_scale = 3.0
 
 class Test_Biped(Framework):
     name = "Biped"
-    m_biped = None
+    biped = None
 
     def __init__(self):
         super(Test_Biped, self).__init__()
@@ -52,7 +52,7 @@ class Test_Biped(Framework):
         sd.SetAsBox(0.1, 10.0, (0.0, 10.0), -0.5 * box2d.b2_pi)
         body.CreateShape(sd)
 
-        self.m_biped = Biped(self.world, box2d.b2Vec2(0.0, 20.0))
+        self.biped = Biped(self.world, box2d.b2Vec2(0.0, 20.0))
 
         for i in range(8):
             bd=box2d.b2BodyDef()
