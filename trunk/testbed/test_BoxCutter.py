@@ -237,8 +237,7 @@ class BoxCutter (Framework):
     def Step(self, settings):
         super(BoxCutter, self).Step(settings)
     
-        self.DrawString(5, self.textLine, "Keys: Cut = c")
-        self.textLine += 15
+        self.DrawStringCR("Keys: Cut = c")
 
         segmentLength = 30.0
         

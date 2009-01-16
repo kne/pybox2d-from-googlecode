@@ -24,6 +24,8 @@ from test_main import *
 from test_main import fwContactTypes
 import math
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 # Contributed by caspin (C++ version)
 
 class ContactCallbackTest (Framework):
@@ -36,99 +38,83 @@ class ContactCallbackTest (Framework):
     def __init__(self):
         super(ContactCallbackTest, self).__init__()
     
+        groundBody = self.world.GetGroundBody()
+
         sd=box2d.b2PolygonDef() 
         sd.friction = 0
-        sd.vertexCount = 3
-        sd.setVertex(0,10,10)
-        sd.setVertex(1,9,7)
-        sd.setVertex(2,10,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(10.0, 10.0), (9.0, 7.0), (10.0, 0.0)]
+        sd.userData = 1
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,9,7)
-        sd.setVertex(1,8,0)
-        sd.setVertex(2,10,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(9.0, 7.0), (8.0, 0.0), (10.0, 0.0)]
+        sd.userData = 2
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,9,7)
-        sd.setVertex(1,8,5)
-        sd.setVertex(2,8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(9.0, 7.0), (8.0, 5.0), (8.0, 0.0)]
+        sd.userData = 3
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,8,5)
-        sd.setVertex(1,7,4)
-        sd.setVertex(2,8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(8.0, 5.0), (7.0, 4.0), (8.0, 0.0)]
+        sd.userData = 4
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,7,4)
-        sd.setVertex(1,5,0)
-        sd.setVertex(2,8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(7.0, 4.0), (5.0, 0.0), (8.0, 0.0)]
+        sd.userData = 5
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,7,4)
-        sd.setVertex(1,5,3)
-        sd.setVertex(2,5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(7.0, 4.0), (5.0, 3.0), (5.0, 0.0)]
+        sd.userData = 6
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,5,3)
-        sd.setVertex(1,2,2)
-        sd.setVertex(2,5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(5.0, 3.0), (2.0, 2.0), (5.0, 0.0)]
+        sd.userData = 7
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,2,2)
-        sd.setVertex(1,0,0)
-        sd.setVertex(2,5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(2.0, 2.0), (0.0, 0.0), (5.0, 0.0)]
+        sd.userData = 8
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(0,2,2)
-        sd.setVertex(1,-2,2)
-        sd.setVertex(2,0,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(2.0, 2.0), (-2.0, 2.0), (0.0, 0.0)]
+        sd.userData = 9
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-2,2)
-        sd.setVertex(1,0,0)
-        sd.setVertex(0,-5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-5.0, 0.0), (0.0, 0.0), (-2.0, 2.0)]
+        sd.userData = 10
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-5,3)
-        sd.setVertex(1,-2,2)
-        sd.setVertex(0,-5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-5.0, 0.0), (-2.0, 2.0), (-5.0, 3.0)]
+        sd.userData = 11
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-7,4)
-        sd.setVertex(1,-5,3)
-        sd.setVertex(0,-5,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-5.0, 0.0), (-5.0, 3.0), (-7.0, 4.0)]
+        sd.userData = 12
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-7,4)
-        sd.setVertex(1,-5,0)
-        sd.setVertex(0,-8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-8.0, 0.0), (-5.0, 0.0), (-7.0, 4.0)]
+        sd.userData = 13
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-8,5)
-        sd.setVertex(1,-7,4)
-        sd.setVertex(0,-8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-8.0, 0.0), (-7.0, 4.0), (-8.0, 5.0)]
+        sd.userData = 14
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-9,7)
-        sd.setVertex(1,-8,5)
-        sd.setVertex(0,-8,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-8.0, 0.0), (-8.0, 5.0), (-9.0, 7.0)]
+        sd.userData = 15
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-9,7)
-        sd.setVertex(1,-8,0)
-        sd.setVertex(0,-10,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-10.0, 0.0), (-8.0, 0.0), (-9.0, 7.0)]
+        sd.userData = 16
+        groundBody.CreateShape(sd)
 
-        sd.setVertex(2,-10,10)
-        sd.setVertex(1,-9,7)
-        sd.setVertex(0,-10,0)
-        self.world.GetGroundBody().CreateShape(sd)
+        sd.vertices = [(-10.0, 0.0), (-9.0, 7.0), (-10.0, 10.0)]
+        sd.userData = 17
+        groundBody.CreateShape(sd)
 
         sd.SetAsBox(.5,6,(10.5,6),0)
-        self.world.GetGroundBody().CreateShape(sd)
+        groundBody.CreateShape(sd)
 
         sd.SetAsBox(.5,6,(-10.5,6),0)
-        self.world.GetGroundBody().CreateShape(sd)
+        groundBody.CreateShape(sd)
 
         bd=box2d.b2BodyDef() 
         bd.position=(9.5,60)
@@ -139,35 +125,35 @@ class ContactCallbackTest (Framework):
         w = 1.0
         b = w / (2.0 + math.sqrt(2.0))
         s = math.sqrt(2.0) * b
-        cd.setVertex(0,0.5 * s, 0.0)
-        cd.setVertex(1,0.5 * w, b)
-        cd.setVertex(2,0.5 * w, b + s)
-        cd.setVertex(3,0.5 * s, w)
-        cd.setVertex(4,-0.5 * s, w)
-        cd.setVertex(5,-0.5 * w, b + s)
-        cd.setVertex(6,-0.5 * w, b)
-        cd.setVertex(7,-0.5 * s, 0.0)
+        cd.vertices = [( 0.5 * s, 0.0),
+                       ( 0.5 * w, b),
+                       ( 0.5 * w, b + s),
+                       ( 0.5 * s, w),
+                       (-0.5 * s, w),
+                       (-0.5 * w, b + s),
+                       (-0.5 * w, b),
+                       (-0.5 * s, 0.0) ]
+
         cd.density = 1.0
+        cd.userData = 'BALL'
 
         self.ball_shape = self.ball.CreateShape(cd)
         self.ball.SetMassFromShapes()
 
     def Step(self, settings):
         strings = []
-        for point in self.points:
-            if  point.state ==fwContactTypes.contactAdded:
-                strings.append("added:   " + str(point.shape1) + " . " + str(point.shape2) + ":" + str(point.id.key))
-            elif  point.state ==fwContactTypes.contactRemoved:
-                strings.append("removed: " + str(point.shape1) + " . " + str(point.shape2) + ":" + str(point.id.key))
-            elif  point.state ==fwContactTypes.contactPersisted:
-                strings.append("persisted:" + str(point.shape1) + " . " + str(point.shape2) + ":" + str(point.id.key))
+        name_dict = { fwContactTypes.contactAdded : "added",
+                      fwContactTypes.contactRemoved : "removed",
+                      fwContactTypes.contactPersisted : "persisted" }
+
+        strings = ["%s: %s, %s (%s)" % (name_dict[point.state], point.shape1.userData, point.shape2.userData, point.id.key)
+                     for point in self.points]
 
         if len(strings) > 15:
             strings = strings[:14]
 
         for string in strings:
-           self.DrawString(5, self.textLine, string)
-           self.textLine += 15
+            self.DrawStringCR(string)
 
         super(ContactCallbackTest, self).Step(settings)
 

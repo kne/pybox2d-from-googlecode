@@ -666,8 +666,7 @@ class Framework(pyglet.window.Window):
             else:
                 timeStep = 0.0
 
-            self.DrawString(5, self.textLine, "****PAUSED****")
-            self.textLine += 15
+            self.DrawStringCR("****PAUSED****")
 
         # Set the flags based on what the settings show (uses a bitwise or mask)
         flags = 0
@@ -698,24 +697,19 @@ class Framework(pyglet.window.Window):
             self.bomb = None
 
         if settings.drawStats:
-            self.DrawString(5, self.textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
+            self.DrawStringCR("proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
                 self.world.GetProxyCount(), box2d.b2_maxProxies, self.world.GetPairCount(), box2d.b2_maxPairs) )
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "bodies/contacts/joints = %d/%d/%d" %
+            self.DrawStringCR("bodies/contacts/joints = %d/%d/%d" %
                 (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "hz %d vel/pos iterations %d/%d" %
+            self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
-            self.textLine += 15
+            self.DrawStringCR("heap bytes = %d" % box2d.cvar.b2_byteCount)
 
         if settings.drawFPS: #python version only
-            self.DrawString(5, self.textLine, "FPS %d" % self.fps)
-            self.textLine += 15
+            self.DrawStringCR("FPS %d" % self.fps)
         
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
@@ -828,14 +822,14 @@ class Framework(pyglet.window.Window):
         # Update the keyboard status
         self.push_handlers(self.keys)
 
-        # Reset the text position
-        self.SetTextLine(30)
-
         # Create a new batch for drawing
         self.debugDraw.batch = pyglet.graphics.Batch()
 
+        # Reset the text position
+        self.SetTextLine(15)
+
         # Draw the title of the test at the top
-        self.DrawString(5, 15, self.name)
+        self.DrawStringCR(self.name)
 
         # Step the physics
         self.Step(self.settings)
@@ -866,13 +860,20 @@ class Framework(pyglet.window.Window):
         return p
 
 
-    def DrawString(self, x, y, str):
+    def DrawString(self, x, y, str, color=(229,153,153,255)):
         """
         Draw some text, str, at screen coordinates (x, y).
         """
-        color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
         text = pyglet.text.Label(str, font_name=self.fontname, font_size=self.fontsize, 
                                  x=x, y=self.height-y, color=color, batch=self.debugDraw.batch, group=self.textGroup)
+
+    def DrawStringCR(self, str, color=(229,153,153,255)):
+        """
+        Draw some text, str, at screen coordinates (x, y).
+        """
+        text = pyglet.text.Label(str, font_name=self.fontname, font_size=self.fontsize, 
+                      x=5, y=self.height-self.textLine, color=color, batch=self.debugDraw.batch, group=self.textGroup)
+        self.textLine += 15
 
     def ShiftMouseDown(self, p):
         """

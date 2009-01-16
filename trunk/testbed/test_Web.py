@@ -165,10 +165,8 @@ class Web (Framework):
                 break
 
     def Step(self, settings):
-          self.DrawString(5, self.textLine, "This demonstrates a soft distance joint.")
-          self.textLine += 15
-          self.DrawString(5, self.textLine, "Press: (b) to delete a body, (j) to delete a joint")
-          self.textLine += 15
+          self.DrawStringCR("This demonstrates a soft distance joint.")
+          self.DrawStringCR("Press: (b) to delete a body, (j) to delete a joint")
           super(Web, self).Step(settings)
      
     def JointDestroyed(self, joint):

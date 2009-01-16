@@ -67,12 +67,10 @@ class Revolute (Framework):
             self.joint.EnableMotor(False)
     
     def Step(self, settings):
-        #self.DrawString(5, self.textLine, "Keys: (l) limits, (a) left, (s) off, (d) right")
-        self.DrawString(5, self.textLine, "Keys: (l) limits, (s) off") # a/d unimplemented
-        self.textLine += 15
+        #self.DrawStringCR("Keys: (l) limits, (a) left, (s) off, (d) right")
+        self.DrawStringCR("Keys: (l) limits, (s) off") # a/d unimplemented
         #torque1 = self.joint1.GetMotorTorque()
-        #self.DrawString(5, self.textLine, "Motor Torque = %f.0, %f.0 : Motor Force = %f.0" % (torque1, torque2, force3))
-        #self.textLine += 15
+        #self.DrawStringCR("Motor Torque = %f.0, %f.0 : Motor Force = %f.0" % (torque1, torque2, force3))
         super(Revolute, self).Step(settings)
     
 if __name__=="__main__":

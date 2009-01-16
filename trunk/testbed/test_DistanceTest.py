@@ -56,8 +56,7 @@ class DistanceTest (Framework):
     def Step(self, settings):
         distance, x1, x2 = box2d.b2Distance(self.shape1, self.body1.GetXForm(), self.shape2, self.body2.GetXForm())
 
-        self.DrawString(5, self.textLine, "distance = %g" % distance)
-        self.textLine += 15
+        self.DrawStringCR("distance = %g" % distance)
 
         self.debugDraw.DrawPoint(x1, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
         self.debugDraw.DrawPoint(x2, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))

@@ -267,8 +267,8 @@ class BreakableBody(Framework):
     def __init__(self):
         super(BreakableBody, self).__init__()
 
-        self.viewZoom = 6.0
-        self.updateCenter()
+        if not self.settings.onlyInit:
+            self.viewZoom = 6.0
 
         # geometries
         gx, gy  = 100.0, 1.0
@@ -435,12 +435,10 @@ class BreakableBody(Framework):
         if jStressed and (F>g_maxAllowableForce):
             self.world.DestroyJoint(jStressed)
 
-        self.DrawString(1, self.textLine,"max.reactionforce=%f.0 allowable=%f.0  change:-+" % (F,g_maxAllowableForce));
-        self.textLine += 12
+        self.DrawStringCR("max.reactionforce=%f.0 allowable=%f.0  change:-+" % (F,g_maxAllowableForce));
 
         onoff = { False: 'off', True: 'on' }
-        self.DrawString(1, self.textLine,"(d)rawmode-%s  (m)esh  (s)taticbody-%s" % (onoff[self.drawMode], onoff[self.staticBodies]))
-        self.textLine += 12
+        self.DrawStringCR("(d)rawmode-%s  (m)esh  (s)taticbody-%s" % (onoff[self.drawMode], onoff[self.staticBodies]))
 
         p1, p2 = box2d.b2Vec2(), box2d.b2Vec2()
         for i in xrange(self.drawCount-1):

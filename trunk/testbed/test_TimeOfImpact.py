@@ -70,8 +70,7 @@ class TimeOfImpact (Framework):
 
         toi = box2d.b2TimeOfImpact(self.shape1, sweep1, self.shape2, sweep2)
 
-        self.DrawString(5, self.textLine, "toi = %g" % (toi))
-        self.textLine += 15
+        self.DrawStringCR("toi = %g" % (toi))
 
         xf2=box2d.b2XForm ()
         sweep2.GetXForm(xf2, toi)

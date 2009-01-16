@@ -70,8 +70,7 @@ class Pulleys (Framework):
     def Step(self, settings):
         ratio = self.joint1.GetRatio()
         L = self.joint1.GetLength1() + ratio * self.joint1.GetLength2()
-        self.DrawString(5, self.textLine, "L1 + %.2f * L2 = %.2f" % (ratio, L))
-        self.textLine += 15
+        self.DrawStringCR("L1 + %.2f * L2 = %.2f" % (ratio, L))
         super(Pulleys, self).Step(settings)
 
 if __name__=="__main__":

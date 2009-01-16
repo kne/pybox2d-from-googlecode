@@ -121,8 +121,7 @@ class PolyShapes (Framework):
      
     def Step(self, settings):
         super(PolyShapes, self).Step(settings)
-        self.DrawString(5, self.textLine, "Press 1-5 to drop stuff")
-        self.textLine += 15
+        self.DrawStringCR("Press 1-5 to drop stuff")
      
 if __name__=="__main__":
      main(PolyShapes)

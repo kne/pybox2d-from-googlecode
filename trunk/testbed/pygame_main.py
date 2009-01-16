@@ -414,10 +414,10 @@ class Framework(object):
     contactListener = None
     debugDraw = None
 
-    # Screen-related
-    viewZoom = 10.0
-    viewCenter = box2d.b2Vec2(0,10.0*20.0) # y = viewZoom * (pos)
-    viewOffset = box2d.b2Vec2(0,0)
+    # Screen-related properties (defined later)
+    _viewZoom  =10.0
+    _viewCenter=None
+    _viewOffset=None
     screenSize = None
     rMouseDown = False
     textLine = 30
@@ -428,13 +428,39 @@ class Framework(object):
     gui_app   = None
     gui_table = None
     def __init__(self):
+        # Box2D Initialization
+        self.worldAABB.lowerBound.Set(-200.0, -100.0)
+        self.worldAABB.upperBound.Set( 200.0, 200.0)
+        gravity = box2d.b2Vec2(0.0, -10.0)
+
+        doSleep = True
+        self.world = box2d.b2World(self.worldAABB, gravity, doSleep)
+        self.destructionListener = fwDestructionListener()
+        self.boundaryListener = fwBoundaryListener()
+        self.contactListener = fwContactListener()
+        self.debugDraw = fwDebugDraw()
+
+        self.destructionListener.test = self
+        self.boundaryListener.test = self
+        self.contactListener.test = self
+        
+        self.world.SetDestructionListener(self.destructionListener)
+        self.world.SetBoundaryListener(self.boundaryListener)
+        self.world.SetContactListener(self.contactListener)
+        self.world.SetDebugDraw(self.debugDraw)
+
         # Pygame Initialization
+        if fwSettings.onlyInit: # testing mode doesn't initialize pygame
+            return
+
         pygame.init()
 
         caption= "Python Box2D Testbed - " + self.name
         pygame.display.set_caption(caption)
 
         self.screen = pygame.display.set_mode( (640,480) )
+        self.debugDraw.surface = self.screen
+
         self.screenSize = box2d.b2Vec2(*self.screen.get_size())
         
         try:
@@ -454,40 +480,35 @@ class Framework(object):
         container.add(self.gui_table,0,0)
         self.gui_app.init(container)
 
-        # Box2D Initialization
-        self.worldAABB.lowerBound.Set(-200.0, -100.0)
-        self.worldAABB.upperBound.Set( 200.0, 200.0)
-        gravity = box2d.b2Vec2(0.0, -10.0)
+        self.viewCenter = (0,10.0*20.0)
 
-        doSleep = True
-        self.world = box2d.b2World(self.worldAABB, gravity, doSleep)
-        self.destructionListener = fwDestructionListener()
-        self.boundaryListener = fwBoundaryListener()
-        self.contactListener = fwContactListener()
-        self.debugDraw = fwDebugDraw()
-
-        self.debugDraw.surface = self.screen
-
-        self.destructionListener.test = self
-        self.boundaryListener.test = self
-        self.contactListener.test = self
-        
-        self.world.SetDestructionListener(self.destructionListener)
-        self.world.SetBoundaryListener(self.boundaryListener)
-        self.world.SetContactListener(self.contactListener)
-        self.world.SetDebugDraw(self.debugDraw)
-
-        self.updateCenter()
-
-    def updateCenter(self):
+    def setCenter(self, value):
         """
         Updates the view offset based on the center of the screen.
         
         Tells the debug draw to update its values also.
         """
-        self.viewOffset = self.viewCenter - self.screenSize/2
+        if isinstance(value, box2d.b2Vec2):
+            self._viewCenter = value.copy()
+        elif isinstance(value, (list, tuple)):
+            self._viewCenter = box2d.b2Vec2( *value )
+        else:
+            raise ValueError, 'Expected b2Vec2 or sequence'
+
+        self._viewOffset = self._viewCenter - self.screenSize/2
 
         self.debugDraw._setValues(self.viewZoom, self.viewCenter, self.viewOffset, self.screenSize.x, self.screenSize.y)
+    
+    def setZoom(self, zoom):
+        self._viewZoom = zoom
+        self.debugDraw.viewZoom = zoom
+
+    viewZoom   = property(lambda self: self._viewZoom, setZoom,
+                           doc='Zoom factor for the display')
+    viewCenter = property(lambda self: self._viewCenter, setCenter, 
+                           doc='Screen center in camera coordinates')
+    viewOffset = property(lambda self: self._viewOffset,
+                           doc='The offset of the top-left corner of the screen')
         
     def checkEvents(self):
         """
@@ -513,10 +534,8 @@ class Framework(object):
                     self.rMouseDown = True
                 elif event.button ==4:
                     self.viewZoom *= 1.1
-                    self.updateCenter()
                 elif event.button == 5:
                     self.viewZoom /= 1.1
-                    self.updateCenter()
             elif event.type == MOUSEBUTTONUP:
                 p = self.ConvertScreenToWorld(*event.pos)
                 if event.button == 3: #right
@@ -529,8 +548,7 @@ class Framework(object):
                 self.MouseMove(p)
 
                 if self.rMouseDown:
-                    self.viewCenter -= box2d.b2Vec2(event.rel[0], -event.rel[1])
-                    self.updateCenter()
+                    self.viewCenter -= (event.rel[0], -event.rel[1])
 
             self.gui_app.event(event) #Pass the event to the GUI
 
@@ -565,14 +583,6 @@ class Framework(object):
             clock.tick(self.settings.hz)
             self.fps = clock.get_fps()
 
-    def SetTextLine(self, line):
-        """
-        Kept for compatibility with C++ Box2D's testbeds.
-        
-        ** TODO: Probably should update this to be more logical and easy to use.
-        """
-        self.textLine=line
-
     def Step(self, settings):
         """
         The main physics step.
@@ -594,8 +604,7 @@ class Framework(object):
             else:
                 timeStep = 0.0
 
-            self.DrawString(5, self.textLine, "****PAUSED****")
-            self.textLine += 15
+            self.DrawStringCR("****PAUSED****", (200,0,0))
 
         # Set the flags based on what the settings show (uses a bitwise or mask)
         flags = 0
@@ -626,24 +635,19 @@ class Framework(object):
             self.bomb = None
 
         if settings.drawStats:
-            self.DrawString(5, self.textLine, "proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
+            self.DrawStringCR("proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
                 self.world.GetProxyCount(), box2d.b2_maxProxies, self.world.GetPairCount(), box2d.b2_maxPairs) )
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "bodies/contacts/joints = %d/%d/%d" %
+            self.DrawStringCR("bodies/contacts/joints = %d/%d/%d" %
                 (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "hz %d vel/pos iterations %d/%d" %
+            self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
-            self.textLine += 15
 
-            self.DrawString(5, self.textLine, "heap bytes = %d" % box2d.cvar.b2_byteCount)
-            self.textLine += 15
+            self.DrawStringCR("heap bytes = %d" % box2d.cvar.b2_byteCount)
 
         if settings.drawFPS: #python version only
-            self.DrawString(5, self.textLine, "FPS %d" % self.fps)
-            self.textLine += 15
+            self.DrawStringCR("FPS %d" % self.fps)
         
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
@@ -688,11 +692,9 @@ class Framework(object):
         if key==K_z:
             # Zoom in
             self.viewZoom = min(1.1 * self.viewZoom, 20.0)
-            self.updateCenter()
         elif key==K_x:
             # Zoom out
             self.viewZoom = max(0.9 * self.viewZoom, 0.02)
-            self.updateCenter()
         elif key==K_r:
             # Reload (disabled)
             #print "Reload not functional"
@@ -847,29 +849,24 @@ class Framework(object):
         pygame.event.pump()
         self.keys = keys = pygame.key.get_pressed()
         if keys[K_LEFT]:
-            self.viewCenter.x -= 0.5
-            self.updateCenter()
+            self.viewCenter -= (0.5, 0)
         elif keys[K_RIGHT]:
-            self.viewCenter.x += 0.5
-            self.updateCenter()
+            self.viewCenter += (0.5, 0)
         if keys[K_UP]:
-            self.viewCenter.y += 0.5
-            self.updateCenter()
+            self.viewCenter += (0, 0.5)
         elif keys[K_DOWN]:
-            self.viewCenter.y -= 0.5
-            self.updateCenter()
+            self.viewCenter -= (0, 0.5)
 
         if keys[K_HOME]:
             self.viewZoom = 1.0
-            self.viewCenter.Set(0.0, 20.0)
-            self.updateCenter()
+            self.viewCenter = (0.0, 20.0)
 
     def SimulationLoop(self):
         """
         The main simulation loop. Don't override this, override Step instead.
         """
-        self.SetTextLine(30)
-        self.DrawString(5, 15, self.name)
+        self.textLine = 15
+        self.DrawStringCR(self.name, (127,127,255))
 
         self.gui_table.updateSettings(self.settings)
         self.Step(self.settings)
@@ -881,13 +878,21 @@ class Framework(object):
         """
         return box2d.b2Vec2((x + self.viewOffset.x) / self.viewZoom, ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
 
-    def DrawString(self, x, y, str):
+    def DrawString(self, x, y, str, color=(229,153,153,255)):
         """
         Draw some text, str, at screen coordinates (x, y).
         """
-        color = (229, 153, 153, 255) # 0.9, 0.6, 0.6
         text = self.font.render(str, True, color)
         self.screen.blit(text, (x,y))
+
+    def DrawStringCR(self, str, color=(229,153,153,255)):
+        """
+        Draw some text at the top status lines
+        and advance to the next line.
+        """
+        text = self.font.render(str, True, color)
+        self.screen.blit(text, (5,self.textLine))
+        self.textLine += 15
 
     # These should be implemented in the subclass: (Step() also if necessary)
     def JointDestroyed(self, joint):

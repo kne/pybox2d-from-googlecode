@@ -186,8 +186,7 @@ class TheoJansen (Framework):
         self.CreateLeg(1.0, wheelAnchor)
     
     def Step(self, settings):
-        self.DrawString(5, self.textLine, "Keys: left = a, brake = s, right = d, toggle motor = m")
-        self.textLine += 15
+        self.DrawStringCR("Keys: left = a, brake = s, right = d, toggle motor = m")
         
         super(TheoJansen, self).Step(settings)
     

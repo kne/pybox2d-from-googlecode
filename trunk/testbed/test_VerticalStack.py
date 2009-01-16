@@ -80,8 +80,7 @@ class VerticalStack (Framework):
             self.bullet.SetLinearVelocity(box2d.b2Vec2(400.0, 0.0))
      
     def Step(self, settings):
-          self.DrawString(5, self.textLine, "Press: (,) to launch a bullet.")
-          self.textLine += 15
+          self.DrawStringCR("Press: (,) to launch a bullet.")
 
           super(VerticalStack, self).Step(settings)
 

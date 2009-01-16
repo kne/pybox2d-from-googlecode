@@ -112,13 +112,11 @@ class MotorsAndLimits (Framework):
             self.joint3.SetMotorSpeed(-self.joint3.GetMotorSpeed())
      
     def Step(self, settings):
-        self.DrawString(5, self.textLine, "Keys: (l) limits, (m) motors, (p) prismatic speed")
-        self.textLine += 15
+        self.DrawStringCR("Keys: (l) limits, (m) motors, (p) prismatic speed")
         torque1 = self.joint1.GetMotorTorque()
         torque2 = self.joint2.GetMotorTorque()
         force3 = self.joint3.GetMotorForce()
-        self.DrawString(5, self.textLine, "Motor Torque = %.0f, %.0f : Motor Force = %.0f" % (torque1,torque2, force3))
-        self.textLine += 15
+        self.DrawStringCR("Motor Torque = %.0f, %.0f : Motor Force = %.0f" % (torque1,torque2, force3))
         super(MotorsAndLimits, self).Step(settings)
 
 if __name__=="__main__":

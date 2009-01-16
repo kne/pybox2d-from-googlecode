@@ -68,8 +68,7 @@ class ShapeEditing (Framework):
                 self.body.WakeUp()
 
     def Step(self, settings):
-        self.DrawString(5, self.textLine, "Press: (c) create a shape, (d) destroy a shape.")
-        self.textLine += 15
+        self.DrawStringCR("Press: (c) create a shape, (d) destroy a shape.")
         super(ShapeEditing, self).Step(settings)
 
 if __name__=="__main__":

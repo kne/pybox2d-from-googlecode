@@ -70,12 +70,10 @@ class Prismatic (Framework):
             self.joint.SetMotorSpeed(-self.joint.GetMotorSpeed())
     
     def Step(self, settings):
-        self.DrawString(5, self.textLine, "Keys: (l) limits, (m) motors, (p) speed")
-        self.textLine += 15
+        self.DrawStringCR("Keys: (l) limits, (m) motors, (p) speed")
         
         force = self.joint.GetMotorForce()
-        self.DrawString(5, self.textLine, "Motor Force = %f.0" % force)
-        self.textLine += 15
+        self.DrawStringCR("Motor Force = %f.0" % force)
         super(Prismatic, self).Step(settings)
     
 if __name__=="__main__":

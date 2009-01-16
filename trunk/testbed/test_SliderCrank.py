@@ -109,12 +109,10 @@ class SliderCrank (Framework):
                self.joint1.GetBody2().WakeUp()
      
     def Step(self, settings):
-          self.DrawString(5, self.textLine, "Keys: (f) toggle friction, (m) toggle motor")
-          self.textLine += 15
+          self.DrawStringCR("Keys: (f) toggle friction, (m) toggle motor")
 
           torque = self.joint1.GetMotorTorque()
-          self.DrawString(5, self.textLine, "Motor Torque = %.0f" % (torque))
-          self.textLine += 15
+          self.DrawStringCR("Motor Torque = %.0f" % (torque))
           super(SliderCrank, self).Step(settings)
      
 if __name__=="__main__":

@@ -107,13 +107,11 @@ class Gears (Framework):
     def Step(self, settings):
         ratio = self.joint4.GetRatio()
         value = self.joint1.GetJointAngle() + ratio * self.joint2.GetJointAngle()
-        self.DrawString(5, self.textLine, "theta1 + %.2f * theta2 = %.2f" % (ratio, value))
-        self.textLine += 15
+        self.DrawStringCR("theta1 + %.2f * theta2 = %.2f" % (ratio, value))
 
         ratio = self.joint5.GetRatio()
         value = self.joint2.GetJointAngle() + ratio * self.joint3.GetJointTranslation()
-        self.DrawString(5, self.textLine, "theta2 + %.2f * delta = %.2f" % (ratio, value))
-        self.textLine += 15
+        self.DrawStringCR("theta2 + %.2f * delta = %.2f" % (ratio, value))
 
         super(Gears, self).Step(settings)
 

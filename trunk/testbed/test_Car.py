@@ -168,9 +168,7 @@ class Car (Framework):
         ground.CreateShape(box)
      
     def Step(self, settings):
-        self.DrawString(5, self.textLine, "Keys: left = a, brake = s, right = d")
-        self.textLine += 15
-
+        self.DrawStringCR("Keys: left = a, brake = s, right = d")
         super(Car, self).Step(settings)
      
     def Keyboard(self, key):

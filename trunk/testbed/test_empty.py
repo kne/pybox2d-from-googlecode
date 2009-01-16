@@ -54,8 +54,7 @@ class Empty(Framework):
         """
 
         # do stuff
-        self.DrawString(0,self.textLine,"*** Base your own testbeds on me! ***")
-        self.textLine+=15
+        self.DrawStringCR("*** Base your own testbeds on me! ***")
 
         super(Empty, self).Step(settings)
 
