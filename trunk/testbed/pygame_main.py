@@ -648,8 +648,8 @@ class Framework(object):
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
             body = self.mouseJoint.GetBody2()
-            p1 = body.GetWorldPoint(self.mouseJoint.m_localAnchor)
-            p2 = self.mouseJoint.m_target
+            p1 = body.GetWorldPoint(self.mouseJoint.localAnchor)
+            p2 = self.mouseJoint.target
 
             self.debugDraw.DrawPoint(p1, settings.pointSize, (0,1.0,0))
             self.debugDraw.DrawPoint(p2, settings.pointSize, (0,1.0,0))
