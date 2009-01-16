@@ -20,26 +20,20 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
-10/22/2008
-Updated to SVN r177 (with user contribution: b2Controller support)
+Keys:
+    Space  - shoot projectile
+    Z/X    - zoom
+    Escape - quit
 
-8/23/2008
-Backported mostly to pyglet.
-Added more comments, documentation, fixes.
-TODO: Figure out a way to put the GUI in.
-BUG: Vista x64 only? Scheduled timers aren't working well
+Other keys can be set by the individual test
 
-4/27/2008
-pygame port. All tests now ported.
+Mouse:
+    Left click  - select/drag body (creates mouse joint)
+    Right click - pan
+    Shift+Left  - drag to create a directional projectile
+    Scroll      - zoom
 
-4/25/2008
-Initial port of the Testbed Framework for Box2D 2.0.1
-The 'fw' prefix refers to 'framework'
-(initial port was for pyglet 1.1)
-
-Notes:
-* Edit test_settings to change what's displayed. Add your own test based on test_empty.
-* Reload is not working.
+You can easily add your own tests based on test_empty.
 
 -kne
 """
@@ -47,7 +41,6 @@ Notes:
 import pyglet
 from pyglet import gl
 import Box2D as box2d
-#import psyco # a few fps faster with psyco
 from settings import fwSettings
 from pyglet_keymapper import *
 import math
@@ -624,10 +617,6 @@ class Framework(pyglet.window.Window):
         if buttons & pyglet.window.mouse.RIGHT:
             self.viewCenter -= box2d.b2Vec2(float(dx)/5, float(dy)/5)
             self.updateCenter()
-
-#pyglet test
-#    def on_draw(self):
-#        self.invalid = False
 
     def run(self):
         """

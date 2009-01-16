@@ -20,37 +20,36 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
-10/22/2008
-Updated to SVN r177 (with user contribution: b2Controller support)
+Keys:
+    F1     - toggle menu (can greatly improve fps)
+    Space  - shoot projectile
+    Z/X    - zoom
+    Escape - quit
 
-7/25/2008
-Updated to SVN r151:
-* Added bomb slingshot (shift+drag)
+Other keys can be set by the individual test
 
-6/1/2008
-Added some much needed comments in the code (next to none in the C++ code).
-Cleanups all around.
+Mouse:
+    Left click  - select/drag body (creates mouse joint)
+    Right click - pan
+    Shift+Left  - drag to create a directional projectile
+    Scroll      - zoom
 
-4/27/2008
-pygame port. All tests now ported.
-
-4/25/2008
-Initial port of the Testbed Framework for Box2D 2.0.1
-The 'fw' prefix refers to 'framework'
-(Initial port was for pyglet 1.1)
-
-Notes:
-* Edit test_settings to change what's displayed. Add your own test based on test_empty.
-* Reload is not working.
+You can easily add your own tests based on test_empty.
 
 -kne
 """
 import pygame
 import Box2D as box2d
-#import psyco # a few fps faster with psyco
 from pygame.locals import *
 from settings import fwSettings
 from pgu import gui
+
+# Use psyco if available
+try:
+    import psyco
+    psyco.full()
+except ImportError:
+    pass
 
 class fwDestructionListener(box2d.b2DestructionListener):
     """
@@ -182,13 +181,14 @@ class fwDebugDraw(box2d.b2DebugDraw):
         """
         Draw a wireframe around the AABB with the given color.
         """
-        points = []
-        points.append( (aabb.lowerBound.x, aabb.lowerBound.y ) )
-        points.append( (aabb.upperBound.x, aabb.lowerBound.y ) )
-        points.append( (aabb.upperBound.x, aabb.upperBound.y ) )
-        points.append( (aabb.lowerBound.x, aabb.upperBound.y ) )
+        points = [self.toScreen(p) for p in [
+                    (aabb.lowerBound.x, aabb.lowerBound.y ),
+                    (aabb.upperBound.x, aabb.lowerBound.y ),
+                    (aabb.upperBound.x, aabb.upperBound.y ),
+                    (aabb.lowerBound.x, aabb.upperBound.y ),
+                    ] ]
         
-        pygame.draw.aalines(self.surface, color, True, [self.toScreen(p) for p in points])
+        pygame.draw.aalines(self.surface, color, True, points)
 
     def DrawSegment(self, p1, p2, color):
         """
@@ -284,25 +284,24 @@ class fwGUI(gui.Table):
     controls. Callbacks are not used, but the checkboxes and sliders are polled
     by the main loop.
     """
-    checkboxes = (  
-                    ("Warm Starting", "enableWarmStarting"), 
-                    ("Time of Impact", "enableTOI"), 
-                    ("Draw", None),
-                    ("Shapes", "drawShapes"), 
-                    ("Joints", "drawJoints"), 
-                    ("Controllers", "drawControllers"), 
-                    ("Core Shapes", "drawCoreShapes"), 
-                    ("AABBs", "drawAABBs"), 
-                    ("OBBs", "drawOBBs"), 
-                    ("Pairs", "drawPairs"), 
-                    ("Contact Points", "drawContactPoints"), 
-                    ("Contact Normals", "drawContactNormals"), 
-                    ("Center of Masses", "drawCOMs"), 
-                    ("Statistics", "drawStats"),
-                    ("FPS", "drawFPS"),
-                    ("Control", None),
-                    ("Pause", "pause"),
-                    ("Single Step", "singleStep") )
+    checkboxes =( ("Warm Starting", "enableWarmStarting"), 
+                  ("Time of Impact", "enableTOI"), 
+                  ("Draw", None),
+                  ("Shapes", "drawShapes"), 
+                  ("Joints", "drawJoints"), 
+                  ("Controllers", "drawControllers"), 
+                  ("Core Shapes", "drawCoreShapes"), 
+                  ("AABBs", "drawAABBs"), 
+                  ("OBBs", "drawOBBs"), 
+                  ("Pairs", "drawPairs"), 
+                  ("Contact Points", "drawContactPoints"), 
+                  ("Contact Normals", "drawContactNormals"), 
+                  ("Center of Masses", "drawCOMs"), 
+                  ("Statistics", "drawStats"),
+                  ("FPS", "drawFPS"),
+                  ("Control", None),
+                  ("Pause", "pause"),
+                  ("Single Step", "singleStep") )
     form = None
 
     def __init__(self,settings, **params):
@@ -314,6 +313,9 @@ class fwGUI(gui.Table):
         fg = (255,255,255)
 
         # "Hertz"
+        self.tr()
+        self.td(gui.Label("F1: Toggle Menu",color=(255,0,0)),align=1,colspan=2)
+
         self.tr()
         self.td(gui.Label("Hertz",color=fg),align=1,colspan=2)
 
@@ -398,7 +400,7 @@ class Framework(object):
     name = "None"
 
     # Box2D-related
-    worldAABB = box2d.b2AABB()
+    worldAABB = None
     points = []
     world = None
     bomb = None
@@ -429,6 +431,7 @@ class Framework(object):
     gui_table = None
     def __init__(self):
         # Box2D Initialization
+        self.worldAABB=box2d.b2AABB()
         self.worldAABB.lowerBound.Set(-200.0, -100.0)
         self.worldAABB.upperBound.Set( 200.0, 200.0)
         gravity = box2d.b2Vec2(0.0, -10.0)
@@ -607,15 +610,22 @@ class Framework(object):
             self.DrawStringCR("****PAUSED****", (200,0,0))
 
         # Set the flags based on what the settings show (uses a bitwise or mask)
+        flag_info = [
+            (settings.drawShapes,     box2d.b2DebugDraw.e_shapeBit),
+            (settings.drawJoints,     box2d.b2DebugDraw.e_jointBit),
+            (settings.drawControllers,box2d.b2DebugDraw.e_controllerBit),
+            (settings.drawCoreShapes, box2d.b2DebugDraw.e_coreShapeBit),
+            (settings.drawAABBs,      box2d.b2DebugDraw.e_aabbBit),
+            (settings.drawOBBs,       box2d.b2DebugDraw.e_obbBit),
+            (settings.drawPairs,      box2d.b2DebugDraw.e_pairBit),
+            (settings.drawCOMs,       box2d.b2DebugDraw.e_centerOfMassBit),
+            ]
+
         flags = 0
-        if settings.drawShapes:     flags |= box2d.b2DebugDraw.e_shapeBit
-        if settings.drawJoints:     flags |= box2d.b2DebugDraw.e_jointBit
-        if settings.drawControllers:flags |= box2d.b2DebugDraw.e_controllerBit
-        if settings.drawCoreShapes: flags |= box2d.b2DebugDraw.e_coreShapeBit
-        if settings.drawAABBs:      flags |= box2d.b2DebugDraw.e_aabbBit
-        if settings.drawOBBs:       flags |= box2d.b2DebugDraw.e_obbBit
-        if settings.drawPairs:      flags |= box2d.b2DebugDraw.e_pairBit
-        if settings.drawCOMs:       flags |= box2d.b2DebugDraw.e_centerOfMassBit
+        for setting, flag in flag_info:
+            if setting:
+                flags |= flag
+
         self.debugDraw.SetFlags(flags)
 
         # Set the other settings that aren't contained in the flags
@@ -634,6 +644,7 @@ class Framework(object):
             self.world.DestroyBody(self.bomb)
             self.bomb = None
 
+        # Take care of additional drawing (stats, fps, mouse joint, slingshot bomb, contact points)
         if settings.drawStats:
             self.DrawStringCR("proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
                 self.world.GetProxyCount(), box2d.b2_maxProxies, self.world.GetPairCount(), box2d.b2_maxPairs) )
@@ -646,7 +657,7 @@ class Framework(object):
 
             self.DrawStringCR("heap bytes = %d" % box2d.cvar.b2_byteCount)
 
-        if settings.drawFPS: #python version only
+        if settings.drawFPS:
             self.DrawStringCR("FPS %d" % self.fps)
         
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
@@ -689,24 +700,15 @@ class Framework(object):
         Checks for the initial keydown of the basic testbed keys. Passes the unused
         ones onto the test via the Keyboard() function.
         """
-        if key==K_z:
-            # Zoom in
+        if key==K_z:       # Zoom in
             self.viewZoom = min(1.1 * self.viewZoom, 20.0)
-        elif key==K_x:
-            # Zoom out
+        elif key==K_x:     # Zoom out
             self.viewZoom = max(0.9 * self.viewZoom, 0.02)
-        elif key==K_r:
-            # Reload (disabled)
-            #print "Reload not functional"
-            exit(10)
-        elif key==K_SPACE:
-            # Launch a bomb
+        elif key==K_SPACE: # Launch a bomb
             self.LaunchRandomBomb()
-        elif key==K_F1:
-            # Toggle drawing the menu
+        elif key==K_F1:    # Toggle drawing the menu
             self.settings.drawMenu = not self.settings.drawMenu
-        else:
-            # Inform the test of the key press
+        else:              # Inform the test of the key press
             self.Keyboard(key)
         
     def ShiftMouseDown(self, p):
@@ -716,10 +718,8 @@ class Framework(object):
         """
         self.mouseWorld = p
 
-        if self.mouseJoint != None:
-            return
-
-        self.SpawnBomb(p)
+        if not self.mouseJoint:
+            self.SpawnBomb(p)
 
     def MouseDown(self, p):
         """
@@ -733,9 +733,8 @@ class Framework(object):
 
         # Make a small box.
         aabb = box2d.b2AABB()
-        d = box2d.b2Vec2(0.001, 0.001)
-        aabb.lowerBound = p - d
-        aabb.upperBound = p + d
+        aabb.lowerBound = p - (0.001, 0.001)
+        aabb.upperBound = p + (0.001, 0.001)
 
         # Query the world for overlapping shapes.
         body = None
@@ -744,12 +743,13 @@ class Framework(object):
         (count, shapes) = self.world.Query(aabb, k_maxCount)
         for shape in shapes:
             shapeBody = shape.GetBody()
-            if shapeBody.IsStatic() == False and shapeBody.GetMass() > 0.0:
+            if not shapeBody.IsStatic() and shapeBody.GetMass() > 0.0:
                 if shape.TestPoint(shapeBody.GetXForm(), p): # is it inside?
                     body = shapeBody
                     break
         
         if body:
+            # A body was selected, create the mouse joint
             md = box2d.b2MouseJointDef()
             md.body1   = self.world.GetGroundBody()
             md.body2   = body
@@ -784,7 +784,6 @@ class Framework(object):
         CompleteBombSpawn will be called and the actual bomb will be
         released.
         """
-
         self.bombSpawnPoint = worldPt.copy()
         self.bombSpawning = True
 
@@ -804,6 +803,7 @@ class Framework(object):
     def LaunchBomb(self, position, velocity):
         """
         A bomb is a simple circle which has the specified position and velocity.
+        position and velocity must be b2Vec2's.
         """
         if self.bomb:
             self.world.DestroyBody(self.bomb)
@@ -821,8 +821,8 @@ class Framework(object):
         sd.density = 20.0
         sd.restitution = 0.1
 
-        minV = position - box2d.b2Vec2(0.3,0.3)
-        maxV = position + box2d.b2Vec2(0.3,0.3)
+        minV = position - (0.3,0.3)
+        maxV = position + (0.3,0.3)
 
         aabb = box2d.b2AABB()
         aabb.lowerBound = minV
@@ -852,6 +852,7 @@ class Framework(object):
             self.viewCenter -= (0.5, 0)
         elif keys[K_RIGHT]:
             self.viewCenter += (0.5, 0)
+
         if keys[K_UP]:
             self.viewCenter += (0, 0.5)
         elif keys[K_DOWN]:
@@ -865,18 +866,29 @@ class Framework(object):
         """
         The main simulation loop. Don't override this, override Step instead.
         """
+
+        # Reset the text line to start the text from the top
         self.textLine = 15
+
+        # Draw the name of the test running
         self.DrawStringCR(self.name, (127,127,255))
 
+        # Update the settings based on the GUI
         self.gui_table.updateSettings(self.settings)
+
+        # Do the main physics step
         self.Step(self.settings)
+
+        # In case during the step the settings changed, update the GUI reflecting
+        # those settings.
         self.gui_table.updateGUI(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
         """
         Return a b2Vec2 in world coordinates of the passed in screen coordinates x, y
         """
-        return box2d.b2Vec2((x + self.viewOffset.x) / self.viewZoom, ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
+        return box2d.b2Vec2((x + self.viewOffset.x) / self.viewZoom, 
+                           ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
 
     def DrawString(self, x, y, str, color=(229,153,153,255)):
         """
@@ -894,7 +906,12 @@ class Framework(object):
         self.screen.blit(text, (5,self.textLine))
         self.textLine += 15
 
-    # These should be implemented in the subclass: (Step() also if necessary)
+    def __del__(self):
+        pass
+
+    # These can/should be implemented in the subclass: (Step() also if necessary)
+    # See test_Empty.py for a simple example.
+
     def JointDestroyed(self, joint):
         """
         Callback indicating 'joint' has been destroyed.
@@ -917,9 +934,6 @@ class Framework(object):
          if key == K_z:
              pass
         """
-        pass
-
-    def __del__(self):
         pass
 
 def main(test_class):
