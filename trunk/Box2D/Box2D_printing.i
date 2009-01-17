@@ -31,7 +31,6 @@
     linearVelocity      = %s,
     massData            = %s,
     position            = %s,
-    shapeList           = %s,
     userData            = %s,
     GetControllerList() = %s,
     GetInertia()        = %s,
@@ -45,7 +44,7 @@
     IsRotationFixed()   = %s,
     IsSleeping()        = %s,
     IsStatic()          = %s)"""% tuple(str(a) for a in\
-   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.shapeList,self.userData,self.GetControllerList(),self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsRotationFixed(),self.IsSleeping(),self.IsStatic()))
+   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.userData,self.GetControllerList(),self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsRotationFixed(),self.IsSleeping(),self.IsStatic()))
  %}
 }
 
@@ -1254,7 +1253,6 @@
  %pythoncode %{
  def __repr__(self):
   return """b2World(
-    bodyList             = %s,
     doSleep              = %s,
     gravity              = %s,
     groundBody           = %s,
@@ -1267,7 +1265,7 @@
     GetJointCount()      = %s,
     GetPairCount()       = %s,
     GetProxyCount()      = %s)"""% tuple(str(a) for a in\
-   (self.bodyList,self.doSleep,self.gravity,self.groundBody,self.jointList,self.worldAABB,self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetControllerList(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount()))
+   (self.doSleep,self.gravity,self.groundBody,self.jointList,self.worldAABB,self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetControllerList(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount()))
  %}
 }
 
