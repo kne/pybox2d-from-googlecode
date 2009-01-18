@@ -220,18 +220,18 @@
     %extend b2Shape {
     public:
         PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
-            bool hit;
+            int hit;
             float32 lambda=0.0f;
             b2Vec2 normal(0.0f ,0.0f);
 
-            hit=$self->TestSegment(xf, &lambda, &normal, segment, maxLambda);
+            hit=(int)$self->TestSegment(xf, &lambda, &normal, segment, maxLambda);
 
             PyObject* normal_tuple=PyTuple_New(2);
             PyTuple_SetItem(normal_tuple, 0, SWIG_From_float(normal.x));
             PyTuple_SetItem(normal_tuple, 1, SWIG_From_float(normal.y));
 
             PyObject* ret=PyTuple_New(3);
-            PyTuple_SetItem(ret, 0, SWIG_From_bool(hit));
+            PyTuple_SetItem(ret, 0, SWIG_From_int(hit));
             PyTuple_SetItem(ret, 1, SWIG_From_float(lambda));
             PyTuple_SetItem(ret, 2, normal_tuple);
             return ret;
@@ -619,7 +619,6 @@
         __eq__ = b2JointCompare
         __ne__ = lambda self,other: not b2JointCompare(self,other)
         type    =property(GetType    , None)
-        userData=property(GetUserData, None)
         body1   =property(GetBody1   , None)
         body2   =property(GetBody2   , None)
         collideConnected=property(GetCollideConnected, None)
@@ -645,12 +644,10 @@
         %}
         PyObject* _pyGetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
-            if (!ret) {
-                return Py_None;
-            } else {
-                Py_INCREF(ret);
-                return ret;
-            }
+            if (!ret)
+                ret=Py_None;
+            Py_INCREF(ret);
+            return ret;
         }
         void _pySetUserData(PyObject* value) {
             self->SetUserData((void*)value);
@@ -961,16 +958,14 @@
 
     %extend b2Body {
         PyObject* _pyGetUserData() {
-            PyObject* ret=(PyObject*)$self->GetUserData();
-            if (!ret) {
-                return Py_None;
-            } else {
-                Py_INCREF(ret);
-                return ret;
-            }
+            PyObject* ret=(PyObject*)self->GetUserData();
+            if (!ret)
+                ret=Py_None;
+            Py_INCREF(ret);
+            return ret;
         }
         void _pySetUserData(PyObject* value) {
-            $self->SetUserData((void*)value);
+            self->SetUserData((void*)value);
             Py_INCREF(value);
         }
         %pythoncode %{
