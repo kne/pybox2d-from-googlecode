@@ -27,6 +27,17 @@ class b2World;
 
 class b2Controller;
 
+/// The various controller types supported by Box2D.
+enum b2ControllerType
+{
+	e_unknownController = -1,
+	e_buoyancyController,
+	e_constantAccelController,
+	e_constantForceController,
+	e_gravityController,
+	e_tensorDampingController,
+};
+
 /// A controller edge is used to connect bodies and controllers together
 /// in a bipartite graph.
 struct b2ControllerEdge
@@ -63,6 +74,9 @@ public:
 	/// Removes all bodies from the controller list.
 	void Clear();
 
+	/// Get the type of the controller
+	b2ControllerType GetType();
+
 	/// Get the next controller in the world's body list.
 	b2Controller* GetNext();
 
@@ -80,14 +94,15 @@ protected:
 
 	b2ControllerEdge* m_bodyList;
 	int32 m_bodyCount;
+	b2ControllerType m_type;
 
 	b2Controller(const b2ControllerDef* def):
 		m_world(NULL),
 		m_bodyList(NULL),
 		m_bodyCount(0),
+		m_type(e_unknownController),
 		m_prev(NULL),
 		m_next(NULL)
-		
 		{
 			B2_NOT_USED(def);
 		}
@@ -128,6 +143,11 @@ inline b2ControllerEdge* b2Controller::GetBodyList()
 inline void b2Controller::Destroy(b2Controller* controller, b2BlockAllocator* allocator)
 {
 	controller->Destroy(allocator);
+}
+
+inline b2ControllerType b2Controller::GetType()
+{
+	return m_type;
 }
 
 #endif

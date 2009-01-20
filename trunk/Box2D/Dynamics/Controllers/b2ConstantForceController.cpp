@@ -21,6 +21,8 @@
 b2ConstantForceController::b2ConstantForceController(const b2ConstantForceControllerDef* def) : b2Controller(def)
 {
 	F = def->F;
+
+	m_type = e_constantForceController;
 }
 
 void b2ConstantForceController::Step(const b2TimeStep& step)

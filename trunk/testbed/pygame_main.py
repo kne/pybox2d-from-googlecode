@@ -693,6 +693,35 @@ class Framework(object):
                     p2 = p1 + k_axisScale * point.normal
                     self.debugDraw.DrawSegment(p1, p2, (0.4, 0.9, 0.4))
 
+    def pickle_load(self, fn):
+        import cPickle as pickle
+        try:
+            self.world = pickle.load(open(fn, 'rb'))._pickle_finalize()
+        except Exception, s:
+            print 'Error while loading world: ', s
+            return
+        
+        self.bomb = None
+        self.bombSpawning = False
+
+        # have to reset a few things that can't be saved:
+        self.world.SetDestructionListener(self.destructionListener)
+        self.world.SetBoundaryListener(self.boundaryListener)
+        self.world.SetContactListener(self.contactListener)
+        self.world.SetDebugDraw(self.debugDraw)
+        print 'Loaded'
+
+    def pickle_save(self, fn):
+        import cPickle as pickle
+        if self.mouseJoint:
+            self.MouseUp(self.mouseWorld) # remove a mouse joint if it exists
+
+        try:
+            pickle.dump(self.world, open(fn, 'wb'))
+            print 'Saved'
+        except:
+            print 'Pickling failed'
+
     def _Keyboard_Event(self, key):
         """
         Internal keyboard event, don't override this.
@@ -708,6 +737,10 @@ class Framework(object):
             self.LaunchRandomBomb()
         elif key==K_F1:    # Toggle drawing the menu
             self.settings.drawMenu = not self.settings.drawMenu
+        elif key==K_F5:    # Save state
+            self.pickle_save('pickle_output')
+        elif key==K_F7:    # Load state
+            self.pickle_load('pickle_output')
         else:              # Inform the test of the key press
             self.Keyboard(key)
         
@@ -922,6 +955,7 @@ class Framework(object):
         """
         Callback indicating 'body' has left the world AABB.
         """
+        print body
         pass
 
     def Keyboard(self, key):

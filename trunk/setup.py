@@ -38,7 +38,7 @@ box2d_source_files = ['Box2D/Box2D.i'] + \
     sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 # arguments to pass to SWIG. for old versions of SWIG, -O (optimize) might not be present.
-swig_arguments = '-c++ -O -includeall -ignoremissing -w201 -outdir .'
+swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -outdir .'
 
 pybox2d_extension = \
     Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')

@@ -29,6 +29,8 @@ b2BuoyancyController::b2BuoyancyController(const b2BuoyancyControllerDef* def) :
 	useDensity = def->useDensity;
 	useWorldGravity = def->useWorldGravity;
 	gravity = def->gravity;
+
+	m_type = e_buoyancyController;
 }
 
 void b2BuoyancyController::Step(const b2TimeStep& step)

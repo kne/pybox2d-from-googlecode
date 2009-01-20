@@ -20,7 +20,7 @@
 
 %module(directors="1") Box2D
 %{
-    #include "Box2D.h"
+    #include "Box2D/Box2D.h"
     
     //Define these functions so that SWIG does not fail
     void b2BroadPhase::ValidatePairs() { }
@@ -51,9 +51,13 @@
         bool __b2PythonShapePointerEquals__(b2Shape* a, b2Shape* b) {
             return a==b;
         }
+        bool __b2PythonControllerPointerEquals__(b2Controller* a, b2Controller* b) {
+            return a==b;
+        }
     %}
 
-    %include "Box2D_printing.i"
+    %include "Box2D/Box2D_printing.i"
+    %include "Box2D/Box2D_pickling.i"
 
     /* ---- features ---- */
 
@@ -66,17 +70,6 @@
     %feature("director") b2BoundaryListener;
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
-    %feature("shadow") GetUserData {
-        def GetUserData(self): # override the C++ version
-            """Get the specified userData (m_userData)"""
-            return self._pyGetUserData()
-    }
-
-    %feature("shadow") SetUserData {
-        def SetUserData(self, value): # override the C++ version
-            """Get the specified userData (m_userData)"""
-            return self._pySetUserData(value)
-    }
 
     /* ---- renames ---- */
 
@@ -100,7 +93,9 @@
 
     %rename(_GetShapeList) b2Body::GetShapeList; //Modify these to return actual lists, not linked lists
     %rename(_GetBodyList)  b2World::GetBodyList;
+    %rename(_GetBodyList)  b2Controller::GetBodyList;
     %rename(_GetJointList) b2World::GetJointList;
+    %rename(_GetControllerList) b2World::GetControllerList;
 
     /* ---- typemaps ---- */
     %typemap(in) b2Vec2* self {
@@ -175,24 +170,17 @@
         $1 = &temp;
     }
 
-    //Allow access to (m_)userData
-    %typemap(in) void* userData, void* m_userData {
-        //In
-        if ($input == Py_None) {
-            $1 = NULL;
-        } else {
-            $1 = (void*)( $input );
-            Py_INCREF($input);
-        }
+    //Allow access to (m_)userData, along with Get/SetUserData
+    %typemap(in) void* {
+        $1 = $input;
+        Py_INCREF((PyObject*)$1);
     }
+    %typemap(out) void* {
+        if (!$1)
+            $result=Py_None;
+        else
+            $result=(PyObject*)$1;
 
-    %typemap(out) void* userData, void* m_userData {
-        //Out
-        if ($1 == NULL) {
-            $result = Py_None;
-        } else {
-            $result = (PyObject*)( $1 );
-        }
         Py_INCREF($result);
     }
 
@@ -338,7 +326,7 @@
                 jointList = []
                 joint = self._GetJointList()
                 while joint:
-                    jointList.append(joint)
+                    jointList.append(joint.getAsType())
                     joint = joint.GetNext()
                 jointList.reverse() # jointlist is in reverse order
                 return jointList
@@ -353,6 +341,17 @@
                     body = body.GetNext()
                 bodyList.reverse() # bodylist is in reverse order
                 return bodyList
+            def GetControllerList(self):
+                """
+                Get a list of the controllers in this world
+                """
+                controllerList = []
+                controller = self._GetControllerList()
+                while controller:
+                    controllerList.append(controller.getAsType())
+                    controller = controller.GetNext()
+                controllerList.reverse() # controllerlist is in reverse order
+                return controllerList
 
             gravity   = property(GetGravity   , SetGravity)
             jointList = property(GetJointList , None)
@@ -360,10 +359,10 @@
             groundBody= property(GetGroundBody, None)
             worldAABB = property(GetWorldAABB , None)
             doSleep   = property(CanSleep     , None)
+            controllerList = property(GetControllerList, None)
         %}
     }
         
-    //Typecast the shape as necessary so Python can use them properly (2.0)
     %extend b2Shape {
     public:
         %pythoncode %{
@@ -371,6 +370,7 @@
         friction   = property(GetFriction, SetFriction)
         restitution= property(GetRestitution, SetRestitution)
         density    = property(GetDensity, SetDensity)
+        userData   = property(GetUserData, SetUserData)
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def typeName(self):
@@ -399,22 +399,6 @@
                 return (b2EdgeShape*)$self;
             return NULL;
         }
-        PyObject* _pyGetUserData() {
-            PyObject* ret=(PyObject*)self->GetUserData();
-            if (!ret) {
-                return Py_None;
-            } else {
-                Py_INCREF(ret);
-                return ret;
-            }
-        }
-        void _pySetUserData(PyObject* value) {
-            self->SetUserData((void*)value);
-            Py_INCREF(value);
-        }
-        %pythoncode %{
-            userData=property(_pyGetUserData, _pySetUserData)
-        %}
     }
    
     //Support using == on bodies, joints, and shapes
@@ -431,6 +415,10 @@
             if not isinstance(a, b2Joint) or not isinstance(b, b2Joint):
                 return False
             return __b2PythonJointPointerEquals__(a, b)
+        def b2ControllerCompare(a, b):
+            if not isinstance(a, b2Controller) or not isinstance(b, b2Controller):
+                return False
+            return __b2PythonControllerPointerEquals__(a, b)
     %}
 
     // Clean up naming. We do not need m_* on the Python end.
@@ -613,6 +601,67 @@
         %}
     }
 
+    %extend b2Controller {
+        %pythoncode %{
+        def typeName(self):
+            """
+            Return the name of the controller from:
+             Unknown, Buoyancy, ConstantAccel, ConstantForce, Gravity, TensorDamping
+            """
+            types = { e_unknownController       : 'Unknown',
+                      e_buoyancyController      : 'Buoyancy',
+                      e_constantAccelController : 'ConstantAccel',
+                      e_constantForceController : 'ConstantForce',
+                      e_gravityController       : 'Gravity',
+                      e_tensorDampingController : 'TensorDamping' }
+            return types[self.GetType()]
+        def getAsType(self):
+            """
+            Return a typecasted version of the controller
+            """
+            return (getattr(self, "_as%sController" % self.typeName())) ()
+        def GetBodyList(self):
+            bodyList = []
+            c_edge = self._GetBodyList()
+            while c_edge:
+                bodyList.append(c_edge.body)
+                c_edge = c_edge.nextBody
+            bodyList.reverse() # bodylist is in reverse order
+            return bodyList
+
+        __eq__ = b2ControllerCompare
+        __ne__ = lambda self,other: not b2ControllerCompare(self,other)
+        type = property(GetType, None)
+        bodyList = property(GetBodyList, None)
+        %}
+        
+        b2BuoyancyController* _asBuoyancyController() {
+            if ($self->GetType()==e_buoyancyController)
+                return (b2BuoyancyController*)$self;
+            return NULL;
+        }
+        b2ConstantAccelController* _asConstantAccelController() {
+            if ($self->GetType()==e_constantAccelController)
+                return (b2ConstantAccelController*)$self;
+            return NULL;
+        }
+        b2ConstantForceController* _asConstantForceController() {
+            if ($self->GetType()==e_constantForceController)
+                return (b2ConstantForceController*)$self;
+            return NULL;
+        }
+        b2GravityController* _asGravityController() {
+            if ($self->GetType()==e_gravityController)
+                return (b2GravityController*)$self;
+            return NULL;
+        }
+        b2TensorDampingController* _asTensorDampingController() {
+            if ($self->GetType()==e_tensorDampingController)
+                return (b2TensorDampingController*)$self;
+            return NULL;
+        }
+    }
+
     %extend b2Joint {
     public:
         %pythoncode %{
@@ -621,6 +670,7 @@
         type    =property(GetType    , None)
         body1   =property(GetBody1   , None)
         body2   =property(GetBody2   , None)
+        userData=property(GetUserData, SetUserData)
         collideConnected=property(GetCollideConnected, None)
         def typeName(self):
             """
@@ -641,20 +691,6 @@
             Return a typecasted version of the joint
             """
             return (getattr(self, "as%sJoint" % self.typeName())) ()
-        %}
-        PyObject* _pyGetUserData() {
-            PyObject* ret=(PyObject*)self->GetUserData();
-            if (!ret)
-                ret=Py_None;
-            Py_INCREF(ret);
-            return ret;
-        }
-        void _pySetUserData(PyObject* value) {
-            self->SetUserData((void*)value);
-            Py_INCREF(value);
-        }
-        %pythoncode %{
-            userData=property(_pyGetUserData, _pySetUserData)
         %}
 
         b2MouseJoint* asMouseJoint() {
@@ -814,10 +850,12 @@
         void _allocateVertices(uint16 _count) {
             if ($self->vertexCount > 0 && $self->vertices)
                 delete [] $self->vertices;
-            $self->vertexCount = _count;
             $self->vertices = new b2Vec2 [_count];
-            if (!$self->vertices)
+            if (!$self->vertices) {
+                $self->vertexCount = 0;
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
+            }
+            $self->vertexCount = _count;
         }
         b2Vec2* getVertex(uint16 vnum) {
             if (vnum >= $self->vertexCount) return NULL;
@@ -834,14 +872,34 @@
     }
 
     %extend b2EdgeShape {
-        
+        %pythoncode %{
+            def GetVertices(self):
+                vertices = []
+                edge = self
+                while edge:
+                    vertices.append( edge.vertex1 )
+                    last = edge.vertex2
+                    edge=edge.next
+                    if edge==self: # a loop
+                        vertices.extend( [edge.vertex1, edge.vertex2] )
+                        return vertices
+                vertices.append( last )
+
+            length      = property(GetLength,      None)
+            vertex1     = property(GetVertex1,     None)
+            vertex2     = property(GetVertex2,     None)
+            coreVertex1 = property(GetCoreVertex1, None)
+            coreVertex2 = property(GetCoreVertex2, None)
+            next        = property(GetNextEdge,    None)
+            prev        = property(GetPrevEdge,    None)
+        %}
     }
 
     %extend b2PolygonDef{
     public:
         %pythoncode %{
         def __repr__(self):
-            return "b2PolygonDef(vertices: %s count: %d)" % (self.getVertices_tuple(), self.vertexCount)
+            return "b2PolygonDef(vertices: %s count: %d)" % (self.vertices, self.vertexCount)
         def checkValues(self):
             return b2PythonCheckPolygonDef(self)
         def getVertices_tuple(self):
@@ -957,17 +1015,6 @@
     }
 
     %extend b2Body {
-        PyObject* _pyGetUserData() {
-            PyObject* ret=(PyObject*)self->GetUserData();
-            if (!ret)
-                ret=Py_None;
-            Py_INCREF(ret);
-            return ret;
-        }
-        void _pySetUserData(PyObject* value) {
-            self->SetUserData((void*)value);
-            Py_INCREF(value);
-        }
         %pythoncode %{
             __eq__ = b2BodyCompare
             __ne__ = lambda self,other: not b2BodyCompare(self,other)
@@ -1018,7 +1065,7 @@
                 return shapeList
 
             massData      = property(getMassData, SetMass)
-            userData      = property(_pyGetUserData, _pySetUserData)
+            userData      = property(GetUserData, SetUserData)
             position      = property(GetPosition, setPosition)
             angle         = property(GetAngle, setAngle)
             linearDamping = property(GetLinearDamping, None)
@@ -1359,5 +1406,5 @@
     %rename(destroyImmediate)  b2ContactManager::m_destroyImmediate;
 #endif
 
-%include "Box2D.h"
+%include "Box2D/Box2D.h"
 

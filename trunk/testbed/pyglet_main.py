@@ -561,8 +561,10 @@ class Framework(pyglet.window.Window):
         elif key==pyglet.window.key.SPACE:
             # Launch a bomb
             self.LaunchRandomBomb()
-        elif key==pyglet.window.key.F1:
-            self.settings.drawMenu = not self.settings.drawMenu
+        elif key==pyglet.window.key.F5:    # Save state
+            self.pickle_save('pickle_output')
+        elif key==pyglet.window.key.F7:    # Load state
+            self.pickle_load('pickle_output')
         else:
             # Inform the test of the key press
             self.Keyboard(key)
@@ -617,6 +619,35 @@ class Framework(pyglet.window.Window):
         if buttons & pyglet.window.mouse.RIGHT:
             self.viewCenter -= box2d.b2Vec2(float(dx)/5, float(dy)/5)
             self.updateCenter()
+
+    def pickle_load(self, fn):
+        import cPickle as pickle
+        try:
+            self.world = pickle.load(open(fn, 'rb'))._pickle_finalize()
+        except Exception, s:
+            print 'Error while loading world: ', s
+            return
+        
+        self.bomb = None
+        self.bombSpawning = False
+
+        # have to reset a few things that can't be saved:
+        self.world.SetDestructionListener(self.destructionListener)
+        self.world.SetBoundaryListener(self.boundaryListener)
+        self.world.SetContactListener(self.contactListener)
+        self.world.SetDebugDraw(self.debugDraw)
+        print 'Loaded'
+
+    def pickle_save(self, fn):
+        import cPickle as pickle
+        if self.mouseJoint:
+            self.MouseUp(self.mouseWorld) # remove a mouse joint if it exists
+
+        try:
+            pickle.dump(self.world, open(fn, 'wb'))
+            print 'Saved'
+        except:
+            print 'Pickling failed'
 
     def run(self):
         """

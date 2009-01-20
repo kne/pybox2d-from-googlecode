@@ -21,7 +21,7 @@
 
 #include "b2Shape.h"
 
-/// This structure is used to build circle shapes.
+/// This structure is used to build edge shapes.
 struct b2EdgeChainDef : public b2ShapeDef
 {
 	b2EdgeChainDef()
@@ -42,7 +42,7 @@ struct b2EdgeChainDef : public b2ShapeDef
 	bool isALoop;
 };
 
-/// A circle shape.
+/// The edge shape.
 class b2EdgeShape : public b2Shape
 {
 public:

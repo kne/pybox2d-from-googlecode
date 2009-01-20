@@ -202,10 +202,10 @@ class StaticEdges (Framework):
         body = self.world.CreateBody(bd)
         
         edgeDef=box2d.b2EdgeChainDef()
-        edgeDef.setVertices_tuple(b2Loop1)
+        edgeDef.vertices=b2Loop1
         body.CreateShape(edgeDef)
         
-        edgeDef.setVertices_tuple(b2Loop2)
+        edgeDef.vertices=b2Loop2
         body.CreateShape(edgeDef)
         
         #body.SetMassFromShapes()

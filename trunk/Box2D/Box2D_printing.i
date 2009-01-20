@@ -20,31 +20,30 @@
  %pythoncode %{
  def __repr__(self):
   return """b2Body(
-    allowSleep          = %s,
-    angle               = %s,
-    angularDamping      = %s,
-    angularVelocity     = %s,
-    fixedRotation       = %s,
-    isBullet            = %s,
-    isSleeping          = %s,
-    linearDamping       = %s,
-    linearVelocity      = %s,
-    massData            = %s,
-    position            = %s,
-    userData            = %s,
-    GetControllerList() = %s,
-    GetInertia()        = %s,
-    GetLocalCenter()    = %s,
-    GetMass()           = %s,
-    GetWorldCenter()    = %s,
-    GetXForm()          = %s,
-    IsBullet()          = %s,
-    IsDynamic()         = %s,
-    IsFrozen()          = %s,
-    IsRotationFixed()   = %s,
-    IsSleeping()        = %s,
-    IsStatic()          = %s)"""% tuple(str(a) for a in\
-   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.userData,self.GetControllerList(),self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsRotationFixed(),self.IsSleeping(),self.IsStatic()))
+    allowSleep        = %s,
+    angle             = %s,
+    angularDamping    = %s,
+    angularVelocity   = %s,
+    fixedRotation     = %s,
+    isBullet          = %s,
+    isSleeping        = %s,
+    linearDamping     = %s,
+    linearVelocity    = %s,
+    massData          = %s,
+    position          = %s,
+    userData          = %s,
+    GetInertia()      = %s,
+    GetLocalCenter()  = %s,
+    GetMass()         = %s,
+    GetWorldCenter()  = %s,
+    GetXForm()        = %s,
+    IsBullet()        = %s,
+    IsDynamic()       = %s,
+    IsFrozen()        = %s,
+    IsRotationFixed() = %s,
+    IsSleeping()      = %s,
+    IsStatic()        = %s)"""% tuple(str(a) for a in\
+   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.userData,self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsRotationFixed(),self.IsSleeping(),self.IsStatic()))
  %}
 }
 
@@ -375,13 +374,9 @@
  %pythoncode %{
  def __repr__(self):
   return """b2ControllerEdge(
-    body           = %s,
-    controller     = %s,
-    nextBody       = %s,
-    nextController = %s,
-    prevBody       = %s,
-    prevController = %s)"""% tuple(str(a) for a in\
-   (self.body,self.controller,self.nextBody,self.nextController,self.prevBody,self.prevController))
+    body       = %s,
+    controller = %s)"""% tuple(str(a) for a in\
+   (self.body,self.controller))
  %}
 }
 
@@ -1256,16 +1251,14 @@
     doSleep              = %s,
     gravity              = %s,
     groundBody           = %s,
-    jointList            = %s,
     worldAABB            = %s,
     GetBodyCount()       = %s,
     GetContactCount()    = %s,
     GetControllerCount() = %s,
-    GetControllerList()  = %s,
     GetJointCount()      = %s,
     GetPairCount()       = %s,
     GetProxyCount()      = %s)"""% tuple(str(a) for a in\
-   (self.doSleep,self.gravity,self.groundBody,self.jointList,self.worldAABB,self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetControllerList(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount()))
+   (self.doSleep,self.gravity,self.groundBody,self.worldAABB,self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount()))
  %}
 }
 
