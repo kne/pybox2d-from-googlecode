@@ -26,6 +26,7 @@ class Empty(Framework):
 
     """
     name = "Empty" # Name of the class to display
+    _pickle_vars=[] # variables to pickle (save/load). e.g., ['name', 'var1', 'var2']
     def __init__(self):
         """ 
         Initialize all of your objects here.
@@ -40,6 +41,9 @@ class Empty(Framework):
         """
         The key is from pygame.locals.K_*
         (e.g., if key == K_z: ... )
+
+        If you are using the pyglet backend, you should be able to use the same
+        K_[a-z], see pyglet_keymapper.py
         """
         pass
 
@@ -53,17 +57,18 @@ class Empty(Framework):
         If placed at the end, it will cause the physics step to happen after your code.
         """
 
-        # do stuff
-        self.DrawStringCR("*** Base your own testbeds on me! ***")
-
         super(Empty, self).Step(settings)
+
+        # do stuff
+
+        # Placed after the physics step, it will draw on top of physics objects
+        self.DrawStringCR("*** Base your own testbeds on me! ***")
 
     def JointDestroyed(self, joint):
         """
         The joint passed in was removed.
         """
         pass
-
 
     def BoundaryViolated(self, body):
         """

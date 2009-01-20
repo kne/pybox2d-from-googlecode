@@ -23,6 +23,7 @@ from test_main import *
 class ApplyForce (Framework):
     name="ApplyForce"
     body=None
+    _pickle_vars=['body']
     def __init__(self):
         super(ApplyForce, self).__init__()
         self.world.SetGravity((0.0, 0.0))
@@ -30,7 +31,7 @@ class ApplyForce (Framework):
         k_restitution = 0.4
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, 20.0)
+        bd.position = (0.0, 20.0)
         ground = self.world.CreateBody(bd) 
 
         sd=box2d.b2PolygonDef() 
@@ -75,7 +76,7 @@ class ApplyForce (Framework):
         bd.angularDamping = 2.0
         bd.linearDamping = 0.1
 
-        bd.position.Set(0.0, 1.05)
+        bd.position = (0.0, 1.05)
         bd.angle = box2d.b2_pi
         self.body = self.world.CreateBody(bd)
         self.body.CreateShape(sd1)

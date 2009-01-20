@@ -264,6 +264,8 @@ class BreakableBody(Framework):
     drawCount = 0
     drawVertices = []
     staticBodies=False
+    _pickle_vars=['maxAllowableForce', 'drawMode', 'drawCount', 'drawVertices',
+                  'staticBodies']
     def __init__(self):
         super(BreakableBody, self).__init__()
 
@@ -279,7 +281,7 @@ class BreakableBody(Framework):
         sd=box2d.b2PolygonDef()
         bd=box2d.b2BodyDef()
 
-        bd.position.Set(0.0, 0.0)
+        bd.position = (0.0, 0.0)
         ground = self.world.CreateBody(bd)
 
         # bottom
@@ -338,7 +340,7 @@ class BreakableBody(Framework):
         bd=box2d.b2BodyDef()
         cd.radius = br
         cd.density= 0.001
-        bd.position.Set(0.0,10.0*gy)
+        bd.position = (0.0,10.0*gy)
         for i in range(60):
             b = self.world.CreateBody(bd)
             b.CreateShape(cd)

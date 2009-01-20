@@ -28,7 +28,7 @@ class PyramidStaticEdges (Framework):
         verts = [ (50.0,0.0), (-50.0,0.0) ]
         
         bd=box2d.b2BodyDef()
-        bd.position.Set( 0.0, 0.0 )
+        bd.position = ( 0.0, 0.0 )
         body = self.world.CreateBody(bd)
 
         edgeDef = box2d.b2EdgeChainDef()

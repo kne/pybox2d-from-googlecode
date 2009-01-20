@@ -101,7 +101,7 @@ def main():
 
     # Create the ground
     bd = box2d.b2BodyDef()
-    bd.position.Set(0.0, 0.0)
+    bd.position = (0.0, 0.0)
     ground = world.CreateBody(bd)
     
     # The borders of the screen
@@ -123,7 +123,7 @@ def main():
     for i in range(10):
         bd = box2d.b2BodyDef()
         bd.allowSleep = True
-        bd.position.Set(box2d.b2Random(-width/(2*z), width/(2*z)), box2d.b2Random(-height/(2*z), height/(2*z)))
+        bd.position = (box2d.b2Random(-width/(2*z), width/(2*z)), box2d.b2Random(-height/(2*z), height/(2*z)))
         bd.isBullet = True
         bomb = world.CreateBody(bd)
         bomb.SetLinearVelocity(-5.0 * bd.position)

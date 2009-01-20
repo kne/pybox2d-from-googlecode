@@ -27,7 +27,8 @@ class Car (Framework):
     vehicle=None
     leftJoint=None
     rightJoint=None
-
+    
+    _pickle_vars=['leftWheel','rightWheel','vehicle','leftJoint','rightJoint']
     def __init__(self):
         super(Car, self).__init__()
         # car body
@@ -60,7 +61,7 @@ class Car (Framework):
         poly2.filter.groupIndex	= -1
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-35.0, 2.8)
+        bd.position = (-35.0, 2.8)
 
         self.vehicle = self.world.CreateBody(bd)
         self.vehicle.CreateShape(poly1)
@@ -76,13 +77,13 @@ class Car (Framework):
 
         bd=box2d.b2BodyDef() 
         bd.allowSleep = False
-        bd.position.Set(-33.8, 2.0)
+        bd.position = (-33.8, 2.0)
 
         self.rightWheel = self.world.CreateBody(bd)
         self.rightWheel.CreateShape(circ)
         self.rightWheel.SetMassFromShapes()
 
-        bd.position.Set(-36.2, 2.0)
+        bd.position = (-36.2, 2.0)
         self.leftWheel = self.world.CreateBody(bd)
         self.leftWheel.CreateShape(circ)
         self.leftWheel.SetMassFromShapes()
@@ -107,7 +108,7 @@ class Car (Framework):
         box.friction = 0.62
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-25.0, 1.0)
+        bd.position = (-25.0, 1.0)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
@@ -118,7 +119,7 @@ class Car (Framework):
 
         box.SetAsBox(9.5, 0.5, (0,0), 0.1 * box2d.b2_pi)
         box.friction = 0.62
-        bd.position.Set(27.0 - 30.0, 3.1)
+        bd.position = (27.0 - 30.0, 3.1)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
@@ -129,7 +130,7 @@ class Car (Framework):
 
         box.SetAsBox(9.5, 0.5, (0,0), -0.1 * box2d.b2_pi)
         box.friction = 0.62
-        bd.position.Set(55.0 - 30.0, 3.1)
+        bd.position = (55.0 - 30.0, 3.1)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
@@ -140,7 +141,7 @@ class Car (Framework):
 
         box.SetAsBox(9.5, 0.5, (0,0), 0.03 * box2d.b2_pi)
         box.friction = 0.62
-        bd.position.Set(41.0, 2.0)
+        bd.position = (41.0, 2.0)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
@@ -151,7 +152,7 @@ class Car (Framework):
 
         box.SetAsBox(5.0, 0.5, (0,0), 0.15 * box2d.b2_pi)
         box.friction = 0.62
-        bd.position.Set(50.0, 4.0)
+        bd.position = (50.0, 4.0)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)
@@ -162,7 +163,7 @@ class Car (Framework):
 
         box.SetAsBox(20.0, 0.5)
         box.friction = 0.62
-        bd.position.Set(85.0, 2.0)
+        bd.position = (85.0, 2.0)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(box)

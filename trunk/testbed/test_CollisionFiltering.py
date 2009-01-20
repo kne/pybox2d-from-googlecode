@@ -48,7 +48,7 @@ class CollisionFiltering (Framework):
         sd.friction = 0.3
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
@@ -66,7 +66,7 @@ class CollisionFiltering (Framework):
         triangleShapeDef.filter.maskBits = self.k_triangleMask
 
         triangleBodyDef=box2d.b2BodyDef()
-        triangleBodyDef.position.Set(-5.0, 2.0)
+        triangleBodyDef.position = (-5.0, 2.0)
 
         body1 = self.world.CreateBody(triangleBodyDef)
         body1.CreateShape(triangleShapeDef)
@@ -77,7 +77,7 @@ class CollisionFiltering (Framework):
         triangleShapeDef.setVertex(1, 2.0*triangleShapeDef.getVertex(1))
         triangleShapeDef.setVertex(2, 2.0*triangleShapeDef.getVertex(2))
         triangleShapeDef.filter.groupIndex = self.k_largeGroup
-        triangleBodyDef.position.Set(-5.0, 6.0)
+        triangleBodyDef.position = (-5.0, 6.0)
         triangleBodyDef.fixedRotation = True
 
         body2 = self.world.CreateBody(triangleBodyDef)
@@ -94,7 +94,7 @@ class CollisionFiltering (Framework):
         boxShapeDef.filter.maskBits = self.k_boxMask
 
         boxBodyDef=box2d.b2BodyDef()
-        boxBodyDef.position.Set(0.0, 2.0)
+        boxBodyDef.position = (0.0, 2.0)
 
         body3 = self.world.CreateBody(boxBodyDef)
         body3.CreateShape(boxShapeDef)
@@ -103,7 +103,7 @@ class CollisionFiltering (Framework):
         # Large box (recycle definitions)
         boxShapeDef.SetAsBox(2.0, 1.0)
         boxShapeDef.filter.groupIndex = self.k_largeGroup
-        boxBodyDef.position.Set(0.0, 6.0)
+        boxBodyDef.position = (0.0, 6.0)
 
         body4 = self.world.CreateBody(boxBodyDef)
         body4.CreateShape(boxShapeDef)
@@ -119,7 +119,7 @@ class CollisionFiltering (Framework):
         circleShapeDef.filter.maskBits = self.k_circleMask
 
         circleBodyDef=box2d.b2BodyDef()
-        circleBodyDef.position.Set(5.0, 2.0)
+        circleBodyDef.position = (5.0, 2.0)
 
         body5 = self.world.CreateBody(circleBodyDef)
         body5.CreateShape(circleShapeDef)
@@ -128,7 +128,7 @@ class CollisionFiltering (Framework):
         # Large circle
         circleShapeDef.radius *= 2.0
         circleShapeDef.filter.groupIndex = self.k_largeGroup
-        circleBodyDef.position.Set(5.0, 6.0)
+        circleBodyDef.position = (5.0, 6.0)
 
         body6 = self.world.CreateBody(circleBodyDef)
         body6.CreateShape(circleShapeDef)

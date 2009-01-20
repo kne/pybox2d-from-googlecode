@@ -26,6 +26,7 @@ class DistanceTest (Framework):
     body2=None
     shape1=None
     shape2=None
+    _pickle_vars = ['body1', 'body2', 'shape1', 'shape2']
     def __init__(self):
         super(DistanceTest, self).__init__()
         sd=box2d.b2PolygonDef() 
@@ -33,7 +34,7 @@ class DistanceTest (Framework):
         sd.density = 0.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, 10.0)
+        bd.position = (0.0, 10.0)
         self.body1 = self.world.CreateBody(bd)
         self.shape1 = self.body1.CreateShape(sd)
 
@@ -44,9 +45,9 @@ class DistanceTest (Framework):
         sd.setVertex(2,0.0, 15.0)
         sd.density = 1.0
         bd=box2d.b2BodyDef() 
-        #bd.position.Set(-48.377853, 0.49244255)
+        #bd.position = (-48.377853, 0.49244255)
         #bd.rotation = 90.475891
-        bd.position.Set(0.0, 10.0)
+        bd.position = (0.0, 10.0)
         self.body2 = self.world.CreateBody(bd)
         self.shape2 = self.body2.CreateShape(sd)
         self.body2.SetMassFromShapes()

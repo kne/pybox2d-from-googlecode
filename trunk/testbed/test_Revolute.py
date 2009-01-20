@@ -22,13 +22,15 @@
 from test_main import *
 class Revolute (Framework):
     name="Revolute"
+    joint=None
+    _pickle_vars=['joint']
     def __init__(self):
         super(Revolute, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
     
@@ -40,7 +42,7 @@ class Revolute (Framework):
         
         rjd=box2d.b2RevoluteJointDef()
         
-        bd.position.Set(0.0, 20.0)
+        bd.position = (0.0, 20.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -62,16 +64,13 @@ class Revolute (Framework):
     
     def Keyboard(self, key):
         if key==K_l:
-            self.joint.EnableLimit(self.joint.IsLimitEnabled())
+            self.joint.EnableLimit(not self.joint.IsLimitEnabled())
         elif key==K_s:
             self.joint.EnableMotor(False)
     
     def Step(self, settings):
-        #self.DrawStringCR("Keys: (l) limits, (a) left, (s) off, (d) right")
-        self.DrawStringCR("Keys: (l) limits, (s) off") # a/d unimplemented
-        #torque1 = self.joint1.GetMotorTorque()
-        #self.DrawStringCR("Motor Torque = %f.0, %f.0 : Motor Force = %f.0" % (torque1, torque2, force3))
         super(Revolute, self).Step(settings)
+        self.DrawStringCR("Keys: (l) toggle limits, (s) motor off")
     
 if __name__=="__main__":
     main(Revolute)

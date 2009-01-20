@@ -205,28 +205,6 @@
     %ignore b2PolygonShape::GetNormals;
 
     /* ---- extending classes ---- */
-    %extend b2Shape {
-    public:
-        PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
-            int hit;
-            float32 lambda=0.0f;
-            b2Vec2 normal(0.0f ,0.0f);
-
-            hit=(int)$self->TestSegment(xf, &lambda, &normal, segment, maxLambda);
-
-            PyObject* normal_tuple=PyTuple_New(2);
-            PyTuple_SetItem(normal_tuple, 0, SWIG_From_float(normal.x));
-            PyTuple_SetItem(normal_tuple, 1, SWIG_From_float(normal.y));
-
-            PyObject* ret=PyTuple_New(3);
-            PyTuple_SetItem(ret, 0, SWIG_From_int(hit));
-            PyTuple_SetItem(ret, 1, SWIG_From_float(lambda));
-            PyTuple_SetItem(ret, 2, normal_tuple);
-            return ret;
-        }
-        
-    }
-
     %extend b2World {
     public:        
         PyObject* Raycast(const b2Segment& segment, int32 maxCount, bool solidShapes, PyObject* userData) {
@@ -365,12 +343,31 @@
         
     %extend b2Shape {
     public:
+        PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
+            int hit;
+            float32 lambda=0.0f;
+            b2Vec2 normal(0.0f ,0.0f);
+
+            hit=(int)$self->TestSegment(xf, &lambda, &normal, segment, maxLambda);
+
+            PyObject* normal_tuple=PyTuple_New(2);
+            PyTuple_SetItem(normal_tuple, 0, SWIG_From_float(normal.x));
+            PyTuple_SetItem(normal_tuple, 1, SWIG_From_float(normal.y));
+
+            PyObject* ret=PyTuple_New(3);
+            PyTuple_SetItem(ret, 0, SWIG_From_int(hit));
+            PyTuple_SetItem(ret, 1, SWIG_From_float(lambda));
+            PyTuple_SetItem(ret, 2, normal_tuple);
+            return ret;
+        }
+
         %pythoncode %{
         filter     = property(GetFilterData, SetFilterData)
         friction   = property(GetFriction, SetFriction)
         restitution= property(GetRestitution, SetRestitution)
         density    = property(GetDensity, SetDensity)
         userData   = property(GetUserData, SetUserData)
+        isSensor   = property(IsSensor, None) # for symmetry with defn + pickling
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def typeName(self):
@@ -1062,6 +1059,7 @@
                         shape=shape.getAsType()
                     shapeList.append(shape)
                     shape = shape.GetNext()
+                shapeList.reverse() # shapelist is in reverse order
                 return shapeList
 
             massData      = property(getMassData, SetMass)
@@ -1318,7 +1316,7 @@
             Ported from the Box2D C++ code for CreateShape().
         """
 
-        if pd.vertexCount < 3 or pd.vertexCount > b2_maxPolygonVertices:
+        if pd.vertexCount < 3 or pd.vertexCount >= b2_maxPolygonVertices:
             raise ValueError, "Invalid vertexCount"
 
         threshold = FLT_EPSILON * FLT_EPSILON

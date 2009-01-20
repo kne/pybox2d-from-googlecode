@@ -25,12 +25,13 @@ from test_main import *
 class BoxCutter (Framework):
     name="BoxCutter"
     laserBody=None
+    _pickle_vars=['laserBody']
     def __init__(self):
         super(BoxCutter, self).__init__() 
 
         self.world.GetGroundBody().SetUserData("ground")
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         bd.userData = "ground1"
         ground = self.world.CreateBody(bd)
         
@@ -39,7 +40,7 @@ class BoxCutter (Framework):
         ground.CreateShape(sd)
     
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 50.0)
+        bd.position = (0.0, 50.0)
         bd.userData = "ground2"
         ground = self.world.CreateBody(bd)
         
@@ -48,7 +49,7 @@ class BoxCutter (Framework):
         ground.CreateShape(sd)
     
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 1.0)
+        bd.position = (0.0, 1.0)
         bd.userData = "laser"
         self.laserBody = self.world.CreateBody(bd)
         
@@ -64,7 +65,7 @@ class BoxCutter (Framework):
         
         bd=box2d.b2BodyDef()
         bd.userData = 1
-        bd.position.Set(0.0, 8.0)
+        bd.position = (0.0, 8.0)
         body1 = self.world.CreateBody(bd)
         body1.CreateShape(sd)
         body1.SetMassFromShapes()
@@ -75,7 +76,7 @@ class BoxCutter (Framework):
         
         bd=box2d.b2BodyDef()
         bd.userData = 1
-        bd.position.Set(0.0, 8.0)
+        bd.position = (0.0, 8.0)
         body1 = self.world.CreateBody(bd)
         body1.CreateShape(sd)
         body1.SetMassFromShapes()

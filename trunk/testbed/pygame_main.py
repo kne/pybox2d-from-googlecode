@@ -693,14 +693,29 @@ class Framework(object):
                     p2 = p1 + k_axisScale * point.normal
                     self.debugDraw.DrawSegment(p1, p2, (0.4, 0.9, 0.4))
 
-    def pickle_load(self, fn):
+    def pickle_load(self, fn, set_vars=True, additional_vars=[]):
+        """
+        Load the pickled world in file fn.
+        additional_vars is a dictionary to be populated with the
+        loaded variables.
+        """
         import cPickle as pickle
         try:
-            self.world = pickle.load(open(fn, 'rb'))._pickle_finalize()
+            world, variables = pickle.load(open(fn, 'rb'))
         except Exception, s:
             print 'Error while loading world: ', s
             return
         
+        self.world = world._pickle_finalize()
+        variables=box2d.pickle_fix(self.world, variables, 'load')
+
+        if set_vars:
+            for var, value in variables.items():
+                if hasattr(self, var):
+                    setattr(self, var, value)
+                else:
+                    print 'Unknown property %s=%s' % (var, value)
+
         self.bomb = None
         self.bombSpawning = False
 
@@ -711,16 +726,26 @@ class Framework(object):
         self.world.SetDebugDraw(self.debugDraw)
         print 'Loaded'
 
-    def pickle_save(self, fn):
+        return variables
+
+
+    def pickle_save(self, fn, additional_vars={}):
         import cPickle as pickle
         if self.mouseJoint:
             self.MouseUp(self.mouseWorld) # remove a mouse joint if it exists
+    
+        if not additional_vars and hasattr(self, '_pickle_vars'):
+            additional_vars=dict((var, getattr(self, var)) for var in self._pickle_vars)
+
+        save_values = [self.world, box2d.pickle_fix(self.world, additional_vars, 'save')]
 
         try:
-            pickle.dump(self.world, open(fn, 'wb'))
-            print 'Saved'
-        except:
-            print 'Pickling failed'
+            pickle.dump(save_values, open(fn, 'wb'))
+        except Exception, s:
+            print 'Pickling failed: ', s
+            return
+
+        print 'Saved'
 
     def _Keyboard_Event(self, key):
         """
@@ -738,9 +763,9 @@ class Framework(object):
         elif key==K_F1:    # Toggle drawing the menu
             self.settings.drawMenu = not self.settings.drawMenu
         elif key==K_F5:    # Save state
-            self.pickle_save('pickle_output')
+            self.pickle_save('pickle_output_%s' % self.name)
         elif key==K_F7:    # Load state
-            self.pickle_load('pickle_output')
+            self.pickle_load('pickle_output_%s' % self.name)
         else:              # Inform the test of the key press
             self.Keyboard(key)
         
@@ -955,7 +980,6 @@ class Framework(object):
         """
         Callback indicating 'body' has left the world AABB.
         """
-        print body
         pass
 
     def Keyboard(self, key):

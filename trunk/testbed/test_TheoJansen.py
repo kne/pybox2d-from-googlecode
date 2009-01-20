@@ -27,12 +27,14 @@ from pygame.locals import *
 
 class TheoJansen (Framework):
     name="TheoJansen"
-    offset=box2d.b2Vec2() 
-    chassis=box2d.b2Vec2()
+    offset=None
+    chassis=None
     wheel=None
     motorJoint=None
     motorOn = False
     motorSpeed = 0
+    _pickle_vars=['offset', 'chassis', 'wheel', 
+                  'motorJoint', 'motorOn', 'motorSpeed']
 
     def CreateLeg(self, s, wheelAnchor):
         p1=box2d.b2Vec2(5.4 * s, -6.1)
@@ -122,7 +124,7 @@ class TheoJansen (Framework):
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
         
@@ -138,7 +140,7 @@ class TheoJansen (Framework):
             sd.radius = 0.25
             
             bd=box2d.b2BodyDef() 
-            bd.position.Set(-40.0 + 2.0 * i, 0.5)
+            bd.position = (-40.0 + 2.0 * i, 0.5)
             
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)

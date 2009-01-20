@@ -29,7 +29,7 @@ class ElasticBody (Framework):
     ground=None 
     elev=None
     joint_elev=None
-    # Main...
+    _pickle_vars=['bodies', 'ground', 'elev', 'joint_elev']
     def __init__(self):
         super(ElasticBody, self).__init__()
 
@@ -39,7 +39,7 @@ class ElasticBody (Framework):
         sd.friction = 0.1
         sd.restitution = 0.1
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-1.0, -7.5)
+        bd.position = (-1.0, -7.5)
         self.ground = self.world.CreateBody(bd)
         self.ground.CreateShape(sd)
         # Upper static body
@@ -48,7 +48,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.01
         sd.restitution = 0.001
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-20, 93.0)
+        bd.position = (-20, 93.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
         sd.SetAsBox(15, 0.50,(-15.0,12.5),0.0)
@@ -62,7 +62,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.1
         sd.restitution = 0.1
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-49.3, 50.0)
+        bd.position = (-49.3, 50.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
         # Right wall
@@ -71,7 +71,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.1
         sd.restitution = 0.1
         bd=box2d.b2BodyDef() 
-        bd.position.Set(45, 50.0)
+        bd.position = (45, 50.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
         # Left channel right upper wall
@@ -80,7 +80,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.05
         sd.restitution = 0.01
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-42.0, 70.0)
+        bd.position = (-42.0, 70.0)
         bd.angle = -0.03*box2d.b2_pi
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
@@ -90,7 +90,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.05
         sd.restitution = 0.01
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-44.0, 27.0)
+        bd.position = (-44.0, 27.0)
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
         # Bottom motors
@@ -100,7 +100,7 @@ class ElasticBody (Framework):
         cd.friction = 1
         cd.restitution = 0.2
         # 1.
-        bd.position.Set(-40.0,2.5)
+        bd.position = (-40.0,2.5)
         body = self.world.CreateBody(bd) 
         body.CreateShape(cd)
         body.SetMassFromShapes()
@@ -111,7 +111,7 @@ class ElasticBody (Framework):
         jr.motorSpeed     = 20
         self.world.CreateJoint(jr).getAsType()
         # 1. left down
-        bd.position.Set(-46.0,-2.5)
+        bd.position = (-46.0,-2.5)
         cd.radius = 1.5
         jr.motorSpeed  = -20
         body = self.world.CreateBody(bd)
@@ -124,7 +124,7 @@ class ElasticBody (Framework):
         # 2.
         cd.radius   = 3.0
         jr.motorSpeed  = 20
-        bd.position.Set(-32.0,2.5)
+        bd.position = (-32.0,2.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
@@ -132,35 +132,35 @@ class ElasticBody (Framework):
         self.world.CreateJoint(jr).getAsType()
         # 3.
         jr.motorSpeed     = 20
-        bd.position.Set(-24.0,1.5)
+        bd.position = (-24.0,1.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
         self.world.CreateJoint(jr).getAsType()
         # 4.
-        bd.position.Set(-16.0,0.8)
+        bd.position = (-16.0,0.8)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
         self.world.CreateJoint(jr).getAsType()
         # 5.
-        bd.position.Set(-8.0,0.5)
+        bd.position = (-8.0,0.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
         self.world.CreateJoint(jr).getAsType()
         # 6.
-        bd.position.Set(0.0,0.1)
+        bd.position = (0.0,0.1)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
         self.world.CreateJoint(jr).getAsType()
         # 7.
-        bd.position.Set(8.0,-0.5)
+        bd.position = (8.0,-0.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         sd.SetAsBox(3.7, 0.5)
@@ -171,7 +171,7 @@ class ElasticBody (Framework):
         # 8. right rotator
         sd.SetAsBox(5, 0.5)
         sd.density = 2.0
-        bd.position.Set(18.0,1)
+        bd.position = (18.0,1)
         rightmotor = self.world.CreateBody(bd) #
         rightmotor.CreateShape(sd)
         sd.SetAsBox(4.5, 0.5, (0,0),box2d.b2_pi/3)
@@ -188,7 +188,7 @@ class ElasticBody (Framework):
         # 9. left rotator
         sd.SetAsBox(8.5, 0.5)
         sd.density = 2.0
-        bd.position.Set(-34.0,17)
+        bd.position = (-34.0,17)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         sd.SetAsBox(8.5, 0.5, (0,0),box2d.b2_pi*.5)
@@ -204,7 +204,7 @@ class ElasticBody (Framework):
         # big compressor
         sd.SetAsBox(3.0,4)
         sd.density = 10.0
-        bd.position.Set(-16.0,17)
+        bd.position = (-16.0,17)
         hammerleft = self.world.CreateBody(bd) 
         hammerleft.CreateShape(sd)
         hammerleft.SetMassFromShapes()
@@ -212,7 +212,7 @@ class ElasticBody (Framework):
         jd.Initialize(body, hammerleft, body.GetWorldCenter()+(0,6), hammerleft.GetWorldCenter() )
         self.world.CreateJoint(jd).getAsType()
 
-        bd.position.Set(4.0,17)
+        bd.position = (4.0,17)
         hammerright = self.world.CreateBody(bd) 
         hammerright.CreateShape(sd)
         hammerright.SetMassFromShapes()
@@ -220,7 +220,7 @@ class ElasticBody (Framework):
         self.world.CreateJoint(jd).getAsType()
         # pusher
         sd.SetAsBox(6,0.75)
-        bd.position.Set(-21.0,9)
+        bd.position = (-21.0,9)
         pusher = self.world.CreateBody(bd) #
         pusher.CreateShape(sd)
         sd.SetAsBox(2,1.5,(-5,0),0)
@@ -236,7 +236,7 @@ class ElasticBody (Framework):
         sd.friction    = 0.05
         sd.restitution = 0.01
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-15.5, 12)
+        bd.position = (-15.5, 12)
         bd.angle = 0.0
         g = self.world.CreateBody(bd) 
         g.CreateShape(sd)
@@ -268,7 +268,7 @@ class ElasticBody (Framework):
         cd=box2d.b2CircleDef() 
         sd=box2d.b2PolygonDef() 
 
-        bd.position.Set(40.0,4.0)
+        bd.position = (40.0,4.0)
         self.elev = self.world.CreateBody(bd)
 
         sd.SetAsBox(0.5, 2.5,(3.0,-3.0), 0)
@@ -294,7 +294,7 @@ class ElasticBody (Framework):
         # Korb
         sd.SetAsBox(2.3, 0.5,(1,0.0), 0.0)
         sd.density = 0.5
-        bd.position.Set(29.0,6.5)
+        bd.position = (29.0,6.5)
         body = self.world.CreateBody(bd) #
         body.CreateShape(sd)
         sd.SetAsBox(2.5, 0.5,(3.0,-2), box2d.b2_pi/2)
@@ -323,7 +323,7 @@ class ElasticBody (Framework):
         self.world.CreateJoint(jr).getAsType()
         # upper body exit
         sd.SetAsBox(14.0, 0.5,(-3.5,-10.0), 0.0)
-        bd.position.Set(17.5,96.0)
+        bd.position = (17.5,96.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
 
@@ -344,7 +344,7 @@ class ElasticBody (Framework):
         bd.allowSleep = False
         for i in range(8):
             for j in range(8):
-                bd.position.Set(j*1.02, 2.51 + 1.02 * i)
+                bd.position = (j*1.02, 2.51 + 1.02 * i)
                 bd.position  += startpoint
                 body  = self.world.CreateBody(bd)
                 bodies[8*i+j] = body

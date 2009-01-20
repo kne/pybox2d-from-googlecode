@@ -34,7 +34,7 @@ class ContactCallbackTest (Framework):
     ball=None 
     bullet=None 
     ball_shape=None 
-     
+    _pickle_vars = ['ball', 'bullet', 'ball_shape']
     def __init__(self):
         super(ContactCallbackTest, self).__init__()
     

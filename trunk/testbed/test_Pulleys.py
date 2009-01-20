@@ -23,13 +23,15 @@
 from test_main import *
 class Pulleys (Framework):
     name="Pulleys"
+    joint1=None
+    _pickle_vars=['joint1']
     def __init__(self):
         super(Pulleys, self).__init__()
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
@@ -44,12 +46,12 @@ class Pulleys (Framework):
 
         bd=box2d.b2BodyDef() 
 
-        bd.position.Set(-10.0, y)
+        bd.position = (-10.0, y)
         body1 = self.world.CreateBody(bd) 
         body1.CreateShape(sd)
         body1.SetMassFromShapes()
 
-        bd.position.Set(10.0, y)
+        bd.position = (10.0, y)
         body2 = self.world.CreateBody(bd) 
         body2.CreateShape(sd)
         body2.SetMassFromShapes()

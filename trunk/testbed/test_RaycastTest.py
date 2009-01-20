@@ -25,12 +25,13 @@ from test_main import *
 class RaycastTest (Framework):
     name="RaycastTest"
     laserBody=None
+    _pickle_vars=['laserBody']
     def __init__(self):
         super(RaycastTest, self).__init__()
         #self.world.SetGravity(box2d.b2Vec2(0,0))
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         
         sd=box2d.b2PolygonDef()
@@ -38,7 +39,7 @@ class RaycastTest (Framework):
         ground.CreateShape(sd)
     
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 1.0)
+        bd.position = (0.0, 1.0)
         self.laserBody = self.world.CreateBody(bd)
         
         sd=box2d.b2PolygonDef()
@@ -48,14 +49,14 @@ class RaycastTest (Framework):
         self.laserBody.SetMassFromShapes()
         
         #Create a few shapes
-        bd.position.Set(-5.0, 10.0)
+        bd.position = (-5.0, 10.0)
         body = self.world.CreateBody(bd)
         
         cd=box2d.b2CircleDef()
         cd.radius = 3
         body.CreateShape(cd)
         
-        bd.position.Set(5.0, 10.0)
+        bd.position = (5.0, 10.0)
         body = self.world.CreateBody(bd)
         
         body.CreateShape(cd)

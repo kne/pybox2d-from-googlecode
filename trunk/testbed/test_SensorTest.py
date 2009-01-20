@@ -20,15 +20,15 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from test_main import *
-from test_main import fwContactTypes
 
 class SensorTest (Framework):
     name="SensorTest"
     sensor=None
+    _pickle_vars=['sensor']
     def __init__(self):
         super(SensorTest, self).__init__()
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd) 
 
@@ -47,7 +47,7 @@ class SensorTest (Framework):
             cd=box2d.b2CircleDef() 
             cd.isSensor = True
             cd.radius = 5.0
-            cd.localPosition.Set(0.0, 20.0)
+            cd.localPosition = (0.0, 20.0)
             self.sensor = ground.CreateShape(cd)
 
         sd=box2d.b2CircleDef() 
@@ -56,7 +56,7 @@ class SensorTest (Framework):
 
         for i in range(10):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(0.0 + 3.0 * i, 20.0)
+            bd.position = (0.0 + 3.0 * i, 20.0)
             
             body = self.world.CreateBody(bd) 
 

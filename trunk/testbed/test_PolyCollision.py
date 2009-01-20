@@ -24,7 +24,7 @@ class PolyCollision (Framework):
     name="PolyCollision"
     body1=None
     body2=None
-
+    _pickle_vars=['body1', 'body2']
     def __init__(self):
         super(PolyCollision, self).__init__()
 
@@ -37,7 +37,7 @@ class PolyCollision (Framework):
         sd.density = 0.0
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 10.0)
+        bd.position = (0.0, 10.0)
         self.body1 = self.world.CreateBody(bd)
         self.body1.CreateShape(sd)
 
@@ -46,7 +46,7 @@ class PolyCollision (Framework):
         sd.density = 1.0
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 10.0)
+        bd.position = (0.0, 10.0)
         self.body2 = self.world.CreateBody(bd)
         self.body2.CreateShape(sd)
         self.body2.SetMassFromShapes()

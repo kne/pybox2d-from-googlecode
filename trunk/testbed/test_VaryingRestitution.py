@@ -29,7 +29,7 @@ class VaryingRestitution (Framework):
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
@@ -42,7 +42,7 @@ class VaryingRestitution (Framework):
 
         for i in range(7):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(-10.0 + 3.0 * i, 20.0)
+            bd.position = (-10.0 + 3.0 * i, 20.0)
 
             body = self.world.CreateBody(bd) 
 

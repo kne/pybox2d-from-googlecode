@@ -23,13 +23,14 @@ from test_main import *
 class VerticalStack (Framework):
     name="VerticalStack"
     bullet=None
+    _pickle_vars=['bullet']
     def __init__(self):
         super(VerticalStack, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0, (0.0, -10.0), 0.0)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 0.0)
+        bd.position = (0.0, 0.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
 
@@ -50,7 +51,7 @@ class VerticalStack (Framework):
                 x = 0.0
                 #x = b2Random(-0.1, 0.1)
                 #x = i % 2 == 0 ? -0.025 : 0.025
-                bd.position.Set(xs[j] + x, 0.752 + 1.54 * i)
+                bd.position = (xs[j] + x, 0.752 + 1.54 * i)
                 body = self.world.CreateBody(bd)
 
                 body.CreateShape(sd)
@@ -71,7 +72,7 @@ class VerticalStack (Framework):
 
             bd=box2d.b2BodyDef()
             bd.isBullet = True
-            bd.position.Set(-31.0, 5.0)
+            bd.position = (-31.0, 5.0)
 
             self.bullet = self.world.CreateBody(bd)
             self.bullet.CreateShape(sd)

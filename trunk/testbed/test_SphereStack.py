@@ -24,14 +24,14 @@ class SphereStack (Framework):
     name="SphereStack"
     bodies = [ ]
     e_count = 10
-    
+    _pickle_vars=['bodies']
     def __init__(self):
         super(SphereStack, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
@@ -42,7 +42,7 @@ class SphereStack (Framework):
         
         for i in xrange(self.e_count):
             bd=box2d.b2BodyDef()
-            bd.position.Set(0.0, 2.0 + 3.0 * i)
+            bd.position = (0.0, 2.0 + 3.0 * i)
             
             self.bodies.append( self.world.CreateBody(bd) )
             self.bodies[-1].CreateShape(sd)

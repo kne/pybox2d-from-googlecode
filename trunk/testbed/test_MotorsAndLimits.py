@@ -25,13 +25,14 @@ class MotorsAndLimits (Framework):
     joint1=None
     joint2=None
     joint3=None
+    _pickle_vars = ['joint1', 'joint2', 'joint3']
     def __init__(self):
         super(MotorsAndLimits, self).__init__()
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
@@ -47,7 +48,7 @@ class MotorsAndLimits (Framework):
         prevBody=ground
         y = 8.0
 
-        bd.position.Set(3.0, y)
+        bd.position = (3.0, y)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -61,7 +62,7 @@ class MotorsAndLimits (Framework):
 
         prevBody = body
 
-        bd.position.Set(9.0, y)
+        bd.position = (9.0, y)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -76,7 +77,7 @@ class MotorsAndLimits (Framework):
 
         self.joint2 = self.world.CreateJoint(rjd).getAsType()
 
-        bd.position.Set(-10.0, 10.0)
+        bd.position = (-10.0, 10.0)
         bd.angle = 0.5 * box2d.b2_pi
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)

@@ -27,6 +27,7 @@ class TimeOfImpact (Framework):
     body2=None
     shape1=None
     shape2=None
+    _pickle_vars=['body1', 'body2', 'shape1', 'shape2']
     def __init__(self):
         super(TimeOfImpact, self).__init__()
         sd=box2d.b2PolygonDef() 
@@ -35,7 +36,7 @@ class TimeOfImpact (Framework):
         sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, 20.0)
+        bd.position = (0.0, 20.0)
         bd.angle = 0.0
         self.body1 = self.world.CreateBody(bd)
         self.shape1 = self.body1.CreateShape(sd)
@@ -45,7 +46,7 @@ class TimeOfImpact (Framework):
         sd.density = 1.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(9.6363468, 28.050615)
+        bd.position = (9.6363468, 28.050615)
         bd.angle = 1.6408679
         self.body2 = self.world.CreateBody(bd)
         self.shape2 = self.body2.CreateShape(sd).getAsType()

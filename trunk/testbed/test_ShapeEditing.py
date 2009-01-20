@@ -19,26 +19,27 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-
 from test_main import *
+
 class ShapeEditing (Framework):
     name="ShapeEditing"
     body=None
     shape1=None
     shape2=None
+    _pickle_vars=['body', 'shape1', 'shape2']
     def __init__(self):
         super(ShapeEditing, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
         bodydef=box2d.b2BodyDef()
-        bodydef.position.Set(0.0, 10.0)
+        bodydef.position = (0.0, 10.0)
         self.body = self.world.CreateBody(bodydef)
 
         sd=box2d.b2PolygonDef()
@@ -55,7 +56,7 @@ class ShapeEditing (Framework):
                 sd=box2d.b2CircleDef()
                 sd.radius = 3.0
                 sd.density = 10.0
-                sd.localPosition.Set(0.5, -4.0)
+                sd.localPosition = (0.5, -4.0)
                 self.shape2 = self.body.CreateShape(sd)
                 self.body.SetMassFromShapes()
                 self.body.WakeUp()
@@ -68,7 +69,7 @@ class ShapeEditing (Framework):
                 self.body.WakeUp()
 
     def Step(self, settings):
-        self.DrawStringCR("Press: (c) create a shape, (d) destroy a shape.")
+        self.DrawStringCR("Press: (c) create a shape, (d) destroy the shape")
         super(ShapeEditing, self).Step(settings)
 
 if __name__=="__main__":

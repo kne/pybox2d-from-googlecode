@@ -22,6 +22,8 @@
 from test_main import *
 class Buoyancy (Framework):
     name="Buoyancy"
+    bc=None
+    _pickle_vars=['bc']
     def __init__(self):
         super(Buoyancy, self).__init__()
 
@@ -37,7 +39,7 @@ class Buoyancy (Framework):
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
     
@@ -52,7 +54,7 @@ class Buoyancy (Framework):
         prevBody = ground
         for i in range(numPlanks):
             bd=box2d.b2BodyDef()
-            bd.position.Set(-14.5 + 1.0 * i, 5.0)
+            bd.position = (-14.5 + 1.0 * i, 5.0)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()
@@ -78,7 +80,7 @@ class Buoyancy (Framework):
             sd.density = 1.0
             
             bd=box2d.b2BodyDef()
-            bd.position.Set(-8.0 + 8.0 * i, 12.0)
+            bd.position = (-8.0 + 8.0 * i, 12.0)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()
@@ -91,12 +93,15 @@ class Buoyancy (Framework):
             sd.density = 1.0
             
             bd=box2d.b2BodyDef()
-            bd.position.Set(-6.0 + 6.0 * i, 10.0)
+            bd.position = (-6.0 + 6.0 * i, 10.0)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()
             
-            self.bc.AddBody(body)
-    
+            self.bc.AddBody(body)    
+
+    def Step(self, settings):
+        super(Buoyancy, self).Step(settings)
+
 if __name__=="__main__":
     main(Buoyancy)

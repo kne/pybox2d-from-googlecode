@@ -30,7 +30,7 @@ class Dominos (Framework):
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         b1 = self.world.CreateBody(bd)
         b1.CreateShape(sd)
 
@@ -38,7 +38,7 @@ class Dominos (Framework):
         sd.SetAsBox(6.0, 0.25)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(-1.5, 10.0)
+        bd.position = (-1.5, 10.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
 
@@ -50,7 +50,7 @@ class Dominos (Framework):
         
         for i in range(10):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(-6.0 + 1.0 * i, 11.25)
+            bd.position = (-6.0 + 1.0 * i, 11.25)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()
@@ -59,7 +59,7 @@ class Dominos (Framework):
         sd.SetAsBox(7.0, 0.25, (0,0), 0.3)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(1.0, 6.0)
+        bd.position = (1.0, 6.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
 
@@ -68,7 +68,7 @@ class Dominos (Framework):
         sd.SetAsBox(0.25, 1.5)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-7.0, 4.0)
+        bd.position = (-7.0, 4.0)
         b2 = self.world.CreateBody(bd)
         b2.CreateShape(sd)
 
@@ -78,7 +78,7 @@ class Dominos (Framework):
         sd.density = 10.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-0.9, 1.0)
+        bd.position = (-0.9, 1.0)
         bd.angle = -0.15
 
         b3 = self.world.CreateBody(bd)
@@ -98,7 +98,7 @@ class Dominos (Framework):
         sd.density = 10.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(-10.0, 15.0)
+        bd.position = (-10.0, 15.0)
         b4 = self.world.CreateBody(bd)
         b4.CreateShape(sd)
         b4.SetMassFromShapes()
@@ -109,7 +109,7 @@ class Dominos (Framework):
 
         
         bd=box2d.b2BodyDef() 
-        bd.position.Set(6.5, 3.0)
+        bd.position = (6.5, 3.0)
         b5 = self.world.CreateBody(bd)
 
         sd=box2d.b2PolygonDef() 
@@ -138,7 +138,7 @@ class Dominos (Framework):
         sd.friction = 0.2
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(6.5, 4.1)
+        bd.position = (6.5, 4.1)
         b6 = self.world.CreateBody(bd)
         b6.CreateShape(sd)
         b6.SetMassFromShapes()
@@ -153,7 +153,7 @@ class Dominos (Framework):
         sd.density = 10.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(7.4, 1.0)
+        bd.position = (7.4, 1.0)
 
         b7 = self.world.CreateBody(bd)
         b7.CreateShape(sd)
@@ -175,7 +175,7 @@ class Dominos (Framework):
         
         for i in range(4):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(5.9 + 2.0 * sd.radius * i, 2.4)
+            bd.position = (5.9 + 2.0 * sd.radius * i, 2.4)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()

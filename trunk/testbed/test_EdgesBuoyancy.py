@@ -36,7 +36,7 @@ class EdgesBuoyancy (Framework):
         self.bc = self.world.CreateController(bcd)
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         body = self.world.CreateBody(bd) 
         
         sd=box2d.b2PolygonDef()
@@ -45,18 +45,18 @@ class EdgesBuoyancy (Framework):
     
         sd1=box2d.b2CircleDef()
         sd1.radius = 0.5
-        sd1.localPosition.Set(-0.5, 0.5)
+        sd1.localPosition = (-0.5, 0.5)
         sd1.density = 2.0
         
         sd2=box2d.b2CircleDef()
         sd2.radius = 0.5
-        sd2.localPosition.Set(0.5, 0.5)
+        sd2.localPosition = (0.5, 0.5)
         sd2.density = 0.0 # massless
         
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x + 5.0, 1.05 + 2.5 * i)
+            bd.position = (x + 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -75,7 +75,7 @@ class EdgesBuoyancy (Framework):
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x - 5.0, 1.05 + 2.5 * i)
+            bd.position = (x - 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -108,7 +108,7 @@ class EdgesBuoyancy (Framework):
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x, 2.05 + 2.5 * i)
+            bd.position = (x, 2.05 + 2.5 * i)
             bd.angle = 0.0
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -129,7 +129,7 @@ class EdgesBuoyancy (Framework):
         sd_right.density = 4.0
         
         bd=box2d.b2BodyDef()
-        bd.position.Set( 0.0, 2.0 )
+        bd.position = ( 0.0, 2.0 )
         body = self.world.CreateBody(bd)
         body.CreateShape(sd_bottom)
         body.CreateShape(sd_left)
@@ -241,14 +241,14 @@ class EdgesBuoyancy (Framework):
         b2Loop1.reverse()
         
         bd=box2d.b2BodyDef()
-        bd.position.Set( 0.0, 0.0 )
+        bd.position = ( 0.0, 0.0 )
         body = self.world.CreateBody(bd)
         
         weight=box2d.b2CircleDef()
         weight.filter.maskBits = 0
         weight.density = 4.0
         weight.radius = 0.5
-        weight.localPosition.Set(8.9, 5.75)
+        weight.localPosition = (8.9, 5.75)
         body.CreateShape(weight)
         
         edgeDef=box2d.b2EdgeChainDef()
@@ -262,7 +262,7 @@ class EdgesBuoyancy (Framework):
         
         body = self.world.CreateBody(bd)
         weight.radius = 5.0
-        weight.localPosition.Set(20.5, 7.0)
+        weight.localPosition = (20.5, 7.0)
         body.CreateShape(weight)
         
         edgeDef.setVertices(b2Loop1)

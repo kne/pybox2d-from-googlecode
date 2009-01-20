@@ -23,7 +23,9 @@ import cPickle as pickle
 
 class Pickle(Framework):
     name = "Pickle" # Name of the class to display
-    firstStep = True
+    bodies = None # loaded from the example
+    joints = None # loaded from the example
+    _pickle_vars = ['bodies', 'joints']
     def __init__(self):
         super(Pickle, self).__init__()
 
@@ -37,11 +39,13 @@ class Pickle(Framework):
         #  1. Saving the whole world is necessary. Shapes mean nothing without
         #     bodies, which mean nothing without a world to put them in. You
         #     can save your definitions, but that's additional overhead.
-        #  2. Save the state of your application also. Saving the world won't 
-        #     keep anything in relation to your game world. You can get 
-        #     the index of the bodies you're tracking by doing:
-        #      world.bodyList.index(myBody)
-        #     and then work from there. Joints work the same.
+        #  2. Save the state of your application also. The framework takes care
+        #     of all class variables in _pickle_vars. So, if you have 
+        #      _pickle_vars = ['a', 'b', 'c']
+        #     those variables will be pickled with the rest of the world. 
+        #     Bodies, shapes, joints, controllers all should work. If you need
+        #     more info on how to save manually, you can see Box2D.py itself.
+        #           
         #  3. ...
         #
         #  XX. Bodies that left the world AABB aren't taken care of yet; this is a TODO

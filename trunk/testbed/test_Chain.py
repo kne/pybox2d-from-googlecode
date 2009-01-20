@@ -26,7 +26,7 @@ class Chain (Framework):
     def __init__(self):
         super(Chain, self).__init__()
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
 
         sd=box2d.b2PolygonDef() 
@@ -45,7 +45,7 @@ class Chain (Framework):
         prevBody=ground
         for i in range(30):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(0.5 + i, y)
+            bd.position = (0.5 + i, y)
             body = self.world.CreateBody(bd) 
             body.CreateShape(sd)
             body.SetMassFromShapes()

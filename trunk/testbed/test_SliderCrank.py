@@ -27,6 +27,7 @@ class SliderCrank (Framework):
     name="SliderCrank"
     joint1=None
     joint2=None
+    _pickle_vars=['joint1', 'joint2']
 
     def __init__(self):
         super(SliderCrank, self).__init__()
@@ -34,7 +35,7 @@ class SliderCrank (Framework):
         sd.SetAsBox(50.0, 10.0)
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
 
@@ -48,7 +49,7 @@ class SliderCrank (Framework):
         prevBody=ground
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, 7.0)
+        bd.position = (0.0, 7.0)
         body = self.world.CreateBody(bd) 
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -63,7 +64,7 @@ class SliderCrank (Framework):
 
         # Define follower.
         sd.SetAsBox(0.5, 4.0)
-        bd.position.Set(0.0, 13.0)
+        bd.position = (0.0, 13.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -76,7 +77,7 @@ class SliderCrank (Framework):
 
         # Define piston
         sd.SetAsBox(1.5, 1.5)
-        bd.position.Set(0.0, 17.0)
+        bd.position = (0.0, 17.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()
@@ -94,7 +95,7 @@ class SliderCrank (Framework):
 
         # Create a payload
         sd.density = 2.0
-        bd.position.Set(0.0, 23.0)
+        bd.position = (0.0, 23.0)
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)
         body.SetMassFromShapes()

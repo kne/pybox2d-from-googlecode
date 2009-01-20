@@ -28,10 +28,11 @@ class Gears (Framework):
     joint3=None
     joint4=None
     joint5=None
+    _pickle_vars = ['joint1', 'joint2', 'joint3',  'joint4',  'joint5']
     def __init__(self):
         super(Gears, self).__init__()
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
 
         sd=box2d.b2PolygonDef() 
@@ -51,7 +52,7 @@ class Gears (Framework):
         box.density = 5.0
 
         bd1=box2d.b2BodyDef() 
-        bd1.position.Set(-3.0, 12.0)
+        bd1.position = (-3.0, 12.0)
         body1 = self.world.CreateBody(bd1) 
         body1.CreateShape(circle1)
         body1.SetMassFromShapes()
@@ -65,7 +66,7 @@ class Gears (Framework):
         self.joint1 = self.world.CreateJoint(jd1).getAsType()
 
         bd2=box2d.b2BodyDef() 
-        bd2.position.Set(0.0, 12.0)
+        bd2.position = (0.0, 12.0)
         body2 = self.world.CreateBody(bd2) 
         body2.CreateShape(circle2)
         body2.SetMassFromShapes()
@@ -75,7 +76,7 @@ class Gears (Framework):
         self.joint2 = self.world.CreateJoint(jd2).getAsType()
 
         bd3=box2d.b2BodyDef() 
-        bd3.position.Set(2.5, 12.0)
+        bd3.position = (2.5, 12.0)
         body3 = self.world.CreateBody(bd3) 
         body3.CreateShape(box)
         body3.SetMassFromShapes()

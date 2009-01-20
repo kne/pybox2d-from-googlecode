@@ -27,13 +27,14 @@ k_scale = 3.0
 class Test_Biped(Framework):
     name = "Biped"
     biped = None
+    _pickle_vars=[]
 
     def __init__(self):
         super(Test_Biped, self).__init__()
         k_restitution = 1.4
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 20.0)
+        bd.position = (0.0, 20.0)
         body = self.world.CreateBody(bd)
 
         sd=box2d.b2PolygonDef()
@@ -56,7 +57,7 @@ class Test_Biped(Framework):
 
         for i in range(8):
             bd=box2d.b2BodyDef()
-            bd.position.Set(5.0, 20.0 + i)
+            bd.position = (5.0, 20.0 + i)
             bd.isBullet = True
             body = self.world.CreateBody(bd) 
             body.SetLinearVelocity(box2d.b2Vec2(0.0, -100.0))

@@ -32,7 +32,7 @@ class CollisionProcessing (Framework):
         sd.friction = 0.3
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
@@ -50,7 +50,7 @@ class CollisionProcessing (Framework):
         triangleShapeDef.density = 1.0
 
         triangleBodyDef=box2d.b2BodyDef() 
-        triangleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        triangleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body1 = self.world.CreateBody(triangleBodyDef) 
         body1.CreateShape(triangleShapeDef)
@@ -60,7 +60,7 @@ class CollisionProcessing (Framework):
         triangleShapeDef.setVertex(0, 2.0*triangleShapeDef.getVertex(0))
         triangleShapeDef.setVertex(1, 2.0*triangleShapeDef.getVertex(1))
         triangleShapeDef.setVertex(2, 2.0*triangleShapeDef.getVertex(2))
-        triangleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        triangleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body2 = self.world.CreateBody(triangleBodyDef)
         body2.CreateShape(triangleShapeDef)
@@ -72,7 +72,7 @@ class CollisionProcessing (Framework):
         boxShapeDef.density = 1.0
 
         boxBodyDef=box2d.b2BodyDef() 
-        boxBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        boxBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body3 = self.world.CreateBody(boxBodyDef) 
         body3.CreateShape(boxShapeDef)
@@ -80,7 +80,7 @@ class CollisionProcessing (Framework):
 
         # Large box (recycle definitions)
         boxShapeDef.SetAsBox(2.0, 1.0)
-        boxBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        boxBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body4 = self.world.CreateBody(boxBodyDef)
         body4.CreateShape(boxShapeDef)
@@ -92,7 +92,7 @@ class CollisionProcessing (Framework):
         circleShapeDef.density = 1.0
 
         circleBodyDef=box2d.b2BodyDef() 
-        circleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        circleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body5 = self.world.CreateBody(circleBodyDef) 
         body5.CreateShape(circleShapeDef)
@@ -100,7 +100,7 @@ class CollisionProcessing (Framework):
 
         # Large circle
         circleShapeDef.radius *= 2.0
-        circleBodyDef.position.Set(box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
+        circleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body6 = self.world.CreateBody(circleBodyDef) 
         body6.CreateShape(circleShapeDef)

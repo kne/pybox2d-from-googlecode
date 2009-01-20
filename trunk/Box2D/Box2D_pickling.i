@@ -1,5 +1,124 @@
+/*
+* Python SWIG interface file for Box2D (www.box2d.org)
+*
+* Copyright (c) 2008 kne / sirkne at gmail dot com
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty.  In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+* 1. The origin of this software must not be misrepresented; you must not
+* claim that you wrote the original software. If you use this software
+* in a product, an acknowledgment in the product documentation would be
+* appreciated but is not required.
+* 2. Altered source versions must be plainly marked as such, and must not be
+* misrepresented as being the original software.
+* 3. This notice may not be removed or altered from any source distribution.
+*/
+
 %pythoncode %{
 class b2PickleError (Exception): pass
+
+def _pickle_fix_value_load(lists, value):
+    """
+    From a dictionary, makes a b2Body, b2Shape, b2Joint, b2Controller
+    """
+    bodyList, jointList, controllerList=lists
+    
+    if not isinstance(value, dict):
+        return value
+
+    if 'pickle_type' not in value:
+        return value
+
+    if value['pickle_type']=='b2Body':
+        return bodyList[ value['body'] ]
+    elif value['pickle_type']=='b2Shape':
+        body  = bodyList[ value['body'] ]
+        shape = body.shapeList[ value['shape'] ]
+        return shape
+    elif value['pickle_type']=='b2Joint':
+        return jointList[ value['joint'] ]
+    elif value['pickle_type']=='b2Controller':
+        return controllerList[ value['controller'] ]
+
+    return value
+
+def _pickle_fix_value_save(lists, value):
+    """
+    Fixes: b2Body, b2Shape, b2Joint, b2Controller
+
+    In place of an unpicklable b2Body outside of a world, use a dictionary with
+    an index to the appropriate place in the world.
+    """
+    bodyList, jointList, controllerList=lists
+
+    if isinstance(value, b2Body):
+        value = { 'pickle_type' : 'b2Body', 'body' : bodyList.index(value) }
+    elif isinstance(value, b2Shape):
+        body = value.GetBody()
+        shapeID = body.shapeList.index(value)
+        value = { 'pickle_type' : 'b2Shape', 'body': bodyList.index(body), 'shape' : shapeID}
+    elif isinstance(value, b2Joint):
+        value = { 'pickle_type' : 'b2Joint',  'joint': jointList.index(value) }
+    elif isinstance(value, b2Controller):
+        value = { 'pickle_type' : 'b2Controller', 'controller' : controllerList.index(value)}
+    return value
+
+def pickle_fix(world, var, func='save', lists=None):
+    """
+    Fix variables so that they may be pickled (or loaded from a pickled state).
+    You cannot save a b2Body by itself, but if passed in with the world, it's possible
+    to pickle it.
+
+    So, be sure to use this on your box2d-related variables before and after pickling.
+
+    e.g.,
+    + Save:
+      my_pickled_vars = box2d.pickle_fix(myworld, my_vars, 'save')
+      pickle.dump([myworld, my_pickled_vars], open(fn, 'wb'))
+
+    + Load
+      world, my_pickled_vars = pickle.load(open(fn, 'rb'))
+      myworld = world._pickle_finalize()
+      my_vars=box2d.pickle_fix(myworld, my_pickled_vars, 'load')
+
+    For an actual implementation of pickling, see the testbed (main test and test_pickle).
+    """
+    if func=='save':
+        fix_function=_pickle_fix_value_save
+    elif func=='load':
+        fix_function=_pickle_fix_value_load
+    else:
+        raise ValueError, 'Expected func in ("save", "load")'
+
+    if not lists:
+        # these lists are all created dynamically, so do this once
+        lists=[world.bodyList, world.jointList, world.controllerList]
+
+    if isinstance(var, (list, tuple)):
+        # Create a new list/tuple and fix each item
+        new_list=[pickle_fix(world, value, func, lists) for value in var]
+        if isinstance(var, tuple):
+            # If it was originally a tuple, make this new list a tuple
+            new_list=tuple(new_list)
+        return new_list
+    elif isinstance(var, dict):
+        if func=='load' and 'pickle_type' in var:
+            return fix_function(lists, var)
+
+        # Create a new dictionary and fix each item
+        new_dict={}
+        for var, value in var.items():
+            new_dict[var]=pickle_fix(world, value, func, lists)
+        return new_dict
+    else:
+        # Not a dictionary/list, so it is probably just a normal value. 
+        # Fix and return it.
+        ret= fix_function(lists, var)
+        return ret
 
 # -- unpicklable object --
 def no_pickle(self):

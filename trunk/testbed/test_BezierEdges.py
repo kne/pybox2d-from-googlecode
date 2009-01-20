@@ -57,6 +57,7 @@ class BezierEdges (Framework):
     control_points = [ ]
     bezier_obj = []
     selected_point = 0
+    _pickle_vars=['control_points', 'bezier_obj', 'selected_point']
 
     def __init__(self):
         super(BezierEdges, self).__init__()
@@ -71,7 +72,7 @@ class BezierEdges (Framework):
         edgeDef.isALoop = False
 
         bd=box2d.b2BodyDef()
-        bd.position.Set( 0.0, 0.0 )
+        bd.position = ( 0.0, 0.0 )
         ground = self.world.CreateBody(bd)
         ground.CreateShape(edgeDef)
 
@@ -82,7 +83,7 @@ class BezierEdges (Framework):
         
         for i in xrange(4):
             bd=box2d.b2BodyDef()
-            bd.position.Set(0.0, 2.0 + 3.0 * i)
+            bd.position = (0.0, 2.0 + 3.0 * i)
             
             body = self.world.CreateBody(bd)
             body.CreateShape(sd)
@@ -98,7 +99,7 @@ class BezierEdges (Framework):
             ed.isALoop = False
 
             bd=box2d.b2BodyDef()
-            bd.position.Set( 0.0, 0.0 )
+            bd.position = ( 0.0, 0.0 )
             body = self.world.CreateBody(bd)
             body.CreateShape(ed)
 

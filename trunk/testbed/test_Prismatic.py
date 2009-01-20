@@ -22,13 +22,14 @@
 from test_main import *
 class Prismatic (Framework):
     name="Prismatic"
+    _pickle_vars=['joint']
     def __init__(self):
         super(Prismatic, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
         ground.CreateShape(sd)
     
@@ -38,7 +39,7 @@ class Prismatic (Framework):
         sd.friction = 0.05
         
         bd=box2d.b2BodyDef()
-        bd.position.Set(-10.0, 10.0)
+        bd.position = (-10.0, 10.0)
         bd.angle = 0.5 * box2d.b2_pi
         body = self.world.CreateBody(bd)
         body.CreateShape(sd)

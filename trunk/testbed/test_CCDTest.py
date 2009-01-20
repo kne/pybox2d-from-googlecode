@@ -23,7 +23,6 @@
 from test_main import *
 class CCDTest (Framework):
     name="CCDTest"
-    angularVelocity = 0.0
     def __init__(self):
         super(CCDTest, self).__init__()
         # Note that this test has a lot of commented-out versions that aren't implemented here.
@@ -31,7 +30,7 @@ class CCDTest (Framework):
         k_restitution = 1.4
 
         bd=box2d.b2BodyDef()
-        bd.position.Set(0.0, 20.0)
+        bd.position = (0.0, 20.0)
         body = self.world.CreateBody(bd) 
 
         sd=box2d.b2PolygonDef() 
@@ -63,7 +62,7 @@ class CCDTest (Framework):
         sd_right.density = 4.0
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set( 0.0, 15.0 )
+        bd.position = ( 0.0, 15.0 )
         body = self.world.CreateBody(bd) 
         body.CreateShape(sd_bottom)
         body.CreateShape(sd_left)
@@ -74,7 +73,7 @@ class CCDTest (Framework):
 
         for i in range(0):
             bd=box2d.b2BodyDef() 
-            bd.position.Set(0.0, 15.0 + i)
+            bd.position = (0.0, 15.0 + i)
             bd.isBullet = True
             body = self.world.CreateBody(bd) 
             body.SetAngularVelocity(box2d.b2Random(-50.0, 50.0))

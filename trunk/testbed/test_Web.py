@@ -28,6 +28,7 @@ class Web (Framework):
     name="Web"
     bodies=[]
     joints=[]
+    _pickle_vars=['bodies', 'joints']
     def __init__(self):
         super(Web, self).__init__()
         sd=box2d.b2PolygonDef()

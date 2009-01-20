@@ -27,7 +27,8 @@ class PolyShapes (Framework):
     bodyIndex=0
     bodies=[]
     sds=[]
-    circleDef=box2d.b2CircleDef()
+    circleDef=None
+    _pickle_vars=['bodies']
 
     def __init__(self):
         super(PolyShapes, self).__init__()
@@ -42,7 +43,7 @@ class PolyShapes (Framework):
             sds.append(box2d.b2PolygonDef())
 
         bd=box2d.b2BodyDef() 
-        bd.position.Set(0.0, -10.0)
+        bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd) 
         ground.CreateShape(sd)
         sds[0].vertexCount = 3
@@ -83,6 +84,7 @@ class PolyShapes (Framework):
         sds[3].density = 1.0
         sds[3].friction = 0.3
 
+        self.circleDef=box2d.b2CircleDef()
         self.circleDef.radius = 0.5
         self.circleDef.density = 1.0
 
@@ -92,7 +94,7 @@ class PolyShapes (Framework):
           bd=box2d.b2BodyDef() 
           
           x = box2d.b2Random(-2.0, 2.0)
-          bd.position.Set(x, 10.0)
+          bd.position = (x, 10.0)
           bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
           
           if index == 4:

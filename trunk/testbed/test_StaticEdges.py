@@ -19,26 +19,26 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-
 from test_main import *
+
 class StaticEdges (Framework):
     name="StaticEdges"
     def __init__(self):
         super(StaticEdges, self).__init__()
         sd1=box2d.b2CircleDef()
         sd1.radius = 0.5
-        sd1.localPosition.Set(-0.5, 0.5)
+        sd1.localPosition = (-0.5, 0.5)
         sd1.density = 2.0
         
         sd2=box2d.b2CircleDef()
         sd2.radius = 0.5
-        sd2.localPosition.Set(0.5, 0.5)
+        sd2.localPosition = (0.5, 0.5)
         sd2.density = 0.0 # massless
         
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x + 5.0, 1.05 + 2.5 * i)
+            bd.position = (x + 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -56,7 +56,7 @@ class StaticEdges (Framework):
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x - 5.0, 1.05 + 2.5 * i)
+            bd.position = (x - 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -65,30 +65,30 @@ class StaticEdges (Framework):
     
         xf1=box2d.b2XForm()
         xf1.R.Set(0.3524 * box2d.b2_pi)
-        xf1.position = box2d.b2Mul(xf1.R, box2d.b2Vec2(1.0, 0.0))
+        xf1.position = box2d.b2Mul(xf1.R, (1.0, 0.0))
         
         sd1=box2d.b2PolygonDef()
         sd1.vertexCount = 3
-        sd1.setVertex(0, box2d.b2Mul(xf1, box2d.b2Vec2(-1.0, 0.0)))
-        sd1.setVertex(1, box2d.b2Mul(xf1, box2d.b2Vec2(1.0, 0.0)))
-        sd1.setVertex(2, box2d.b2Mul(xf1, box2d.b2Vec2(0.0, 0.5)))
+        sd1.setVertex(0, box2d.b2Mul(xf1, (-1.0, 0.0)))
+        sd1.setVertex(1, box2d.b2Mul(xf1, (1.0, 0.0)))
+        sd1.setVertex(2, box2d.b2Mul(xf1, (0.0, 0.5)))
         sd1.density = 2.0
         
         xf2=box2d.b2XForm()
         xf2.R.Set(-0.3524 * box2d.b2_pi)
-        xf2.position = box2d.b2Mul(xf2.R, box2d.b2Vec2(-1.0, 0.0))
+        xf2.position = box2d.b2Mul(xf2.R, (-1.0, 0.0))
         
         sd2=box2d.b2PolygonDef()
         sd2.vertexCount = 3
-        sd2.setVertex(0, box2d.b2Mul(xf2, box2d.b2Vec2(-1.0, 0.0)))
-        sd2.setVertex(1, box2d.b2Mul(xf2, box2d.b2Vec2(1.0, 0.0)))
-        sd2.setVertex(2, box2d.b2Mul(xf2, box2d.b2Vec2(0.0, 0.5)))
+        sd2.setVertex(0, box2d.b2Mul(xf2, (-1.0, 0.0)))
+        sd2.setVertex(1, box2d.b2Mul(xf2, (1.0, 0.0)))
+        sd2.setVertex(2, box2d.b2Mul(xf2, (0.0, 0.5)))
         sd2.density = 2.0
         
         for i in range(10):
             x = box2d.b2Random(-0.1, 0.1)
             bd=box2d.b2BodyDef()
-            bd.position.Set(x, 2.05 + 2.5 * i)
+            bd.position = (x, 2.05 + 2.5 * i)
             bd.angle = 0.0
             body = self.world.CreateBody(bd)
             body.CreateShape(sd1)
@@ -198,7 +198,7 @@ class StaticEdges (Framework):
         b2Loop2 = [(loop[0] - 10.0, loop[1]) for loop in loop2]
 
         bd=box2d.b2BodyDef()
-        bd.position.Set( 0.0, 0.0 )
+        bd.position = ( 0.0, 0.0 )
         body = self.world.CreateBody(bd)
         
         edgeDef=box2d.b2EdgeChainDef()
