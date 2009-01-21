@@ -28,7 +28,7 @@ class RaycastTest (Framework):
     _pickle_vars=['laserBody']
     def __init__(self):
         super(RaycastTest, self).__init__()
-        #self.world.SetGravity(box2d.b2Vec2(0,0))
+        #self.world.SetGravity( (0,0) )
         
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
@@ -68,8 +68,8 @@ class RaycastTest (Framework):
         segmentLength = 30.0
         
         segment=box2d.b2Segment()
-        laserStart=box2d.b2Vec2(5.0-0.1,0.0)
-        laserDir=box2d.b2Vec2(segmentLength,0.0)
+        laserStart=(5.0-0.1,0.0)
+        laserDir=(segmentLength,0.0)
         segment.p1 = self.laserBody.GetWorldPoint(laserStart)
         segment.p2 = self.laserBody.GetWorldVector(laserDir)
         segment.p2+=segment.p1

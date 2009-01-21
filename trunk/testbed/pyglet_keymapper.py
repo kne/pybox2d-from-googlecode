@@ -22,11 +22,21 @@
 from pyglet.window import key
 import string
 
+# While the testbed tests were created with Pygame in mind, Pyglet can also
+# be used. To make the keyboard constants the same for both tests, this keymapper
+# is used to map pygame key constants to pyglet ones. 
+#
+# Only basic keys are mapped for now: K_[a-z0-9], K_F[1-12] and K_COMMA.
+
 def map_keys():
     keys = {}
     for letter in string.uppercase:
         keys['K_'+letter.lower()] = getattr(key, letter)
-    
+    for i in range(0,9):
+        keys['K_%d'%i] = getattr(key, '_%d' % i)
+    for i in range(1,12):
+        keys['K_F%d'%i] = getattr(key, 'F%d' % i)
+    keys['K_COMMA']=key.COMMA
     return keys
 
 temp = globals() 

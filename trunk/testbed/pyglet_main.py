@@ -397,23 +397,6 @@ class fwDebugDraw(box2d.b2DebugDraw):
                 aabb.lowerBound.x, aabb.upperBound.y, aabb.lowerBound.x, aabb.lowerBound.y)),
             ('c3f', [color.r, color.g, color.b] * 8))
 
-    def DrawXForm(self, xf):
-        """
-        Draw the transform xf on the screen
-
-        TODO: is this working?
-        """
-        p1 = xf.position
-        k_axisScale = 0.4
-        p2 = p1 + k_axisScale * xf.R.col1
-        p3 = p1 + k_axisScale * xf.R.col2
-
-        color = (1.0,0,0)
-        self.DrawSegment(p1, p2, color)
-
-        color = (0,1.0,0)
-        self.DrawSegment(p1, p3, color)
-
 class Framework(pyglet.window.Window):
     """
     The main testbed framework.
@@ -431,7 +414,7 @@ class Framework(pyglet.window.Window):
     name = "None"
 
     # Box2D-related
-    worldAABB = box2d.b2AABB()
+    worldAABB = None
     points = []
     world = None
     bomb = None
@@ -455,9 +438,8 @@ class Framework(pyglet.window.Window):
     keys=pyglet.window.key.KeyStateHandler()
 
     # Screen-related
-    viewZoom = 1.0
-    viewCenter = box2d.b2Vec2(0,20)
-    viewOffset = box2d.b2Vec2(0,0)
+    _viewZoom  =1.0
+    _viewCenter=None
     screenSize = None
     textLine = 30
     font = None
@@ -474,8 +456,9 @@ class Framework(pyglet.window.Window):
         self.screenSize = box2d.b2Vec2(self.width, self.height)
 
         # Box2D Initialization
-        self.worldAABB.lowerBound.Set(-200.0, -100.0)
-        self.worldAABB.upperBound.Set( 200.0, 200.0)
+        self.worldAABB = box2d.b2AABB()
+        self.worldAABB.lowerBound = (-200.0, -100.0)
+        self.worldAABB.upperBound = ( 200.0, 200.0)
         gravity = box2d.b2Vec2(0.0, -10.0)
 
         doSleep = True
@@ -496,6 +479,8 @@ class Framework(pyglet.window.Window):
         self.world.SetContactListener(self.contactListener)
         self.world.SetDebugDraw(self.debugDraw)
 
+        self._viewCenter = box2d.b2Vec2(0,10.0)
+
     def on_close(self):
         """
         Callback: user tried to close the window
@@ -507,16 +492,12 @@ class Framework(pyglet.window.Window):
         """
         Callback: the window was shown.
         """
-        self.updateCenter()
+        self.updateProjection()
 
-    def updateCenter(self):
+    def updateProjection(self):
         """
-        Updates the view offset based on the center of the screen.
-
         Recalculates the necessary projection.
         """
-        self.viewOffset = self.viewCenter - self.screenSize/2
-
         gl.glViewport(0, 0, self.width, self.height)
 
         gl.glMatrixMode(gl.GL_PROJECTION)
@@ -525,19 +506,38 @@ class Framework(pyglet.window.Window):
         ratio = float(self.width) / self.height
 
         extents = box2d.b2Vec2(ratio * 25.0, 25.0)
-        extents *= self.viewZoom
+        extents *= self._viewZoom
 
-        lower = self.viewCenter - extents
-        upper = self.viewCenter + extents
+        lower = self._viewCenter - extents
+        upper = self._viewCenter + extents
 
         # L/R/B/T
         gl.gluOrtho2D(lower.x, upper.x, lower.y, upper.y)
-        #print "(Resize) View extents", lower, upper, "Ratio", ratio
-
-        self.lower, self.upper = lower, upper
 
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glLoadIdentity()
+
+    def setCenter(self, value):
+        """
+        Updates the view offset based on the center of the screen.
+        """
+        if isinstance(value, box2d.b2Vec2):
+            self._viewCenter = value.copy()
+        elif isinstance(value, (list, tuple)):
+            self._viewCenter = box2d.b2Vec2( *value )
+        else:
+            raise ValueError, 'Expected b2Vec2 or sequence'
+
+        self.updateProjection()
+
+    def setZoom(self, zoom):
+        self._viewZoom = zoom
+        self.updateProjection()
+
+    viewZoom   = property(lambda self: self._viewZoom, setZoom,
+                           doc='Zoom factor for the display')
+    viewCenter = property(lambda self: self._viewCenter, setCenter, 
+                           doc='Screen center in camera coordinates')
 
     def on_key_press(self, key, modifiers):
         """
@@ -549,11 +549,9 @@ class Framework(pyglet.window.Window):
         elif key==pyglet.window.key.Z:
             # Zoom in
             self.viewZoom = min(1.1 * self.viewZoom, 20.0)
-            self.updateCenter()
         elif key==pyglet.window.key.X:
             # Zoom out
             self.viewZoom = max(0.9 * self.viewZoom, 0.02)
-            self.updateCenter()
         elif key==pyglet.window.key.R:
             # Reload (disabled)
             #print "Reload not functional"
@@ -602,10 +600,8 @@ class Framework(pyglet.window.Window):
         """
         if scroll_y < 0:
             self.viewZoom *= 1.1
-            self.updateCenter()
         elif scroll_y > 0:
             self.viewZoom /= 1.1
-            self.updateCenter()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         """
@@ -617,17 +613,31 @@ class Framework(pyglet.window.Window):
         self.MouseMove(p)
 
         if buttons & pyglet.window.mouse.RIGHT:
-            self.viewCenter -= box2d.b2Vec2(float(dx)/5, float(dy)/5)
-            self.updateCenter()
+            self.viewCenter -= (float(dx)/5, float(dy)/5)
 
-    def pickle_load(self, fn):
+    def pickle_load(self, fn, set_vars=True, additional_vars=[]):
+        """
+        Load the pickled world in file fn.
+        additional_vars is a dictionary to be populated with the
+        loaded variables.
+        """
         import cPickle as pickle
         try:
-            self.world = pickle.load(open(fn, 'rb'))._pickle_finalize()
+            world, variables = pickle.load(open(fn, 'rb'))
         except Exception, s:
             print 'Error while loading world: ', s
             return
         
+        self.world = world._pickle_finalize()
+        variables=box2d.pickle_fix(self.world, variables, 'load')
+
+        if set_vars:
+            for var, value in variables.items():
+                if hasattr(self, var):
+                    setattr(self, var, value)
+                else:
+                    print 'Unknown property %s=%s' % (var, value)
+
         self.bomb = None
         self.bombSpawning = False
 
@@ -638,16 +648,26 @@ class Framework(pyglet.window.Window):
         self.world.SetDebugDraw(self.debugDraw)
         print 'Loaded'
 
-    def pickle_save(self, fn):
+        return variables
+
+
+    def pickle_save(self, fn, additional_vars={}):
         import cPickle as pickle
         if self.mouseJoint:
             self.MouseUp(self.mouseWorld) # remove a mouse joint if it exists
+    
+        if not additional_vars and hasattr(self, '_pickle_vars'):
+            additional_vars=dict((var, getattr(self, var)) for var in self._pickle_vars)
+
+        save_values = [self.world, box2d.pickle_fix(self.world, additional_vars, 'save')]
 
         try:
-            pickle.dump(self.world, open(fn, 'wb'))
-            print 'Saved'
-        except:
-            print 'Pickling failed'
+            pickle.dump(save_values, open(fn, 'wb'))
+        except Exception, s:
+            print 'Pickling failed: ', s
+            return
+
+        print 'Saved'
 
     def run(self):
         """
@@ -660,8 +680,6 @@ class Framework(pyglet.window.Window):
     def SetTextLine(self, line):
         """
         Kept for compatibility with C++ Box2D's testbeds.
-        
-        ** TODO: Probably should update this to be more logical and easy to use.
         """
         self.textLine=line
 
@@ -810,21 +828,16 @@ class Framework(pyglet.window.Window):
         """
         if self.keys[pyglet.window.key.LEFT]:
             self.viewCenter.x -= 0.5
-            self.updateCenter()
         elif self.keys[pyglet.window.key.RIGHT]:
             self.viewCenter.x += 0.5
-            self.updateCenter()
         if self.keys[pyglet.window.key.UP]:
             self.viewCenter.y += 0.5
-            self.updateCenter()
         elif self.keys[pyglet.window.key.DOWN]:
             self.viewCenter.y -= 0.5
-            self.updateCenter()
 
         if self.keys[pyglet.window.key.HOME]:
-            self.viewZoom = 1.0
-            self.viewCenter.Set(0.0, 20.0)
-            self.updateCenter()
+            self._viewZoom = 1.0 
+            self.viewCenter = (0.0, 20.0)
 
     def SimulationLoop(self, dt):
         """
@@ -869,14 +882,15 @@ class Framework(pyglet.window.Window):
 
         ratio = float(self.width) / self.height
         extents = box2d.b2Vec2(ratio * 25.0, 25.0)
-        extents *= self.viewZoom
+        extents *= self._viewZoom
 
-        lower = self.viewCenter - extents
-        upper = self.viewCenter + extents
+        lower = self._viewCenter - extents
+        upper = self._viewCenter + extents
 
-        p = box2d.b2Vec2()
-        p.x = (1.0 - u) * lower.x + u * upper.x
-        p.y = (1.0 - v) * lower.y + v * upper.y
+        p = box2d.b2Vec2( 
+            (1.0 - u) * lower.x + u * upper.x,
+            (1.0 - v) * lower.y + v * upper.y )
+
         return p
 
 

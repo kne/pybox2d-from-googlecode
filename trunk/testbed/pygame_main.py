@@ -25,6 +25,8 @@ Keys:
     Space  - shoot projectile
     Z/X    - zoom
     Escape - quit
+    F5     - save state
+    F7     - load state
 
 Other keys can be set by the individual test
 
@@ -432,9 +434,9 @@ class Framework(object):
     def __init__(self):
         # Box2D Initialization
         self.worldAABB=box2d.b2AABB()
-        self.worldAABB.lowerBound.Set(-200.0, -100.0)
-        self.worldAABB.upperBound.Set( 200.0, 200.0)
-        gravity = box2d.b2Vec2(0.0, -10.0)
+        self.worldAABB.lowerBound = (-200.0, -100.0)
+        self.worldAABB.upperBound = ( 200.0, 200.0)
+        gravity = (0.0, -10.0)
 
         doSleep = True
         self.world = box2d.b2World(self.worldAABB, gravity, doSleep)

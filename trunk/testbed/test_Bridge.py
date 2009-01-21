@@ -51,13 +51,13 @@ class Bridge(Framework):
             body.CreateShape(sd)
             body.SetMassFromShapes()
 
-            anchor=box2d.b2Vec2(-15.0 + 1.0 * i, 5.0)
+            anchor=(-15.0 + 1.0 * i, 5.0)
             jd.Initialize(prevBody, body, anchor)
             self.world.CreateJoint(jd)
 
             prevBody = body
 
-        anchor = box2d.b2Vec2(-15.0 + 1.0 * numPlanks, 5.0)
+        anchor = (-15.0 + 1.0 * numPlanks, 5.0)
         jd.Initialize(prevBody, ground, anchor)
         self.world.CreateJoint(jd)
 

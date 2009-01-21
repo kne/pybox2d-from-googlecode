@@ -92,9 +92,9 @@ def main():
 
     # Create the world
     worldAABB=box2d.b2AABB()
-    worldAABB.lowerBound.Set(-100.0, -100.0)
-    worldAABB.upperBound.Set( 100.0, 100.0)
-    gravity = box2d.b2Vec2(0.0, -10.0)
+    worldAABB.lowerBound = (-100.0, -100.0)
+    worldAABB.upperBound = ( 100.0, 100.0)
+    gravity = (0.0, -10.0)
 
     world = box2d.b2World(worldAABB, gravity, True)
     world.SetDebugDraw(renderer)
@@ -152,8 +152,8 @@ def update_shapes(world):
     for body in world.bodyList:
         v = body.GetLinearVelocity()
         if body.IsSleeping() or v.LengthSquared() < 0.2:
-            i = body.GetWorldVector(box2d.b2Vec2(box2d.b2Random(-200,200), box2d.b2Random(-200,200)))
-            p = body.GetWorldPoint(box2d.b2Vec2(0.0, 0.0))
+            i = body.GetWorldVector((box2d.b2Random(-200,200), box2d.b2Random(-200,200)))
+            p = body.GetWorldPoint((0.0, 0.0))
             body.ApplyImpulse(i, p)
        
 def main_loop(world, screen, demolist, app):

@@ -78,7 +78,7 @@ class VerticalStack (Framework):
             self.bullet.CreateShape(sd)
             self.bullet.SetMassFromShapes()
 
-            self.bullet.SetLinearVelocity(box2d.b2Vec2(400.0, 0.0))
+            self.bullet.SetLinearVelocity((400.0, 0.0))
      
     def Step(self, settings):
           self.DrawStringCR("Press: (,) to launch a bullet.")

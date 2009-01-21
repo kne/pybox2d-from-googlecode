@@ -51,7 +51,7 @@ class PolyCollision (Framework):
         self.body2.CreateShape(sd)
         self.body2.SetMassFromShapes()
 
-        self.world.SetGravity(box2d.b2Vec2_zero)
+        self.world.SetGravity( (0,0) )
      
     def Step(self, settings):
         settings.pause = True

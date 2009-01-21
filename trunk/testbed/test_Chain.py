@@ -50,7 +50,7 @@ class Chain (Framework):
             body.CreateShape(sd)
             body.SetMassFromShapes()
             
-            anchor=box2d.b2Vec2(i, y)
+            anchor=(i, y)
             jd.Initialize(prevBody, body, anchor)
             self.world.CreateJoint(jd).getAsType()
             

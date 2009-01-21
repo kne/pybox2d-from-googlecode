@@ -89,7 +89,6 @@ class Car (Framework):
         self.leftWheel.SetMassFromShapes()
 
         # join wheels to chassis
-        anchor=box2d.b2Vec2() 
         jd=box2d.b2RevoluteJointDef() 
         jd.Initialize(self.vehicle, self.leftWheel, self.leftWheel.GetWorldCenter())
         jd.collideConnected = False

@@ -86,9 +86,6 @@ class BoxCutter (Framework):
     #  False - Error on split
     #  True  - Normal result is two new shape definitions.    
     def SplitShape(self, shape, segment, splitSize, newPolygon):
-        lambda_= 1
-        normal=box2d.b2Vec2()
-        
         b = shape.GetBody()
         xf = b.GetXForm()
         hit,lambda_,normal=shape.TestSegment(xf, segment, 1.0)

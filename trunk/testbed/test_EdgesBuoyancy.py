@@ -28,7 +28,7 @@ class EdgesBuoyancy (Framework):
 
         bcd = box2d.b2BuoyancyControllerDef() 
         bcd.offset = 15
-        bcd.normal.Set(0,1)
+        bcd.normal = (0,1)
         bcd.density = 2
         bcd.linearDrag = 2
         bcd.angularDrag = 1

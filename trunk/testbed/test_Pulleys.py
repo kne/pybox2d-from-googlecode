@@ -58,13 +58,11 @@ class Pulleys (Framework):
 
         pulleyDef=box2d.b2PulleyJointDef() 
 
-        anchor1=box2d.b2Vec2(-10.0, y + b)
+        anchor1      =(-10.0, y + b)
+        anchor2      =( 10.0, y + b)
+        groundAnchor1=(-10.0, y + b + L)
+        groundAnchor2=( 10.0, y + b + L)
 
-        anchor2=box2d.b2Vec2(10.0, y + b)
-
-        groundAnchor1=box2d.b2Vec2(-10.0, y + b + L)
-
-        groundAnchor2=box2d.b2Vec2(10.0, y + b + L)
         pulleyDef.Initialize(body1, body2, groundAnchor1, groundAnchor2, anchor1, anchor2, 2.0)
 
         self.joint1 = self.world.CreateJoint(pulleyDef).getAsType() 

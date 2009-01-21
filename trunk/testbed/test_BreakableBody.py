@@ -444,11 +444,11 @@ class BreakableBody(Framework):
 
         p1, p2 = box2d.b2Vec2(), box2d.b2Vec2()
         for i in xrange(self.drawCount-1):
-            p1.Set(self.drawVertices[i].x  ,self.drawVertices[i].y)
+            p1 = (self.drawVertices[i].x      ,self.drawVertices[i].y)
             if i<self.drawCount-1:
-                p2.Set(self.drawVertices[i+1].x,self.drawVertices[i+1].y)
+                p2 = (self.drawVertices[i+1].x,self.drawVertices[i+1].y)
             else:
-                p2.Set(self.drawVertices[0].x,self.drawVertices[0].y)
+                p2 = (self.drawVertices[0].x  ,self.drawVertices[0].y)
             self.debugDraw.DrawSegment(p1,p2,box2d.b2Color(0.6,0.2,0.2))
             self.debugDraw.DrawPoint(p1,3.0, box2d.b2Color(0.6,0.5,0.2))
 

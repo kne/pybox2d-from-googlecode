@@ -58,7 +58,7 @@ class TheoJansen (Framework):
             sd1.setVertex(1, p2)
             sd1.setVertex(2, p3)
             
-            sd2.setVertex(0, box2d.b2Vec2_zero)
+            sd2.setVertex(0, (0,0))
             sd2.setVertex(1, p5 - p4)
             sd2.setVertex(2, p6 - p4)
         else:
@@ -66,7 +66,7 @@ class TheoJansen (Framework):
             sd1.setVertex(1, p3)
             sd1.setVertex(2, p2)
             
-            sd2.setVertex(0, box2d.b2Vec2_zero)
+            sd2.setVertex(0, (0,0))
             sd2.setVertex(1, p6 - p4)
             sd2.setVertex(2, p5 - p4)
 

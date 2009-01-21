@@ -87,7 +87,7 @@ class Dominos (Framework):
 
         jd=box2d.b2RevoluteJointDef() 
 
-        anchor=box2d.b2Vec2(-2.0, 1.0) 
+        anchor=(-2.0, 1.0) 
         jd.Initialize(b1, b3, anchor)
         jd.collideConnected = True
         self.world.CreateJoint(jd).getAsType() 
@@ -103,7 +103,7 @@ class Dominos (Framework):
         b4.CreateShape(sd)
         b4.SetMassFromShapes()
 
-        anchor.Set(-7.0, 15.0)
+        anchor = (-7.0, 15.0)
         jd.Initialize(b2, b4, anchor)
         self.world.CreateJoint(jd).getAsType() 
 
@@ -127,7 +127,7 @@ class Dominos (Framework):
 
         b5.SetMassFromShapes()
 
-        anchor.Set(6.0, 2.0)
+        anchor = (6.0, 2.0)
         jd.Initialize(b1, b5, anchor)
         self.world.CreateJoint(jd).getAsType() 
 
@@ -143,7 +143,7 @@ class Dominos (Framework):
         b6.CreateShape(sd)
         b6.SetMassFromShapes()
 
-        anchor.Set(7.5, 4.0)
+        anchor = (7.5, 4.0)
         jd.Initialize(b5, b6, anchor)
         self.world.CreateJoint(jd).getAsType() 
 
@@ -162,8 +162,8 @@ class Dominos (Framework):
         djd=box2d.b2DistanceJointDef() 
         djd.body1 = b3
         djd.body2 = b7
-        djd.localAnchor1.Set(6.0, 0.0)
-        djd.localAnchor2.Set(0.0, -1.0)
+        djd.localAnchor1 = (6.0, 0.0)
+        djd.localAnchor2 = (0.0, -1.0)
         d = djd.body2.GetWorldPoint(djd.localAnchor2) - djd.body1.GetWorldPoint(djd.localAnchor1)
         djd.length = d.Length()
         self.world.CreateJoint(djd).getAsType() 

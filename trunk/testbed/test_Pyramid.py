@@ -38,8 +38,8 @@ class Pyramid (Framework):
         sd.density = 5.0
 
         x=box2d.b2Vec2(-10.0, 0.75)
-        deltaX=box2d.b2Vec2(0.5625, 2.0)
-        deltaY=box2d.b2Vec2(1.125, 0.0)
+        deltaX=(0.5625, 2.0)
+        deltaY=(1.125, 0.0)
 
         for i in range(25):
             y = x.copy()

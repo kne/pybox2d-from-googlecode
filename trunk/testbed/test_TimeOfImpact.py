@@ -54,7 +54,7 @@ class TimeOfImpact (Framework):
 
     def Step(self, settings):
         sweep1=box2d.b2Sweep()
-        sweep1.c0.Set(0.0, 20.0)
+        sweep1.c0 = (0.0, 20.0)
         sweep1.a0 = 0.0
         sweep1.c = sweep1.c0
         sweep1.a = sweep1.a0
@@ -62,9 +62,9 @@ class TimeOfImpact (Framework):
         sweep1.localCenter = self.body1.GetLocalCenter()
 
         sweep2=box2d.b2Sweep()
-        sweep2.c0.Set(9.6363468, 28.050615)
+        sweep2.c0 = (9.6363468, 28.050615)
         sweep2.a0 = 1.6408679
-        sweep2.c = sweep2.c0 + box2d.b2Vec2(-0.075121880, 0.27358246)
+        sweep2.c = sweep2.c0 + (-0.075121880, 0.27358246)
         sweep2.a = sweep2.a0 - 10.434675
         sweep2.t0 = 0.0
         sweep2.localCenter = self.body2.GetLocalCenter()
