@@ -22,11 +22,12 @@
 """
 Keys:
     F1     - toggle menu (can greatly improve fps)
+    F5     - save state
+    F7     - load state
+
     Space  - shoot projectile
     Z/X    - zoom
     Escape - quit
-    F5     - save state
-    F7     - load state
 
 Other keys can be set by the individual test
 
@@ -56,17 +57,20 @@ except ImportError:
 class fwDestructionListener(box2d.b2DestructionListener):
     """
     The destruction listener callback:
-    "SayGoodbye" is called when a joint is deleted.
+    "SayGoodbye" is called when a joint or shape is deleted.
     """
     test = None
     def __init__(self):
         super(fwDestructionListener, self).__init__()
 
-    def SayGoodbye(self, joint):
-        if self.test.mouseJoint:
-            self.test.mouseJoint=None
-        else:
-            self.test.JointDestroyed(joint)
+    def SayGoodbye(self, object):
+        if isinstance(object, box2d.b2Joint):
+            if self.test.mouseJoint==object:
+                self.test.mouseJoint=None
+            else:
+                self.test.JointDestroyed(object)
+        elif isinstance(object, box2d.b2Shape):
+            self.test.ShapeDestroyed(object)
 
 class fwBoundaryListener(box2d.b2BoundaryListener):
     """
@@ -402,35 +406,37 @@ class Framework(object):
     name = "None"
 
     # Box2D-related
-    worldAABB = None
-    points = []
-    world = None
-    bomb = None
-    mouseJoint = None
-    settings = fwSettings
-    bombSpawning = False
-    bombSpawnPoint = None
-    mouseWorld = None
+    worldAABB          = None
+    points             = []
+    world              = None
+    bomb               = None
+    mouseJoint         = None
+    settings           = fwSettings
+    bombSpawning       = False
+    bombSpawnPoint     = None
+    mouseWorld         = None
+    destroyList        = []
 
     # Box2D-callbacks
-    destructionListener = None
-    boundaryListener = None
-    contactListener = None
-    debugDraw = None
+    destructionListener= None
+    boundaryListener   = None
+    contactListener    = None
+    debugDraw          = None
 
-    # Screen-related properties (defined later)
-    _viewZoom  =10.0
-    _viewCenter=None
-    _viewOffset=None
-    screenSize = None
-    rMouseDown = False
-    textLine = 30
-    font = None
-    fps = 0
+    # Screen/rendering-related
+    _viewZoom          = 10.0
+    _viewCenter        = None
+    _viewOffset        = None
+    screenSize         = None
+    rMouseDown         = False
+    textLine           = 30
+    font               = None
+    fps                = 0
 
     # GUI-related (PGU)
     gui_app   = None
     gui_table = None
+
     def __init__(self):
         # Box2D Initialization
         self.worldAABB=box2d.b2AABB()
@@ -641,6 +647,11 @@ class Framework(object):
         self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
+        # Destroy bodies that have left the world AABB (can be removed if not using pickling)
+        for obj in self.destroyList:
+            self.world.DestroyBody(obj)
+        self.destroyList = []
+
         # If the bomb is frozen, get rid of it.
         if self.bomb and self.bomb.IsFrozen():
             self.world.DestroyBody(self.bomb)
@@ -712,6 +723,7 @@ class Framework(object):
         variables=box2d.pickle_fix(self.world, variables, 'load')
 
         if set_vars:
+            # reset the additional saved variables:
             for var, value in variables.items():
                 if hasattr(self, var):
                     setattr(self, var, value)
@@ -972,6 +984,12 @@ class Framework(object):
     # These can/should be implemented in the subclass: (Step() also if necessary)
     # See test_Empty.py for a simple example.
 
+    def ShapeDestroyed(self, shape):
+        """
+        Callback indicating 'shape' has been destroyed.
+        """
+        pass
+
     def JointDestroyed(self, joint):
         """
         Callback indicating 'joint' has been destroyed.
@@ -982,7 +1000,14 @@ class Framework(object):
         """
         Callback indicating 'body' has left the world AABB.
         """
-        pass
+        # Not destroying bodies outside the world AABB will cause
+        # pickling to fail, so destroy it after the next step:
+        self.destroyList.append(body)
+        # Be sure to check if any of these bodies are ones your game
+        # stores. Using a reference to a deleted object will cause a crash.
+        # e.g., 
+        # if body==self.player: 
+        #     self.player=None
 
     def Keyboard(self, key):
         """

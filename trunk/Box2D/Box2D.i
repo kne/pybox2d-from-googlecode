@@ -71,6 +71,12 @@
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
 
+    // Director-exceptions are a result of callbacks that happen as a result to
+    // the physics step, usually. So, catch those errors and report them back to Python.
+    %exception b2World::Step {
+        try { $action }
+        catch (Swig::DirectorException &e) { SWIG_fail; }
+    }
     /* ---- renames ---- */
 
     //These operators do not work unless explicitly defined like this 

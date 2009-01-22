@@ -48,17 +48,20 @@ import math
 class fwDestructionListener(box2d.b2DestructionListener):
     """
     The destruction listener callback:
-    "SayGoodbye" is called when a joint is deleted.
+    "SayGoodbye" is called when a joint or shape is deleted.
     """
     test = None
     def __init__(self):
         super(fwDestructionListener, self).__init__()
 
-    def SayGoodbye(self, joint):
-        if self.test.mouseJoint:
-            self.test.mouseJoint=None
-        else:
-            self.test.JointDestroyed(joint)
+    def SayGoodbye(self, object):
+        if isinstance(object, box2d.b2Joint):
+            if self.test.mouseJoint==object:
+                self.test.mouseJoint=None
+            else:
+                self.test.JointDestroyed(object)
+        elif isinstance(object, box2d.b2Shape):
+            self.test.ShapeDestroyed(object)
 
 class fwBoundaryListener(box2d.b2BoundaryListener):
     """
@@ -414,36 +417,36 @@ class Framework(pyglet.window.Window):
     name = "None"
 
     # Box2D-related
-    worldAABB = None
-    points = []
-    world = None
-    bomb = None
-    bombSpawning = False
-    bombSpawnPoint = None
-    mouseJoint = None
-    settings = fwSettings
-    mouseWorld = None
+    worldAABB          = None
+    points             = []
+    world              = None
+    bomb               = None
+    bombSpawning       = False
+    bombSpawnPoint     = None
+    mouseJoint         = None
+    settings           = fwSettings
+    mouseWorld         = None
 
     # Box2D-callbacks
-    destructionListener = None
-    boundaryListener = None
-    contactListener = None
-    debugDraw = None
+    destructionListener= None
+    boundaryListener   = None
+    contactListener    = None
+    debugDraw          = None
 
     # Window-related
-    fontname = "Arial"
-    fontsize = 10
-    font = None
-    textGroup = None
-    keys=pyglet.window.key.KeyStateHandler()
+    fontname           = "Arial"
+    fontsize           = 10
+    font               = None
+    textGroup          = None
+    keys               = pyglet.window.key.KeyStateHandler()
 
     # Screen-related
-    _viewZoom  =1.0
-    _viewCenter=None
-    screenSize = None
-    textLine = 30
-    font = None
-    fps = 0
+    _viewZoom          = 1.0
+    _viewCenter        = None
+    screenSize         = None
+    textLine           = 30
+    font               = None
+    fps                = 0
 
     def __init__(self, **kw):
         super(Framework, self).__init__(**kw)
@@ -459,7 +462,7 @@ class Framework(pyglet.window.Window):
         self.worldAABB = box2d.b2AABB()
         self.worldAABB.lowerBound = (-200.0, -100.0)
         self.worldAABB.upperBound = ( 200.0, 200.0)
-        gravity = box2d.b2Vec2(0.0, -10.0)
+        gravity = (0.0, -10.0)
 
         doSleep = True
         self.world = box2d.b2World(self.worldAABB, gravity, doSleep)
@@ -997,6 +1000,9 @@ class Framework(pyglet.window.Window):
         self.bombSpawning = False
 
     # These should be implemented in the subclass: (Step() also if necessary)
+    def ShapeDestroyed(self, joint):
+        pass
+
     def JointDestroyed(self, joint):
         pass
 
