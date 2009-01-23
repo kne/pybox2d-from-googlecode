@@ -193,6 +193,9 @@ class TheoJansen (Framework):
         super(TheoJansen, self).Step(settings)
     
     def Keyboard(self, key):
+        if not self.chassis:
+            return
+
         if key==K_a:
             self.chassis.WakeUp()
             self.motorJoint.SetMotorSpeed(-self.motorSpeed)

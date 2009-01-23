@@ -172,6 +172,9 @@ class Car (Framework):
         super(Car, self).Step(settings)
      
     def Keyboard(self, key):
+        if not self.leftJoint:
+            return
+
         if key==K_a:
            self.leftJoint.SetMaxMotorTorque(800.0)
            self.leftJoint.SetMotorSpeed(12.0)

@@ -84,6 +84,9 @@ class ApplyForce (Framework):
         self.body.SetMassFromShapes()
      
     def Keyboard(self, key):
+        if not self.body:
+            return
+
         if key==K_w:
             f = self.body.GetWorldVector((0.0, -200.0))
             p = self.body.GetWorldPoint((0.0, 2.0))

@@ -68,10 +68,14 @@ class Pulleys (Framework):
         self.joint1 = self.world.CreateJoint(pulleyDef).getAsType() 
      
     def Step(self, settings):
+        super(Pulleys, self).Step(settings)
+        
+        if not self.joint1:
+            return
+
         ratio = self.joint1.GetRatio()
         L = self.joint1.GetLength1() + ratio * self.joint1.GetLength2()
         self.DrawStringCR("L1 + %.2f * L2 = %.2f" % (ratio, L))
-        super(Pulleys, self).Step(settings)
 
 if __name__=="__main__":
     main(Pulleys)

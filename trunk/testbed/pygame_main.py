@@ -715,13 +715,18 @@ class Framework(object):
         import cPickle as pickle
         try:
             world, variables = pickle.load(open(fn, 'rb'))
+            world = world._pickle_finalize()
+            variables  = box2d.pickle_fix(world, variables, 'load')
         except Exception, s:
             print 'Error while loading world: ', s
             return
         
-        self.world = world._pickle_finalize()
-        variables=box2d.pickle_fix(self.world, variables, 'load')
+        self.world = world
 
+        self.bomb = None
+        self.bombSpawning = False
+        self.points = []
+        
         if set_vars:
             # reset the additional saved variables:
             for var, value in variables.items():
@@ -729,10 +734,6 @@ class Framework(object):
                     setattr(self, var, value)
                 else:
                     print 'Unknown property %s=%s' % (var, value)
-
-        self.bomb = None
-        self.bombSpawning = False
-        self.points = []
 
         # have to reset a few things that can't be saved:
         self.world.SetDestructionListener(self.destructionListener)
@@ -742,7 +743,6 @@ class Framework(object):
         print 'Loaded'
 
         return variables
-
 
     def pickle_save(self, fn, additional_vars={}):
         import cPickle as pickle
@@ -1001,14 +1001,26 @@ class Framework(object):
         """
         Callback indicating 'body' has left the world AABB.
         """
-        # Not destroying bodies outside the world AABB will cause
-        # pickling to fail, so destroy it after the next step:
-        self.destroyList.append(body)
         # Be sure to check if any of these bodies are ones your game
         # stores. Using a reference to a deleted object will cause a crash.
         # e.g., 
         # if body==self.player: 
         #     self.player=None
+        #
+        # The following checks for generic usage by testing the pickle variables.
+
+        if hasattr(self, '_pickle_vars'):
+            for var in self._pickle_vars:
+                value=getattr(self, var)
+                if body==value:
+                    setattr(self, var, None)
+                elif isinstance(value, list):
+                    if body in value:
+                        value.remove(body)
+
+        # Not destroying bodies outside the world AABB will cause
+        # pickling to fail, so destroy it after the next step:
+        self.destroyList.append(body)
 
     def Keyboard(self, key):
         """

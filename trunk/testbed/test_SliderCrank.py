@@ -101,20 +101,25 @@ class SliderCrank (Framework):
         body.SetMassFromShapes()
 
     def Keyboard(self, key):
-          if key==K_f:
-               self.joint2.enableMotor = not self.joint2.enableMotor
-               self.joint2.GetBody2().WakeUp()
-               
-          elif key==K_m:
-               self.joint1.enableMotor = not self.joint1.enableMotor
-               self.joint1.GetBody2().WakeUp()
-     
-    def Step(self, settings):
-          self.DrawStringCR("Keys: (f) toggle friction, (m) toggle motor")
+        if not self.joint1 or not self.joint2:
+            return
 
-          torque = self.joint1.GetMotorTorque()
-          self.DrawStringCR("Motor Torque = %.0f" % (torque))
-          super(SliderCrank, self).Step(settings)
-     
+        if key==K_f:
+            self.joint2.enableMotor = not self.joint2.enableMotor
+            self.joint2.GetBody2().WakeUp()
+           
+        elif key==K_m:
+            self.joint1.enableMotor = not self.joint1.enableMotor
+            self.joint1.GetBody2().WakeUp()
+
+    def Step(self, settings):
+        self.DrawStringCR("Keys: (f) toggle friction, (m) toggle motor")
+
+        if self.joint1:
+            torque = self.joint1.GetMotorTorque()
+            self.DrawStringCR("Motor Torque = %.0f" % (torque))
+
+        super(SliderCrank, self).Step(settings)
+
 if __name__=="__main__":
      main(SliderCrank)

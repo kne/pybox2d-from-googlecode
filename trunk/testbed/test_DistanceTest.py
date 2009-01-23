@@ -55,19 +55,23 @@ class DistanceTest (Framework):
         self.world.SetGravity((0.0, 0.0))
      
     def Step(self, settings):
-        distance, x1, x2 = box2d.b2Distance(self.shape1, self.body1.GetXForm(), self.shape2, self.body2.GetXForm())
+        if self.body2:
+            distance, x1, x2 = box2d.b2Distance(self.shape1, self.body1.GetXForm(), self.shape2, self.body2.GetXForm())
 
-        self.DrawStringCR("distance = %g" % distance)
+            self.DrawStringCR("distance = %g" % distance)
 
-        self.debugDraw.DrawPoint(x1, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
-        self.debugDraw.DrawPoint(x2, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
-        self.debugDraw.DrawSegment(x1, x2, box2d.b2Color(1.0, 1.0, 0.0))
+            self.debugDraw.DrawPoint(x1, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
+            self.debugDraw.DrawPoint(x2, settings.pointSize, box2d.b2Color(1.0, 0.0, 0.0))
+            self.debugDraw.DrawSegment(x1, x2, box2d.b2Color(1.0, 1.0, 0.0))
 
         settings.pause = True
         super(DistanceTest, self).Step(settings)
         settings.pause = False
      
     def Keyboard(self, key):
+        if not self.body2:
+            return
+
         p = self.body2.GetPosition()
         a = self.body2.GetAngle()
 

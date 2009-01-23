@@ -23,24 +23,28 @@ class b2PickleError (Exception): pass
 
 def _pickle_fix_value_load(lists, value):
     """
-    From a dictionary, makes a b2Body, b2Shape, b2Joint, b2Controller
+    Returns the appropriate object (a b2Body, b2Shape, b2Joint, b2Controller)
+    based on the indices in the passed-in dictionary.
     """
     bodyList, jointList, controllerList=lists
     
     if not isinstance(value, dict):
         return value
-
-    if 'pickle_type' not in value:
+    elif 'pickle_type' not in value:
         return value
 
+    # Depending on the type, use the right list
     if value['pickle_type']=='b2Body':
         return bodyList[ value['body'] ]
+
     elif value['pickle_type']=='b2Shape':
         body  = bodyList[ value['body'] ]
         shape = body.shapeList[ value['shape'] ]
         return shape
+
     elif value['pickle_type']=='b2Joint':
         return jointList[ value['joint'] ]
+
     elif value['pickle_type']=='b2Controller':
         return controllerList[ value['controller'] ]
 
@@ -65,6 +69,7 @@ def _pickle_fix_value_save(lists, value):
         value = { 'pickle_type' : 'b2Joint',  'joint': jointList.index(value) }
     elif isinstance(value, b2Controller):
         value = { 'pickle_type' : 'b2Controller', 'controller' : controllerList.index(value)}
+
     return value
 
 def pickle_fix(world, var, func='save', lists=None):
@@ -107,6 +112,7 @@ def pickle_fix(world, var, func='save', lists=None):
         return new_list
     elif isinstance(var, dict):
         if func=='load' and 'pickle_type' in var:
+            # Loading a dictionary placeholder for an object
             return fix_function(lists, var)
 
         # Create a new dictionary and fix each item
@@ -126,11 +132,22 @@ def no_pickle(self):
 
 # -- generic get and set state --
 def _generic_setstate(self, dict):
+    """
+    Takes each variable=value pair in the dictionary and
+    sets the attributes based on them
+    """
     self.__init__()
     for key, value in dict.iteritems():
         setattr(self, key, value)
 
 def _generic_getstate(self, additional_ignore=[]):
+    """
+    Returns a dictionary representation of self, with 
+     dict(var=value [, ...])
+
+    additional_ignore can be specified to ignore certain
+    properties. 
+    """
     ignore_properties = ['thisown', 'this', 'next', 'prev', 
                          'world', 'coreVertices', 'normals']
     if additional_ignore:
@@ -143,26 +160,39 @@ def _generic_getstate(self, additional_ignore=[]):
 
 # -- factory output -- (i.e., b2Body, 
 def _pickle_factory_set(self, data):
-    # the factory output cannot be created just yet,
-    # so store the necessary information to create it later
+    """
+    The factory output cannot be created just yet,
+    so store the necessary information to create it later.
+    """
     self.__pickle_data__ = data
 
 # -- factory output finalizing (loading)
 def _pickle_finalize(self, world=None, body=None):
+    """
+    Finalize one of the outputs that we previously set as a 
+    dictionary.
+    """
     if not hasattr(self, '__pickle_data__'):
-        raise b2PickleError
-    
-    #print '-> finalizing', type(self)
+        raise b2PickleError, "Invalid object passed to _pickle_finalize"
 
+    # At this point, 'self' is invalid on the SWIG-end of things.
+    # __init__ has not been called, so it only exists on the Python-end.
+
+    # The previously saved-data
+    data = self.__pickle_data__
+    
+    # These types are what are passed in:
+    #                 create_function          output          input
     pairs = [ (lambda w,b,v: w.CreateBody(v) , b2Body        , b2BodyDef),
               (lambda w,b,v: b.CreateShape(v), b2PolygonShape, b2PolygonDef),
               (lambda w,b,v: b.CreateShape(v), b2CircleShape , b2CircleDef),
               (lambda w,b,v: b.CreateShape(v), b2EdgeChainDef, b2EdgeChainDef),
             ]
     
-    data = self.__pickle_data__
     createfcn = None
 
+    # Create a new instance of the definition so that it may re-create
+    # the object.
     for fcn, output, input in pairs:
         if isinstance(self, output):
             self = input()
@@ -170,70 +200,74 @@ def _pickle_finalize(self, world=None, body=None):
             break
 
     if not createfcn:
-        raise b2PickleError # I do not know quite what happened
+        raise b2PickleError, "Invalid object passed to _pickle_finalize"
 
+    # A few things exist that cannot be set in the definition and can only
+    # be set after the object is created. Check for these and then set them
+    # after if necessary.
     do_after_classes=(b2Body, b2Shape, list)
     do_after_props  =['linearVelocity', 'angularVelocity', 'isSleeping']
     finalize_after = []
     
     if isinstance(self, (b2PolygonDef, b2EdgeChainDef)):
-        #print '* polygon/edge shape detected. setting vertices.'
+        # Polygon/edge shape. Set their vertices first, as normally they would
+        # be put in the 'do after' section
         self.vertices = data['vertices']
         del data['vertices']
 
     for var in data:
         value = data[var]
         if isinstance(value, do_after_classes) or var in do_after_props:
+            # Set these after creation
             finalize_after.append( (var, value) )
         elif hasattr(self, var):
-            #print 'setting %s=%s' % (var,value)
             setattr(self, var, value)
 
-    #print '* creating'
+    # Create the actual object (not just the definition)
     self = createfcn(world, body, self)
 
-    if isinstance(self, b2World):
-        world=self
-    elif isinstance(self, b2Body):
+    # If we just created a body, set that for the upcoming recursion.
+    # Finalizing the shape will require that this be set.
+    if isinstance(self, b2Body):
         body = self
 
-    #print '* finalize after...'
     for var, value in finalize_after:
         if var == 'shapeList':
+            # A shapelist is a special case, do it separately
             _pickle_finalize_shapelist(world, body, value)
         elif var == 'isSleeping':
+            # Sleeping is only modifiable by functions, and as such is a special case
             if value:
                 self.PutToSleep()
             else:
                 self.WakeUp()
         elif hasattr(self, var):
+            # The attribute exists, so set it.
             if hasattr(value, '_pickle_finalize'):
+                # But first finalize it if necessary.
                 value=_pickle_finalize(value,world,body)
             setattr(self, var, value)
-        #else:
-        #    print 'Unknown:', var
-    #print '* done'
+
     return self
 
 # -- custom handlers --
 def _pickle_finalize_controller(data, world):
-    #print 'finalize controller'
+    """
+    Finalize a controller. It's mostly standard, just
+    requires a custom bodyList.
+    """
     defn = globals()["b2%sControllerDef" % data['_type']] ()
 
     bodyList  = world.bodyList
     for var in data:
         value = data[var]
         if hasattr(defn, var):
-            #print 'setting %s=%s' % (var,value)
             setattr(defn, var, value)
-        else:
-            #print 'not found', var
-            pass
 
-    #print '* creating controller'
+    # Create the controller
     controller = world.CreateController(defn)
-    #print '* created; adding bodies...'
 
+    # And now add the bodies to it
     for body in data['bodyList']:
         try:
             real_body = bodyList[ int(body) ]
@@ -244,45 +278,57 @@ def _pickle_finalize_controller(data, world):
     return controller
 
 def _pickle_finalize_joint(data, world):
-    #print 'finalize joint'
+    """
+    Finalize a joint.
+    The bodies and joints need to be retrieved from the world list
+    in order to make the joint.
+    """
+
     defn = globals()["b2%sJointDef" % data['_type']] ()
 
-    body_names = ['body1', 'body2']
+    body_names  = ['body1' , 'body2' ]
     joint_names = ['joint1', 'joint2']
 
     bodyList  = world.bodyList
     jointList = world.jointList
+
     for var in data:
         value = data[var]
-        if var=='localXAxis1': var = 'localAxis1' # single rename necessary
-        if hasattr(defn, var):
-            if var in body_names:
-                try:
-                    value = bodyList[ int(value) ]
-                except:
-                    raise b2PickleError, 'World not initialized properly; unable to create joint'
-            elif var in joint_names:
-                # it seemed like this might cause a problem, but in reality it should not.
-                # the joints linked by this have to have been created already, so their index
-                # should be available already.
-                try:
-                    value = jointList[ int(value) ]
-                except:
-                    raise b2PickleError, 'World not initialized properly; unable to create joint'
-            #print 'setting %s=%s' % (var,value)
-            setattr(defn, var, value)
-        else:
-            #print 'not found', var
-            pass
 
-    #print '* creating joint'
+        if var=='localXAxis1': 
+            var = 'localAxis1' # single rename necessary
+
+        if not hasattr(defn, var):
+            continue
+
+        if var in body_names:
+            # Set the body based on the global body list
+            try:
+                value = bodyList[ int(value) ]
+            except:
+                raise b2PickleError, 'World not initialized properly; unable to create joint'
+        elif var in joint_names:
+            # Set the joint based on the global joint list
+            try:
+                value = jointList[ int(value) ]
+            except:
+                raise b2PickleError, 'World not initialized properly; unable to create joint'
+
+        # Set the value
+        setattr(defn, var, value)
+
     return world.CreateJoint(defn)
 
 def _pickle_finalize_shapelist(world, body, shapelist):
-    # auto added to the shapelist as the shapes are created
+    """
+    Finalize the shape list for a body.
+    Only reason this has to be implemented separately is because of the
+    way edge chains are implemented.
+    """
     for s in shapelist:
         if isinstance(s, dict):
-            # special case, an edge shape
+            # Special case, an edge shape. pickled as a
+            # dictionary. Create a fake definition and finalize it.
             temp=b2EdgeChainDef()
             temp.__pickle_data__=s
             _pickle_finalize(temp, world, body)
@@ -290,20 +336,26 @@ def _pickle_finalize_shapelist(world, body, shapelist):
             s._pickle_finalize(world, body)
 
 def _pickle_finalize_world(self):
-    #print '-> finalizing world'
+    """
+    Finalize a b2World.
+    """
     if not hasattr(self, '__pickle_data__'):
-        raise b2PickleError
+        raise b2PickleError, 'Finalizing a world that was not loaded?'
 
     data = self.__pickle_data__
     
-    #print 'Creating world...'
+    # Create the world. Only 3 parameters to deal with.
     world = b2World(data['worldAABB'], data['gravity'], data['doSleep'])
 
-    #print "finalizing ground body"
+    # First, deal with the ground body. It cannot be taken care of as a
+    # normal body since we do not create it; the constructor of the world
+    # on the C++-side creates it.
     gb_data = data['groundBody'].__pickle_data__
 
+    # Finalize its shapelist
     _pickle_finalize_shapelist(world, world.groundBody, gb_data['shapeList'])
 
+    # And then go through each variable, setting the properties
     for var in gb_data.keys():
         value = gb_data[var]
         if isinstance(value, (b2Shape)) or var=='shapeList':
@@ -314,25 +366,41 @@ def _pickle_finalize_world(self):
             except AttributeError:
                 pass
 
-    #print 'Finalizing bodies...'
+    # Finalize each body
     for body in data['bodyList']:
         body._pickle_finalize(world)
 
+    # Finalize each joint
     for joint in data['jointList']:
         _pickle_finalize_joint(joint, world)
 
+    # Finalize each controller
     for controller in data['controllerList']:
         _pickle_finalize_controller(controller, world)
 
+    # And that is it. :)
     return world
 
 def _pickle_body_getstate(self):
-    # everything is generic_getstate except for edge shape handling.
+    """
+    Everything is essentially generic_getstate,
+     except for edge shape handling.
+
+    TODO: I can see a possible issue in this if joints are used on
+    an edge shape or a body with edge shapes and other shapes.
+    The shape list order could be improperly recreated. We'll see
+    if anything happens...
+    """
 
     def get_edge_vertices_and_shapes(shape):
         """
-        returns is_loop, shapes, vertices
+        Determine whether or not the edge is a loop.
+        Also, return each shape that this passes through.
+        Then return the vertices.
+
+        Returns is_loop, shapes, vertices
         """
+
         vertices = []
         shapes   = []
         edge     = shape
@@ -340,44 +408,63 @@ def _pickle_body_getstate(self):
             shapes.append(edge)
             vertices.append( edge.vertex1 )
             last=edge.vertex2
+
+            # Go to the next edge
             edge=edge.next
-            if edge==shape: # a loop
+            if edge==shape: # A loop
                 return True, shapes, vertices
-        # not a loop
+
+        # Not a loop
         vertices.append( last )
         return False, shapes, vertices
         
+    # Get all the basic attributes except for shapeList
     ret = _generic_getstate(self, ['shapeList'])
     
+    # Now check each shape in the list
     ret['shapeList']=[]
     handled_edges = []
     for shape in self.shapeList:
         if isinstance(shape, b2EdgeShape):
             if shape in handled_edges:
-                #print 'found already handled edge; continuing'
+                # This edge was already added from another one
+                # because they were linked together.
                 continue
+
             is_loop, shapes, vertices=get_edge_vertices_and_shapes(shape)
             handled_edges.extend(shapes)
+
+            # Create a dictionary for this edge shape
+            # (to be finalized in _pickle_finalize_shapelist when loaded)
             shape_info = _generic_getstate(shape, ['vertices','length','coreVertex1','coreVertex2'])
             shape_info['isALoop'] =is_loop
             shape_info['vertices']=vertices
             ret['shapeList'].append(shape_info)
         else:
+            # Regular shapes need no extra processing
             ret['shapeList'].append(shape)
     return ret
 
 def _pickle_get_b2world(self):
+    """
+    Get the state of the world.
+    """
+
+    # The basic properties first
     vars = ['worldAABB', 'gravity', 'doSleep', 'groundBody']
     data=dict((var, getattr(self, var)) for var in vars)
 
-    data['bodyList']=self.bodyList[1:] # remove the ground body
+    # Now the body list (excepting the ground body)
+    data['bodyList']=self.bodyList[1:]
 
+    # Add all joints, ensuring to downcast to the appropriate type
     jointList = []
     for joint in self.jointList:
         joint=joint.getAsType()
         jointList.append( joint.__getstate__(self) )
     data['jointList']=jointList
 
+    # Add all controllers, ensuring to downcast to the appropriate type
     controllerList = []
     for controller in self.controllerList:
         controller=controller.getAsType()
@@ -387,46 +474,58 @@ def _pickle_get_b2world(self):
     return data
 
 def _pickle_get_controller(self, world=None):
+    """
+    Get the state of a controller
+    """
     if not world:
         raise b2PickleError, "Controllers can't be saved without the world itself"
 
     ignore_prop =['thisown', 'this', 'bodyList']
     defn = globals()[ "%sDef" % self.__class__.__name__ ]
+
+    # Take the available variables in the _definition_
+    # and then create a dictionary
     vars = [v for v in dir(defn) 
         if isinstance(getattr(defn, v), property) 
             and v not in ignore_prop]
 
     ret=dict((var, getattr(self, var)) for var in vars)
+
+    # Set the type, so we know how to recreate it
     ret['_type'] = self.typeName()
 
+    # Then use indices into the world body list to store 
+    # the bodies controlled by this controller
     main_bodyList = world.bodyList
     ctrl_bodyList = self.bodyList
     ret['bodyList']=[main_bodyList.index(body) for body in ctrl_bodyList]
     return ret
 
 def _pickle_get_joint(self, world=None):
+    """
+    Get the state of a joint.
+    """
     if not world:
         raise b2PickleError, "Joints can't be saved without the world itself"
 
+    # Take the available variables in the _definition_
+    # and then create a dictionary
     ignore_prop =['thisown', 'this', 'world', 'type']
     defn = globals()[ "%sDef" % self.__class__.__name__ ]
     vars = [v for v in dir(defn) 
         if isinstance(getattr(defn, v), property) 
             and v not in ignore_prop]
 
-    if 'localAxis1' in vars:
-        # prismatic, rename:
-        #    (defn)       (joint)
-        #    localAxis1 = localXAxis1;
-        # line, rename:
-        #    (defn)       (joint)  
-        #    localAxis1 = localXAxis1;
+    # A single rename is necessary. If localAxis1 (definition) exists,
+    # rename it to localXAxis1 (joint)
+    if 'localAxis1' in vars: # prismatic, line joints
         vars.remove('localAxis1')
         vars.append('localXAxis1')
 
     ret=dict((var, getattr(self, var)) for var in vars)
     ret['_type'] = self.typeName()
 
+    # Recreate the body/joint lists.
     bodyList = world.bodyList
     jointList= world.jointList
     for key, value in ret.iteritems():

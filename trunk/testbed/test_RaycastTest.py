@@ -65,6 +65,11 @@ class RaycastTest (Framework):
         pass
 
     def Step(self, settings):
+        super(RaycastTest, self).Step(settings)
+
+        if not self.laserBody:
+            return
+
         segmentLength = 30.0
         
         segment=box2d.b2Segment()
@@ -98,7 +103,6 @@ class RaycastTest (Framework):
             segment.p1 = laserStart-0.1*laserDir
             segment.p2 = laserStart+segmentLength*laserDir
 
-        super(RaycastTest, self).Step(settings)
 
 if __name__=="__main__":
     main(RaycastTest)

@@ -235,6 +235,9 @@ class BoxCutter (Framework):
     def Step(self, settings):
         super(BoxCutter, self).Step(settings)
     
+        if not self.laserBody:
+            return
+
         self.DrawStringCR("Keys: Cut = c")
 
         segmentLength = 30.0

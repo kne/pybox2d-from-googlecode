@@ -63,6 +63,9 @@ class Revolute (Framework):
         self.joint = self.world.CreateJoint(rjd).getAsType()
     
     def Keyboard(self, key):
+        if not self.joint:
+            return
+
         if key==K_l:
             self.joint.EnableLimit(not self.joint.IsLimitEnabled())
         elif key==K_s:

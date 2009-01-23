@@ -64,17 +64,24 @@ class Empty(Framework):
         # Placed after the physics step, it will draw on top of physics objects
         self.DrawStringCR("*** Base your own testbeds on me! ***")
 
+    def ShapeDestroyed(self, shape):
+        """
+        Callback indicating 'shape' has been destroyed.
+        """
+        pass
+
     def JointDestroyed(self, joint):
         """
         The joint passed in was removed.
         """
         pass
 
-    def BoundaryViolated(self, body):
-        """
-        The body went out of the world's extents.
-        """
-        pass
+    #def BoundaryViolated(self, body):
+    #    """
+    #    The body went out of the world's extents.
+    #    """
+    #    See pygame_main's implementation of BoundaryViolated for more information
+    #    about pickling and general stability.
 
 if __name__=="__main__":
     main(Empty)

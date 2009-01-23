@@ -53,19 +53,22 @@ class TimeOfImpact (Framework):
         self.body2.SetMassFromShapes()
 
     def Step(self, settings):
+        if not self.body1 or not self.body2 or not self.shape1 or not self.shape2:
+            return
+
         sweep1=box2d.b2Sweep()
         sweep1.c0 = (0.0, 20.0)
         sweep1.a0 = 0.0
-        sweep1.c = sweep1.c0
-        sweep1.a = sweep1.a0
+        sweep1.c  = sweep1.c0
+        sweep1.a  = sweep1.a0
         sweep1.t0 = 0.0
         sweep1.localCenter = self.body1.GetLocalCenter()
 
         sweep2=box2d.b2Sweep()
         sweep2.c0 = (9.6363468, 28.050615)
         sweep2.a0 = 1.6408679
-        sweep2.c = sweep2.c0 + (-0.075121880, 0.27358246)
-        sweep2.a = sweep2.a0 - 10.434675
+        sweep2.c  = sweep2.c0 + (-0.075121880, 0.27358246)
+        sweep2.a  = sweep2.a0 - 10.434675
         sweep2.t0 = 0.0
         sweep2.localCenter = self.body2.GetLocalCenter()
 
@@ -73,7 +76,7 @@ class TimeOfImpact (Framework):
 
         self.DrawStringCR("toi = %g" % (toi))
 
-        xf2=box2d.b2XForm ()
+        xf2=box2d.b2XForm()
         sweep2.GetXForm(xf2, toi)
         vertexCount = self.shape2.GetVertexCount()
         vertices = []

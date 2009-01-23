@@ -1014,14 +1014,26 @@ class Framework(pyglet.window.Window):
         pass
 
     def BoundaryViolated(self, body):
-        # Not destroying bodies outside the world AABB will cause
-        # pickling to fail, so destroy it after the next step:
-        self.destroyList.append(body)
         # Be sure to check if any of these bodies are ones your game
         # stores. Using a reference to a deleted object will cause a crash.
         # e.g., 
         # if body==self.player: 
         #     self.player=None
+        #
+        # The following checks for generic usage by testing the pickle variables.
+
+        if hasattr(self, '_pickle_vars'):
+            for var in self._pickle_vars:
+                value=getattr(self, var)
+                if body==value:
+                    setattr(self, var, None)
+                elif isinstance(value, list):
+                    if body in value:
+                        value.remove(body)
+
+        # Not destroying bodies outside the world AABB will cause
+        # pickling to fail, so destroy it after the next step:
+        self.destroyList.append(body)
 
     def Keyboard(self, key):
         pass

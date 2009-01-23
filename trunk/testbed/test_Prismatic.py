@@ -63,6 +63,9 @@ class Prismatic (Framework):
         self.joint = self.world.CreateJoint(pjd).getAsType()
     
     def Keyboard(self, key):
+        if not self.joint:
+            return
+
         if key==K_l:
             self.joint.EnableLimit(not self.joint.IsLimitEnabled())
         elif key==K_m:
@@ -73,8 +76,10 @@ class Prismatic (Framework):
     def Step(self, settings):
         self.DrawStringCR("Keys: (l) limits, (m) motors, (p) speed")
         
-        force = self.joint.GetMotorForce()
-        self.DrawStringCR("Motor Force = %f.0" % force)
+        if self.joint:
+            force = self.joint.GetMotorForce()
+            self.DrawStringCR("Motor Force = %f.0" % force)
+
         super(Prismatic, self).Step(settings)
     
 if __name__=="__main__":

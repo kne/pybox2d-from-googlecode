@@ -174,9 +174,6 @@ class Web (Framework):
         if joint in self.joints:
             print "Joint destroyed and removed from the list"
             self.joints.remove(joint)
-        else:
-            print "Joint destroyed but not found in list", joint
-            # bug here? is this box2d's fault? it passes in shapes!
 
 if __name__=="__main__":
      main(Web)

@@ -59,23 +59,26 @@ class PolyCollision (Framework):
         settings.pause = False
      
     def Keyboard(self, key):
-          p = self.body2.GetPosition()
-          a = self.body2.GetAngle()
-          
-          if key==K_a:
-               p.x -= 0.1
-          elif key==K_d:
-               p.x += 0.1
-          elif key==K_s:
-               p.y -= 0.1
-          elif key==K_w:
-               p.y += 0.1
-          elif key==K_q:
-               a += 0.1 * box2d.b2_pi
-          elif key==K_e:
-               a -= 0.1 * box2d.b2_pi
+        if not self.body2:
+            return
 
-          self.body2.SetXForm(p, a)
-     
+        p = self.body2.GetPosition()
+        a = self.body2.GetAngle()
+
+        if key==K_a:
+            p.x -= 0.1
+        elif key==K_d:
+            p.x += 0.1
+        elif key==K_s:
+            p.y -= 0.1
+        elif key==K_w:
+            p.y += 0.1
+        elif key==K_q:
+            a += 0.1 * box2d.b2_pi
+        elif key==K_e:
+            a -= 0.1 * box2d.b2_pi
+
+        self.body2.SetXForm(p, a)
+
 if __name__=="__main__":
      main(PolyCollision)

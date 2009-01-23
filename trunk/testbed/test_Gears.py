@@ -106,13 +106,14 @@ class Gears (Framework):
         self.joint5 = self.world.CreateJoint(jd5).getAsType()
              
     def Step(self, settings):
-        ratio = self.joint4.GetRatio()
-        value = self.joint1.GetJointAngle() + ratio * self.joint2.GetJointAngle()
-        self.DrawStringCR("theta1 + %.2f * theta2 = %.2f" % (ratio, value))
+        if self.joint1 and self.joint2 and self.joint3 and self.joint4 and self.joint5:
+            ratio = self.joint4.GetRatio()
+            value = self.joint1.GetJointAngle() + ratio * self.joint2.GetJointAngle()
+            self.DrawStringCR("theta1 + %.2f * theta2 = %.2f" % (ratio, value))
 
-        ratio = self.joint5.GetRatio()
-        value = self.joint2.GetJointAngle() + ratio * self.joint3.GetJointTranslation()
-        self.DrawStringCR("theta2 + %.2f * delta = %.2f" % (ratio, value))
+            ratio = self.joint5.GetRatio()
+            value = self.joint2.GetJointAngle() + ratio * self.joint3.GetJointTranslation()
+            self.DrawStringCR("theta2 + %.2f * delta = %.2f" % (ratio, value))
 
         super(Gears, self).Step(settings)
 

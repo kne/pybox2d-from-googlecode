@@ -51,6 +51,9 @@ class ShapeEditing (Framework):
         self.shape2 = None
              
     def Keyboard(self, key):
+        if not self.body:
+            return
+
         if key==K_c:
             if not self.shape2:
                 sd=box2d.b2CircleDef()

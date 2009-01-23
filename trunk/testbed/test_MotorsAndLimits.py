@@ -95,6 +95,9 @@ class MotorsAndLimits (Framework):
         self.joint3 = self.world.CreateJoint(pjd).getAsType()
 
     def Keyboard(self, key):
+        if not self.joint1 or not self.joint2 or not self.joint3:
+            return
+
         if key==K_l:
             self.joint2.EnableLimit(not self.joint2.IsLimitEnabled())
             self.joint3.EnableLimit(not self.joint3.IsLimitEnabled())
@@ -114,10 +117,13 @@ class MotorsAndLimits (Framework):
      
     def Step(self, settings):
         self.DrawStringCR("Keys: (l) limits, (m) motors, (p) prismatic speed")
-        torque1 = self.joint1.GetMotorTorque()
-        torque2 = self.joint2.GetMotorTorque()
-        force3 = self.joint3.GetMotorForce()
-        self.DrawStringCR("Motor Torque = %.0f, %.0f : Motor Force = %.0f" % (torque1,torque2, force3))
+        
+        if self.joint1 and self.joint2 and self.joint3:
+            torque1 = self.joint1.GetMotorTorque()
+            torque2 = self.joint2.GetMotorTorque()
+            force3 = self.joint3.GetMotorForce()
+            self.DrawStringCR("Motor Torque = %.0f, %.0f : Motor Force = %.0f" % (torque1,torque2, force3))
+
         super(MotorsAndLimits, self).Step(settings)
 
 if __name__=="__main__":
