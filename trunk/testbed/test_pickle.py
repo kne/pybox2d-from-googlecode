@@ -21,6 +21,19 @@
 from test_main import *
 import cPickle as pickle
 
+# For using pickling with pybox2d in your own applications, there are several 
+# things you should be aware of:
+#  1. Saving the whole world is necessary. Shapes mean nothing without
+#     bodies, which mean nothing without a world to put them in. You
+#     can save your definitions, but that's additional overhead.
+#  2. Save the state of your application also. The framework takes care
+#     of all class variables in _pickle_vars. So, if you have 
+#      _pickle_vars = ['a', 'b', 'c']
+#     those variables will be pickled with the rest of the world. 
+#     Bodies, shapes, joints, controllers all should work. If you need
+#     more info on how to save manually, you can see Box2D.py itself.
+#  3. ...
+
 class Pickle(Framework):
     name = "Pickle" # Name of the class to display
     bodies = None # loaded from the example
@@ -34,30 +47,74 @@ class Pickle(Framework):
 
         # for more info, see the pickle_load and pickle_save functions.
 
-        # For using pickling in your own applications, there are several things
-        # you have to be aware of:
-        #  1. Saving the whole world is necessary. Shapes mean nothing without
-        #     bodies, which mean nothing without a world to put them in. You
-        #     can save your definitions, but that's additional overhead.
-        #  2. Save the state of your application also. The framework takes care
-        #     of all class variables in _pickle_vars. So, if you have 
-        #      _pickle_vars = ['a', 'b', 'c']
-        #     those variables will be pickled with the rest of the world. 
-        #     Bodies, shapes, joints, controllers all should work. If you need
-        #     more info on how to save manually, you can see Box2D.py itself.
-        #           
-        #  3. ...
-        #
-        #  XX. Bodies that left the world AABB aren't taken care of yet; this is a TODO
+    def Step(self, settings):
+        super(Pickle, self).Step(settings)
+        self.DrawStringCR("So, does Pickling work?")
+
+    # A couple examples of selective pickling.
+    # These are unnecessary in normal save/load circumstances, but 
+    # perhaps if you are writing an editor or something along those lines,
+    # they will be of use.
+    def pickle_save_no_joints(self, fn):
+        """
+        Save only bodies and controllers.
+
+        Uses a bit of a hack to make the pickler think that there are 
+        no joints.
+        """
+
+        self._pickle_vars=['bodies']
+
+        backup_jointList = box2d.b2World.jointList
+        box2d.b2World.jointList = []
+        self.pickle_save(fn)
+        box2d.b2World.jointList = backup_jointList
+
+    def pickle_save_statics(self, fn):
+        """
+        Save only static bodies.
+
+        Joints cannot be saved unless extra processing is done
+        to ensure that all necessary bodies are saved with the
+        joints.
+
+        The ground body is saved regardless.
+        """
+
+        self._pickle_vars=[]
+
+        # the pickler will skip the first body from the bodyList
+        # because it assumes it to be the ground body. Always add
+        # this None to your list first.
+        my_bodylist=[None] 
+        for body in self.world.bodyList[1:]: #skip the ground body
+            if body.IsStatic():
+                my_bodylist.append(body)
+
+        backup_bodyList = box2d.b2World.bodyList
+        backup_jointList = box2d.b2World.jointList
+
+        box2d.b2World.jointList = []
+        box2d.b2World.bodyList  = my_bodylist 
+
+        self.pickle_save(fn)
+
+        box2d.b2World.jointList = backup_jointList
+        box2d.b2World.bodyList = backup_bodyList
 
     def Keyboard(self, key):
         # F5/F7 taken care of by the main testbed.
         # F5 saves to 'pickle_output', F7 loads the same file
-        pass
-
-    def Step(self, settings):
-        super(Pickle, self).Step(settings)
-        self.DrawStringCR("So, does Pickling work?")
+        if key==K_F2:
+            fn='pickle_output_Pickle_no_joints'
+            self.pickle_save_no_joints(fn)
+            self.pickle_load(fn)
+            print 'Loaded joint count:', len(self.world.jointList)
+        elif key==K_F3:
+            fn='pickle_output_Pickle_only_statics'
+            self.pickle_save_statics(fn)
+            self.pickle_load(fn)
+            print 'Loaded body count', len(self.world.bodyList)
 
 if __name__=="__main__":
     main(Pickle)

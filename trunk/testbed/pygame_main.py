@@ -740,7 +740,7 @@ class Framework(object):
         self.world.SetBoundaryListener(self.boundaryListener)
         self.world.SetContactListener(self.contactListener)
         self.world.SetDebugDraw(self.debugDraw)
-        print 'Loaded'
+        print 'Loaded from %s' % fn
 
         return variables
 
@@ -760,7 +760,7 @@ class Framework(object):
             print 'Pickling failed: ', s
             return
 
-        print 'Saved'
+        print 'Saved to %s' % fn
 
     def _Keyboard_Event(self, key):
         """
