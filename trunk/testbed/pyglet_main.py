@@ -423,9 +423,11 @@ class Framework(pyglet.window.Window):
     bomb               = None
     bombSpawning       = False
     bombSpawnPoint     = None
+    points             = []
     mouseJoint         = None
     settings           = fwSettings
     mouseWorld         = None
+    destroyList        = []
 
     # Box2D-callbacks
     destructionListener= None
@@ -732,6 +734,11 @@ class Framework(pyglet.window.Window):
         self.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
         self.world.Validate()
 
+        # Destroy bodies that have left the world AABB (can be removed if not using pickling)
+        for obj in self.destroyList:
+            self.world.DestroyBody(obj)
+        self.destroyList = []
+
         # If the bomb is frozen, get rid of it.
         if self.bomb and self.bomb.IsFrozen():
             self.world.DestroyBody(self.bomb)
@@ -1007,7 +1014,14 @@ class Framework(pyglet.window.Window):
         pass
 
     def BoundaryViolated(self, body):
-        pass
+        # Not destroying bodies outside the world AABB will cause
+        # pickling to fail, so destroy it after the next step:
+        self.destroyList.append(body)
+        # Be sure to check if any of these bodies are ones your game
+        # stores. Using a reference to a deleted object will cause a crash.
+        # e.g., 
+        # if body==self.player: 
+        #     self.player=None
 
     def Keyboard(self, key):
         pass

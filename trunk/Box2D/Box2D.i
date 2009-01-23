@@ -56,6 +56,7 @@
         }
     %}
 
+    %include "Box2D/Box2D_doxygen.i"
     %include "Box2D/Box2D_printing.i"
     %include "Box2D/Box2D_pickling.i"
 

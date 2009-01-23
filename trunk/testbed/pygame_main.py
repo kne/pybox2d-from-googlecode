@@ -732,6 +732,7 @@ class Framework(object):
 
         self.bomb = None
         self.bombSpawning = False
+        self.points = []
 
         # have to reset a few things that can't be saved:
         self.world.SetDestructionListener(self.destructionListener)
