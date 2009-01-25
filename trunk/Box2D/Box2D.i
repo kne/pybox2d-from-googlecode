@@ -111,27 +111,49 @@
        passes it onto the factory output (b2Body) upon creation, it's necessary 
        to intercept the CreateBody/Joint/Shape functions to increase the refcount
        for each of those functions.
+
+       And upon being destroyed, the userData refcount must be decreased.
      */
+    
     %extend b2World {
     public:        
         b2Body* CreateBody(b2BodyDef* defn) {
+            b2Body* ret;
             if (defn)
                 Py_XINCREF((PyObject*)defn->userData);
-            return self->CreateBody(defn);
+            ret=self->CreateBody(defn);
+            return ret;
         }
         b2Joint* CreateJoint(b2JointDef* defn) {
+            b2Joint* ret;
             if (defn)
                 Py_XINCREF((PyObject*)defn->userData);
-            return self->CreateJoint(defn);
+            ret=self->CreateJoint(defn);
+            return ret;
         }
+        void DestroyBody(b2Body* body) {
+            Py_XDECREF((PyObject*)body->GetUserData());
+            self->DestroyBody(body);
+        }
+        void DestroyJoint(b2Joint* joint) {
+            Py_XDECREF((PyObject*)joint->GetUserData());
+            self->DestroyJoint(joint);
+        }
+
     }
 
     %extend b2Body {
     public:        
+        void DestroyShape(b2Shape* shape) {
+            Py_XDECREF((PyObject*)shape->GetUserData());
+            self->DestroyShape(shape);
+        }
         b2Shape* CreateShape(b2ShapeDef* defn) {
+            b2Shape* ret;
             if (defn)
                 Py_XINCREF((PyObject*)defn->userData);
-            return self->CreateShape(defn);
+            ret=self->CreateShape(defn);
+            return ret;
         }
         PyObject* GetUserData() {
             PyObject* ret=(PyObject*)self->GetUserData();
@@ -148,11 +170,7 @@
             self->SetUserData(NULL);
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
-            def __del__(self):
-                # Clear the userData if this is not a temporary pickle instance
-                if not hasattr(self, '__pickle_data__'):
-                    self.ClearUserData()
+            userData = property(GetUserData, SetUserData)
         %}
     }
 
@@ -173,11 +191,7 @@
             self->SetUserData(NULL);
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
-            def __del__(self):
-                # Clear the userData if this is not a temporary pickle instance
-                if not hasattr(self, '__pickle_data__'):
-                    self.ClearUserData()
+            userData = property(GetUserData, SetUserData)
         %}
     }
 
@@ -198,11 +212,7 @@
             self->SetUserData(NULL);
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
-            def __del__(self):
-                # Clear the userData if this is not a temporary pickle instance
-                if not hasattr(self, '__pickle_data__'):
-                    self.ClearUserData()
+            userData = property(GetUserData, SetUserData)
         %}
     }
 
@@ -228,7 +238,7 @@
             self->userData=NULL;
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
+            userData = property(GetUserData, SetUserData)
             def __del__(self):
                 self.ClearUserData()
         %}
@@ -255,7 +265,7 @@
             self->userData=NULL;
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
+            userData = property(GetUserData, SetUserData)
             def __del__(self):
                 self.ClearUserData()
         %}
@@ -282,7 +292,7 @@
             self->userData=NULL;
         }
         %pythoncode %{
-            userData = property(GetUserData, SetUserData, ClearUserData)
+            userData = property(GetUserData, SetUserData)
             def __del__(self):
                 self.ClearUserData()
         %}
@@ -292,9 +302,18 @@
     // original C++ versions and not the ones I have written.
     %ignore SetUserData;
     %ignore GetUserData;
+
+    %newobject b2World::CreateBody;
+    %newobject b2World::CreateJoint;
+    %newobject b2Body::CreateShape;
+
     %ignore b2World::CreateBody;
     %ignore b2World::CreateJoint;
     %ignore b2Body::CreateShape;
+
+    %ignore b2World::DestroyBody;
+    %ignore b2World::DestroyJoint;
+    %ignore b2Body::DestroyShape;
 
     /* ---- typemaps ---- */
     %typemap(in) b2Vec2* self {
