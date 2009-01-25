@@ -40,6 +40,7 @@
         }
     #endif
 
+    #pragma SWIG nowarn=314
     // Add support for == and != in Python for shapes, joints, and bodies.
     %inline %{
         bool __b2PythonJointPointerEquals__(b2Joint* a, b2Joint* b) {
@@ -76,7 +77,7 @@
     // the physics step, usually. So, catch those errors and report them back to Python.
     %exception b2World::Step {
         try { $action }
-        catch (Swig::DirectorException &e) { SWIG_fail; }
+        catch (Swig::DirectorException) { SWIG_fail; }
     }
     /* ---- renames ---- */
 
@@ -90,7 +91,7 @@
     %rename(b2mul) operator * (float32 s, const b2Vec3& a);
     %rename(b2add) operator + (const b2Vec3& a, const b2Vec3& b);
     %rename(b2sub) operator - (const b2Vec3& a, const b2Vec3& b);
-    
+
     //Since Python (apparently) requires __imul__ to return self,
     //these void operators will not do. So, rename them, then call them
     //with Python code, and return self. (see further down in b2Vec2)
@@ -104,6 +105,197 @@
     %rename(_GetJointList) b2World::GetJointList;
     %rename(_GetControllerList) b2World::GetControllerList;
 
+    /* Take care of userData first */
+
+    /* Note: Given that we have a definition (b2BodyDef) that takes the userData, then
+       passes it onto the factory output (b2Body) upon creation, it's necessary 
+       to intercept the CreateBody/Joint/Shape functions to increase the refcount
+       for each of those functions.
+     */
+    %extend b2World {
+    public:        
+        b2Body* CreateBody(b2BodyDef* defn) {
+            if (defn)
+                Py_XINCREF((PyObject*)defn->userData);
+            return self->CreateBody(defn);
+        }
+        b2Joint* CreateJoint(b2JointDef* defn) {
+            if (defn)
+                Py_XINCREF((PyObject*)defn->userData);
+            return self->CreateJoint(defn);
+        }
+    }
+
+    %extend b2Body {
+    public:        
+        b2Shape* CreateShape(b2ShapeDef* defn) {
+            if (defn)
+                Py_XINCREF((PyObject*)defn->userData);
+            return self->CreateShape(defn);
+        }
+        PyObject* GetUserData() {
+            PyObject* ret=(PyObject*)self->GetUserData();
+            if (!ret) ret=Py_None;
+            Py_XINCREF(ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(data);
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(NULL);
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                # Clear the userData if this is not a temporary pickle instance
+                if not hasattr(self, '__pickle_data__'):
+                    self.ClearUserData()
+        %}
+    }
+
+    %extend b2Joint {
+    public:        
+        PyObject* GetUserData() {
+            PyObject* ret=(PyObject*)self->GetUserData();
+            if (!ret) ret=Py_None;
+            Py_XINCREF(ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(data);
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(NULL);
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                # Clear the userData if this is not a temporary pickle instance
+                if not hasattr(self, '__pickle_data__'):
+                    self.ClearUserData()
+        %}
+    }
+
+    %extend b2Shape {
+    public:        
+        PyObject* GetUserData() {
+            PyObject* ret=(PyObject*)self->GetUserData();
+            if (!ret) ret=Py_None;
+            Py_XINCREF(ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(data);
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->GetUserData());
+            self->SetUserData(NULL);
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                # Clear the userData if this is not a temporary pickle instance
+                if not hasattr(self, '__pickle_data__'):
+                    self.ClearUserData()
+        %}
+    }
+
+    //Allow access to userData in definitions, with proper destruction
+    %extend b2JointDef {
+    public:
+        PyObject* GetUserData() {
+            PyObject* ret;
+            if (!self->userData)
+                ret=Py_None;
+            else
+                ret=(PyObject*)self->userData;
+            Py_INCREF((PyObject*)ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->userData);
+            Py_INCREF(data);
+            self->userData=(void*)data;
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->userData);
+            self->userData=NULL;
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                self.ClearUserData()
+        %}
+    }
+
+    %extend b2BodyDef {
+    public:
+        PyObject* GetUserData() {
+            PyObject* ret;
+            if (!self->userData)
+                ret=Py_None;
+            else
+                ret=(PyObject*)self->userData;
+            Py_INCREF((PyObject*)ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->userData);
+            Py_INCREF(data);
+            self->userData=(void*)data;
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->userData);
+            self->userData=NULL;
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                self.ClearUserData()
+        %}
+    }
+
+    %extend b2ShapeDef {
+    public:
+        PyObject* GetUserData() {
+            PyObject* ret;
+            if (!self->userData)
+                ret=Py_None;
+            else
+                ret=(PyObject*)self->userData;
+            Py_INCREF((PyObject*)ret);
+            return ret;
+        }
+        void SetUserData(PyObject* data) {
+            Py_XDECREF((PyObject*)self->userData);
+            Py_INCREF(data);
+            self->userData=(void*)data;
+        }
+        void ClearUserData() {
+            Py_XDECREF((PyObject*)self->userData);
+            self->userData=NULL;
+        }
+        %pythoncode %{
+            userData = property(GetUserData, SetUserData, ClearUserData)
+            def __del__(self):
+                self.ClearUserData()
+        %}
+    }
+
+    // These renames are intentionally below the above CreateBody, as they will rename the 
+    // original C++ versions and not the ones I have written.
+    %ignore SetUserData;
+    %ignore GetUserData;
+    %ignore b2World::CreateBody;
+    %ignore b2World::CreateJoint;
+    %ignore b2Body::CreateShape;
+
     /* ---- typemaps ---- */
     %typemap(in) b2Vec2* self {
         int res1 = SWIG_ConvertPtr($input, (void**)&$1, SWIGTYPE_p_b2Vec2, 0);
@@ -111,7 +303,7 @@
             SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
         }
     }
-    
+
     //Resolve ambiguities in overloaded functions when you pass a tuple or list when 
     //SWIG expects a b2Vec2
     %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec2*,b2Vec2& {
@@ -177,7 +369,7 @@
         $1 = &temp;
     }
 
-    //Allow access to (m_)userData, along with Get/SetUserData
+    //Allow access to void* types
     %typemap(in) void* {
         $1 = $input;
         Py_INCREF((PyObject*)$1);
@@ -205,6 +397,7 @@
 
     /* ---- ignores ---- */
     /*Re-implement these inaccessible members on the Python side:*/
+    %ignore userData;
     %ignore b2PolygonDef::vertices;
     %ignore b2EdgeChainDef::vertices;
     %ignore b2PolygonShape::vertices;
@@ -347,7 +540,7 @@
             controllerList = property(GetControllerList, None)
         %}
     }
-        
+
     %extend b2Shape {
     public:
         PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
@@ -367,13 +560,12 @@
             PyTuple_SetItem(ret, 2, normal_tuple);
             return ret;
         }
-
+        
         %pythoncode %{
         filter     = property(GetFilterData, SetFilterData)
         friction   = property(GetFriction, SetFriction)
         restitution= property(GetRestitution, SetRestitution)
         density    = property(GetDensity, SetDensity)
-        userData   = property(GetUserData, SetUserData)
         isSensor   = property(IsSensor, None) # for symmetry with defn + pickling
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
@@ -404,7 +596,7 @@
             return NULL;
         }
     }
-   
+
     //Support using == on bodies, joints, and shapes
     %pythoncode %{
         def b2ShapeCompare(a, b):
@@ -674,7 +866,6 @@
         type    =property(GetType    , None)
         body1   =property(GetBody1   , None)
         body2   =property(GetBody2   , None)
-        userData=property(GetUserData, SetUserData)
         collideConnected=property(GetCollideConnected, None)
         def typeName(self):
             """
@@ -811,7 +1002,7 @@
             return &( $self->GetNormals() [vnum] );
         }
     }
-    
+
 
     %extend b2EdgeChainDef {
     public:
@@ -820,6 +1011,7 @@
             return "b2EdgeDef(vertices: %s count: %d)" % (self.getVertices_tuple(), self.vertexCount)
         def __del__(self):
             """Cleans up by freeing the allocated vertex array"""
+            super(b2EdgeChainDef, self).__del__()
             self._cleanUp()
         def getVertices_tuple(self):
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
@@ -1070,7 +1262,6 @@
                 return shapeList
 
             massData      = property(getMassData, SetMass)
-            userData      = property(GetUserData, SetUserData)
             position      = property(GetPosition, setPosition)
             angle         = property(GetAngle, setAngle)
             linearDamping = property(GetLinearDamping, None)
@@ -1393,7 +1584,7 @@
     %rename(quantizationFactor) b2BroadPhase::m_quantizationFactor;
     %rename(proxyCount)         b2BroadPhase::m_proxyCount;
     %rename(timeStamp)          b2BroadPhase::m_timeStamp;
-    
+
     //b2Contact
     %rename(flags)             b2Contact::m_flags;
     %rename(manifoldCount)     b2Contact::m_manifoldCount;
@@ -1409,6 +1600,7 @@
     %rename(world)             b2ContactManager::m_world;
     %rename(nullContact)       b2ContactManager::m_nullContact;
     %rename(destroyImmediate)  b2ContactManager::m_destroyImmediate;
+
 #endif
 
 %include "Box2D/Box2D.h"

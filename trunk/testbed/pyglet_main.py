@@ -1039,7 +1039,6 @@ class Framework(pyglet.window.Window):
         pass
 
 def main(test_class):
-    print "----------------------------------"
     print "Loading %s..." % test_class.name
     test = test_class()
     if fwSettings.onlyInit:
