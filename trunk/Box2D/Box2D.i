@@ -339,14 +339,17 @@
             int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
             if (sz != 2) {
                 PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+                SWIG_fail;
             }
             int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
             if (!SWIG_IsOK(res1)) {
                 PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+                SWIG_fail;
             } 
             res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.y);
             if (!SWIG_IsOK(res1)) {
                 PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+                SWIG_fail;
             } 
         } else if ($input==Py_None) {
             temp.Set(0.0f,0.0f);
@@ -354,6 +357,7 @@
             int res1 = SWIG_ConvertPtr($input, (void**)&$1, $1_descriptor, 0);
             if (!SWIG_IsOK(res1)) {
                 SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+                SWIG_fail;
             }
             temp =(b2Vec2&) *$1;
         }
@@ -367,14 +371,17 @@
             int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
             if (sz != 2) {
                 PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+                SWIG_fail;
             }
             int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
             if (!SWIG_IsOK(res1)) {
                 PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+                SWIG_fail;
             } 
             res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.y);
             if (!SWIG_IsOK(res1)) {
                 PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Vec2, expected int/float arguments");
+                SWIG_fail;
             } 
         } else if ($input == Py_None) {
             temp.Set(0.0f,0.0f);
@@ -433,7 +440,7 @@
 
             if (!shapes) {
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
-                return ret;
+                return NULL;
             }
             
             if (userData==Py_None) {
@@ -491,7 +498,7 @@
 
             if (!shapes) {
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
-                return ret;
+                return NULL;
             }
 
             int32 num=$self->Query(aabb, shapes, maxCount);
@@ -1069,6 +1076,7 @@
             if (!$self->vertices) {
                 $self->vertexCount = 0;
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
+                return;
             }
             $self->vertexCount = _count;
         }
@@ -1312,6 +1320,13 @@
     %}
 
     /* Additional supporting C++ code */
+    %typemap(out) bool b2CheckPolygonDef(b2PolygonDef*) {
+        if (!$1) 
+            SWIG_fail;
+        else
+            $result = SWIG_From_bool(static_cast< bool >($1));
+    }
+
     %inline %{
         // Add some functions that might be commonly used
         bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {
@@ -1463,9 +1478,179 @@
             return ret;
         }
 
-    %}
+        // Modified from the b2PolygonShape constructor
+        // Should be as accurate as the original version
+        b2Vec2 __b2ComputeCentroid(const b2Vec2* vs, int32 count) {
+            b2Vec2 c; c.Set(0.0f, 0.0f);
+            if (count < 3 || count >= b2_maxPolygonVertices) {
+                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
+                return c;
+            }
 
-    /* Additional supporting python code */
+            float32 area = 0.0f;
+
+            // pRef is the reference point for forming triangles.
+            // It's location doesn't change the result (except for rounding error).
+            b2Vec2 pRef(0.0f, 0.0f);
+
+            const float32 inv3 = 1.0f / 3.0f;
+
+            for (int32 i = 0; i < count; ++i)
+            {
+                // Triangle vertices.
+                b2Vec2 p1 = pRef;
+                b2Vec2 p2 = vs[i];
+                b2Vec2 p3 = i + 1 < count ? vs[i+1] : vs[0];
+
+                b2Vec2 e1 = p2 - p1;
+                b2Vec2 e2 = p3 - p1;
+
+                float32 D = b2Cross(e1, e2);
+
+                float32 triangleArea = 0.5f * D;
+                area += triangleArea;
+
+                // Area weighted centroid
+                c += triangleArea * inv3 * (p1 + p2 + p3);
+            }
+
+            // Centroid
+            if (area <= B2_FLT_EPSILON) {
+                PyErr_SetString(PyExc_ValueError, "ComputeCentroid: area <= FLT_EPSILON");
+                return c;
+            }
+
+            c *= 1.0f / area;
+            return c;
+        }
+
+        bool __b2ComputeOBB(b2OBB* obb, const b2Vec2* vs, int32 count)
+        {
+            if (count < 3 || count >= b2_maxPolygonVertices) {
+                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
+                return false;
+            }
+
+            b2Vec2 p[b2_maxPolygonVertices + 1];
+            for (int32 i = 0; i < count; ++i)
+            {
+                p[i] = vs[i];
+            }
+            p[count] = p[0];
+
+            float32 minArea = B2_FLT_MAX;
+            
+            for (int32 i = 1; i <= count; ++i)
+            {
+                b2Vec2 root = p[i-1];
+                b2Vec2 ux = p[i] - root;
+                float32 length = ux.Normalize();
+                if (length <= B2_FLT_EPSILON) {
+                    PyErr_SetString(PyExc_ValueError, "ComputeOBB: length <= B2_FLT_EPSILON");
+                    return false;
+                }
+                b2Vec2 uy(-ux.y, ux.x);
+                b2Vec2 lower(B2_FLT_MAX, B2_FLT_MAX);
+                b2Vec2 upper(-B2_FLT_MAX, -B2_FLT_MAX);
+
+                for (int32 j = 0; j < count; ++j)
+                {
+                    b2Vec2 d = p[j] - root;
+                    b2Vec2 r;
+                    r.x = b2Dot(ux, d);
+                    r.y = b2Dot(uy, d);
+                    lower = b2Min(lower, r);
+                    upper = b2Max(upper, r);
+                }
+
+                float32 area = (upper.x - lower.x) * (upper.y - lower.y);
+                if (area < 0.95f * minArea)
+                {
+                    minArea = area;
+                    obb->R.col1 = ux;
+                    obb->R.col2 = uy;
+                    b2Vec2 center = 0.5f * (lower + upper);
+                    obb->center = root + b2Mul(obb->R, center);
+                    obb->extents = 0.5f * (upper - lower);
+                }
+            }
+
+            if (minArea >= B2_FLT_MAX) {
+                PyErr_SetString(PyExc_ValueError, "ComputeOBB: minArea >= B2_FLT_MAX");
+                return false;
+            }
+            return true;
+        }
+
+        bool b2CheckPolygonDef(b2PolygonDef* poly) {
+            // Get the vertices transformed into the body frame.
+            if (poly->vertexCount < 3 || poly->vertexCount >= b2_maxPolygonVertices) {
+                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
+                return false;
+            }
+
+            // Compute normals. Ensure the edges have non-zero length.
+            b2Vec2 m_normals[b2_maxPolygonVertices];
+            for (int32 i = 0; i < poly->vertexCount; ++i)
+            {
+                int32 i1 = i;
+                int32 i2 = i + 1 < poly->vertexCount ? i + 1 : 0;
+                b2Vec2 edge = poly->vertices[i2] - poly->vertices[i1];
+                if (edge.LengthSquared() <= B2_FLT_EPSILON * B2_FLT_EPSILON) {
+                    PyErr_SetString(PyExc_ValueError, "edge.LengthSquared < FLT_EPSILON**2");
+                    return false;
+                }
+                
+                m_normals[i] = b2Cross(edge, 1.0f);
+                m_normals[i].Normalize();
+            }
+
+            // Compute the polygon centroid.
+            b2Vec2 m_centroid = __b2ComputeCentroid(poly->vertices, poly->vertexCount);
+            
+            // Compute the oriented bounding box.
+            b2OBB m_obb;
+            __b2ComputeOBB(&m_obb, poly->vertices, poly->vertexCount);
+
+            if (PyErr_Occurred()) 
+                return false;
+
+            // Create core polygon shape by shifting edges inward.
+            // Also compute the min/max radius for CCD.
+            for (int32 i = 0; i < poly->vertexCount; ++i)
+            {
+                int32 i1 = i - 1 >= 0 ? i - 1 : poly->vertexCount - 1;
+                int32 i2 = i;
+
+                b2Vec2 n1 = m_normals[i1];
+                b2Vec2 n2 = m_normals[i2];
+                b2Vec2 v = poly->vertices[i] - m_centroid;
+
+                b2Vec2 d;
+                d.x = b2Dot(n1, v) - b2_toiSlop;
+                d.y = b2Dot(n2, v) - b2_toiSlop;
+
+                // Shifting the edge inward by b2_toiSlop should
+                // not cause the plane to pass the centroid.
+
+                // Your shape has a radius/extent less than b2_toiSlop.
+                if (d.x < 0.0f) {
+                    PyErr_SetString(PyExc_ValueError, "Your shape has a radius/extent less than b2_toiSlop. (d.x < 0.0)");
+                    return false;
+                } else if (d.y < 0.0f) {
+                    PyErr_SetString(PyExc_ValueError, "Your shape has a radius/extent less than b2_toiSlop. (d.y < 0.0)");
+                    return false;
+                }
+                b2Mat22 A;
+                A.col1.x = n1.x; A.col2.x = n1.y;
+                A.col1.y = n2.x; A.col2.y = n2.y;
+                //m_coreVertices[i] = A.Solve(d) + m_centroid;
+            }
+            return true;
+        }
+    %}
+    
+    /* Additional supporting Python code */
     %pythoncode %{
     B2_FLT_EPSILON = 1.192092896e-07
     FLT_EPSILON = B2_FLT_EPSILON
@@ -1520,8 +1705,8 @@
             c += triangleArea * inv3 * (p1 + p2 + p3)
 
         # Centroid
-        if area < FLT_EPSILON:
-            raise ValueError, "ComputeCentroid: area < FLT_EPSILON"
+        if area <= FLT_EPSILON:
+            raise ValueError, "ComputeCentroid: area <= FLT_EPSILON"
 
         return c / area
 
@@ -1530,7 +1715,8 @@
             Checks the Polygon definition to see if upon creation it will cause an assertion.
             Raises ValueError if an assertion would be raised.
 
-            Ported from the Box2D C++ code for CreateShape().
+            Ported from the Box2D C++ code for CreateShape(). The C++ version is now
+            included as it's more accurate, please use b2CheckPolygonDef instead.
         """
 
         if pd.vertexCount < 3 or pd.vertexCount >= b2_maxPolygonVertices:
