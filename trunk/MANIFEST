@@ -5,6 +5,8 @@ LICENSE
 __init__.py
 Box2D/Box2D.i
 Box2D/Box2D_printing.i
+Box2D/Box2D_doxygen.i
+Box2D/Box2D_pickling.i
 Box2D/Collision/b2BroadPhase.cpp
 Box2D/Collision/b2CollideCircle.cpp
 Box2D/Collision/b2CollidePoly.cpp
