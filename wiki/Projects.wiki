@@ -1,8 +1,9 @@
 #summary Projects using pyBox2D
 #labels Featured
 
-=== Libraries / Add-ons ===
+=== Libraries / Add-ons / Learning Utilities ===
 
+ * [http://mekanimo.net/ Mekanimo] Simulation designer for games/learning/etc. with nice GUI and export options
  * [http://code.google.com/p/pybox2d-foil/ pybox2d-foil] Airfoil physics simulation for pyBox2D by [http://code.google.com/u/snickell/ snickell]
  * [http://code.google.com/p/pytform/ pytform] Work in progress pyglet 2d polygon-based game development kit
  * [http://elements.linuxuser.at/ Elements] Work in progress simplified physics API (dead?)
