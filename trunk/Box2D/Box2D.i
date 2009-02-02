@@ -1107,6 +1107,7 @@
                         vertices.extend( [edge.vertex1, edge.vertex2] )
                         return vertices
                 vertices.append( last )
+                return vertices
 
             length      = property(GetLength,      None)
             vertex1     = property(GetVertex1,     None)
