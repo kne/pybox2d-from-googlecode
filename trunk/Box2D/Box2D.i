@@ -1649,6 +1649,28 @@
             }
             return true;
         }
+
+        /* As of Box2D SVN r191, these functions are no longer in b2Math.h,
+           so re-add them here for backwards compatibility */
+        #define RAND_LIMIT      32767      
+        // Random number in range [-1,1]      
+        float32 b2Random()      
+        {      
+                float32 r = (float32)(rand() & (RAND_LIMIT));      
+                r /= RAND_LIMIT;      
+                r = 2.0f * r - 1.0f;      
+                return r;      
+        }      
+              
+        /// Random floating point number in range [lo, hi]      
+        float32 b2Random(float32 lo, float32 hi)      
+        {      
+                float32 r = (float32)(rand() & (RAND_LIMIT));      
+                r /= RAND_LIMIT;      
+                r = (hi - lo) * r + lo;      
+                return r;      
+        }
+
     %}
     
     /* Additional supporting Python code */
