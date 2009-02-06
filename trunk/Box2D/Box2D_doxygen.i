@@ -1176,7 +1176,7 @@ the fraction between [0,1] in which the shapes first touch. fraction=0 means the
 
 %feature("docstring") b2Mul "Multiply a matrix times a vector.";
 
-%feature("docstring") b2Random "Random floating point number in range [lo, hi].";
+%feature("docstring") b2Random "Random floating point number in range [lo, hi]. With no arguments, returns one in -1,1.";
 
 %feature("docstring") b2NextPowerOfTwo "\"Next Largest Power of 2 Given a binary integer value x, the next largest power of 2 can be computed by a SWAR algorithm that recursively \"folds\" the upper bits into the lower bits. This process yields a bit vector with the same most significant 1 as x, but all 1's below it. Adding 1 to that value yields the next largest power of 2. For a 32-bit value:\"";
 

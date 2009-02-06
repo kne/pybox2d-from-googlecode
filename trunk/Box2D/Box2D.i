@@ -163,6 +163,7 @@
         }
         void SetUserData(PyObject* data) {
             Py_XDECREF((PyObject*)self->GetUserData());
+            Py_INCREF(data);
             self->SetUserData(data);
         }
         void ClearUserData() {
@@ -184,6 +185,7 @@
         }
         void SetUserData(PyObject* data) {
             Py_XDECREF((PyObject*)self->GetUserData());
+            Py_INCREF(data);
             self->SetUserData(data);
         }
         void ClearUserData() {
@@ -205,6 +207,7 @@
         }
         void SetUserData(PyObject* data) {
             Py_XDECREF((PyObject*)self->GetUserData());
+            Py_INCREF(data);
             self->SetUserData(data);
         }
         void ClearUserData() {
@@ -1327,7 +1330,33 @@
         else
             $result = SWIG_From_bool(static_cast< bool >($1));
     }
+    %feature("docstring") b2CheckPolygonDef "
+        Checks the Polygon definition to see if upon creation it will cause an assertion.
+        Raises ValueError if an assertion would be raised.
 
+        b2PolygonDef* poly     - the polygon definition
+        bool additional_checks - whether or not to run additional checks
+
+        Additional checking: usually only in DEBUG mode on the C++ code.
+
+        While shapes that pass this test can be created without assertions,
+        they will ultimately create unexpected behavior. It's recommended
+        to _not_ use any polygon that fails this test.
+    ";
+
+    %feature("docstring") b2AABBOverlaps "Checks if two AABBs overlap, or if a point
+    lies in an AABB
+    
+    b2AABBOverlaps(AABB1, [AABB2/point])
+    ";
+
+    %feature("docstring") collideCircleParticle "For liquid simulation. Checks if a particle
+    would collide with the specified circle.
+    ";
+
+    %feature("docstring") b2CollidePolyParticle "For liquid simulation. Checks if a particle
+    would collide with the specified polygon.
+    ";
     %inline %{
         // Add some functions that might be commonly used
         bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {
@@ -1583,7 +1612,7 @@
             return true;
         }
 
-        bool b2CheckPolygonDef(b2PolygonDef* poly) {
+        bool b2CheckPolygonDef(b2PolygonDef* poly, bool additional_checks=true) {
             // Get the vertices transformed into the body frame.
             if (poly->vertexCount < 3 || poly->vertexCount >= b2_maxPolygonVertices) {
                 PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
@@ -1647,13 +1676,48 @@
                 A.col1.y = n2.x; A.col2.y = n2.y;
                 //m_coreVertices[i] = A.Solve(d) + m_centroid;
             }
+
+            if (!additional_checks)
+                return true;
+
+            // Ensure the polygon is convex.
+            for (int32 i = 0; i < poly->vertexCount; ++i)
+            {
+                for (int32 j = 0; j < poly->vertexCount; ++j)
+                {
+                    // Do not check vertices on the current edge.
+                    if (j == i || j == (i + 1) % poly->vertexCount)
+                        continue;
+                    
+                    float32 s = b2Dot(m_normals[i], poly->vertices[j] - poly->vertices[i]);
+                    if (s >= -b2_linearSlop) {
+                        PyErr_SetString(PyExc_ValueError, "Your polygon is non-convex (it has an indentation), or it's too skinny");
+                        return false;
+                    }
+                }
+            }
+
+            // Ensure the polygon is counter-clockwise.
+            for (int32 i = 1; i < poly->vertexCount; ++i)
+            {
+                float32 cross = b2Cross(m_normals[i-1], m_normals[i]);
+
+                // Keep asinf happy.
+                cross = b2Clamp(cross, -1.0f, 1.0f);
+
+                float32 angle = asinf(cross);
+                if (angle <= b2_angularSlop) {
+                    PyErr_SetString(PyExc_ValueError, "You have consecutive edges that are almost parallel on your polygon.");
+                    return false;
+                }
+            }
             return true;
         }
 
         /* As of Box2D SVN r191, these functions are no longer in b2Math.h,
            so re-add them here for backwards compatibility */
         #define RAND_LIMIT      32767      
-        // Random number in range [-1,1]      
+        // Random number in range [-1,1]
         float32 b2Random()      
         {      
                 float32 r = (float32)(rand() & (RAND_LIMIT));      
