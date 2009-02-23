@@ -975,7 +975,7 @@
         def fromTuple(self, tuple):
             """
             Set the vector to the values found in the tuple (x,y)
-            You can also use, of course:
+            You can also use:
                 value = b2Vec2(*tuple)
             """
             self.x, self.y = tuple
@@ -1003,9 +1003,12 @@
             return self
         def dot(self, v):
             """
-            Dot product with v
+            Dot product with v (list/tuple or b2Vec2)
             """
-            return self.x*v.x + self.y*v.y
+            if isinstance(v, (list, tuple)):
+                return self.x*v[0] + self.y*v[1]
+            else:
+                return self.x*v.x + self.y*v.y
 
         %}
         b2Vec2 __div__(float32 a) { //convenience function
