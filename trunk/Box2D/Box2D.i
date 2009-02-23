@@ -349,6 +349,13 @@
                 controllerList.reverse() # controllerlist is in reverse order
                 return controllerList
 
+            def __iter__(self):
+                """
+                Iterates over the bodies in the world
+                """
+                for body in self.bodyList:
+                    yield body
+
             gravity   = property(GetGravity   , SetGravity)
             jointList = property(GetJointList , None)
             bodyList  = property(GetBodyList  , None)
@@ -645,6 +652,13 @@
             bodyList.reverse() # bodylist is in reverse order
             return bodyList
 
+        def __iter__(self):
+            """
+            Iterates over the bodies in the controller
+            """
+            for body in self.bodyList:
+                yield body
+
         __eq__ = b2ControllerCompare
         __ne__ = lambda self,other: not b2ControllerCompare(self,other)
         type = property(GetType, None)
@@ -806,6 +820,13 @@
             for i in range(0, self.GetVertexCount()):
                 vertices.append(self.getNormal(i))
             return vertices
+        def __iter__(self):
+            """
+            Iterates over the vertices in the polygon
+            """
+            for v in self.vertices:
+                yield v
+
         vertices = property(getVertices_tuple, None)
         coreVertices = property(getCoreVertices_tuple, None)
         normals = property(getNormals_tuple, None)
@@ -1088,18 +1109,25 @@
                 shapeList.reverse() # shapelist is in reverse order
                 return shapeList
 
-            massData      = property(getMassData, SetMass)
-            position      = property(GetPosition, setPosition)
-            angle         = property(GetAngle, setAngle)
-            linearDamping = property(GetLinearDamping, None)
-            angularDamping= property(GetAngularDamping, None)
-            allowSleep    = property(CanSleep, AllowSleeping)
-            isSleeping    = property(IsSleeping, None)
-            fixedRotation = property(IsRotationFixed, None)
-            isBullet      = property(IsBullet, SetBullet)
-            angularVelocity=property(GetAngularVelocity,SetAngularVelocity)
-            linearVelocity =property(GetLinearVelocity,SetLinearVelocity)
-            shapeList      =property(GetShapeList, None)
+            def __iter__(self):
+                """
+                Iterates over the shapes in the body
+                """
+                for shape in self.shapeList:
+                    yield shape
+
+            massData      = property(getMassData        , SetMass)
+            position      = property(GetPosition        , setPosition)
+            angle         = property(GetAngle           , setAngle)
+            linearDamping = property(GetLinearDamping   , None)
+            angularDamping= property(GetAngularDamping  , None)
+            allowSleep    = property(CanSleep           , AllowSleeping)
+            isSleeping    = property(IsSleeping         , None)
+            fixedRotation = property(IsRotationFixed    , None)
+            isBullet      = property(IsBullet           , SetBullet)
+            angularVelocity=property(GetAngularVelocity , SetAngularVelocity)
+            linearVelocity =property(GetLinearVelocity  , SetLinearVelocity)
+            shapeList      =property(GetShapeList       , None)
         %}
     }
 
@@ -1399,14 +1427,14 @@
     B2_FLT_EPSILON = 1.192092896e-07
     FLT_EPSILON = B2_FLT_EPSILON
     B2_FLT_MAX     = 3.402823466e+38
-    cvars = ["b2_pi","b2_maxManifoldPoints","b2_maxPolygonVertices","b2_maxProxies","b2_maxPairs",
-            "b2_linearSlop","b2_angularSlop","b2_toiSlop","b2_maxTOIContactsPerIsland","b2_maxTOIJointsPerIsland",
-            "b2_velocityThreshold","b2_maxLinearCorrection","b2_maxAngularCorrection","b2_maxLinearVelocity",
-            "b2_maxLinearVelocitySquared","b2_maxAngularVelocity","b2_maxAngularVelocitySquared","b2_contactBaumgarte",
-            "b2_timeToSleep","b2_linearSleepTolerance","b2_angularSleepTolerance","b2_version","b2Vec2_zero",
-            "b2Mat22_identity","b2XForm_identity","b2_nullFeature","b2_nullPair","b2_nullProxy","b2_tableCapacity","b2_tableMask",
-            "b2_invalid","b2_nullEdge","b2BroadPhase_s_validate","b2_defaultFilter","b2_chunkSize","b2_maxBlockSize",
-            "b2_blockSizes","b2_chunkArrayIncrement","b2_stackSize","b2_maxStackEntries","b2_minPulleyLength" ]
+    cvars = ('b2_minPulleyLength','b2Contact_s_initialized','b2Contact_s_registers','b2_maxStackEntries','b2_stackSize',
+             'b2_chunkArrayIncrement','b2_blockSizes','b2_maxBlockSize','b2_chunkSize','b2_defaultFilter','b2BroadPhase_s_validate',
+             'b2_nullEdge','b2_invalid','b2_tableMask','b2_tableCapacity','b2_nullProxy','b2_nullPair','b2_nullFeature','b2XForm_identity',
+             'b2Mat22_identity','b2Vec2_zero','b2_version','b2_byteCount','b2_angularSleepTolerance','b2_linearSleepTolerance',
+             'b2_timeToSleep','b2_contactBaumgarte','b2_maxAngularVelocitySquared','b2_maxAngularVelocity','b2_maxLinearVelocitySquared',
+             'b2_maxLinearVelocity','b2_maxAngularCorrection','b2_maxLinearCorrection','b2_velocityThreshold','b2_maxTOIJointsPerIsland',
+             'b2_maxTOIContactsPerIsland','b2_toiSlop','b2_angularSlop','b2_linearSlop','b2_maxPairs','b2_maxProxies','b2_maxPolygonVertices',
+             'b2_maxManifoldPoints','b2_pi')
 
     def b2PythonComputeCentroid(pd):
         """
