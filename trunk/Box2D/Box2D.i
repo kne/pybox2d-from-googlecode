@@ -985,6 +985,10 @@
     //Extend the vector class to support Python print statements
     //Also, add vector addition and scalar multiplication
     %extend b2Vec2 {
+        b2Vec2(b2Vec2& other) {
+            return new b2Vec2(other.x, other.y);
+        }
+
         %pythoncode %{
         def __repr__(self):
             return "b2Vec2(%g,%g)" % (self.x, self.y)
@@ -1448,7 +1452,7 @@
         if count < 3:
             raise ValueError, "ComputeCentroid: vertex count < 3"
 
-        c = b2Vec2(0, 0)
+        c = b2Vec2(0.0, 0.0)
         area = 0.0
 
         # pRef is the reference point for forming triangles.

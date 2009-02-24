@@ -12,17 +12,39 @@ If that worked, then:
 """
 
 import os
-from distutils.core import setup, Extension
-from distutils.sysconfig import get_python_inc
 from glob import glob
 
+try:
+    from setuptools import (setup, Extension)
+    print 'Using setuptools.'
+except:
+    from distutils.core import (setup, Extension)
+    print 'Setuptools not found; falling back on distutils.'
+
 # release version number
-box2d_version = "2.0.2"
+box2d_version  = '2.0.2'
 release_number = 1
 
 # create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))
 
+def write_init(): 
+    # read in the license header
+    license_header = open(os.path.join('Box2D', 'pybox2d_license_header.txt')).read()
+
+    # create the source code for the file
+    init_source = [ "",
+        "from Box2D import *",
+        "__version__      = '%s'"    % version_str,
+        "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number),
+        ]
+
+    # and create the __init__ file with the appropriate version string
+    f=open('__init__.py', 'w')
+    f.write(license_header)
+    f.write( '\n'.join(init_source) )
+    f.close()
+    
 source_paths = [
     'Box2D/Dynamics/',
     'Box2D/Dynamics/Contacts/',
@@ -44,7 +66,7 @@ pybox2d_extension = \
     Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')
 
 LONG_DESCRIPTION = \
-"""Box2D (version %s) for usage in Python.
+""" 2D physics library Box2D %s for usage in Python.
 
     After installing please be sure to try out the testbed demos.
     They require either pygame or pyglet and are available on the
@@ -52,7 +74,7 @@ LONG_DESCRIPTION = \
 
     pybox2d homepage: http://pybox2d.googlecode.com
     Box2D's homepage: http://www.box2d.org
-    """ % (box2d_version)
+    """ % (box2d_version,)
 
 CLASSIFIERS = [
     "Development Status :: 4 - Beta",
@@ -64,6 +86,8 @@ CLASSIFIERS = [
     "Programming Language :: Python",
     "Games :: Physics Libraries"
     ]
+
+write_init()
 
 setup_dict = dict(
     name             = "Box2D",
