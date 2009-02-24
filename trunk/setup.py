@@ -92,7 +92,7 @@ write_init()
 setup_dict = dict(
     name             = "Box2D",
     version          = version_str,
-    author           = "kne",
+    author           = "Ken Lauer",
     author_email     = "sirkne at gmail dot com",
     description      = "Python Box2D",
     license          = "zlib",

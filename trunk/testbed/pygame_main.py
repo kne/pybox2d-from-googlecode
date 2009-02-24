@@ -122,17 +122,14 @@ class fwContactListener(box2d.b2ContactListener):
     def handleCall(self, state, point):
         if not self.test: return
 
-        k_maxContactPoints = 2048
-        if len(self.test.points) == k_maxContactPoints: return
-
-        self.test.points.append( fwContactPoint() )
-        cp = self.test.points[-1]
-        cp.shape1 = point.shape1
-        cp.shape2 = point.shape2
+        cp          = fwContactPoint()
+        cp.shape1   = point.shape1
+        cp.shape2   = point.shape2
         cp.position = point.position.copy()
-        cp.normal = point.normal.copy()
-        cp.id = point.id
-        cp.state = state
+        cp.normal   = point.normal.copy()
+        cp.id       = point.id
+        cp.state    = state
+        self.test.points.append(cp)
 
     def Add(self, point):
         self.handleCall(fwContactTypes.contactAdded, point)

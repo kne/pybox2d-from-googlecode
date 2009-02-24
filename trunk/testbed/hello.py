@@ -13,7 +13,7 @@ from Box2D import *
 # if bodies reach the end of the world, but it will be slower.
 worldAABB=b2AABB()
 worldAABB.lowerBound = (-100, -100)
-worldAABB.upperBound = (100, 100)
+worldAABB.upperBound = ( 100,  100)
 
 # Define the gravity vector.
 gravity = b2Vec2(0, -10)
@@ -23,7 +23,7 @@ doSleep = True
  
 # Construct a world object, which will hold and simulate the rigid bodies.
 world = b2World(worldAABB, gravity, doSleep)
- 
+
 # Define the ground body.
 groundBodyDef = b2BodyDef()
 groundBodyDef.position = [0, -10]
@@ -65,7 +65,7 @@ body.SetMassFromShapes()
  
 # Prepare for simulation. Typically we use a time step of 1/60 of a
 # second (60Hz) and 10 velocity/8 position iterations. This provides a 
-# high quality simulation # in most game scenarios.
+# high quality simulation in most game scenarios.
 timeStep = 1.0 / 60
 vel_iters, pos_iters = 10, 8
  
@@ -76,8 +76,5 @@ for i in range(60):
     world.Step(timeStep, vel_iters, pos_iters)
  
     # Now print the position and angle of the body.
-    position = body.GetPosition()
-    angle = body.GetAngle()
- 
-    print position, angle
+    print body.position, body.angle
 

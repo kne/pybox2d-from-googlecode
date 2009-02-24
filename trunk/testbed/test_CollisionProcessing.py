@@ -110,32 +110,30 @@ class CollisionProcessing (Framework):
         # We are going to destroy some bodies according to contact
         # points. We must buffer the bodies that should be destroyed
         # because they may belong to multiple contact points.
-        k_maxNuke = 6
         nuke = []
-        nukeCount = 0
         
         # Traverse the contact results. Destroy bodies that
         # are touching heavier bodies.
         body_pairs = [(p.shape1.GetBody(), p.shape2.GetBody()) for p in self.points]
-
+        
         for body1, body2 in body_pairs:
             mass1, mass2 = body1.GetMass(), body2.GetMass()
-
+        
             if mass1 > 0.0 and mass2 > 0.0:
                 if mass2 > mass1:
                     nuke_body = body1
                 else:
                     nuke_body = body2
-
+        
                 if nuke_body not in nuke:
                     nuke.append(nuke_body)
-                    if len(nuke) == k_maxNuke:
-                        break
-
+        
         # Destroy the bodies, skipping duplicates.
         for b in nuke:
             print "Nuking:", b
             self.world.DestroyBody(b)
+        
+        nuke = None
      
         super(CollisionProcessing, self).Step(settings)
 
