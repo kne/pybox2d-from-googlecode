@@ -5,7 +5,7 @@
 
 == Dependencies ==
 
-Requires the Python versions from the official [http://www.python.org/download/ site]. 
+Requires the Python versions from the official [http://www.python.org/download/ site].  As with Pygame, this *does not* work with the Python that comes with OS X. Please use the official installer.
 
 == pygame ==
 
@@ -19,9 +19,7 @@ Requires the Python versions from the official [http://www.python.org/download/ 
 
 == Directories ==
 
-You will find the testbed and manual installed in: */usr/local/share/box2d*
-
-The library itself is installed in Python's site-packages directory: */Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/!Box2D2*
+The library itself is installed in Python's site-packages directory: */Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/!Box2D*
 
 If, for some reason, you delete the site-packages and need to reinstall it (and the installer isn't putting the files there), you can try deleting */Library/Receipts/Box2D*
 
@@ -37,6 +35,4 @@ Requires the Python versions from the official [http://www.python.org/download/ 
 
 == Directories ==
 
-You will find the testbed and manual installed in: *C:\Python25\box2d*
-
-The library itself is installed in Python's site-packages directory: *C:\Python25\lib\site-packages\!Box2D2\*
+The library itself is installed in Python's site-packages directory: *C:\Python25\lib\site-packages\!Box2D\*
