@@ -5,15 +5,20 @@ For now, the main documentation will be kept on the *Box2D [http://www.box2d.org
 
 Please feel free to discuss your ideas and/or problems in the forums, also.
 
-==Getting Started Manual==
+==Manual==
 
-I've started to convert the getting started with Box2D manual to Python. [http://www.box2d.org/wiki/index.php?title=Python_Manual Here] it is.
+The original Box2D manual has been ported to Python and mostly updated for the latest version. You can find it [http://www.box2d.org/wiki/index.php?title=Python_Manual here].
+
+Basic API documentation is available thanks to epydoc, [http://pybox2d.googlecode.com/svn/epydoc/html/index.html here]. It's hardly user-friendly, so unless you know what you're looking for, chances are the testbed examples are still your best bet.
 
 ==Version Numbers==
 
 The version numbers follow the main Box2D releases (currently 2.0.1) with a release number attached. For example, 2.0.1b3 is based on Box2D release 2.0.1 and is the third release of the bindings.
 
 ==Changes==
+
+===2.0.2b1 (2/25/2009)===
+See [http://pybox2d.blogspot.com/2009/02/202b1-released.html here].
 
 ===2.0.2b0 (10/23/2008)===
 
