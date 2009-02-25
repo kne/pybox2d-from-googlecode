@@ -15,6 +15,13 @@ Basic API documentation is available thanks to epydoc, [http://pybox2d.googlecod
 
 The version numbers follow the main Box2D releases (currently 2.0.1) with a release number attached. For example, 2.0.1b3 is based on Box2D release 2.0.1 and is the third release of the bindings.
 
+Starting Box2D 2.0.2b1, the version number of the source code is available in Box2D:
+{{{
+import Box2D
+Box2D.__version__      # '2.0.2b1'
+Box2D.__version_info__ # (2,0,2,1)
+}}}
+
 ==Changes==
 
 ===2.0.2b1 (2/25/2009)===
