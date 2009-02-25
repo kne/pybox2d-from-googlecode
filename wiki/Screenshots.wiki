@@ -5,6 +5,10 @@ Below each image is the linked SVN source code and the operating system from whi
 
 = New for 2.0.2 =
 
+http://pybox2d.googlecode.com/svn/branches/screenshots/bezieredges.png
+
+[http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_BezierEdges.py test_BezierEdges.py] (OS X 10.5.4)
+
 http://pybox2d.googlecode.com/svn/branches/screenshots/pickle.png
 
 [http://code.google.com/p/pybox2d/source/browse/trunk/testbed/test_pickle.py test_pickle.py] (OS X 10.5.4)
