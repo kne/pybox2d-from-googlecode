@@ -27,12 +27,12 @@ of Box2D, please see:
    http://www.box2d.org/wiki/index.php?title=Box2D_with_Python
 
 On the wiki, you will also find more useful things of varying quality.
-A list of classes and their (usually) accessible members:
+Epydoc output for pyBox2D:
 
-   http://www.box2d.org/wiki/index.php?title=PythonAPI
+   http://pybox2d.googlecode.com/svn/epydoc/html/index.html
 
-Which also links to the doxygenated C++ source (a great resource if you can 
-understand it). 
+It's by no means perfect, but it can come in handy.
+
 
 Bugs
 ----
@@ -52,4 +52,3 @@ You can contact the team on the Box2D forums:
 or by e-mail:
 
    sirkne at gmail com
-   santagada
