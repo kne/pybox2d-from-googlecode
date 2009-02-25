@@ -15,17 +15,11 @@ sudo apt-get install build-essentials python-dev swig python-pygame
 {{{
 svn checkout http://pybox2d.googlecode.com/svn/trunk/ pybox2d
 }}}
-  #3 Compile the Box2D static library
-{{{
-cd pybox2d/Box2D/
-make
-}}}
-   Note that if you receive some errors about *-fPIC*, adding -fPIC to your CXXFLAGS (or changing the Makefile) might fix the problem.
-  #4 Build and install the pyBox2D library
+  #3 Build and install the pyBox2D library
 {{{
 python setup.py build
 # Assuming everything goes well...
-sudo python setup.py install
+sudo python setup.py install --force
 }}}
 
 ===Windows===
@@ -47,14 +41,10 @@ svn checkout http://pybox2d.googlecode.com/svn/trunk/ pybox2d
 {{{
 cd /c/path/to/pybox2d/Box2D
 }}}
-  #6 Build the Box2D static library
-{{{
-make
-}}}
-  #7 Build and install pyBox2D
+  #6 Build and install pyBox2D
 {{{
 setup.py build
-setup.py install
+setup.py install --force
 }}}
 
 
@@ -100,37 +90,22 @@ sudo make install
 
 ==== pyBox2D Installation ====
 
-  # Download the latest source distribution of pyBox2D: http://pybox2d.googlecode.com/files/pyBox2D-2.0.1b4-Source.zip
+  # Download the latest source distribution of pyBox2D [http://pybox2d.googlecode.com/files/Box2D-2.0.2b1.zip here]
   # Place the file onto your Desktop  
   # Open Terminal.app located in the Applications/Utilities folder
   # Then enter the following into the terminal window:
 {{{
 cd ~/Desktop
-unzip pyBox2D-*-Source.zip
-cd pyBox2D-*-Source/Box2D/Source
-make
+unzip Box2D-*.zip
+cd Box2D-*/
 python setup.py build
 }}}
-  # If you get this error: `ld: warning in Gen/float/libbox2d.a, file is not of required architecture`, run `python setup.py build` again.
+  If all went well,
 {{{
-sudo python setup.py install
+sudo python setup.py install --force
 <ENTER THE ADMINISTRATOR/ROOT PASSWORD>
 }}}
-  # Hopefully all went well and no errors occurred.
-  # Close the Terminal.app window
-
-==== Test pyBox2D Installation (optional) ====
-
-  # NOTE: The pyBox2D testbed examples require pygame.
-  # Download pygame from: http://www.pygame.org/download.shtml
-  # For a simple gui installer download (as on pygame site): http://rene.f0o.com/~rene/stuff/macosx/pygame-1.8.0rc5-py2.5-macosx10.4.mpkg.zip
-  # To test if the pyBox2D installation works we can see if the testbed examples included in the distribution run
-{{{
-cd ~/Desktop/pyBox2D-*-Source/Box2D/Python/testbed
-python demos.py
-}}}
-  # At this stage take a look at the other examples provided. They are a good starting point to get an idea of how pyBox2D works.
-  # For documentation / technical support to further your software development experience see the links on the project home page.
+  Close the Terminal.app window and see the links on the project home page for the testbed and documentation.
 
 ==== Building pyBox2D from the SVN ====
 
