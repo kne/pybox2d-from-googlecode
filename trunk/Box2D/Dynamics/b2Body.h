@@ -104,7 +104,7 @@ public:
 	/// Creates a shape and attach it to this body.
 	/// @param shapeDef the shape definition.
 	/// @warning This function is locked during callbacks.
-	b2Shape* CreateShape(b2ShapeDef* shapeDef);
+	b2Shape* CreateShape(const b2ShapeDef* shapeDef);
 
 	/// Destroy a shape. This removes the shape from the broad-phase and
 	/// therefore destroys any contacts associated with this shape. All shapes
@@ -144,12 +144,6 @@ public:
 	/// Get the angle in radians.
 	/// @return the current world rotation angle in radians.
 	float32 GetAngle() const;
-
-	/// Get the linear damping.
-	float32 GetLinearDamping() const;
-
-	/// Get the angular damping.
-	float32 GetAngularDamping() const;
 
 	/// Get the world position of the center of mass.
 	const b2Vec2& GetWorldCenter() const;
@@ -231,14 +225,36 @@ public:
 	/// @return the world velocity of a point.
 	b2Vec2 GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) const;
 
+	/// Get the linear damping of the body.
+	float32 GetLinearDamping() const;
+
+	/// Set the linear damping of the body.
+	void SetLinearDamping(float32 linearDamping);
+
+	/// Get the angular damping of the body.
+	float32 GetAngularDamping() const;
+
+	/// Set the angular damping of the body.
+	void SetAngularDamping(float32 angularDamping);
+
 	/// Is this body treated like a bullet for continuous collision detection?
 	bool IsBullet() const;
 
 	/// Should this body be treated like a bullet for continuous collision detection?
 	void SetBullet(bool flag);
 
+	/// Is this body prevented from rotating.
+	bool IsFixedRotation() const;
+
+	/// Set if this body is prevented from rotating.
+	void SetFixedRotation(bool fixed);
+
 	/// Is this body static (immovable)?
 	bool IsStatic() const;
+
+	/// Make this body static (immovable).
+	/// Use SetMass and SetMassFromShapes to make bodies dynamic.
+	void SetStatic();
 
 	/// Is this body dynamic (movable)?
 	bool IsDynamic() const;
@@ -249,14 +265,11 @@ public:
 	/// Is this body sleeping (not simulating).
 	bool IsSleeping() const;
 
+	/// Is this body allowed to sleep
+	bool IsAllowSleeping() const;
+
 	/// You can disable sleeping on this body.
 	void AllowSleeping(bool flag);
-
-	/// Get whether or not this body is allowed to sleep.
-	bool CanSleep() const;
-
-	/// Get whether or not this body is allowed to rotate.
-	bool IsRotationFixed() const;
 
 	/// Wake up this body so it will begin simulating.
 	void WakeUp();
@@ -417,17 +430,6 @@ inline float32 b2Body::GetAngularVelocity() const
 	return m_angularVelocity;
 }
 
-inline float32 b2Body::GetLinearDamping() const
-{
-	return m_linearDamping;
-}
-
-
-inline float32 b2Body::GetAngularDamping() const
-{
-	return m_angularDamping;
-}
-
 inline float32 b2Body::GetMass() const
 {
 	return m_mass;
@@ -468,6 +470,26 @@ inline b2Vec2 b2Body::GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) 
 	return GetLinearVelocityFromWorldPoint(GetWorldPoint(localPoint));
 }
 
+inline float32 b2Body::GetLinearDamping() const
+{
+	return m_linearDamping;
+}
+
+inline void b2Body::SetLinearDamping(float32 linearDamping)
+{
+	m_linearDamping = linearDamping;
+}
+
+inline float32 b2Body::GetAngularDamping() const
+{
+	return m_angularDamping;
+}
+
+inline void b2Body::SetAngularDamping(float32 angularDamping)
+{
+	m_angularDamping = angularDamping;
+}
+
 inline bool b2Body::IsBullet() const
 {
 	return (m_flags & e_bulletFlag) == e_bulletFlag;
@@ -485,10 +507,52 @@ inline void b2Body::SetBullet(bool flag)
 	}
 }
 
+inline bool b2Body::IsFixedRotation() const
+{
+	return (m_flags & e_fixedRotationFlag) == e_fixedRotationFlag;
+}
+
+inline void b2Body::SetFixedRotation(bool fixed)
+{
+	if(fixed)
+	{
+		m_angularVelocity = 0.0f;
+		m_invI = 0.0f;
+		m_flags |= e_fixedRotationFlag;
+	}
+	else
+	{
+		if(m_I > 0.0f)
+		{
+			// Recover m_invI from m_I.
+			m_invI = 1.0f / m_I;
+			m_flags &= e_fixedRotationFlag;
+		}
+		// TODO: Else what?
+	}
+}
+
+
 inline bool b2Body::IsStatic() const
 {
 	return m_type == e_staticType;
 }
+
+inline void b2Body::SetStatic()
+{
+	if(m_type == e_staticType)
+		return;
+	m_mass = 0.0;
+	m_invMass = 0.0f;
+	m_I = 0.0f;
+	m_invI = 0.0f;
+	m_type = e_staticType;
+	for (b2Shape* s = m_shapeList; s; s = s->m_next)
+	{
+		s->RefilterProxy(m_world->m_broadPhase, m_xf);
+	}
+}
+
 
 inline bool b2Body::IsDynamic() const
 {
@@ -505,6 +569,11 @@ inline bool b2Body::IsSleeping() const
 	return (m_flags & e_sleepFlag) == e_sleepFlag;
 }
 
+inline bool b2Body::IsAllowSleeping() const
+{
+	return (m_flags & e_allowSleepFlag) == e_allowSleepFlag;
+}
+
 inline void b2Body::AllowSleeping(bool flag)
 {
 	if (flag)
@@ -516,16 +585,6 @@ inline void b2Body::AllowSleeping(bool flag)
 		m_flags &= ~e_allowSleepFlag;
 		WakeUp();
 	}
-}
-
-inline bool b2Body::CanSleep() const
-{
-	return (m_flags & e_allowSleepFlag) == e_allowSleepFlag;
-}
-
-inline bool b2Body::IsRotationFixed() const
-{
-	return (m_flags & e_fixedRotationFlag) == e_fixedRotationFlag;
 }
 
 inline void b2Body::WakeUp()
