@@ -368,7 +368,7 @@
 
     %extend b2Shape {
     public:
-        int32 __hash__() { return (long)self; }
+        long __hash__() { return (long)self; }
         PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
             int hit;
             float32 lambda=0.0f;
@@ -624,7 +624,7 @@
     }
 
     %extend b2Controller {
-        int32 __hash__() { return (long)self; }
+        long __hash__() { return (long)self; }
         %pythoncode %{
         def typeName(self):
             """
@@ -694,7 +694,7 @@
 
     %extend b2Joint {
     public:
-        int32 __hash__() { return (long)self; }
+        long __hash__() { return (long)self; }
         %pythoncode %{
         __eq__ = b2JointCompare
         __ne__ = lambda self,other: not b2JointCompare(self,other)
@@ -1062,7 +1062,7 @@
     }
 
     %extend b2Body {
-        int32 __hash__() { return (long)self; }
+        long __hash__() { return (long)self; }
         %pythoncode %{
             __eq__ = b2BodyCompare
             __ne__ = lambda self,other: not b2BodyCompare(self,other)
