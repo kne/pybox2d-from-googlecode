@@ -20,10 +20,16 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 class fwSettings(object):
-    backend="pygame"
+    backend='pygame'        # The default backend to use in ('pyglet', 'pygame')
+
+    # Physics options
     hz=60.0
     velocityIterations=10
     positionIterations=8
+    enableWarmStarting=True   # Makes physics results more accurate (see Box2D wiki)
+    enableTOI=True            # Calculate time of impact
+
+    # Drawing
     drawStats=False
     drawShapes=True
     drawControllers=True
@@ -36,15 +42,15 @@ class fwSettings(object):
     drawContactNormals=False
     drawContactForces=False
     drawFrictionForces=False
-    drawCOMs=False
-    enableWarmStarting=True
-    enableTOI=True
+    drawFPS=True
+    drawMenu=True             # toggle by pressing F1
+    drawCOMs=False            # Centers of mass
+    pointSize=2.5             # pixel radius for drawing points
+
+    # Miscellaneous testbed options
     pause=False
     singleStep=False
-    drawFPS=True # python version
-    pointSize=2.5 # python version (pixel radius for drawing points)
-    drawMenu=True #toggle by pressing F1
-    onlyInit=False # run the test's initialization without graphics, and then quit (for testing)
+    onlyInit=False            # run the test's initialization without graphics, and then quit (for testing)
 
 from optparse import OptionParser
 

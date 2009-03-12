@@ -941,7 +941,7 @@
         def __repr__(self):
             return "b2PolygonDef(vertices: %s count: %d)" % (self.vertices, self.vertexCount)
         def checkValues(self):
-            return b2PythonCheckPolygonDef(self)
+            return b2CheckPolygonDef(self)
         def getVertices_tuple(self):
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
             vertices = []
@@ -982,25 +982,32 @@
         }
     }
 
-    //Extend the vector class to support Python print statements
-    //Also, add vector addition and scalar multiplication
+    %extend b2Color {
+        %pythoncode %{
+        __iter__ = lambda self: iter((self.r, self.g, self.b)) 
+         %}
+    }
+
+    // Vector class
     %extend b2Vec2 {
         b2Vec2(b2Vec2& other) {
             return new b2Vec2(other.x, other.y);
         }
 
         %pythoncode %{
+        __iter__ = lambda self: iter( (self.x, self.y) )
         def __repr__(self):
             return "b2Vec2(%g,%g)" % (self.x, self.y)
         def tuple(self):
             """
             Return the vector as a tuple (x,y)
             """
-            return (self.x, self.y)
+            return tuple(self)
         def fromTuple(self, tuple):
             """
+            *DEPRECATED*
             Set the vector to the values found in the tuple (x,y)
-            You can also use:
+            You should use:
                 value = b2Vec2(*tuple)
             """
             self.x, self.y = tuple

@@ -60,10 +60,10 @@
     IsBullet()        = %s,
     IsDynamic()       = %s,
     IsFrozen()        = %s,
-    IsRotationFixed() = %s,
+    IsFixedRotation() = %s,
     IsSleeping()      = %s,
     IsStatic()        = %s)"""% tuple(str(a) for a in\
-   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.userData,self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsRotationFixed(),self.IsSleeping(),self.IsStatic()))
+   (self.allowSleep,self.angle,self.angularDamping,self.angularVelocity,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.linearVelocity,self.massData,self.position,self.userData,self.GetInertia(),self.GetLocalCenter(),self.GetMass(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsFixedRotation(),self.IsSleeping(),self.IsStatic()))
  %}
 }
 
