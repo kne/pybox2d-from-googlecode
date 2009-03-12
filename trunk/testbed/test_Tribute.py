@@ -20,7 +20,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # A tribute to Gish
-# Contributed by giorgosg
+# Contributed by Giorgos Giagas (giorgosg)
 
 from test_main import *
 from math import cos, sin, pi
@@ -35,6 +35,7 @@ class Tribute (Framework):
         super(Tribute, self).__init__()
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
+        sd.friction = 0.2
         
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
@@ -46,7 +47,16 @@ class Tribute (Framework):
         
         sd.SetAsBox(0.5, 5.0, (50.0, 15.0), 0.0)
         ground.CreateShape(sd)
-        
+
+        sd.SetAsBox(3.0,1.0)
+        sd.density = 3.0
+        boxd = box2d.b2BodyDef()
+        for i in range(0, 16, 2):
+            boxd.position = (-10.1, i)
+            box = self.world.CreateBody(boxd)
+            box.CreateShape(sd)
+            box.SetMassFromShapes()
+
         sd=box2d.b2CircleDef()
         sd.density    = 5.0
         sd.friction   = 0.5
@@ -57,42 +67,37 @@ class Tribute (Framework):
         bd.angularDamping = 0.5
         bd.linearDamping  = 0.5
         bd.fixedRotation  = True
-
-        pjd=box2d.b2DistanceJointDef()
+        bd.allowSleep     = False
+        self.bodies = bodies = []
         radius = self.radius = 2
-        first, prev = None, None
-        self.bodies = []
-        for i in range(1, 360, 15): # 24 circles
-            pos = (cos(i*2*pi/360)*radius -10,
-                   sin(i*2*pi/360)*radius +50)
+        blob_center = box2d.b2Vec2(-10, +50)
+
+        for i in range(0, 360, 15): # 24 circles
+            pos = (cos(i*2*pi/360)*radius + blob_center.x,
+                   sin(i*2*pi/360)*radius + blob_center.y)
             bd.position = pos
             bodyx = self.world.CreateBody(bd)
             bodyx.CreateShape(sd)
             bodyx.SetMassFromShapes()
-            self.bodies.append(bodyx)
+            bodies.append(bodyx)
 
-            if prev == None:
-                first = prev = bodyx
-            else:
-                pjd.Initialize(prev, bodyx,
-                                 (prev.position.x, prev.position.y),
-                                 (bodyx.position.x, bodyx.position.y))
-                pjd.frequenceHz = 20.0
-                pjd.dampingRatio = 10.0
-                joint = self.world.CreateJoint(pjd).getAsType()
-                last = prev = bodyx
-        pjd.Initialize(first, last,
-                       (first.position.x, first.position.y),
-                       (last.position.x, last.position.y))
-        pjd.frequenceHz  = 60.0
-        pjd.dampingRatio = 10.0
-        joint = self.world.CreateJoint(pjd).getAsType()
+        bodycount = len(self.bodies)
+        pjd=box2d.b2DistanceJointDef()
+        for i in range(bodycount):
+            body1 = bodies[i]
+            body2 = bodies[i+1] if i+1<bodycount else bodies[0]
+            pjd.Initialize(body1, body2,
+                           (body1.position.x, body1.position.y),
+                           (body2.position.x, body2.position.y))
+            pjd.dampingRatio = 10.0
+            joint = self.world.CreateJoint(pjd).getAsType()
 
         # Make the simulation a bit more stable
         self.settings.positionIterations = 20
         self.settings.velocityIterations = 20
-
-        if hasattr(self, 'gui_table'): # update the pygame gui, otherwise it'll be reset
+        
+        # update the pygame gui, otherwise it'll be reset
+        if hasattr(self, 'gui_table'): 
             self.gui_table.updateGUI(self.settings)
 
     def AddSpringForce(self, bA, localA, bB, localB, k, friction, desiredDist):
@@ -101,9 +106,11 @@ class Tribute (Framework):
         diff=pB - pA
         #Find velocities of attach points
         vA = (bA.GetLinearVelocity() -
-              box2d.b2Cross(bA.GetWorldVector(localA), bA.GetAngularVelocity()))
+              box2d.b2Cross(bA.GetWorldVector(localA),
+                            bA.GetAngularVelocity()))
         vB = (bB.GetLinearVelocity() -
-              box2d.b2Cross(bB.GetWorldVector(localB), bB.GetAngularVelocity()))
+              box2d.b2Cross(bB.GetWorldVector(localB),
+                            bB.GetAngularVelocity()))
 
         vdiff=vB-vA
         dx = diff.Normalize() #normalizes diff and puts length into dx
@@ -115,9 +122,6 @@ class Tribute (Framework):
         diff *= -1.0
         bA.ApplyForce(diff, bB.GetWorldPoint(localB))
 
-        # Non-bouncy limit
-        #pjd.Initialize(ground, body, (-10.0, 10.0), (1.0, 0.0))
-    
     def Keyboard(self, key):
         if key==K_j:
             self.jump = True
