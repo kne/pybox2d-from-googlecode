@@ -42,7 +42,7 @@ import pyglet
 from pyglet import gl
 import Box2D as box2d
 from settings import fwSettings
-from pyglet_keymapper import *
+from pygame_keycodes import *
 import math
 
 class fwDestructionListener(box2d.b2DestructionListener):
