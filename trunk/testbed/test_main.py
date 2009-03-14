@@ -25,7 +25,7 @@ from settings import fwSettings
 # only, you can take 'pyglet_main.py' or 'pygame_main.py' and overwrite 
 # 'test_main.py'.
 
-known_backends = ("pyglet", "pygame")
+known_backends = ("pyglet", "pygame", "cairo")
 
 if fwSettings.backend in known_backends:
     exec("from %s_main import *" % fwSettings.backend)
