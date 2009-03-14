@@ -28,11 +28,9 @@ import itertools
 
 import pygtk
 pygtk.require('2.0')
-import gobject
 import gtk, gobject, cairo
 
 import Box2D as box2d
-from Box2D import b2Vec2
 from settings import fwSettings
 import console
 
