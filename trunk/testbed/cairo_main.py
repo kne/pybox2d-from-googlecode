@@ -334,6 +334,9 @@ class Framework(object):
             self.debugDraw.scale /= 1.1
         else:
             self.Keyboard(event.keyval)
+    def Keyboard(self, keyval):
+        pass
+    
     def on_drawing_area_button_press_event(self, widget, event):
         widget.grab_focus()
         if event.button == 3:

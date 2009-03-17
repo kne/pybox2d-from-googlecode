@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Mar 17 07:57:46 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Mar 17 10:32:33 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">640</property>
@@ -53,7 +53,7 @@
                       <widget class="GtkSpinButton" id="hertz">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">5 5 200 1 10 10</property>
+                        <property name="adjustment">5 5 200 1 10 0</property>
                         <signal name="value_changed" handler="on_hertz_value_changed"/>
                       </widget>
                       <packing>
@@ -91,7 +91,7 @@
                       <widget class="GtkSpinButton" id="position_iterations">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">1 1 500 1 10 10</property>
+                        <property name="adjustment">1 1 500 1 10 0</property>
                         <signal name="value_changed" handler="on_position_iterations_value_changed"/>
                       </widget>
                       <packing>
@@ -120,7 +120,7 @@
                       <widget class="GtkSpinButton" id="velocity_iterations">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">0 0 100 1 10 10</property>
+                        <property name="adjustment">0 0 100 1 10 0</property>
                         <signal name="value_changed" handler="on_velocity_iterations_value_changed"/>
                       </widget>
                       <packing>
