@@ -57,13 +57,17 @@ class FpsCount(object):
 
 class CairoDebugDraw(box2d.b2DebugDraw):
     def __init__(self):
-        super(self.__class__, self).__init__()
+        super(CairoDebugDraw, self).__init__()
         self.scale = 8 
         self.view = (-50.0, 50.0) # the upper left corner in b2world coords.
         self.line_width = 0.04 # in world units
-        self.min_line_width = 0.8 # in screen units
+        self.min_line_width = 1.0 # in screen units
         # some colors look bad when inverted
-        self.colordict = {(0, 0, 8): (0.0, 0.0, 8.0)}
+        self.colordict = {(  0,   0, 204): [0.0, 0.0, 0.8],
+                          (127, 229, 127): [0.56, 0.22, 0.0]}
+        self.antialias = cairo.ANTIALIAS_NONE
+        self.font_options = cairo.FontOptions()
+        self.font_options.set_antialias(self.antialias)
 
     def draw_begin(self, drawing_area):
         width, height = drawing_area.window.get_size()
@@ -71,15 +75,15 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         region = gtk.gdk.region_rectangle((0, 0, width, height))
         drawing_area.window.begin_paint_region(region)
         cr = self.cr = drawing_area.window.cairo_create()
-        
+        cr.set_antialias(self.antialias)
+        cr.set_font_options(self.font_options)
+
         cr.rectangle(0, 0, width, height)
         cr.clip()
         cr.save()
         cr.set_source_rgb(1.0, 1.0, 1.0)
-        #cr.region(region)
-        #cr.fill()
         cr.paint()
-        
+
         cr.scale(self.scale, -self.scale)
         cr.translate(- self.view[0],
                      - self.view[1])
@@ -91,7 +95,9 @@ class CairoDebugDraw(box2d.b2DebugDraw):
             
         cr.set_tolerance(0.2)
         cr.set_line_width(line_width)
+
         cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
 
     def draw_end(self, drawing_area):
         drawing_area.window.end_paint()
@@ -108,8 +114,7 @@ class CairoDebugDraw(box2d.b2DebugDraw):
     
     def convert_color(self, color):
         color = (color.r, color.g, color.b)
-        lkup = tuple(int(c*10) for c in color)
-
+        lkup = tuple(int(c*255) for c in color)
         if lkup in self.colordict:
             return self.colordict[lkup]
         else:
@@ -256,7 +261,7 @@ class Framework(object):
         builder.add_from_file('cairo_main.xml')
         builder.connect_signals(self)
 
-        builder.get_object('messages_expander').set_expanded(True)
+        #builder.get_object('messages_expander').set_expanded(True)
         
         self.drawing_area = builder.get_object('drawing_area')
         self.window = builder.get_object('window')
@@ -269,12 +274,14 @@ class Framework(object):
         # Need to check if this is dropping the overall fps
         #gobject.timeout_add(100, self.Draw,
         #                    priority=gobject.PRIORITY_DEFAULT_IDLE)
-
         builder.get_object('hertz').set_value(self.settings.hz)
         builder.get_object('position_iterations'
                            ).set_value(self.settings.positionIterations)
         builder.get_object('velocity_iterations'
                            ).set_value(self.settings.velocityIterations)
+        builder.get_object('antialiasing'
+                           ).set_active(self.debugDraw.antialias ==
+                                        cairo.ANTIALIAS_DEFAULT)
         for widget, setting, b2 in self.flag_info:
             builder.get_object(widget).set_active(setting)
         
@@ -306,6 +313,11 @@ class Framework(object):
         active_flags = [flag[2] for flag in self.flag_info
                         if self.builder.get_object(flag[0]).get_active()] + [0]
         self.debugDraw.SetFlags(reduce(operator.or_, active_flags))
+    def on_antialiasing_toggled(self, widget):
+        antialiasing = self.builder.get_object('antialiasing').get_active()
+        self.debugDraw.antialias = cairo.ANTIALIAS_DEFAULT if antialiasing\
+                                   else cairo.ANTIALIAS_NONE
+        self.debugDraw.font_options.set_antialias(self.debugDraw.antialias)
 
     def on_velocity_iterations_value_changed(self, widget):
         self.settings.velocityIterations = widget.get_value_as_int()
@@ -412,14 +424,14 @@ class Framework(object):
             p2 = self.mouse_joint.target
             self.debugDraw.DrawSegment(p1, p2, box2d.b2Color(1, 1, 1))
         
-        cr = self.debugDraw.cr
-        cr.restore()
-        cr.scale(1.5,1.5)
-
         #message_label = self.builder.get_object('messages_label')
         #if self.builder.get_object('messages_expander').get_expanded() == True:
         #    self.builder.get_object('messages_label'
         #                            ).set_text('\n'.join(self.text_lines))
+
+        cr = self.debugDraw.cr
+        cr.restore()
+        cr.scale(1.5,1.5)
         pos = 20
         for line in self.text_lines:
             cr.move_to(10, pos)
@@ -428,8 +440,7 @@ class Framework(object):
         
     def SimulationLoop(self, ignore_pause=False):
         self.debugDraw.draw_begin(self.drawing_area)
-
-        if ignore_pause or self.settings.pause == False:
+        if ignore_pause or (self.settings.pause == False):
             self.text_lines = []
             self.DrawStringCR("Fps: %.1f" % (self.fps(),))
             self.Step(self.settings)
@@ -454,9 +465,8 @@ class Framework(object):
 
         Takes care of physics drawing
         (callbacks are executed after the world.Step() )
-        and drawing additional information.
         """
-        timestep = 0 if settings.pause else 1/settings.hz
+        timestep = 1/settings.hz
         self.world.Step(timestep,
                         settings.velocityIterations,
                         settings.positionIterations)

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Mar 12 13:55:14 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Mar 17 07:57:46 2009 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">200</property>
@@ -56,28 +56,6 @@
                     <signal handler="on_drawing_area_button_release_event" name="button_release_event"/>
                     <signal handler="on_drawing_area_scroll_event" name="scroll_event"/>
                   </object>
-                </child>
-                <child>
-                  <object class="GtkExpander" id="messages_expander">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child>
-                      <object class="GtkLabel" id="messages_label">
-                        <property name="visible">True</property>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label8">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Messages</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
             </child>
@@ -325,6 +303,30 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkCheckButton" id="antialiasing">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Draw with Antialiasing</property>
+                    <property name="draw_indicator">True</property>
+                    <signal handler="on_antialiasing_toggled" name="toggled"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHSeparator" id="hseparator5">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">4</property>
+                    <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkHButtonBox" id="hbuttonbox1">
                     <property name="visible">True</property>
                     <child>
@@ -421,7 +423,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">7</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
                 <child>
@@ -431,7 +433,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="padding">4</property>
-                    <property name="position">8</property>
+                    <property name="position">10</property>
                   </packing>
                 </child>
                 <child>
@@ -439,13 +441,15 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="has_tooltip">True</property>
+                    <property name="tooltip_text">You can access the "framework" and "world" variables</property>
                     <property name="label" translatable="yes">Open Python Console</property>
                     <signal handler="on_py_console_clicked" name="clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">9</property>
+                    <property name="position">11</property>
                   </packing>
                 </child>
               </object>

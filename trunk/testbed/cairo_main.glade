@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Mar 12 14:12:45 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Mar 17 07:57:46 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="window">
     <property name="width_request">640</property>
@@ -33,31 +33,6 @@
                     <signal name="button_release_event" handler="on_drawing_area_button_release_event"/>
                     <signal name="scroll_event" handler="on_drawing_area_scroll_event"/>
                   </widget>
-                </child>
-                <child>
-                  <widget class="GtkExpander" id="messages_expander">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child>
-                      <widget class="GtkLabel" id="messages_label">
-                        <property name="visible">True</property>
-                      </widget>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="label8">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Messages</property>
-                      </widget>
-                      <packing>
-                        <property name="type">label_item</property>
-                      </packing>
-                    </child>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </widget>
             </child>
@@ -316,6 +291,31 @@
                   </packing>
                 </child>
                 <child>
+                  <widget class="GtkCheckButton" id="antialiasing">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Draw with Antialiasing</property>
+                    <property name="response_id">0</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_antialiasing_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkHSeparator" id="hseparator5">
+                    <property name="visible">True</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">4</property>
+                    <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
                   <widget class="GtkHButtonBox" id="hbuttonbox1">
                     <property name="visible">True</property>
                     <child>
@@ -415,7 +415,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">7</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
                 <child>
@@ -425,7 +425,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="padding">4</property>
-                    <property name="position">8</property>
+                    <property name="position">10</property>
                   </packing>
                 </child>
                 <child>
@@ -442,7 +442,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">9</property>
+                    <property name="position">11</property>
                   </packing>
                 </child>
               </widget>
