@@ -138,13 +138,9 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         for v in vertices:
             cr.line_to(*v)
         cr.close_path()
-        cr.fill()
+        cr.fill_preserve()
 
         cr.set_source_rgb(color[0], color[1], color[2])
-        cr.move_to(*vertices[0])
-        for v in vertices:
-            cr.line_to(*v)
-        cr.close_path()
         cr.stroke()
 
     def DrawCircle(self, center, radius, color):
@@ -159,10 +155,9 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         color = self.convert_color(color)
         cr.set_source_rgba(color[0], color[1], color[2], 0.7)
         cr.arc(center.x, center.y, radius, 0, 2*math.pi)
-        cr.fill()
+        cr.fill_preserve()
 
         cr.set_source_rgb(color[0], color[1], color[2])
-        cr.arc(center.x, center.y, radius, 0, 2*math.pi)
         cr.stroke()
 
         p = radius * axis
