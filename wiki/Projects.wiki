@@ -1,4 +1,4 @@
-#summary Projects using pyBox2D
+#summary Projects using pybox2d
 #labels Featured
 
 === Libraries / Add-ons / Learning Utilities ===
@@ -12,11 +12,20 @@
 
 === Games ===
 
+ * [http://cd21.org/games/the-bird-eating-macaque/ The Bird-eating Macaque] by cap ([http://www.ludumdare.com/compo/2009/02/08/the-bird-eating-macaque-final/ LD page])
  * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
- * [http://code.google.com/p/gamecomp/ NaN]'s The day mom tied us together, fun and innovative little side scroller (with a cool intro) ([http://www.pyweek.org/e/NaN7/ PyWeek page])
- * [http://nuigroup.com/forums/viewthread/3200/ tPhysics] A Multi-Touch Physics Sandbox. Video demo looks like fun! (should use b2PolygonDef.checkValues() to fix the polygon problems)
+ * [http://code.google.com/p/gamecomp/ NaN]'s "The day mom tied us together", fun and innovative little side scroller (with a cool intro) ([http://www.pyweek.org/e/NaN7/ PyWeek page])
+ * [http://nuigroup.com/forums/viewthread/3200/ tPhysics], a Multi-Touch Physics Sandbox. Video demo looks like fun! (should use b2PolygonDef.checkValues() to fix the polygon problems)
 
-=== Physics Jam Results ===
+=== Up and Coming ===
+
+Some WIP projects to keep an eye on:
+
+ * [http://github.com/elemel elemel]'s 2D physics puzzle game [http://github.com/elemel/cannonball/tree Cannonball], and 2D platform RPG [http://github.com/elemel/mortified/tree/master mortified]
+ * [http://github.com/ddunwoody/adastra adastra], by ddunwoody
+ * [http://www.gamecreation.org/~quadropus/ Quadropus], a puzzle-platformer where the player must balance the use of four tentacles to solve a variety of environmental puzzles
+
+=== Physics Jam Results 2008 ===
 
 The OLPC Physics jam took place on Aug 29-31, 2008. The results from the groups are here:
 
@@ -27,4 +36,4 @@ The OLPC Physics jam took place on Aug 29-31, 2008. The results from the groups 
 
 === Others? ===
 
-Please let me know if you use pybox2d in any of your projects and I will gladly link to them here.
+Please let me know if you use pybox2d in any of your projects, and I will gladly link to them here.
