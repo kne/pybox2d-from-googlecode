@@ -202,6 +202,12 @@ public:
 	/// Get the global gravity vector.
 	b2Vec2 GetGravity() const;
 
+    /// Get the world's AABB
+    b2AABB GetWorldAABB() const { return m_broadPhase->m_worldAABB; }
+
+	/// Whether bodies can sleep or not
+	bool CanSleep() const { return m_allowSleep; }
+
 private:
 
 	friend class b2Body;

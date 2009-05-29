@@ -129,6 +129,9 @@ public:
 	/// Get the next joint the world joint list.
 	b2Joint* GetNext();
 
+    /// Get whether or not to collide connected bodies
+    bool GetCollideConnected() const { return m_collideConnected; }
+
 	/// Get the user data pointer.
 	void* GetUserData();
 

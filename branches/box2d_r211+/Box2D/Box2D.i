@@ -774,8 +774,8 @@
         %pythoncode %{
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
-        radius = property(GetRadius, None)
-        localPosition = property(GetLocalPosition, None)
+        # radius = property(lambda self: self.m_radius, None) # TODO now m_radius (rename to radius)
+        # localPosition = property(GetLocalPosition, None)  # TODO now m_p (rename to pos)
         %}
     }
 
@@ -914,8 +914,8 @@
             length      = property(GetLength,      None)
             vertex1     = property(GetVertex1,     None)
             vertex2     = property(GetVertex2,     None)
-            coreVertex1 = property(GetCoreVertex1, None)
-            coreVertex2 = property(GetCoreVertex2, None)
+            #coreVertex1 = property(GetCoreVertex1, None) TODO now m_v1
+            #coreVertex2 = property(GetCoreVertex2, None) TODO now m_v2
             next        = property(GetNextEdge,    None)
             prev        = property(GetPrevEdge,    None)
         %}
@@ -1113,7 +1113,7 @@
                 for shape in self.shapeList:
                     yield shape
 
-            massData      = property(getMassData        , SetMass)
+            massData      = property(GetMassData        , SetMassData)
             position      = property(GetPosition        , setPosition)
             angle         = property(GetAngle           , setAngle)
             linearDamping = property(GetLinearDamping   , SetLinearDamping)

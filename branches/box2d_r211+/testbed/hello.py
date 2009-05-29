@@ -40,7 +40,7 @@ groundShapeDef = b2PolygonDef()
 groundShapeDef.SetAsBox(50, 10)
  
 # Add the ground shape to the ground body.
-groundBody.CreateShape(groundShapeDef)
+groundBody.CreateFixture(groundShapeDef)
  
 # Define the dynamic body. We set its position and call the body factory.
 bodyDef = b2BodyDef()
@@ -58,7 +58,7 @@ shapeDef.density = 1
 shapeDef.friction = 0.3
  
 # Add the shape to the body.
-shape=body.CreateShape(shapeDef)
+shape=body.CreateFixture(shapeDef)
  
 # Now tell the dynamic body to compute it's mass properties base on its shape.
 body.SetMassFromShapes()
