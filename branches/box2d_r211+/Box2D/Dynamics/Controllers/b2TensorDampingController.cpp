@@ -23,7 +23,7 @@ b2TensorDampingController::b2TensorDampingController(const b2TensorDampingContro
 	T = def->T;
 	maxTimestep = def->maxTimestep;
 
-	m_type = e_tensorDampingController;
+	m_type = b2_tensorDampingController;
 }
 
 void b2TensorDampingController::Step(const b2TimeStep& step)

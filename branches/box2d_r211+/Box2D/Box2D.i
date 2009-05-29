@@ -24,6 +24,7 @@
     
     //Define these functions so that SWIG does not fail
     void b2BroadPhase::ValidatePairs() { }
+    void b2DestroyEdgeChain(b2Body* body, b2Fixture* firstEdge) { }
 %}
 
 #ifdef SWIGPYTHON
@@ -228,7 +229,7 @@
         PyObject* Raycast(const b2Segment& segment, int32 maxCount, bool solidShapes, PyObject* userData) {
             //returns tuple (shapecount, shapes)
             PyObject* ret=Py_None;
-            b2Shape** shapes=new b2Shape* [maxCount];
+            b2Fixture** shapes=new b2Fixture* [maxCount];
 
             if (!shapes) {
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
@@ -249,7 +250,7 @@
             PyObject* shape;
 
             for (int i=0; i < num; i++) {
-                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Shape, 0 );
+                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Fixture, 0 );
                 PyTuple_SetItem(shapeList, i, shape);
             }
 
@@ -272,13 +273,13 @@
                 Py_INCREF(userData);
             }
 
-            b2Shape* shape = $self->RaycastOne(segment, &lambda, normal, solidShapes, (void*)userData);
+            b2Fixture* shape = $self->RaycastOne(segment, &lambda, normal, solidShapes, (void*)userData);
             
             ret = PyTuple_New(3);
 
             PyTuple_SetItem(ret, 0, SWIG_From_float(lambda));
             PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(normal), SWIGTYPE_p_b2Vec2, 0) );
-            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(shape), SWIGTYPE_p_b2Shape, 0) );
+            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(shape), SWIGTYPE_p_b2Fixture, 0) );
 
             return ret;
         }
@@ -286,7 +287,7 @@
         PyObject* Query(const b2AABB& aabb, uint32 maxCount) {
             // Returns tuple: (number of shapes, shapelist)
             PyObject* ret=Py_None;
-            b2Shape** shapes=new b2Shape* [maxCount];
+            b2Fixture** shapes=new b2Fixture* [maxCount];
 
             if (!shapes) {
                 PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
@@ -303,7 +304,7 @@
             PyObject* shape;
 
             for (int i=0; i < num; i++) {
-                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Shape, 0 );
+                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Fixture, 0 );
                 PyTuple_SetItem(shapeList, i, shape);
             }
 
@@ -366,7 +367,7 @@
         %}
     }
 
-    %extend b2Shape {
+    %extend b2Fixture {
     public:
         long __hash__() { return (long)self; }
         PyObject* TestSegment(const b2XForm& xf, const b2Segment& segment, float32 maxLambda) {
@@ -374,7 +375,7 @@
             float32 lambda=0.0f;
             b2Vec2 normal(0.0f ,0.0f);
 
-            hit=(int)$self->TestSegment(xf, &lambda, &normal, segment, maxLambda);
+            hit=(int)$self->GetShape()->TestSegment($self->GetBody()->GetXForm(), &lambda, &normal, segment, maxLambda);
 
             PyObject* normal_tuple=PyTuple_New(2);
             PyTuple_SetItem(normal_tuple, 0, SWIG_From_float(normal.x));
@@ -396,28 +397,30 @@
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def typeName(self):
-            types = {  e_unknownShape   : "Unknown",
-                        e_circleShape   : "Circle",
-                        e_polygonShape  : "Polygon",
-                        e_edgeShape     : "Edge",
-                        e_shapeTypeCount: "ShapeType" }
+            types = {  b2_unknownShape   : "Unknown",
+                       b2_circleShape    : "Circle",
+                       b2_polygonShape   : "Polygon",
+                       b2_edgeShape      : "Edge",
+                       b2_shapeTypeCount : "ShapeType" }
             return types[self.GetType()]
         def getAsType(self):
             """Return a typecasted version of the shape"""
             return (getattr(self, "as%s" % self.typeName())) ()
+
+        shape      = property(getAsType  , None)
         %}
         b2CircleShape* asCircle() {
-            if ($self->GetType()==e_circleShape)
+            if ($self->GetType()==b2_circleShape)
                 return (b2CircleShape*)$self;
             return NULL;
         }
         b2PolygonShape* asPolygon() {
-            if ($self->GetType()==e_polygonShape)
+            if ($self->GetType()==b2_polygonShape)
                 return (b2PolygonShape*)$self;
             return NULL;
         }
         b2EdgeShape* asEdge() {
-            if ($self->GetType()==e_edgeShape)
+            if ($self->GetType()==b2_edgeShape)
                 return (b2EdgeShape*)$self;
             return NULL;
         }
@@ -631,12 +634,12 @@
             Return the name of the controller from:
              Unknown, Buoyancy, ConstantAccel, ConstantForce, Gravity, TensorDamping
             """
-            types = { e_unknownController       : 'Unknown',
-                      e_buoyancyController      : 'Buoyancy',
-                      e_constantAccelController : 'ConstantAccel',
-                      e_constantForceController : 'ConstantForce',
-                      e_gravityController       : 'Gravity',
-                      e_tensorDampingController : 'TensorDamping' }
+            types = { b2_unknownController       : 'Unknown',
+                      b2_buoyancyController      : 'Buoyancy',
+                      b2_constantAccelController : 'ConstantAccel',
+                      b2_constantForceController : 'ConstantForce',
+                      b2_gravityController       : 'Gravity',
+                      b2_tensorDampingController : 'TensorDamping' }
             return types[self.GetType()]
         def getAsType(self):
             """
@@ -666,27 +669,27 @@
         %}
         
         b2BuoyancyController* _asBuoyancyController() {
-            if ($self->GetType()==e_buoyancyController)
+            if ($self->GetType()==b2_buoyancyController)
                 return (b2BuoyancyController*)$self;
             return NULL;
         }
         b2ConstantAccelController* _asConstantAccelController() {
-            if ($self->GetType()==e_constantAccelController)
+            if ($self->GetType()==b2_constantAccelController)
                 return (b2ConstantAccelController*)$self;
             return NULL;
         }
         b2ConstantForceController* _asConstantForceController() {
-            if ($self->GetType()==e_constantForceController)
+            if ($self->GetType()==b2_constantForceController)
                 return (b2ConstantForceController*)$self;
             return NULL;
         }
         b2GravityController* _asGravityController() {
-            if ($self->GetType()==e_gravityController)
+            if ($self->GetType()==b2_gravityController)
                 return (b2GravityController*)$self;
             return NULL;
         }
         b2TensorDampingController* _asTensorDampingController() {
-            if ($self->GetType()==e_tensorDampingController)
+            if ($self->GetType()==b2_tensorDampingController)
                 return (b2TensorDampingController*)$self;
             return NULL;
         }
@@ -784,18 +787,6 @@
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         def __repr__(self):
             return "b2PolygonShape(vertices: %s count: %d)" % (self.getVertices_tuple(), self.GetVertexCount())
-        def getCoreVertices_tuple(self):
-            """Returns all of the core vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
-            vertices = []
-            for i in range(0, self.GetVertexCount()):
-                vertices.append( (self.getCoreVertex(i).x, self.getCoreVertex(i).y ) )
-            return vertices
-        def getCoreVertices_b2Vec2(self):
-            """Returns all of the core vertices as a list of b2Vec2's [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
-            vertices = []
-            for i in range(0, self.GetVertexCount()):
-                vertices.append(self.getCoreVertex(i))
-            return vertices
         def getVertices_tuple(self):
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
             vertices = []
@@ -828,20 +819,15 @@
                 yield v
 
         vertices = property(getVertices_tuple, None)
-        coreVertices = property(getCoreVertices_tuple, None)
         normals = property(getNormals_tuple, None)
         %}
         const b2Vec2* getVertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
-            return &( $self->GetVertices() [vnum] );
-        }
-        const b2Vec2* getCoreVertex(uint16 vnum) {
-            if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
-            return &( $self->GetCoreVertices() [vnum] );
+            return &( $self->m_vertices[vnum] );
         }
         const b2Vec2* getNormal(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
-            return &( $self->GetNormals() [vnum] );
+            return &( $self->m_normals[vnum] );
         }
     }
 
@@ -1142,22 +1128,6 @@
         %}
     }
 
-    %rename (__b2Distance__) b2Distance(b2Vec2* x1, b2Vec2* x2, const b2Shape* shape1, const b2XForm& xf1, const b2Shape* shape2, const b2XForm& xf2);
-    %inline %{
-        //Add a b2Distance:
-        // dist, x1, x2 = b2Distance(shape1, xf1, shape2, xf2)
-        PyObject* b2Distance(const b2Shape* shape1, const b2XForm& xf1, const b2Shape* shape2, const b2XForm& xf2) {
-            PyObject* ret=PyTuple_New(3);
-            b2Vec2* x1=new b2Vec2;
-            b2Vec2* x2=new b2Vec2;
-            float dist=b2Distance(x1,x2,shape1,xf1,shape2,xf2);
-            PyTuple_SetItem(ret, 0, SWIG_From_float(dist)); 
-            PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(x1), SWIGTYPE_p_b2Vec2, 0 ));
-            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(x2), SWIGTYPE_p_b2Vec2, 0 ));
-            return ret;
-        }
-    %}
-
     /* Additional supporting C++ code */
     %typemap(out) bool b2CheckPolygonDef(b2PolygonDef*) {
         if (!$1) 
@@ -1250,78 +1220,20 @@
             return c;
         }
 
-        bool __b2ComputeOBB(b2OBB* obb, const b2Vec2* vs, int32 count)
-        {
-            if (count < 3 || count >= b2_maxPolygonVertices) {
-                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
-                return false;
-            }
-
-            b2Vec2 p[b2_maxPolygonVertices + 1];
-            for (int32 i = 0; i < count; ++i)
-            {
-                p[i] = vs[i];
-            }
-            p[count] = p[0];
-
-            float32 minArea = B2_FLT_MAX;
-            
-            for (int32 i = 1; i <= count; ++i)
-            {
-                b2Vec2 root = p[i-1];
-                b2Vec2 ux = p[i] - root;
-                float32 length = ux.Normalize();
-                if (length <= B2_FLT_EPSILON) {
-                    PyErr_SetString(PyExc_ValueError, "ComputeOBB: length <= B2_FLT_EPSILON");
-                    return false;
-                }
-                b2Vec2 uy(-ux.y, ux.x);
-                b2Vec2 lower(B2_FLT_MAX, B2_FLT_MAX);
-                b2Vec2 upper(-B2_FLT_MAX, -B2_FLT_MAX);
-
-                for (int32 j = 0; j < count; ++j)
-                {
-                    b2Vec2 d = p[j] - root;
-                    b2Vec2 r;
-                    r.x = b2Dot(ux, d);
-                    r.y = b2Dot(uy, d);
-                    lower = b2Min(lower, r);
-                    upper = b2Max(upper, r);
-                }
-
-                float32 area = (upper.x - lower.x) * (upper.y - lower.y);
-                if (area < 0.95f * minArea)
-                {
-                    minArea = area;
-                    obb->R.col1 = ux;
-                    obb->R.col2 = uy;
-                    b2Vec2 center = 0.5f * (lower + upper);
-                    obb->center = root + b2Mul(obb->R, center);
-                    obb->extents = 0.5f * (upper - lower);
-                }
-            }
-
-            if (minArea >= B2_FLT_MAX) {
-                PyErr_SetString(PyExc_ValueError, "ComputeOBB: minArea >= B2_FLT_MAX");
-                return false;
-            }
-            return true;
-        }
-
-        bool b2CheckPolygonDef(b2PolygonDef* poly, bool additional_checks=true) {
+        bool b2CheckVertices(b2Vec2* vertices, int32 count, bool additional_checks=true) {
             // Get the vertices transformed into the body frame.
-            if (poly->vertexCount < 3 || poly->vertexCount >= b2_maxPolygonVertices) {
+            if (count < 3 || count >= b2_maxPolygonVertices) {
                 PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
                 return false;
             }
 
             // Compute normals. Ensure the edges have non-zero length.
             b2Vec2 m_normals[b2_maxPolygonVertices];
-            for (int32 i = 0; i < poly->vertexCount; ++i)
+            for (int32 i = 0; i < count; ++i)
             {
                 int32 i1 = i;
-                int32 i2 = i + 1 < poly->vertexCount ? i + 1 : 0;
-                b2Vec2 edge = poly->vertices[i2] - poly->vertices[i1];
+                int32 i2 = i + 1 < count ? i + 1 : 0;
+                b2Vec2 edge = vertices[i2] - vertices[i1];
                 if (edge.LengthSquared() <= B2_FLT_EPSILON * B2_FLT_EPSILON) {
                     PyErr_SetString(PyExc_ValueError, "edge.LengthSquared < FLT_EPSILON**2");
                     return false;
@@ -1332,81 +1244,40 @@
             }
 
             // Compute the polygon centroid.
-            b2Vec2 m_centroid = __b2ComputeCentroid(poly->vertices, poly->vertexCount);
+            b2Vec2 m_centroid = __b2ComputeCentroid(vertices, count);
             
-            // Compute the oriented bounding box.
-            b2OBB m_obb;
-            __b2ComputeOBB(&m_obb, poly->vertices, poly->vertexCount);
-
-            if (PyErr_Occurred()) 
-                return false;
-
-            // Create core polygon shape by shifting edges inward.
-            // Also compute the min/max radius for CCD.
-            for (int32 i = 0; i < poly->vertexCount; ++i)
-            {
-                int32 i1 = i - 1 >= 0 ? i - 1 : poly->vertexCount - 1;
-                int32 i2 = i;
-
-                b2Vec2 n1 = m_normals[i1];
-                b2Vec2 n2 = m_normals[i2];
-                b2Vec2 v = poly->vertices[i] - m_centroid;
-
-                b2Vec2 d;
-                d.x = b2Dot(n1, v) - b2_toiSlop;
-                d.y = b2Dot(n2, v) - b2_toiSlop;
-
-                // Shifting the edge inward by b2_toiSlop should
-                // not cause the plane to pass the centroid.
-
-                // Your shape has a radius/extent less than b2_toiSlop.
-                if (d.x < 0.0f) {
-                    PyErr_SetString(PyExc_ValueError, "Your shape has a radius/extent less than b2_toiSlop. (d.x < 0.0)");
-                    return false;
-                } else if (d.y < 0.0f) {
-                    PyErr_SetString(PyExc_ValueError, "Your shape has a radius/extent less than b2_toiSlop. (d.y < 0.0)");
-                    return false;
-                }
-                b2Mat22 A;
-                A.col1.x = n1.x; A.col2.x = n1.y;
-                A.col1.y = n2.x; A.col2.y = n2.y;
-                //m_coreVertices[i] = A.Solve(d) + m_centroid;
-            }
 
             if (!additional_checks)
                 return true;
 
-            // Ensure the polygon is convex.
-            for (int32 i = 0; i < poly->vertexCount; ++i)
+            // Ensure the polygon is convex and the interior
+            // is to the left of each edge.
+            for (int32 i = 0; i < count; ++i)
             {
-                for (int32 j = 0; j < poly->vertexCount; ++j)
+                int32 i1 = i;
+                int32 i2 = i + 1 < count ? i + 1 : 0;
+                b2Vec2 edge = vertices[i2] - vertices[i1];
+
+                for (int32 j = 0; j < count; ++j)
                 {
-                    // Do not check vertices on the current edge.
-                    if (j == i || j == (i + 1) % poly->vertexCount)
+                    // Don not check vertices on the current edge.
+                    if (j == i1 || j == i2)
+                    {
                         continue;
+                    }
                     
-                    float32 s = b2Dot(m_normals[i], poly->vertices[j] - poly->vertices[i]);
-                    if (s >= -b2_linearSlop) {
-                        PyErr_SetString(PyExc_ValueError, "Your polygon is non-convex (it has an indentation), or it's too skinny");
+                    b2Vec2 r = vertices[j] - vertices[i1];
+
+                    // Your polygon is non-convex (it has an indentation) or
+                    // has colinear edges.
+                    float32 s = b2Cross(edge, r);
+                    if (s <= 0.0f) {
+                        PyErr_SetString(PyExc_ValueError, "Your polygon is non-convex (it has an indentation) or has colinear edges.");
                         return false;
                     }
                 }
             }
 
-            // Ensure the polygon is counter-clockwise.
-            for (int32 i = 1; i < poly->vertexCount; ++i)
-            {
-                float32 cross = b2Cross(m_normals[i-1], m_normals[i]);
-
-                // Keep asinf happy.
-                cross = b2Clamp(cross, -1.0f, 1.0f);
-
-                float32 angle = asinf(cross);
-                if (angle <= b2_angularSlop) {
-                    PyErr_SetString(PyExc_ValueError, "You have consecutive edges that are almost parallel on your polygon.");
-                    return false;
-                }
-            }
             return true;
         }
 

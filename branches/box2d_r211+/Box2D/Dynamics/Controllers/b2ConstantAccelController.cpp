@@ -22,7 +22,7 @@ b2ConstantAccelController::b2ConstantAccelController(const b2ConstantAccelContro
 {
 	A = def->A;
 
-	m_type = e_constantAccelController;
+	m_type = b2_constantAccelController;
 }
 
 void b2ConstantAccelController::Step(const b2TimeStep& step)

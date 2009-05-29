@@ -55,15 +55,15 @@ public:
 
 %extend b2Body {
 public:        
-    void DestroyShape(b2Shape* shape) {
-        Py_XDECREF((PyObject*)shape->GetUserData());
-        self->DestroyShape(shape);
+    void DestroyFixture(b2Fixture* fixture) {
+        Py_XDECREF((PyObject*)fixture->GetUserData());
+        self->DestroyFixture(fixture);
     }
-    b2Shape* CreateShape(b2ShapeDef* defn) {
-        b2Shape* ret;
+    b2Fixture* CreateFixture(b2FixtureDef* defn) {
+        b2Fixture* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
-        ret=self->CreateShape(defn);
+        ret=self->CreateFixture(defn);
         return ret;
     }
     PyObject* GetUserData() {
@@ -108,7 +108,7 @@ public:
     %}
 }
 
-%extend b2Shape {
+%extend b2Fixture {
 public:        
     PyObject* GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
@@ -185,7 +185,7 @@ public:
     %}
 }
 
-%extend b2ShapeDef {
+%extend b2FixtureDef {
 public:
     PyObject* GetUserData() {
         PyObject* ret;
@@ -220,12 +220,12 @@ public:
 
 %newobject b2World::CreateBody;
 %newobject b2World::CreateJoint;
-%newobject b2Body::CreateShape;
+%newobject b2Body::CreateFixture;
 
 %ignore b2World::CreateBody;
 %ignore b2World::CreateJoint;
-%ignore b2Body::CreateShape;
+%ignore b2Body::CreateFixture;
 
 %ignore b2World::DestroyBody;
 %ignore b2World::DestroyJoint;
-%ignore b2Body::DestroyShape;
+%ignore b2Body::DestroyFixture;

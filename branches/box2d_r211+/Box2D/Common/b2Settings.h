@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -22,12 +22,11 @@
 #include <assert.h>
 #include <math.h>
 
-#ifdef MSVC
 #define B2_NOT_USED(x) x
-#else
-#define B2_NOT_USED(x)
-#endif
 
+/// Define USE_ASSERTIONS if you want what would normally crash Python with an
+/// assertion message to instead raise an exception. Box2D will likely be left
+/// in an unusable state, but you should still be able to gracefully exit.
 #ifdef USE_ASSERTIONS
 #include <Python.h>
 class b2AssertException {};
@@ -81,10 +80,30 @@ const float32 b2_pi = 3.14159265359f;
 ///
 
 // Collision
-const int32 b2_maxManifoldPoints = 2;
-const int32 b2_maxPolygonVertices = 16;
-const int32 b2_maxProxies = 1024;				// this must be a power of two
-const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
+
+/// The maximum number of contact points between two convex shapes.
+#define b2_maxManifoldPoints		2
+
+/// The maximum number of vertices on a convex polygon.
+/// (Box2D's default is 8, pybox2d's is 16)
+#define b2_maxPolygonVertices		16 
+
+/// Factor used to fatten AABBs in b2DynamicTree. This allows client
+/// objects to move a small amount without needing to adjust the tree.
+#define b2_fatAABBFactor			1.5f
+
+/// The initial pool size for the dynamic tree.
+#define b2_nodePoolSize				50
+
+/// This must be a power of two 
+/// (Box2D's default is 512, pybox2d's is 1024)
+#define b2_maxProxies				1024
+
+/// This must be a power of two
+#define b2_maxPairs					(8 * b2_maxProxies)
+
+/// The radius of the polygon/edge shape skin.
+#define b2_polygonRadius			0.01f
 
 // Dynamics
 
@@ -95,11 +114,6 @@ const float32 b2_linearSlop = 0.005f;	// 0.5 cm
 /// A small angle used as a collision and constraint tolerance. Usually it is
 /// chosen to be numerically significant, but visually insignificant.
 const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
-
-/// Continuous collision detection (CCD) works with core, shrunken shapes. This is the
-/// amount by which shapes are automatically shrunk to work with CCD. This must be
-/// larger than b2_linearSlop.
-const float32 b2_toiSlop = 8.0f * b2_linearSlop;
 
 /// Maximum number of contacts to be handled to solve a TOI island.
 const int32 b2_maxTOIContactsPerIsland = 32;
@@ -121,19 +135,13 @@ const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 
 /// The maximum linear velocity of a body. This limit is very large and is used
 /// to prevent numerical problems. You shouldn't need to adjust this.
-#ifdef TARGET_FLOAT32_IS_FIXED
-const float32 b2_maxLinearVelocity = 100.0f;
-#else
-const float32 b2_maxLinearVelocity = 200.0f;
-const float32 b2_maxLinearVelocitySquared = b2_maxLinearVelocity * b2_maxLinearVelocity;
-#endif
+#define b2_maxTranslation 2.0f
+#define b2_maxTranslationSquared (b2_maxTranslation * b2_maxTranslation)
 
 /// The maximum angular velocity of a body. This limit is very large and is used
 /// to prevent numerical problems. You shouldn't need to adjust this.
-const float32 b2_maxAngularVelocity = 250.0f;
-#ifndef TARGET_FLOAT32_IS_FIXED
-const float32 b2_maxAngularVelocitySquared = b2_maxAngularVelocity * b2_maxAngularVelocity;
-#endif
+#define b2_maxRotation (0.5f * b2_pi)
+#define b2_maxRotationSquared (b2_maxRotation * b2_maxRotation)
 
 /// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
 /// that overlap is removed in one time step. However using values close to 1 often lead
@@ -149,7 +157,7 @@ const float32 b2_timeToSleep = 0.5f;									// half a second
 const float32 b2_linearSleepTolerance = 0.01f;		// 1 cm/s
 
 /// A body cannot sleep if its angular velocity is above this tolerance.
-const float32 b2_angularSleepTolerance = 2.0f / 180.0f;		// 2 degrees/s
+const float32 b2_angularSleepTolerance = 2.0f / 180.0f * b2_pi;		// 2 degrees/s
 
 // Memory Allocation
 

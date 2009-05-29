@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -21,15 +21,15 @@
 
 #include "../Common/b2Math.h"
 #include "../Collision/Shapes/b2Shape.h"
-#include "Joints/b2Joint.h"
-#include "Controllers/b2Controller.h"
 
 #include <memory>
 
+class b2Fixture;
 class b2Joint;
 class b2Contact;
 class b2Controller;
 class b2World;
+struct b2FixtureDef;
 struct b2JointEdge;
 struct b2ContactEdge;
 struct b2ControllerEdge;
@@ -47,6 +47,8 @@ struct b2BodyDef
 		userData = NULL;
 		position.Set(0.0f, 0.0f);
 		angle = 0.0f;
+		linearVelocity.Set(0.0f, 0.0f);
+		angularVelocity = 0.0f;
 		linearDamping = 0.0f;
 		angularDamping = 0.0f;
 		allowSleep = true;
@@ -69,6 +71,12 @@ struct b2BodyDef
 
 	/// The world angle of the body in radians.
 	float32 angle;
+
+	/// The linear velocity of the body in world co-ordinates.
+	b2Vec2 linearVelocity;
+
+	/// The angular velocity of the body.
+	float32 angularVelocity;
 
 	/// Linear damping is use to reduce the linear velocity. The damping parameter
 	/// can be larger than 1.0f but the damping effect becomes sensitive to the
@@ -97,30 +105,30 @@ struct b2BodyDef
 	bool isBullet;
 };
 
-/// A rigid body.
+/// A rigid body. These are created via b2World::CreateBody.
 class b2Body
 {
 public:
-	/// Creates a shape and attach it to this body.
-	/// @param shapeDef the shape definition.
+	/// Creates a fixture and attach it to this body.
+	/// @param def the fixture definition.
 	/// @warning This function is locked during callbacks.
-	b2Shape* CreateShape(const b2ShapeDef* shapeDef);
+	b2Fixture* CreateFixture(const b2FixtureDef* def);
 
-	/// Destroy a shape. This removes the shape from the broad-phase and
-	/// therefore destroys any contacts associated with this shape. All shapes
+	/// Destroy a fixture. This removes the fixture from the broad-phase and
+	/// therefore destroys any contacts associated with this fixture. All fixtures
 	/// attached to a body are implicitly destroyed when the body is destroyed.
-	/// @param shape the shape to be removed.
+	/// @param fixture the fixture to be removed.
 	/// @warning This function is locked during callbacks.
-	void DestroyShape(b2Shape* shape);
+	void DestroyFixture(b2Fixture* fixture);
 
 	/// Set the mass properties. Note that this changes the center of mass position.
 	/// If you are not sure how to compute mass properties, use SetMassFromShapes.
 	/// The inertia tensor is assumed to be relative to the center of mass.
 	/// @param massData the mass properties.
-	void SetMass(const b2MassData* massData);
+	void SetMassData(const b2MassData* data);
 
 	/// Compute the mass properties from the attached shapes. You typically call this
-	/// after adding all the shapes. If you add or remove shapes later, you may want
+	/// after adding all the fixtures. If you add or remove fixtures later, you may want
 	/// to call this again. Note that this changes the center of mass position.
 	void SetMassFromShapes();
 
@@ -133,9 +141,26 @@ public:
 	/// body is automatically frozen.
 	bool SetXForm(const b2Vec2& position, float32 angle);
 
+	/// Set the position of the body's origin and rotation (radians).
+	/// This breaks any contacts and wakes the other bodies.
+	/// Note this is less efficient than the other overload - you should use that
+	/// if the angle is available.
+	/// @param xf the transform of position and angle to set the body to.
+	/// @return false if the movement put a shape outside the world. In this case the
+	/// body is automatically frozen.
+	bool SetXForm(const b2XForm& xf);
+
 	/// Get the body transform for the body's origin.
 	/// @return the world transform of the body's origin.
 	const b2XForm& GetXForm() const;
+
+	/// Set the world body origin position.
+	/// @param position the new position of the body.
+	void SetPosition(const b2Vec2& position);
+
+	/// Set the world body angle.
+	/// @param angle the new angle of the body.
+	void SetAngle(float32 angle);
 
 	/// Get the world body origin position.
 	/// @return the world position of the body's origin.
@@ -194,6 +219,10 @@ public:
 	/// Get the central rotational inertia of the body.
 	/// @return the rotational inertia, usually in kg-m^2.
 	float32 GetInertia() const;
+
+	/// Get the mass data of the body.
+	/// @return a struct containing the mass, inertia and center of the body.
+	b2MassData GetMassData() const;
 
 	/// Get the world coordinates of a point given the local coordinates.
 	/// @param localPoint a point on the body measured relative the the body's origin.
@@ -278,8 +307,8 @@ public:
 	/// This also sets the velocity to zero.
 	void PutToSleep();
 
-	/// Get the list of all shapes attached to this body.
-	b2Shape* GetShapeList();
+	/// Get the list of all fixtures attached to this body.
+	b2Fixture* GetFixtureList();
 
 	/// Get the list of all joints attached to this body.
 	b2JointEdge* GetJointList();
@@ -338,7 +367,7 @@ private:
 	b2Body(const b2BodyDef* bd, b2World* world);
 	~b2Body();
 
-	bool SynchronizeShapes();
+	bool SynchronizeFixtures();
 
 	void SynchronizeTransform();
 
@@ -366,8 +395,8 @@ private:
 	b2Body* m_prev;
 	b2Body* m_next;
 
-	b2Shape* m_shapeList;
-	int32 m_shapeCount;
+	b2Fixture* m_fixtureList;
+	int32 m_fixtureCount;
 
 	b2JointEdge* m_jointList;
 	b2ContactEdge* m_contactList;
@@ -388,6 +417,21 @@ private:
 inline const b2XForm& b2Body::GetXForm() const
 {
 	return m_xf;
+}
+
+inline bool b2Body::SetXForm(const b2XForm& xf)
+{
+	return SetXForm(xf.position, xf.GetAngle());
+}
+
+inline void b2Body::SetPosition(const b2Vec2& position)
+{
+	SetXForm(position, GetAngle());
+}
+
+inline void b2Body::SetAngle(float32 angle)
+{
+	SetXForm(GetPosition(), angle);
 }
 
 inline const b2Vec2& b2Body::GetPosition() const
@@ -438,6 +482,15 @@ inline float32 b2Body::GetMass() const
 inline float32 b2Body::GetInertia() const
 {
 	return m_I;
+}
+
+inline b2MassData b2Body::GetMassData() const
+{
+	b2MassData massData;
+	massData.mass = m_mass;
+	massData.I = m_I;
+	massData.center = GetWorldCenter();
+	return massData;
 }
 
 inline b2Vec2 b2Body::GetWorldPoint(const b2Vec2& localPoint) const
@@ -538,22 +591,6 @@ inline bool b2Body::IsStatic() const
 	return m_type == e_staticType;
 }
 
-inline void b2Body::SetStatic()
-{
-	if(m_type == e_staticType)
-		return;
-	m_mass = 0.0;
-	m_invMass = 0.0f;
-	m_I = 0.0f;
-	m_invI = 0.0f;
-	m_type = e_staticType;
-	for (b2Shape* s = m_shapeList; s; s = s->m_next)
-	{
-		s->RefilterProxy(m_world->m_broadPhase, m_xf);
-	}
-}
-
-
 inline bool b2Body::IsDynamic() const
 {
 	return m_type == e_dynamicType;
@@ -603,9 +640,9 @@ inline void b2Body::PutToSleep()
 	m_torque = 0.0f;
 }
 
-inline b2Shape* b2Body::GetShapeList()
+inline b2Fixture* b2Body::GetFixtureList()
 {
-	return m_shapeList;
+	return m_fixtureList;
 }
 
 inline b2JointEdge* b2Body::GetJointList()
@@ -631,17 +668,6 @@ inline void* b2Body::GetUserData()
 inline void b2Body::SetUserData(void* data)
 {
 	m_userData = data;
-}
-
-inline bool b2Body::IsConnected(const b2Body* other) const
-{
-	for (b2JointEdge* jn = m_jointList; jn; jn = jn->next)
-	{
-		if (jn->other == other)
-			return jn->joint->m_collideConnected == false;
-	}
-
-	return false;
 }
 
 inline void b2Body::ApplyForce(const b2Vec2& force, const b2Vec2& point)

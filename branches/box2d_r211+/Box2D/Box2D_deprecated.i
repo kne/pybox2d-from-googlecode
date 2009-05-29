@@ -27,7 +27,7 @@ would collide with the specified polygon.
 ";
 
 %inline %{
-    PyObject* collideCircleParticle(b2CircleShape* circle, const b2Vec2& ppos) {
+    PyObject* collideCircleParticle(b2Fixture* fixture, const b2Vec2& ppos) {
         //out bCollides, b2Vec2 penetration, b2Vec2 penetrationNormal
         //Ported to C from Blaze (D)
         PyObject* ret=PyTuple_New(3);
@@ -35,14 +35,15 @@ would collide with the specified polygon.
         PyTuple_SetItem(ret, 1, SWIG_From_bool(false));
         PyTuple_SetItem(ret, 2, SWIG_From_bool(false));
 
-        b2XForm xf1 = circle->GetBody()->GetXForm();
+        const b2CircleShape* circle = (b2CircleShape*)fixture->GetShape();
+        b2XForm xf1 = fixture->GetBody()->GetXForm();
 
-        b2Vec2 p1 = b2Mul(xf1, circle->GetLocalPosition());
+        b2Vec2 p1 = b2Mul(xf1, circle->m_p);
         b2Vec2 p2 = ppos;
 
         b2Vec2 d = p2 - p1;
         float32 distSqr = b2Dot(d, d);
-        float32 r1 = circle->GetRadius();
+        float32 r1 = circle->m_radius;
         float32 r2 = 0.0f;
         float32 radiusSum = r1 + r2;
         if (distSqr > radiusSum * radiusSum) {
@@ -71,7 +72,7 @@ would collide with the specified polygon.
         return ret;
     }
 
-    PyObject* b2CollidePolyParticle(b2PolygonShape* polygon, const b2Vec2& ppos, float32 pradius) {
+    PyObject* b2CollidePolyParticle(b2Fixture* fixture, const b2Vec2& ppos, float32 pradius) {
         //out bCollides, b2Vec2 penetration, b2Vec2 penetrationNormal
         //Ported to C from Blaze (D)
         PyObject* ret=PyTuple_New(3);
@@ -79,7 +80,8 @@ would collide with the specified polygon.
         PyTuple_SetItem(ret, 1, SWIG_From_bool(false));
         PyTuple_SetItem(ret, 2, SWIG_From_bool(false));
 
-        const b2XForm xf1 = polygon->GetBody()->GetXForm();
+        const b2PolygonShape* polygon = (b2PolygonShape*)fixture->GetShape();
+        const b2XForm xf1 = fixture->GetBody()->GetXForm();
         b2XForm xf2;
         xf2.position = ppos;
 
@@ -93,9 +95,9 @@ would collide with the specified polygon.
         float32 radius = pradius;
         b2Vec2* penetration=new b2Vec2();
 
-        int vertexCount = polygon->GetVertexCount();
-        const b2Vec2* vertices = polygon->GetVertices();
-        const b2Vec2* normals = polygon->GetNormals();
+        int vertexCount = polygon->m_vertexCount;
+        const b2Vec2* vertices = polygon->m_vertices;
+        const b2Vec2* normals = polygon->m_normals;
 
         for (int i = 0; i < vertexCount; ++i) {
             float32 s = b2Dot(normals[i], cLocal - vertices[i]);

@@ -23,7 +23,7 @@ b2GravityController::b2GravityController(const b2GravityControllerDef* def) : b2
 	G = def->G;
 	invSqr = def->invSqr;
 
-	m_type = e_gravityController;
+	m_type = b2_gravityController;
 }
 
 void b2GravityController::Step(const b2TimeStep& step)

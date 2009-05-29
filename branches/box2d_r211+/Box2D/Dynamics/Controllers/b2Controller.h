@@ -30,12 +30,12 @@ class b2Controller;
 /// The various controller types supported by Box2D.
 enum b2ControllerType
 {
-	e_unknownController = -1,
-	e_buoyancyController,
-	e_constantAccelController,
-	e_constantForceController,
-	e_gravityController,
-	e_tensorDampingController,
+	b2_unknownController = -1,
+	b2_buoyancyController,
+	b2_constantAccelController,
+	b2_constantForceController,
+	b2_gravityController,
+	b2_tensorDampingController,
 };
 
 /// A controller edge is used to connect bodies and controllers together
@@ -75,7 +75,7 @@ public:
 	void Clear();
 
 	/// Get the type of the controller
-	b2ControllerType GetType();
+	b2ControllerType GetType() const;
 
 	/// Get the next controller in the world's body list.
 	b2Controller* GetNext();
@@ -100,9 +100,10 @@ protected:
 		m_world(NULL),
 		m_bodyList(NULL),
 		m_bodyCount(0),
-		m_type(e_unknownController),
+		m_type(b2_unknownController),
 		m_prev(NULL),
 		m_next(NULL)
+		
 		{
 			B2_NOT_USED(def);
 		}
@@ -125,6 +126,11 @@ private:
 	virtual b2Controller* Create(b2BlockAllocator* allocator) = 0;
 };
 
+inline b2ControllerType b2Controller::GetType() const
+{
+	return m_type;
+}
+
 inline b2Controller* b2Controller::GetNext()
 {
 	return m_next;
@@ -143,11 +149,6 @@ inline b2ControllerEdge* b2Controller::GetBodyList()
 inline void b2Controller::Destroy(b2Controller* controller, b2BlockAllocator* allocator)
 {
 	controller->Destroy(allocator);
-}
-
-inline b2ControllerType b2Controller::GetType()
-{
-	return m_type;
 }
 
 #endif

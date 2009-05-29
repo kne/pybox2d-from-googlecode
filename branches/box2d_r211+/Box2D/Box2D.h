@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -37,15 +37,14 @@ For discussion please visit http://www.box2d.org/forum
 #include "Collision/Shapes/b2PolygonShape.h"
 #include "Collision/Shapes/b2EdgeShape.h"
 #include "Collision/b2BroadPhase.h"
+#include "Collision/b2Distance.h"
+#include "Collision/b2DynamicTree.h"
+#include "Collision/b2TimeOfImpact.h"
+#include "Dynamics/b2Body.h"
+#include "Dynamics/b2EdgeChain.h"
+#include "Dynamics/b2Fixture.h"
 #include "Dynamics/b2WorldCallbacks.h"
 #include "Dynamics/b2World.h"
-#include "Dynamics/b2Body.h"
-#include "Dynamics/Controllers/b2BuoyancyController.h"
-#include "Dynamics/Controllers/b2ConstantAccelController.h"
-#include "Dynamics/Controllers/b2ConstantForceController.h"
-#include "Dynamics/Controllers/b2Controller.h"
-#include "Dynamics/Controllers/b2GravityController.h"
-#include "Dynamics/Controllers/b2TensorDampingController.h"
 
 #include "Dynamics/Contacts/b2Contact.h"
 
@@ -57,4 +56,11 @@ For discussion please visit http://www.box2d.org/forum
 #include "Dynamics/Joints/b2PulleyJoint.h"
 #include "Dynamics/Joints/b2RevoluteJoint.h"
 
+#include "Dynamics/Controllers/b2BuoyancyController.h"
+#include "Dynamics/Controllers/b2ConstantForceController.h"
+#include "Dynamics/Controllers/b2ConstantAccelController.h"
+#include "Dynamics/Controllers/b2GravityController.h"
+#include "Dynamics/Controllers/b2TensorDampingController.h"
+
 #endif
+

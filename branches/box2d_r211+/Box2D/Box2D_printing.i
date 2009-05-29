@@ -829,17 +829,6 @@
  %}
 }
 
-%extend b2OBB {
- %pythoncode %{
- def __repr__(self):
-  return """b2OBB(
-    R       = %s,
-    center  = %s,
-    extents = %s)"""% tuple(str(a) for a in\
-   (self.R,self.center,self.extents))
- %}
-}
-
 %extend b2Pair {
  %pythoncode %{
  def __repr__(self):
@@ -1145,21 +1134,6 @@
     GetType()        = %s,
     IsSensor()       = %s)"""% tuple(str(a) for a in\
    (self.density,self.filter,self.friction,self.restitution,self.userData,self.GetBody(),self.GetFilterData(),self.GetSweepRadius(),self.GetType(),self.IsSensor()))
- %}
-}
-
-%extend b2ShapeDef {
- %pythoncode %{
- def __repr__(self):
-  return """b2ShapeDef(
-    density     = %s,
-    filter      = %s,
-    friction    = %s,
-    isSensor    = %s,
-    restitution = %s,
-    type        = %s,
-    userData    = %s)"""% tuple(str(a) for a in\
-   (self.density,self.filter,self.friction,self.isSensor,self.restitution,self.type,self.userData))
  %}
 }
 

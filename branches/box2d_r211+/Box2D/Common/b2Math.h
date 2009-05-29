@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -21,18 +21,10 @@
 
 #include "b2Settings.h"
 
-#ifdef TARGET_OS_IPHONE
-#include "math.h"
-#else
-#include <cmath>
-#endif
+#include <math.h>
+#include <float.h>
+#include <stddef.h>
 
-
-
-#include <cfloat>
-#include <cstdlib>
-
-#include <stdio.h>
 
 #ifdef TARGET_FLOAT32_IS_FIXED
 
@@ -111,7 +103,7 @@ inline float32 b2Abs(float32 a)
 struct b2Vec2
 {
 	/// Default constructor does nothing (for performance).
-	b2Vec2() : x(0.0f), y(0.0f) {}
+	b2Vec2() {}
 
 	/// Construct using coordinates.
 	b2Vec2(float32 x, float32 y) : x(x), y(y) {}
@@ -125,6 +117,18 @@ struct b2Vec2
 	/// Negate this vector.
 	b2Vec2 operator -() const { b2Vec2 v; v.Set(-x, -y); return v; }
 	
+	/// Read from and indexed element.
+	float32 operator () (int32 i) const
+	{
+		return (&x)[i];
+	}
+
+	/// Write to an indexed element.
+	float32& operator () (int32 i)
+	{
+		return (&x)[i];
+	}
+
 	/// Add a vector to this vector.
 	void operator += (const b2Vec2& v)
 	{
@@ -475,6 +479,19 @@ struct b2XForm
 		R.SetIdentity();
 	}
 
+	/// Set this based on the position and angle.
+	void Set(const b2Vec2& p, float32 angle)
+	{
+		position = p;
+		R.Set(angle);
+	}
+
+	/// Calculate the angle that the rotation matrix represents.
+	float32 GetAngle() const
+	{
+		return b2Atan2(R.col1.y, R.col1.x);
+	}
+
 	b2Vec2 position;
 	b2Mat22 R;
 };
@@ -486,8 +503,8 @@ struct b2XForm
 struct b2Sweep
 {
 	/// Get the interpolated transform at a specific time.
-	/// @param t the normalized time in [0,1].
-	void GetXForm(b2XForm* xf, float32 t) const;
+	/// @param alpha is a factor in [0,1], where 0 indicates t0.
+	void GetTransform(b2XForm* xf, float32 alpha) const;
 
 	/// Advance the sweep forward, yielding a new initial state.
 	/// @param t the new initial time.
@@ -504,7 +521,7 @@ extern const b2Vec2 b2Vec2_zero;
 extern const b2Mat22 b2Mat22_identity;
 extern const b2XForm b2XForm_identity;
 
-/// Peform the dot product on two vectors.
+/// Perform the dot product on two vectors.
 inline float32 b2Dot(const b2Vec2& a, const b2Vec2& b)
 {
 	return a.x * b.x + a.y * b.y;

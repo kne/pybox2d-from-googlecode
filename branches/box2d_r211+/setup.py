@@ -22,8 +22,8 @@ except:
     print 'Setuptools not found; falling back on distutils.'
 
 # release version number
-box2d_version  = '2.0.2'
-release_number = 1
+box2d_version  = '2.1.0'
+release_number = 0
 
 # create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))

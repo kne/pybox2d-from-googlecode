@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -936,4 +936,3 @@ void b2BroadPhase::AddProxyResult(uint16 proxyId, b2Proxy* proxy, int32 maxCount
 	m_queryResults[i] = proxyId;
 	m_queryResultCount++;
 }
-
