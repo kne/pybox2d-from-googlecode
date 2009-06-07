@@ -21,8 +21,7 @@
 b2ConstantForceController::b2ConstantForceController(const b2ConstantForceControllerDef* def) : b2Controller(def)
 {
 	F = def->F;
-
-	m_type = b2_constantForceController;
+    m_type = b2_constantForceController;
 }
 
 void b2ConstantForceController::Step(const b2TimeStep& step)
@@ -42,7 +41,7 @@ void b2ConstantForceController::Destroy(b2BlockAllocator* allocator)
 }
 
 
-b2ConstantForceController* b2ConstantForceControllerDef::Create(b2BlockAllocator* allocator)
+b2ConstantForceController* b2ConstantForceControllerDef::Create(b2BlockAllocator* allocator) const
 {
 	void* mem = allocator->Allocate(sizeof(b2ConstantForceController));
 	return new (mem) b2ConstantForceController(this);

@@ -75,16 +75,19 @@ public:
 	void Clear();
 
 	/// Get the type of the controller
-	b2ControllerType GetType() const;
+	b2ControllerType GetType() const { return m_type; }
 
 	/// Get the next controller in the world's body list.
 	b2Controller* GetNext();
+	const b2Controller* GetNext() const;
 
 	/// Get the parent world of this body.
 	b2World* GetWorld();
+	const b2World* GetWorld() const;
 
 	/// Get the attached body list
 	b2ControllerEdge* GetBodyList();
+	const b2ControllerEdge* GetBodyList() const;
 
 
 protected:
@@ -123,15 +126,15 @@ public:
 	
 private:
 	friend class b2World;
-	virtual b2Controller* Create(b2BlockAllocator* allocator) = 0;
+	virtual b2Controller* Create(b2BlockAllocator* allocator) const = 0;
 };
 
-inline b2ControllerType b2Controller::GetType() const
+inline b2Controller* b2Controller::GetNext()
 {
-	return m_type;
+	return m_next;
 }
 
-inline b2Controller* b2Controller::GetNext()
+inline const b2Controller* b2Controller::GetNext() const
 {
 	return m_next;
 }
@@ -141,7 +144,17 @@ inline b2World* b2Controller::GetWorld()
 	return m_world;
 }
 
+inline const b2World* b2Controller::GetWorld() const
+{
+	return m_world;
+}
+
 inline b2ControllerEdge* b2Controller::GetBodyList()
+{
+	return m_bodyList;
+}
+
+inline const b2ControllerEdge* b2Controller::GetBodyList() const
 {
 	return m_bodyList;
 }

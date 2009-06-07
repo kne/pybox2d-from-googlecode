@@ -129,11 +129,11 @@ public:
 	/// Get the next joint the world joint list.
 	b2Joint* GetNext();
 
-    /// Get whether or not to collide connected bodies
-    bool GetCollideConnected() const { return m_collideConnected; }
+	/// Get whether or not to collide connected bodies
+	bool GetCollideConnected() const { return m_collideConnected; }
 
 	/// Get the user data pointer.
-	void* GetUserData();
+	void* GetUserData() const;
 
 	/// Set the user data pointer.
 	void SetUserData(void* data);
@@ -214,7 +214,7 @@ inline b2Joint* b2Joint::GetNext()
 	return m_next;
 }
 
-inline void* b2Joint::GetUserData()
+inline void* b2Joint::GetUserData() const
 {
 	return m_userData;
 }

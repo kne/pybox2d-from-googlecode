@@ -100,7 +100,7 @@ public:
 	void DestroyJoint(b2Joint* joint);
 
 	/// Add a controller to the world.
-	b2Controller* CreateController(b2ControllerDef* def);
+	b2Controller* CreateController( const b2ControllerDef* def);
 
 	/// Removes a controller from the world.
 	void DestroyController(b2Controller* controller);
@@ -199,14 +199,14 @@ public:
 	/// Change the global gravity vector.
 	void SetGravity(const b2Vec2& gravity);
 	
-	/// Get the global gravity vector.
-	b2Vec2 GetGravity() const;
-
-    /// Get the world's AABB
-    b2AABB GetWorldAABB() const { return m_broadPhase->m_worldAABB; }
+	/// Get the world's AABB
+	b2AABB GetWorldAABB() const { return m_broadPhase->m_worldAABB; }
 
 	/// Whether bodies can sleep or not
 	bool CanSleep() const { return m_allowSleep; }
+
+	/// Get the global gravity vector.
+	b2Vec2 GetGravity() const;
 
 private:
 
