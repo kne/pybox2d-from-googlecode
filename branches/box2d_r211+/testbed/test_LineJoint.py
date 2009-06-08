@@ -31,7 +31,7 @@ class LineJoint (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 2.0)
@@ -41,7 +41,7 @@ class LineJoint (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 7.0)
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
         
         jd = box2d.b2LineJointDef()

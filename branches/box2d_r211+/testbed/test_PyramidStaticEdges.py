@@ -34,7 +34,7 @@ class PyramidStaticEdges (Framework):
         edgeDef = box2d.b2EdgeChainDef()
         edgeDef.setVertices_tuple(verts)
         edgeDef.isALoop = False
-        body.CreateShape(edgeDef)
+        body.CreateFixture(edgeDef)
         
         #body.SetMassFromShapes()
     
@@ -54,7 +54,7 @@ class PyramidStaticEdges (Framework):
                 bd=box2d.b2BodyDef() 
                 bd.position = y
                 body = self.world.CreateBody(bd) 
-                body.CreateShape(sd)
+                body.CreateFixture(sd)
                 body.SetMassFromShapes()
                 y += deltaY
 

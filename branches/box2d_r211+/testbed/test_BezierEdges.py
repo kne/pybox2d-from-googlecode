@@ -74,7 +74,7 @@ class BezierEdges (Framework):
         bd=box2d.b2BodyDef()
         bd.position = ( 0.0, 0.0 )
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(edgeDef)
+        ground.CreateFixture(edgeDef)
 
         # some objects to use on the curve
         sd=box2d.b2CircleDef()
@@ -86,7 +86,7 @@ class BezierEdges (Framework):
             bd.position = (0.0, 2.0 + 3.0 * i)
             
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
         
     def Keyboard(self, key):
@@ -101,7 +101,7 @@ class BezierEdges (Framework):
             bd=box2d.b2BodyDef()
             bd.position = ( 0.0, 0.0 )
             body = self.world.CreateBody(bd)
-            body.CreateShape(ed)
+            body.CreateFixture(ed)
 
             self.bezier_obj.append(body)
         elif key==K_d:

@@ -38,16 +38,16 @@ class CCDTest (Framework):
         sd.restitution = k_restitution
 
         sd.SetAsBox(0.1, 10.0, (-10.0, 0.0), 0.0)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (0.0, -10.0), 0.5 * box2d.b2_pi)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (0.0, 10.0), -0.5 * box2d.b2_pi)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd_bottom=box2d.b2PolygonDef() 
         sd_bottom.SetAsBox( 1.5, 0.15 )
@@ -64,9 +64,9 @@ class CCDTest (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = ( 0.0, 15.0 )
         body = self.world.CreateBody(bd) 
-        body.CreateShape(sd_bottom)
-        body.CreateShape(sd_left)
-        body.CreateShape(sd_right)
+        body.CreateFixture(sd_bottom)
+        body.CreateFixture(sd_left)
+        body.CreateFixture(sd_right)
         body.SetMassFromShapes()
         
         return
@@ -82,7 +82,7 @@ class CCDTest (Framework):
             sd.radius = 0.25
             sd.density = 1.0
             sd.restitution = 0.0
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
 

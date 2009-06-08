@@ -286,9 +286,9 @@ class BreakableBody(Framework):
 
         # bottom
         sd.SetAsBox( H(gx), H(gy) )
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         sd.SetAsBox( H(dx), H(gy), (-dx,sy-1.0), 0.0 )
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         # dyn bodies
         pd=box2d.b2PolygonDef()
@@ -343,7 +343,7 @@ class BreakableBody(Framework):
         bd.position = (0.0,10.0*gy)
         for i in range(60):
             b = self.world.CreateBody(bd)
-            b.CreateShape(cd)
+            b.CreateFixture(cd)
             b.SetMassFromShapes()
     
     # Create compound (soft) body using a triangle mesh
@@ -398,7 +398,7 @@ class BreakableBody(Framework):
 
                 bd.position=pos
                 b = self.world.CreateBody(bd)
-                b.CreateShape(pd)
+                b.CreateFixture(pd)
                 b.SetMassFromShapes()
                 # we need the body pointer in the triangles for the joints later
                 triangles[i].userData = b

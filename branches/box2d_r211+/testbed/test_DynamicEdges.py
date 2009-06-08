@@ -31,7 +31,7 @@ class DynamicEdges (Framework):
         
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
     
         sd1=box2d.b2CircleDef()
         sd1.radius = 0.5
@@ -49,8 +49,8 @@ class DynamicEdges (Framework):
             bd.position = (x + 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         sd1=box2d.b2PolygonDef()
@@ -67,8 +67,8 @@ class DynamicEdges (Framework):
             bd.position = (x - 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         xf1=box2d.b2XForm()
@@ -99,8 +99,8 @@ class DynamicEdges (Framework):
             bd.position = (x, 2.05 + 2.5 * i)
             bd.angle = 0.0
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         sd_bottom=box2d.b2PolygonDef()
@@ -118,9 +118,9 @@ class DynamicEdges (Framework):
         bd=box2d.b2BodyDef()
         bd.position = ( 0.0, 2.0 )
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd_bottom)
-        body.CreateShape(sd_left)
-        body.CreateShape(sd_right)
+        body.CreateFixture(sd_bottom)
+        body.CreateFixture(sd_left)
+        body.CreateFixture(sd_right)
         body.SetMassFromShapes()
     
         loop1=[
@@ -235,21 +235,21 @@ class DynamicEdges (Framework):
         weight.density = 4.0
         weight.radius = 0.5
         weight.localPosition = (8.9, 5.75)
-        body.CreateShape(weight)
+        body.CreateFixture(weight)
         
         edgeDef=box2d.b2EdgeChainDef()
         edgeDef.setVertices(b2Loop2)
-        body.CreateShape(edgeDef)
+        body.CreateFixture(edgeDef)
         
         body.SetMassFromShapes()
         
         body = self.world.CreateBody(bd)
         weight.radius = 5.0
         weight.localPosition = (20.5, 7.0)
-        body.CreateShape(weight)
+        body.CreateFixture(weight)
         
         edgeDef.setVertices(b2Loop1)
-        body.CreateShape(edgeDef)
+        body.CreateFixture(edgeDef)
         
         body.SetMassFromShapes()
 

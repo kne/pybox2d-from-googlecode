@@ -30,7 +30,7 @@ class Pyramid (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         a = 0.5
@@ -38,7 +38,7 @@ class Pyramid (Framework):
         sd.density = 5.0
 
         x=box2d.b2Vec2(-10.0, 0.75)
-        deltaX=(0.5625, 2.0)
+        deltaX=(0.5625, 1.25)
         deltaY=(1.125, 0.0)
 
         for i in range(25):
@@ -48,7 +48,7 @@ class Pyramid (Framework):
                 bd=box2d.b2BodyDef() 
                 bd.position = y
                 body = self.world.CreateBody(bd) 
-                body.CreateShape(sd)
+                body.CreateFixture(sd)
                 body.SetMassFromShapes()
                 y += deltaY
 

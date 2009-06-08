@@ -32,7 +32,7 @@ class Revolute (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         sd=box2d.b2CircleDef()
         sd.radius = 0.5
@@ -44,7 +44,7 @@ class Revolute (Framework):
         
         bd.position = (0.0, 20.0)
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
         
         w = 100.0

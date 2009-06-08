@@ -34,13 +34,13 @@ class SensorTest (Framework):
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         if True:
             sd=box2d.b2PolygonDef() 
             sd.SetAsBox(10.0, 2.0, (0.0, 20.0), 0.0)
             sd.isSensor = True
-            self.sensor = ground.CreateShape(sd)
+            self.sensor = ground.CreateFixture(sd)
 
         else:
             # Alternative test:
@@ -48,7 +48,7 @@ class SensorTest (Framework):
             cd.isSensor = True
             cd.radius = 5.0
             cd.localPosition = (0.0, 20.0)
-            self.sensor = ground.CreateShape(cd)
+            self.sensor = ground.CreateFixture(cd)
 
         sd=box2d.b2CircleDef() 
         sd.radius = 1.0
@@ -60,7 +60,7 @@ class SensorTest (Framework):
             
             body = self.world.CreateBody(bd) 
 
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
     def Step(self, settings):
@@ -83,7 +83,7 @@ class SensorTest (Framework):
             ground = self.sensor.GetBody()
             typedshape = self.sensor.getAsType()
             if self.sensor.GetType() == box2d.e_circleShape:
-                center = ground.GetWorldPoint(typedshape.GetLocalPosition())
+                center = ground.GetWorldPoint(typedshape.m_p())
             elif self.sensor.GetType() == box2d.e_polygonShape:
                 center = ground.GetWorldPoint(typedshape.GetCentroid())
             else:

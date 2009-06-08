@@ -722,7 +722,7 @@ class Framework(pyglet.window.Window):
 
         # Set the other settings that aren't contained in the flags
         self.world.SetWarmStarting(settings.enableWarmStarting)
-    	self.world.SetContinuousPhysics(settings.enableTOI)
+    	self.world.SetContinuousPhysics(settings.enableContinuous)
 
         # Reset the collision points
         self.points = []
@@ -817,7 +817,7 @@ class Framework(pyglet.window.Window):
         aabb.upperBound = maxV
 
         if self.world.InRange(aabb):
-            self.bomb.CreateShape(sd)
+            self.bomb.CreateFixture(sd)
             self.bomb.SetMassFromShapes()
 
     def LaunchRandomBomb(self):

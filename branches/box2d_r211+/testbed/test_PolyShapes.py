@@ -45,7 +45,7 @@ class PolyShapes (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         sds[0].vertexCount = 3
         sds[0].setVertex(0,-0.5, 0.0)
         sds[0].setVertex(1,0.5, 0.0)
@@ -103,9 +103,9 @@ class PolyShapes (Framework):
           self.bodies.append(self.world.CreateBody(bd) )
           
           if index < 4:
-              self.bodies[-1].CreateShape(self.sds[index])
+              self.bodies[-1].CreateFixture(self.sds[index])
           else:
-              self.bodies[-1].CreateShape(self.circleDef)
+              self.bodies[-1].CreateFixture(self.circleDef)
           self.bodies[-1].SetMassFromShapes()
           
     def DestroyBody(self):

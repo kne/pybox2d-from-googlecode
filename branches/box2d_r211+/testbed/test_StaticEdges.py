@@ -41,8 +41,8 @@ class StaticEdges (Framework):
             bd.position = (x + 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         sd1=box2d.b2PolygonDef()
@@ -59,8 +59,8 @@ class StaticEdges (Framework):
             bd.position = (x - 5.0, 1.05 + 2.5 * i)
             bd.angle = box2d.b2Random(-box2d.b2_pi, box2d.b2_pi)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         xf1=box2d.b2XForm()
@@ -91,8 +91,8 @@ class StaticEdges (Framework):
             bd.position = (x, 2.05 + 2.5 * i)
             bd.angle = 0.0
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd1)
-            body.CreateShape(sd2)
+            body.CreateFixture(sd1)
+            body.CreateFixture(sd2)
             body.SetMassFromShapes()
     
         loop1 = [ 
@@ -203,10 +203,10 @@ class StaticEdges (Framework):
         
         edgeDef=box2d.b2EdgeChainDef()
         edgeDef.vertices=b2Loop1
-        body.CreateShape(edgeDef)
+        body.CreateFixture(edgeDef)
         
         edgeDef.vertices=b2Loop2
-        body.CreateShape(edgeDef)
+        body.CreateFixture(edgeDef)
         
         #body.SetMassFromShapes()
     

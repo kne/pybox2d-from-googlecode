@@ -51,7 +51,7 @@ class CollisionFiltering (Framework):
         bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         # Small triangle
         triangleShapeDef=box2d.b2PolygonDef()
@@ -69,7 +69,7 @@ class CollisionFiltering (Framework):
         triangleBodyDef.position = (-5.0, 2.0)
 
         body1 = self.world.CreateBody(triangleBodyDef)
-        body1.CreateShape(triangleShapeDef)
+        body1.CreateFixture(triangleShapeDef)
         body1.SetMassFromShapes()
 
         # Large triangle (recycle definitions)
@@ -81,7 +81,7 @@ class CollisionFiltering (Framework):
         triangleBodyDef.fixedRotation = True
 
         body2 = self.world.CreateBody(triangleBodyDef)
-        body2.CreateShape(triangleShapeDef)
+        body2.CreateFixture(triangleShapeDef)
         body2.SetMassFromShapes()
 
         # Small box
@@ -97,7 +97,7 @@ class CollisionFiltering (Framework):
         boxBodyDef.position = (0.0, 2.0)
 
         body3 = self.world.CreateBody(boxBodyDef)
-        body3.CreateShape(boxShapeDef)
+        body3.CreateFixture(boxShapeDef)
         body3.SetMassFromShapes()
 
         # Large box (recycle definitions)
@@ -106,7 +106,7 @@ class CollisionFiltering (Framework):
         boxBodyDef.position = (0.0, 6.0)
 
         body4 = self.world.CreateBody(boxBodyDef)
-        body4.CreateShape(boxShapeDef)
+        body4.CreateFixture(boxShapeDef)
         body4.SetMassFromShapes()
 
         # Small circle
@@ -122,7 +122,7 @@ class CollisionFiltering (Framework):
         circleBodyDef.position = (5.0, 2.0)
 
         body5 = self.world.CreateBody(circleBodyDef)
-        body5.CreateShape(circleShapeDef)
+        body5.CreateFixture(circleShapeDef)
         body5.SetMassFromShapes()
 
         # Large circle
@@ -131,7 +131,7 @@ class CollisionFiltering (Framework):
         circleBodyDef.position = (5.0, 6.0)
 
         body6 = self.world.CreateBody(circleBodyDef)
-        body6.CreateShape(circleShapeDef)
+        body6.CreateFixture(circleShapeDef)
         body6.SetMassFromShapes()
 
 if __name__=="__main__":

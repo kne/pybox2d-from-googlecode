@@ -35,7 +35,7 @@ class CollisionProcessing (Framework):
         bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         xLo = -5.0
         xHi = 5.0
@@ -53,7 +53,7 @@ class CollisionProcessing (Framework):
         triangleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body1 = self.world.CreateBody(triangleBodyDef) 
-        body1.CreateShape(triangleShapeDef)
+        body1.CreateFixture(triangleShapeDef)
         body1.SetMassFromShapes()
 
         # Large triangle (recycle definitions)
@@ -63,7 +63,7 @@ class CollisionProcessing (Framework):
         triangleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body2 = self.world.CreateBody(triangleBodyDef)
-        body2.CreateShape(triangleShapeDef)
+        body2.CreateFixture(triangleShapeDef)
         body2.SetMassFromShapes()
 
         # Small box
@@ -75,7 +75,7 @@ class CollisionProcessing (Framework):
         boxBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body3 = self.world.CreateBody(boxBodyDef) 
-        body3.CreateShape(boxShapeDef)
+        body3.CreateFixture(boxShapeDef)
         body3.SetMassFromShapes()
 
         # Large box (recycle definitions)
@@ -83,7 +83,7 @@ class CollisionProcessing (Framework):
         boxBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body4 = self.world.CreateBody(boxBodyDef)
-        body4.CreateShape(boxShapeDef)
+        body4.CreateFixture(boxShapeDef)
         body4.SetMassFromShapes()
 
         # Small circle
@@ -95,7 +95,7 @@ class CollisionProcessing (Framework):
         circleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body5 = self.world.CreateBody(circleBodyDef) 
-        body5.CreateShape(circleShapeDef)
+        body5.CreateFixture(circleShapeDef)
         body5.SetMassFromShapes()
 
         # Large circle
@@ -103,7 +103,7 @@ class CollisionProcessing (Framework):
         circleBodyDef.position = (box2d.b2Random(xLo, xHi), box2d.b2Random(yLo, yHi))
 
         body6 = self.world.CreateBody(circleBodyDef) 
-        body6.CreateShape(circleShapeDef)
+        body6.CreateFixture(circleShapeDef)
         body6.SetMassFromShapes()
      
     def Step(self, settings):

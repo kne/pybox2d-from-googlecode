@@ -39,7 +39,7 @@ class PolyCollision (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 10.0)
         self.body1 = self.world.CreateBody(bd)
-        self.body1.CreateShape(sd)
+        self.body1.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 0.5)
@@ -48,7 +48,7 @@ class PolyCollision (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 10.0)
         self.body2 = self.world.CreateBody(bd)
-        self.body2.CreateShape(sd)
+        self.body2.CreateFixture(sd)
         self.body2.SetMassFromShapes()
 
         self.world.SetGravity( (0,0) )

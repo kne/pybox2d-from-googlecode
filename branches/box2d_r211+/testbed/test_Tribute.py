@@ -40,13 +40,13 @@ class Tribute (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         ground      = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.5, 5.0, (-50.0, 15.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         
         sd.SetAsBox(0.5, 5.0, (50.0, 15.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(3.0,1.0)
         sd.density = 3.0
@@ -54,7 +54,7 @@ class Tribute (Framework):
         for i in range(0, 16, 2):
             boxd.position = (-10.1, i)
             box = self.world.CreateBody(boxd)
-            box.CreateShape(sd)
+            box.CreateFixture(sd)
             box.SetMassFromShapes()
 
         sd=box2d.b2CircleDef()
@@ -77,7 +77,7 @@ class Tribute (Framework):
                    sin(i*2*pi/360)*radius + blob_center.y)
             bd.position = pos
             bodyx = self.world.CreateBody(bd)
-            bodyx.CreateShape(sd)
+            bodyx.CreateFixture(sd)
             bodyx.SetMassFromShapes()
             bodies.append(bodyx)
 

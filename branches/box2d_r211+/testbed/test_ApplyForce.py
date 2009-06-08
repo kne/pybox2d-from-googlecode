@@ -39,16 +39,16 @@ class ApplyForce (Framework):
         sd.restitution = k_restitution
 
         sd.SetAsBox(0.2, 20.0, (-20.0, 0.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (20.0, 0.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (0.0, -20.0), 0.5 * box2d.b2_pi)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (0.0, 20.0), -0.5 * box2d.b2_pi)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         xf1 = box2d.b2XForm ()
         xf1.R.Set(0.3524 * box2d.b2_pi)
@@ -79,8 +79,8 @@ class ApplyForce (Framework):
         bd.position = (0.0, 1.05)
         bd.angle = box2d.b2_pi
         self.body = self.world.CreateBody(bd)
-        self.body.CreateShape(sd1)
-        self.body.CreateShape(sd2)
+        self.body.CreateFixture(sd1)
+        self.body.CreateFixture(sd2)
         self.body.SetMassFromShapes()
      
     def Keyboard(self, key):

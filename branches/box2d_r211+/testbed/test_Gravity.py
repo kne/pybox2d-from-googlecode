@@ -43,16 +43,16 @@ class Gravity (Framework):
         sd.restitution = 1
 
         sd.SetAsBox(0.2, 20.0, (-20.0, 0.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (20.0, 0.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (0.0, -20.0), 0.5 * box2d.b2_pi)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.2, 20.0, (0.0, 20.0), -0.5 * box2d.b2_pi)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
@@ -69,7 +69,7 @@ class Gravity (Framework):
             
             body=self.world.CreateBody(bd)
             self.bodies.append(body)
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
             self.gc.AddBody(body)
 

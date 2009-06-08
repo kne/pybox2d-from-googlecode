@@ -37,7 +37,7 @@ class BoxCutter (Framework):
         
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 50.0)
@@ -46,7 +46,7 @@ class BoxCutter (Framework):
         
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 1.0)
@@ -56,7 +56,7 @@ class BoxCutter (Framework):
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(5.0, 1.0)
         sd.density = 4.0
-        self.laserBody.CreateShape(sd)
+        self.laserBody.CreateFixture(sd)
         self.laserBody.SetMassFromShapes()
     
         sd=box2d.b2PolygonDef()
@@ -67,7 +67,7 @@ class BoxCutter (Framework):
         bd.userData = 1
         bd.position = (0.0, 8.0)
         body1 = self.world.CreateBody(bd)
-        body1.CreateShape(sd)
+        body1.CreateFixture(sd)
         body1.SetMassFromShapes()
     
         sd=box2d.b2PolygonDef()
@@ -78,7 +78,7 @@ class BoxCutter (Framework):
         bd.userData = 1
         bd.position = (0.0, 8.0)
         body1 = self.world.CreateBody(bd)
-        body1.CreateShape(sd)
+        body1.CreateFixture(sd)
         body1.SetMassFromShapes()
 
     # Split a shape through a segment
@@ -214,7 +214,7 @@ class BoxCutter (Framework):
             
             if self.SplitShape(polyShape, segment, 0.1, pd):
                 b.DestroyShape(shapes[i])
-                b.CreateShape(pd[0])
+                b.CreateFixture(pd[0])
                 b.SetMassFromShapes()
                 b.WakeUp()
                 
@@ -223,7 +223,7 @@ class BoxCutter (Framework):
                 bd.position = b.GetPosition()
                 bd.angle = b.GetAngle()
                 newBody = self.world.CreateBody(bd)
-                newBody.CreateShape(pd[1])
+                newBody.CreateFixture(pd[1])
                 newBody.SetMassFromShapes()
                 newBody.SetAngularVelocity(b.GetAngularVelocity())
                 newBody.SetLinearVelocity(b.GetLinearVelocity())

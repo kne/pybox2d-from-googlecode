@@ -37,7 +37,7 @@ class Web (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(0.5, 0.5)
@@ -48,22 +48,22 @@ class Web (Framework):
 
         bd.position = (-5.0, 5.0)
         self.bodies.append(self.world.CreateBody(bd))
-        self.bodies[0].CreateShape(sd)
+        self.bodies[0].CreateFixture(sd)
         self.bodies[0].SetMassFromShapes()
 
         bd.position = (5.0, 5.0)
         self.bodies.append(self.world.CreateBody(bd))
-        self.bodies[1].CreateShape(sd)
+        self.bodies[1].CreateFixture(sd)
         self.bodies[1].SetMassFromShapes()
 
         bd.position = (5.0, 15.0)
         self.bodies.append(self.world.CreateBody(bd))
-        self.bodies[2].CreateShape(sd)
+        self.bodies[2].CreateFixture(sd)
         self.bodies[2].SetMassFromShapes()
 
         bd.position = (-5.0, 15.0)
         self.bodies.append(self.world.CreateBody(bd))
-        self.bodies[3].CreateShape(sd)
+        self.bodies[3].CreateFixture(sd)
         self.bodies[3].SetMassFromShapes()
 
         jd=box2d.b2DistanceJointDef()

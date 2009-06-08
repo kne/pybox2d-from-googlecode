@@ -37,7 +37,7 @@ class Gears (Framework):
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         circle1=box2d.b2CircleDef() 
         circle1.radius = 1.0
@@ -54,7 +54,7 @@ class Gears (Framework):
         bd1=box2d.b2BodyDef() 
         bd1.position = (-3.0, 12.0)
         body1 = self.world.CreateBody(bd1) 
-        body1.CreateShape(circle1)
+        body1.CreateFixture(circle1)
         body1.SetMassFromShapes()
 
         jd1=box2d.b2RevoluteJointDef() 
@@ -68,7 +68,7 @@ class Gears (Framework):
         bd2=box2d.b2BodyDef() 
         bd2.position = (0.0, 12.0)
         body2 = self.world.CreateBody(bd2) 
-        body2.CreateShape(circle2)
+        body2.CreateFixture(circle2)
         body2.SetMassFromShapes()
 
         jd2=box2d.b2RevoluteJointDef() 
@@ -78,7 +78,7 @@ class Gears (Framework):
         bd3=box2d.b2BodyDef() 
         bd3.position = (2.5, 12.0)
         body3 = self.world.CreateBody(bd3) 
-        body3.CreateShape(box)
+        body3.CreateFixture(box)
         body3.SetMassFromShapes()
 
         jd3=box2d.b2PrismaticJointDef() 

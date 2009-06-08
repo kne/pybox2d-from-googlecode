@@ -32,7 +32,7 @@ class Bridge(Framework):
         bd = box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd = box2d.b2PolygonDef()        
         sd.SetAsBox(0.5, 0.125)
@@ -48,7 +48,7 @@ class Bridge(Framework):
             bd.position = (-14.5 + 1.0 * i, 5.0)
 
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
             anchor=(-15.0 + 1.0 * i, 5.0)
@@ -72,7 +72,7 @@ class Bridge(Framework):
             bd=box2d.b2BodyDef()
             bd.position = (-8.0 + 8.0 * i, 12.0)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
         for i in xrange(3):
@@ -83,7 +83,7 @@ class Bridge(Framework):
             bd=box2d.b2BodyDef()
             bd.position = (-6.0 + 6.0 * i, 10.0)
             body = self.world.CreateBody(bd)
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
  
 if __name__=="__main__":

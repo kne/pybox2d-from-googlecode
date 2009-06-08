@@ -33,7 +33,7 @@ class Pulleys (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         a = 2.0
         b = 4.0
@@ -48,12 +48,12 @@ class Pulleys (Framework):
 
         bd.position = (-10.0, y)
         body1 = self.world.CreateBody(bd) 
-        body1.CreateShape(sd)
+        body1.CreateFixture(sd)
         body1.SetMassFromShapes()
 
         bd.position = (10.0, y)
         body2 = self.world.CreateBody(bd) 
-        body2.CreateShape(sd)
+        body2.CreateFixture(sd)
         body2.SetMassFromShapes()
 
         pulleyDef=box2d.b2PulleyJointDef() 

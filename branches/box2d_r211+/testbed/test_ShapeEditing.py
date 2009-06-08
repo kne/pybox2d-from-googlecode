@@ -24,9 +24,9 @@ from test_main import *
 class ShapeEditing (Framework):
     name="ShapeEditing"
     body=None
-    shape1=None
-    shape2=None
-    _pickle_vars=['body', 'shape1', 'shape2']
+    fixture1=None
+    fixture2=None
+    _pickle_vars=['body', 'fixture1', 'fixture2']
     def __init__(self):
         super(ShapeEditing, self).__init__()
         sd=box2d.b2PolygonDef()
@@ -36,7 +36,7 @@ class ShapeEditing (Framework):
         bd.position = (0.0, -10.0)
 
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         bodydef=box2d.b2BodyDef()
         bodydef.position = (0.0, 10.0)
@@ -45,29 +45,29 @@ class ShapeEditing (Framework):
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(4.0, 4.0, (0.0, 0.0), 0.0)
         sd.density = 10.0
-        self.shape1 = self.body.CreateShape(sd)
+        self.fixture1 = self.body.CreateFixture(sd)
         self.body.SetMassFromShapes()
 
-        self.shape2 = None
+        self.fixture2 = None
              
     def Keyboard(self, key):
         if not self.body:
             return
 
         if key==K_c:
-            if not self.shape2:
+            if not self.fixture2:
                 sd=box2d.b2CircleDef()
                 sd.radius = 3.0
                 sd.density = 10.0
                 sd.localPosition = (0.5, -4.0)
-                self.shape2 = self.body.CreateShape(sd)
+                self.fixture2 = self.body.CreateFixture(sd)
                 self.body.SetMassFromShapes()
                 self.body.WakeUp()
 
         elif key==K_d:
-            if self.shape2:
-                self.body.DestroyShape(self.shape2)
-                self.shape2 = None
+            if self.fixture2:
+                self.body.DestroyFixture(self.fixture2)
+                self.fixture2 = None
                 self.body.SetMassFromShapes()
                 self.body.WakeUp()
 

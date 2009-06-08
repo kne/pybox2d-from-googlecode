@@ -64,8 +64,8 @@ class Car (Framework):
         bd.position = (-35.0, 2.8)
 
         self.vehicle = self.world.CreateBody(bd)
-        self.vehicle.CreateShape(poly1)
-        self.vehicle.CreateShape(poly2)
+        self.vehicle.CreateFixture(poly1)
+        self.vehicle.CreateFixture(poly2)
         self.vehicle.SetMassFromShapes()
 
         # vehicle wheels
@@ -80,12 +80,12 @@ class Car (Framework):
         bd.position = (-33.8, 2.0)
 
         self.rightWheel = self.world.CreateBody(bd)
-        self.rightWheel.CreateShape(circ)
+        self.rightWheel.CreateFixture(circ)
         self.rightWheel.SetMassFromShapes()
 
         bd.position = (-36.2, 2.0)
         self.leftWheel = self.world.CreateBody(bd)
-        self.leftWheel.CreateShape(circ)
+        self.leftWheel.CreateFixture(circ)
         self.leftWheel.SetMassFromShapes()
 
         # join wheels to chassis
@@ -110,7 +110,7 @@ class Car (Framework):
         bd.position = (-25.0, 1.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
 
         # more ground
         box=box2d.b2PolygonDef() 
@@ -121,7 +121,7 @@ class Car (Framework):
         bd.position = (27.0 - 30.0, 3.1)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
 
         # more ground
         box=box2d.b2PolygonDef() 
@@ -132,7 +132,7 @@ class Car (Framework):
         bd.position = (55.0 - 30.0, 3.1)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
 
         # more ground
         box=box2d.b2PolygonDef() 
@@ -143,7 +143,7 @@ class Car (Framework):
         bd.position = (41.0, 2.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
 
         # more ground
         box=box2d.b2PolygonDef() 
@@ -154,7 +154,7 @@ class Car (Framework):
         bd.position = (50.0, 4.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
 
         # more ground
         box=box2d.b2PolygonDef() 
@@ -165,7 +165,7 @@ class Car (Framework):
         bd.position = (85.0, 2.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(box)
+        ground.CreateFixture(box)
      
     def Step(self, settings):
         self.DrawStringCR("Keys: left = a, brake = s, right = d")

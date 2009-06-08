@@ -31,7 +31,7 @@ class Chain (Framework):
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.6, 0.125)
@@ -47,7 +47,7 @@ class Chain (Framework):
             bd=box2d.b2BodyDef() 
             bd.position = (0.5 + i, y)
             body = self.world.CreateBody(bd) 
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
             
             anchor=(i, y)

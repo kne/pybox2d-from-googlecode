@@ -31,7 +31,7 @@ class VaryingFriction (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -20.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(13.0, 0.25)
@@ -41,7 +41,7 @@ class VaryingFriction (Framework):
         bd.angle = -0.25
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.25, 1.0)
@@ -50,7 +50,7 @@ class VaryingFriction (Framework):
         bd.position = (10.5, 19.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(13.0, 0.25)
@@ -60,7 +60,7 @@ class VaryingFriction (Framework):
         bd.angle = 0.25
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.25, 1.0)
@@ -69,7 +69,7 @@ class VaryingFriction (Framework):
         bd.position = (-10.5, 11.0)
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(13.0, 0.25)
@@ -79,7 +79,7 @@ class VaryingFriction (Framework):
         bd.angle = -0.25
 
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.5, 0.5)
@@ -93,7 +93,7 @@ class VaryingFriction (Framework):
             body = self.world.CreateBody(bd) 
 
             sd.friction = friction[i]
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
      
 if __name__=="__main__":

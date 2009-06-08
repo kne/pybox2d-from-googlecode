@@ -39,7 +39,7 @@ class TimeOfImpact (Framework):
         bd.position = (0.0, 20.0)
         bd.angle = 0.0
         self.body1 = self.world.CreateBody(bd)
-        self.shape1 = self.body1.CreateShape(sd)
+        self.shape1 = self.body1.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.25, 0.25)
@@ -49,7 +49,7 @@ class TimeOfImpact (Framework):
         bd.position = (9.6363468, 28.050615)
         bd.angle = 1.6408679
         self.body2 = self.world.CreateBody(bd)
-        self.shape2 = self.body2.CreateShape(sd).getAsType()
+        self.shape2 = self.body2.CreateFixture(sd).getAsType()
         self.body2.SetMassFromShapes()
 
     def Step(self, settings):

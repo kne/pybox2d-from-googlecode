@@ -37,7 +37,7 @@ class SliderCrank (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         # Define crank.
         sd=box2d.b2PolygonDef() 
@@ -51,7 +51,7 @@ class SliderCrank (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, 7.0)
         body = self.world.CreateBody(bd) 
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
 
         rjd.Initialize(prevBody, body, (0.0, 5.0))
@@ -66,7 +66,7 @@ class SliderCrank (Framework):
         sd.SetAsBox(0.5, 4.0)
         bd.position = (0.0, 13.0)
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
 
         rjd.Initialize(prevBody, body, (0.0, 9.0))
@@ -79,7 +79,7 @@ class SliderCrank (Framework):
         sd.SetAsBox(1.5, 1.5)
         bd.position = (0.0, 17.0)
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
 
         rjd.Initialize(prevBody, body, (0.0, 17.0))
@@ -97,7 +97,7 @@ class SliderCrank (Framework):
         sd.density = 2.0
         bd.position = (0.0, 23.0)
         body = self.world.CreateBody(bd)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
         body.SetMassFromShapes()
 
     def Keyboard(self, key):

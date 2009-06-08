@@ -32,7 +32,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, -10.0)
         b1 = self.world.CreateBody(bd)
-        b1.CreateShape(sd)
+        b1.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(6.0, 0.25)
@@ -40,7 +40,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (-1.5, 10.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd=box2d.b2PolygonDef() 
         sd.SetAsBox(0.1, 1.0)
@@ -52,7 +52,7 @@ class Dominos (Framework):
             bd=box2d.b2BodyDef() 
             bd.position = (-6.0 + 1.0 * i, 11.25)
             body = self.world.CreateBody(bd) 
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
         sd=box2d.b2PolygonDef() 
@@ -61,7 +61,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (1.0, 6.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         
         sd=box2d.b2PolygonDef() 
@@ -70,7 +70,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (-7.0, 4.0)
         b2 = self.world.CreateBody(bd)
-        b2.CreateShape(sd)
+        b2.CreateFixture(sd)
 
         
         sd=box2d.b2PolygonDef() 
@@ -82,7 +82,7 @@ class Dominos (Framework):
         bd.angle = -0.15
 
         b3 = self.world.CreateBody(bd)
-        b3.CreateShape(sd)
+        b3.CreateFixture(sd)
         b3.SetMassFromShapes()
 
         jd=box2d.b2RevoluteJointDef() 
@@ -100,7 +100,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (-10.0, 15.0)
         b4 = self.world.CreateBody(bd)
-        b4.CreateShape(sd)
+        b4.CreateFixture(sd)
         b4.SetMassFromShapes()
 
         anchor = (-7.0, 15.0)
@@ -117,13 +117,13 @@ class Dominos (Framework):
         sd.friction = 0.1
 
         sd.SetAsBox(1.0, 0.1, (0.0, -0.9), 0.0)
-        b5.CreateShape(sd)
+        b5.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 1.0, (-0.9, 0.0), 0.0)
-        b5.CreateShape(sd)
+        b5.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 1.0, (0.9, 0.0), 0.0)
-        b5.CreateShape(sd)
+        b5.CreateFixture(sd)
 
         b5.SetMassFromShapes()
 
@@ -140,7 +140,7 @@ class Dominos (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (6.5, 4.1)
         b6 = self.world.CreateBody(bd)
-        b6.CreateShape(sd)
+        b6.CreateFixture(sd)
         b6.SetMassFromShapes()
 
         anchor = (7.5, 4.0)
@@ -156,7 +156,7 @@ class Dominos (Framework):
         bd.position = (7.4, 1.0)
 
         b7 = self.world.CreateBody(bd)
-        b7.CreateShape(sd)
+        b7.CreateFixture(sd)
         b7.SetMassFromShapes()
 
         djd=box2d.b2DistanceJointDef() 
@@ -177,7 +177,7 @@ class Dominos (Framework):
             bd=box2d.b2BodyDef() 
             bd.position = (5.9 + 2.0 * sd.radius * i, 2.4)
             body = self.world.CreateBody(bd) 
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
 if __name__=="__main__":

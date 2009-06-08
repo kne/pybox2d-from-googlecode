@@ -45,7 +45,7 @@ class Belt (Framework):
         sd.density = 3.0
         sd.friction = 0.8
         sd.restitution = 0.4
-        c1.CreateShape(sd)
+        c1.CreateFixture(sd)
         c1.SetMassFromShapes()
         
         # first joint
@@ -57,7 +57,7 @@ class Belt (Framework):
         bd.position=(10, 15)
         c2 = self.world.CreateBody(bd)
         sd.radius = 2.2
-        c2.CreateShape(sd)
+        c2.CreateFixture(sd)
         c2.SetMassFromShapes()
         
         # second joint
@@ -97,7 +97,7 @@ class Belt (Framework):
             
             pd.SetAsBox(0.5 * v.Length() + thickness / 2.0, thickness / 2.0, (0,0), angle)
 
-            shape = next_body.CreateShape(pd)
+            shape = next_body.CreateFixture(pd)
             next_body.SetMassFromShapes()
             
             if prev_body: # if we have previous body, create joint

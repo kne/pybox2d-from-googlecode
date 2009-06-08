@@ -81,8 +81,8 @@ class TheoJansen (Framework):
         body1 = self.world.CreateBody(bd1) 
         body2 = self.world.CreateBody(bd2) 
         
-        body1.CreateShape(sd1)
-        body2.CreateShape(sd2)
+        body1.CreateFixture(sd1)
+        body2.CreateFixture(sd2)
         
         body1.SetMassFromShapes()
         body2.SetMassFromShapes()
@@ -126,13 +126,13 @@ class TheoJansen (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = (0.0, -10.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         
         sd.SetAsBox(0.5, 5.0, (-50.0, 15.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         
         sd.SetAsBox(0.5, 5.0, (50.0, 15.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
         
         for i in range(40):
             sd = box2d.b2CircleDef()
@@ -143,7 +143,7 @@ class TheoJansen (Framework):
             bd.position = (-40.0 + 2.0 * i, 0.5)
             
             body = self.world.CreateBody(bd) 
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
         
         sd=box2d.b2PolygonDef() 
@@ -153,7 +153,7 @@ class TheoJansen (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = pivot + self.offset
         self.chassis = self.world.CreateBody(bd)
-        self.chassis.CreateShape(sd)
+        self.chassis.CreateFixture(sd)
         self.chassis.SetMassFromShapes()
         
         sd = box2d.b2CircleDef()
@@ -163,7 +163,7 @@ class TheoJansen (Framework):
         bd=box2d.b2BodyDef() 
         bd.position = pivot + self.offset
         self.wheel = self.world.CreateBody(bd)
-        self.wheel.CreateShape(sd)
+        self.wheel.CreateFixture(sd)
         self.wheel.SetMassFromShapes()
     
         jd=box2d.b2RevoluteJointDef() 

@@ -36,7 +36,7 @@ class RaycastTest (Framework):
         
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(50.0, 10.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 1.0)
@@ -45,7 +45,7 @@ class RaycastTest (Framework):
         sd=box2d.b2PolygonDef()
         sd.SetAsBox(5.0, 1.0)
         sd.density = 4.0
-        self.laserBody.CreateShape(sd)
+        self.laserBody.CreateFixture(sd)
         self.laserBody.SetMassFromShapes()
         
         #Create a few shapes
@@ -54,12 +54,12 @@ class RaycastTest (Framework):
         
         cd=box2d.b2CircleDef()
         cd.radius = 3
-        body.CreateShape(cd)
+        body.CreateFixture(cd)
         
         bd.position = (5.0, 10.0)
         body = self.world.CreateBody(bd)
         
-        body.CreateShape(cd)
+        body.CreateFixture(cd)
     
     def Keyboard(self, key):
         pass

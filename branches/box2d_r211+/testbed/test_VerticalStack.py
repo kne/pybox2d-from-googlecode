@@ -32,10 +32,10 @@ class VerticalStack (Framework):
         bd=box2d.b2BodyDef()
         bd.position = (0.0, 0.0)
         ground = self.world.CreateBody(bd) 
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (20.0, 10.0), 0.0)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
 
         xs = [0.0, -10.0, -5.0, 5.0, 10.0]
 
@@ -54,7 +54,7 @@ class VerticalStack (Framework):
                 bd.position = (xs[j] + x, 0.752 + 1.54 * i)
                 body = self.world.CreateBody(bd)
 
-                body.CreateShape(sd)
+                body.CreateFixture(sd)
                 body.SetMassFromShapes()
 
         self.bullet = None 
@@ -75,7 +75,7 @@ class VerticalStack (Framework):
             bd.position = (-31.0, 5.0)
 
             self.bullet = self.world.CreateBody(bd)
-            self.bullet.CreateShape(sd)
+            self.bullet.CreateFixture(sd)
             self.bullet.SetMassFromShapes()
 
             self.bullet.SetLinearVelocity((400.0, 0.0))

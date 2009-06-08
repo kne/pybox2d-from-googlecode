@@ -42,16 +42,16 @@ class Test_Biped(Framework):
         sd.restitution = k_restitution
 
         sd.SetAsBox(0.1, 10.0, (-10.0, 0.0), 0.0)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (10.0, 0.0), 0.0)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (0.0, -10.0), 0.5 * box2d.b2_pi)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         sd.SetAsBox(0.1, 10.0, (0.0, 10.0), -0.5 * box2d.b2_pi)
-        body.CreateShape(sd)
+        body.CreateFixture(sd)
 
         self.biped = Biped(self.world, box2d.b2Vec2(0.0, 20.0))
 
@@ -67,7 +67,7 @@ class Test_Biped(Framework):
             sd.radius = 0.25
             sd.density = 15.0
             sd.restitution = k_restitution
-            body.CreateShape(sd)
+            body.CreateFixture(sd)
             body.SetMassFromShapes()
 
 class Biped(object):
@@ -118,103 +118,103 @@ class Biped(object):
         bd = bdef.LFootDef
         bd.position += position
         self.LFoot = self.world.CreateBody(bd)
-        self.LFoot.CreateShape(bdef.LFootPoly)
+        self.LFoot.CreateFixture(bdef.LFootPoly)
         self.LFoot.SetMassFromShapes()
 
         bd = bdef.RFootDef
         bd.position += position
         self.RFoot = self.world.CreateBody(bd)
-        self.RFoot.CreateShape(bdef.RFootPoly)
+        self.RFoot.CreateFixture(bdef.RFootPoly)
         self.RFoot.SetMassFromShapes()
 
         bd = bdef.LCalfDef
         bd.position += position
         self.LCalf = self.world.CreateBody(bd)
-        self.LCalf.CreateShape(bdef.LCalfPoly)
+        self.LCalf.CreateFixture(bdef.LCalfPoly)
         self.LCalf.SetMassFromShapes()
 
         bd = bdef.RCalfDef
         bd.position += position
         self.RCalf = self.world.CreateBody(bd)
-        self.RCalf.CreateShape(bdef.RCalfPoly)
+        self.RCalf.CreateFixture(bdef.RCalfPoly)
         self.RCalf.SetMassFromShapes()
 
         bd = bdef.LThighDef
         bd.position += position
         self.LThigh = self.world.CreateBody(bd)
-        self.LThigh.CreateShape(bdef.LThighPoly)
+        self.LThigh.CreateFixture(bdef.LThighPoly)
         self.LThigh.SetMassFromShapes()
 
         bd = bdef.RThighDef
         bd.position += position
         self.RThigh = self.world.CreateBody(bd)
-        self.RThigh.CreateShape(bdef.RThighPoly)
+        self.RThigh.CreateFixture(bdef.RThighPoly)
         self.RThigh.SetMassFromShapes()
 
         bd = bdef.PelvisDef
         bd.position += position
         self.Pelvis = self.world.CreateBody(bd)
-        self.Pelvis.CreateShape(bdef.PelvisPoly)
+        self.Pelvis.CreateFixture(bdef.PelvisPoly)
         self.Pelvis.SetMassFromShapes()
 
         bd = bdef.StomachDef
         bd.position += position
         self.Stomach = self.world.CreateBody(bd)
-        self.Stomach.CreateShape(bdef.StomachPoly)
+        self.Stomach.CreateFixture(bdef.StomachPoly)
         self.Stomach.SetMassFromShapes()
 
         bd = bdef.ChestDef
         bd.position += position
         self.Chest = self.world.CreateBody(bd)
-        self.Chest.CreateShape(bdef.ChestPoly)
+        self.Chest.CreateFixture(bdef.ChestPoly)
         self.Chest.SetMassFromShapes()
 
         bd = bdef.NeckDef
         bd.position += position
         self.Neck = self.world.CreateBody(bd)
-        self.Neck.CreateShape(bdef.NeckPoly)
+        self.Neck.CreateFixture(bdef.NeckPoly)
         self.Neck.SetMassFromShapes()
 
         bd = bdef.HeadDef
         bd.position += position
         self.Head = self.world.CreateBody(bd)
-        self.Head.CreateShape(bdef.HeadCirc)
+        self.Head.CreateFixture(bdef.HeadCirc)
         self.Head.SetMassFromShapes()
 
         bd = bdef.LUpperArmDef
         bd.position += position
         self.LUpperArm = self.world.CreateBody(bd)
-        self.LUpperArm.CreateShape(bdef.LUpperArmPoly)
+        self.LUpperArm.CreateFixture(bdef.LUpperArmPoly)
         self.LUpperArm.SetMassFromShapes()
 
         bd = bdef.RUpperArmDef
         bd.position += position
         self.RUpperArm = self.world.CreateBody(bd)
-        self.RUpperArm.CreateShape(bdef.RUpperArmPoly)
+        self.RUpperArm.CreateFixture(bdef.RUpperArmPoly)
         self.RUpperArm.SetMassFromShapes()
 
         bd = bdef.LForearmDef
         bd.position += position
         self.LForearm = self.world.CreateBody(bd)
-        self.LForearm.CreateShape(bdef.LForearmPoly)
+        self.LForearm.CreateFixture(bdef.LForearmPoly)
         self.LForearm.SetMassFromShapes()
 
         bd = bdef.RForearmDef
         bd.position += position
         self.RForearm = self.world.CreateBody(bd)
-        self.RForearm.CreateShape(bdef.RForearmPoly)
+        self.RForearm.CreateFixture(bdef.RForearmPoly)
         self.RForearm.SetMassFromShapes()
 
         bd = bdef.LHandDef
         bd.position += position
         self.LHand = self.world.CreateBody(bd)
-        self.LHand.CreateShape(bdef.LHandPoly)
+        self.LHand.CreateFixture(bdef.LHandPoly)
         self.LHand.SetMassFromShapes()
 
         bd = bdef.RHandDef
         bd.position += position
         self.RHand = self.world.CreateBody(bd)
-        self.RHand.CreateShape(bdef.RHandPoly)
+        self.RHand.CreateFixture(bdef.RHandPoly)
         self.RHand.SetMassFromShapes()
 
         # link body parts

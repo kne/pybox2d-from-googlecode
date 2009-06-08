@@ -92,10 +92,10 @@ class fwContactTypes:
     Acts as an enum, holding the types necessary for contacts:
     Added, persisted, and removed
     """
-    contactUnknown = 0
-    contactAdded = 1
+    contactUnknown   = 0
+    contactAdded     = 1
     contactPersisted = 2
-    contactRemoved = 3
+    contactRemoved   = 3
 
 class fwContactPoint:
     """
@@ -139,6 +139,11 @@ class fwContactListener(box2d.b2ContactListener):
 
     def Remove(self, point):
         self.handleCall(fwContactTypes.contactRemoved, point)
+
+    def PreSolve(self, point, old_manifold):
+        pass # TODO
+        #self.handleCall(fwContactTypes.contactPreSolve, point)
+        #print point
 
 class fwDebugDraw(box2d.b2DebugDraw):
     """
@@ -288,7 +293,7 @@ class fwGUI(gui.Table):
     by the main loop.
     """
     checkboxes =( ("Warm Starting", "enableWarmStarting"), 
-                  ("Time of Impact", "enableTOI"), 
+                  ("Time of Impact", "enableContinuous"), 
                   ("Draw", None),
                   ("Shapes", "drawShapes"), 
                   ("Joints", "drawJoints"), 
@@ -635,7 +640,7 @@ class Framework(object):
 
         # Set the other settings that aren't contained in the flags
         self.world.SetWarmStarting(settings.enableWarmStarting)
-    	self.world.SetContinuousPhysics(settings.enableTOI)
+    	self.world.SetContinuousPhysics(settings.enableContinuous)
 
         # Reset the collision points
         self.points = []
@@ -695,8 +700,10 @@ class Framework(object):
                     self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.95, 0.3))
                 elif point.state == fwContactTypes.contactPersisted:
                     self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.3, 0.95))
-                else: #elif point.state == fwContactTypes.contactRemoved:
+                elif point.state == fwContactTypes.contactRemoved:
                     self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.95, 0.3, 0.3))
+                #else: # elif point.state == fwContactTypes.contactPreSolve:
+                #    pass
 
                 if settings.drawContactNormals:
                     p1 = point.position
@@ -810,12 +817,12 @@ class Framework(object):
         body = None
         k_maxCount = 10 # maximum amount of shapes to return
 
-        (count, shapes) = self.world.Query(aabb, k_maxCount)
-        for shape in shapes:
-            shapeBody = shape.GetBody()
-            if not shapeBody.IsStatic() and shapeBody.GetMass() > 0.0:
-                if shape.TestPoint(shapeBody.GetXForm(), p): # is it inside?
-                    body = shapeBody
+        (count, fixtures) = self.world.Query(aabb, k_maxCount)
+        for fixture in fixtures:
+            fixtureBody = fixture.GetBody()
+            if not fixtureBody.IsStatic() and fixtureBody.GetMass() > 0.0:
+                if fixture.TestPoint(p): # is it inside?
+                    body = fixtureBody
                     break
         
         if body:
@@ -899,7 +906,7 @@ class Framework(object):
         aabb.upperBound = maxV
 
         if self.world.InRange(aabb):
-            self.bomb.CreateShape(sd)
+            self.bomb.CreateFixture(sd)
             self.bomb.SetMassFromShapes()
 
     def LaunchRandomBomb(self):

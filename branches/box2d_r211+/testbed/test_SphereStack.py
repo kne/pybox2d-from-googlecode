@@ -34,7 +34,7 @@ class SphereStack (Framework):
         bd.position = (0.0, -10.0)
         
         ground = self.world.CreateBody(bd)
-        ground.CreateShape(sd)
+        ground.CreateFixture(sd)
     
         sd=box2d.b2CircleDef()
         sd.radius = 1.0
@@ -42,10 +42,10 @@ class SphereStack (Framework):
         
         for i in xrange(self.e_count):
             bd=box2d.b2BodyDef()
-            bd.position = (0.0, 2.0 + 3.0 * i)
+            bd.position = (0.0, 4.0 + 3.0 * i)
             
             self.bodies.append( self.world.CreateBody(bd) )
-            self.bodies[-1].CreateShape(sd)
+            self.bodies[-1].CreateFixture(sd)
             self.bodies[-1].SetMassFromShapes()
     
     def Step(self, settings):

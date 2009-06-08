@@ -44,77 +44,77 @@ class ContactCallbackTest (Framework):
         sd.friction = 0
         sd.vertices = [(10.0, 10.0), (9.0, 7.0), (10.0, 0.0)]
         sd.userData = 1
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(9.0, 7.0), (8.0, 0.0), (10.0, 0.0)]
         sd.userData = 2
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(9.0, 7.0), (8.0, 5.0), (8.0, 0.0)]
         sd.userData = 3
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(8.0, 5.0), (7.0, 4.0), (8.0, 0.0)]
         sd.userData = 4
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(7.0, 4.0), (5.0, 0.0), (8.0, 0.0)]
         sd.userData = 5
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(7.0, 4.0), (5.0, 3.0), (5.0, 0.0)]
         sd.userData = 6
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(5.0, 3.0), (2.0, 2.0), (5.0, 0.0)]
         sd.userData = 7
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(2.0, 2.0), (0.0, 0.0), (5.0, 0.0)]
         sd.userData = 8
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(2.0, 2.0), (-2.0, 2.0), (0.0, 0.0)]
         sd.userData = 9
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-5.0, 0.0), (0.0, 0.0), (-2.0, 2.0)]
         sd.userData = 10
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-5.0, 0.0), (-2.0, 2.0), (-5.0, 3.0)]
         sd.userData = 11
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-5.0, 0.0), (-5.0, 3.0), (-7.0, 4.0)]
         sd.userData = 12
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-8.0, 0.0), (-5.0, 0.0), (-7.0, 4.0)]
         sd.userData = 13
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-8.0, 0.0), (-7.0, 4.0), (-8.0, 5.0)]
         sd.userData = 14
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-8.0, 0.0), (-8.0, 5.0), (-9.0, 7.0)]
         sd.userData = 15
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-10.0, 0.0), (-8.0, 0.0), (-9.0, 7.0)]
         sd.userData = 16
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.vertices = [(-10.0, 0.0), (-9.0, 7.0), (-10.0, 10.0)]
         sd.userData = 17
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.SetAsBox(.5,6,(10.5,6),0)
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         sd.SetAsBox(.5,6,(-10.5,6),0)
-        groundBody.CreateShape(sd)
+        groundBody.CreateFixture(sd)
 
         bd=box2d.b2BodyDef() 
         bd.position=(9.5,60)
@@ -122,7 +122,7 @@ class ContactCallbackTest (Framework):
 
         cd=box2d.b2PolygonDef() 
         cd.vertexCount = 8
-        w = 1.0
+        w = 0.95
         b = w / (2.0 + math.sqrt(2.0))
         s = math.sqrt(2.0) * b
         cd.vertices = [( 0.5 * s, 0.0),
@@ -137,7 +137,7 @@ class ContactCallbackTest (Framework):
         cd.density = 1.0
         cd.userData = 'BALL'
 
-        self.ball_shape = self.ball.CreateShape(cd)
+        self.ball_shape = self.ball.CreateFixture(cd)
         self.ball.SetMassFromShapes()
 
     def Step(self, settings):
