@@ -23,6 +23,7 @@
 
 Some WIP projects to keep an eye on:
 
+ * [http://vizi.dasa.cc/ Vizi] "An aspiring digital-audio-workstation implemented in an unconventional manner" ([http://groups.google.com/group/pyglet-users/browse_thread/thread/8a18b7011d8a0d59?pli=1 note])
  * [http://github.com/elemel elemel]'s 2D physics puzzle game [http://github.com/elemel/cannonball/tree Cannonball], and 2D platform RPG [http://github.com/elemel/mortified/tree/master mortified]
  * [http://github.com/ddunwoody/adastra adastra], by ddunwoody
  * [http://www.gamecreation.org/~quadropus/ Quadropus], a puzzle-platformer where the player must balance the use of four tentacles to solve a variety of environmental puzzles
