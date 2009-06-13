@@ -1,0 +1,13 @@
+#summary Alternatives to pybox2d
+#labels Phase-Support
+
+== 2D ==
+
+[http://code.google.com/p/pymunk/ pymunk]
+
+
+== 3D ==
+
+[http://pyode.sourceforge.net/ PyODE]
+
+[http://python-ogre.org/ Python-Ogre]'s Newton
