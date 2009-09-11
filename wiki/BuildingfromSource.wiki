@@ -7,9 +7,9 @@
 Starting with release 2.0.1b4, I will put a source release that includes the Box2D C++ source to make it easier to install on Linux. If you would like to do it manually from the latest SVN version, follow these steps:
 
   #1 Download and install the latest version of [http://www.swig.org SWIG] (preferably 1.3.31+) with your package manager.
-   If you are using *Ubuntu*, you can install it via Synaptic Package Manager (package name 'swig'). You will also need to install the python-dev package, and build-essentials (and python-pygame if you want to run the testbed).
+   If you are using *Ubuntu*, you can install it via Synaptic Package Manager (package name 'swig'). You will also need to install the python-dev package, and build-essential (and python-pygame if you want to run the testbed).
 {{{
-sudo apt-get install build-essentials python-dev swig python-pygame
+sudo apt-get install build-essential python-dev swig python-pygame
 }}}
   #2 Check out the SVN
 {{{
