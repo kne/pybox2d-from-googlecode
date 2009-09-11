@@ -1,13 +1,20 @@
 #summary Installer information for various platforms
 #labels Featured,Phase-Deploy
 
-= OS X =
+== setuptools eggs ==
+
+The [http://peak.telecommunity.com/DevCenter/setuptools setuptools] eggs are available on this site and also on [http://pypi.python.org/pypi/Box2D pypi]. 
+
+To install these, first install [http://peak.telecommunity.com/dist/ez_setup.py setuptools] (by opening it with Python) and then run: easy_install box2d
+This should find and download the appropriate eggs for your platform and install them in your site-lib directory. 
+
+== OS X ==
 
 == Dependencies ==
 
 Requires the Python versions from the official [http://www.python.org/download/ site].  As with Pygame, this *does not* work with the Python that comes with OS X. Please use the official installer.
 
-== pygame ==
+=== pygame ===
 
 *pygame* is not included in the installer. If you want to try the testbed applications (and you should), you must install a few additional things. From the [http://www.pygame.org pygame] site:
 
@@ -17,22 +24,22 @@ Requires the Python versions from the official [http://www.python.org/download/ 
 
 [http://www.pygame.org/ftp/pyobjc-1.4-py2.5-macosx10.4.mpkg.zip pyobjc-1.4-py2.5-macosx10.4.mpkg.zip] (required to use pygame)
 
-== Directories ==
+=== Directories === 
 
-The library itself is installed in Python's site-packages directory: */Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/!Box2D*
+The library itself is installed in Python's site-packages directory: */Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/site-packages/Box2D*
 
 If, for some reason, you delete the site-packages and need to reinstall it (and the installer isn't putting the files there), you can try deleting */Library/Receipts/Box2D*
 
-= Windows =
+== Windows ==
 
-== Dependencies ==
+=== Dependencies === 
 
 Requires the Python versions from the official [http://www.python.org/download/ site]. 
 
-== pygame ==
+=== pygame === 
 
 *pygame* is not included in the installer. If you want to try the testbed applications (and you should), you must install [http://www.pygame.org pygame] for your version of Python (to see your Python's version, go to the command prompt and type {{{python -V}}}.)
 
-== Directories ==
+=== Directories ===
 
 The library itself is installed in Python's site-packages directory: *C:\Python25\lib\site-packages\!Box2D\*
