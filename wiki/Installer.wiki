@@ -8,6 +8,12 @@ The [http://peak.telecommunity.com/DevCenter/setuptools setuptools] eggs are ava
 To install these, first install [http://peak.telecommunity.com/dist/ez_setup.py setuptools] (by opening it with Python) and then run: easy_install box2d
 This should find and download the appropriate eggs for your platform and install them in your site-lib directory. 
 
+Alternatively, you can download the egg from the download page, and run easy_install on it or simply place it in your site-packages directory. 
+
+===Do I need to install libbox2d first?===
+
+No, everything that is necessary to run the basic library is included. Even if you are building from the source (see [BuildingfromSource here]), the library code is included such that nothing else is necessary (except for the right tools to build it with).
+
 == OS X ==
 
 == Dependencies ==
