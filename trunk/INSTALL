@@ -13,10 +13,10 @@ Contents
 
       If you are using Ubuntu, you can install it via Synaptic Package Manager
       (package name 'swig'). You will also need to install the python-dev 
-      package, and build-essentials (and python-pygame if you want to run the 
+      package, and build-essential (and python-pygame if you want to run the 
       testbed).
 
-      sudo apt-get install build-essentials python-dev swig python-pygame
+      sudo apt-get install build-essential python-dev swig python-pygame
 
    2. Check out the SVN
 
