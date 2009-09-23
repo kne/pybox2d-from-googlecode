@@ -174,7 +174,7 @@ would collide with the specified polygon.
         """
 
         if pd.vertexCount < 3 or pd.vertexCount >= b2_maxPolygonVertices:
-            raise ValueError, "Invalid vertexCount"
+            raise ValueError("Invalid vertexCount")
 
         threshold = FLT_EPSILON * FLT_EPSILON
         verts = pd.getVertices_b2Vec2()
@@ -186,7 +186,7 @@ would collide with the specified polygon.
             else: v1 = verts[i+1]
             edge=v1 - v0
             if edge.LengthSquared() < threshold:
-                raise ValueError, "edge.LengthSquared < FLT_EPSILON**2" 
+                raise ValueError("edge.LengthSquared < FLT_EPSILON**2" )
             normals.append( b2Cross(edge, 1.0) )
             normals[-1].Normalize()
             v0=v1
@@ -210,7 +210,7 @@ would collide with the specified polygon.
 
             # Your shape has a radius/extent less than b2_toiSlop.
             if d.x < 0.0 or d.y <= 0.0: 
-                raise ValueError, "Your shape has a radius/extent less than b2_toiSlop."
+                raise ValueError("Your shape has a radius/extent less than b2_toiSlop.")
 
             A = b2Mat22()
             A.col1.x = n1.x; A.col2.x = n1.y

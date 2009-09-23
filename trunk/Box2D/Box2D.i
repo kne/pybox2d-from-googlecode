@@ -959,7 +959,7 @@
                 in the format ( (x1,y1), (x2,y2) ... (xN,yN) )
                 where each vertex is a list/tuple/b2Vec2"""
             if len(vertices) > b2_maxPolygonVertices:
-                raise ValueError
+                raise ValueError()
             self.vertexCount = len(vertices)
             for i in range(0, self.vertexCount):
                 self.setVertex(i, vertices[i]) # possible on pyBox2D >= r2.0.2b1
@@ -1457,7 +1457,7 @@
         count = pd.vertexCount
 
         if count < 3:
-            raise ValueError, "ComputeCentroid: vertex count < 3"
+            raise ValueError("ComputeCentroid: vertex count < 3")
 
         c = b2Vec2(0.0, 0.0)
         area = 0.0
@@ -1489,7 +1489,7 @@
 
         # Centroid
         if area <= FLT_EPSILON:
-            raise ValueError, "ComputeCentroid: area <= FLT_EPSILON"
+            raise ValueError("ComputeCentroid: area <= FLT_EPSILON")
 
         return c / area
     %}

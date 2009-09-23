@@ -97,7 +97,7 @@ def pickle_fix(world, var, func='save', lists=None):
     elif func=='load':
         fix_function=_pickle_fix_value_load
     else:
-        raise ValueError, 'Expected func in ("save", "load")'
+        raise ValueError('Expected func in ("save", "load")')
 
     if not lists:
         # these lists are all created dynamically, so do this once
@@ -117,7 +117,7 @@ def pickle_fix(world, var, func='save', lists=None):
 
         # Create a new dictionary and fix each item
         new_dict={}
-        for var, value in var.items():
+        for var, value in list(var.items()):
             new_dict[var]=pickle_fix(world, value, func, lists)
         return new_dict
     else:
@@ -128,7 +128,7 @@ def pickle_fix(world, var, func='save', lists=None):
 
 # -- unpicklable object --
 def no_pickle(self):
-    raise b2PickleError, 'Cannot pickle this object. Pickle the typecasted object: object.getAsType()'
+    raise b2PickleError('Cannot pickle this object. Pickle the typecasted object: object.getAsType()')
 
 # -- generic get and set state --
 def _generic_setstate(self, dict):
@@ -137,7 +137,7 @@ def _generic_setstate(self, dict):
     sets the attributes based on them
     """
     self.__init__()
-    for key, value in dict.iteritems():
+    for key, value in dict.items():
         setattr(self, key, value)
 
 def _generic_getstate(self, additional_ignore=[]):
@@ -173,7 +173,7 @@ def _pickle_finalize(self, world=None, body=None):
     dictionary.
     """
     if not hasattr(self, '__pickle_data__'):
-        raise b2PickleError, "Invalid object passed to _pickle_finalize"
+        raise b2PickleError("Invalid object passed to _pickle_finalize")
 
     # At this point, 'self' is invalid on the SWIG-end of things.
     # __init__ has not been called, so it only exists on the Python-end.
@@ -195,12 +195,12 @@ def _pickle_finalize(self, world=None, body=None):
     # the object.
     for fcn, output, input in pairs:
         if isinstance(self, output):
-            self = input()
+            self = eval(input())
             createfcn=fcn
             break
 
     if not createfcn:
-        raise b2PickleError, "Invalid object passed to _pickle_finalize"
+        raise b2PickleError("Invalid object passed to _pickle_finalize")
 
     # A few things exist that cannot be set in the definition and can only
     # be set after the object is created. Check for these and then set them
@@ -272,7 +272,7 @@ def _pickle_finalize_controller(data, world):
         try:
             real_body = bodyList[ int(body) ]
         except:
-            raise b2PickleError, 'World not initialized properly; unable to create controller'
+            raise b2PickleError('World not initialized properly; unable to create controller')
         controller.AddBody(real_body)
 
     return controller
@@ -306,13 +306,13 @@ def _pickle_finalize_joint(data, world):
             try:
                 value = bodyList[ int(value) ]
             except:
-                raise b2PickleError, 'World not initialized properly; unable to create joint'
+                raise b2PickleError('World not initialized properly; unable to create joint')
         elif var in joint_names:
             # Set the joint based on the global joint list
             try:
                 value = jointList[ int(value) ]
             except:
-                raise b2PickleError, 'World not initialized properly; unable to create joint'
+                raise b2PickleError('World not initialized properly; unable to create joint')
 
         # Set the value
         setattr(defn, var, value)
@@ -340,7 +340,7 @@ def _pickle_finalize_world(self):
     Finalize a b2World.
     """
     if not hasattr(self, '__pickle_data__'):
-        raise b2PickleError, 'Finalizing a world that was not loaded?'
+        raise b2PickleError('Finalizing a world that was not loaded?')
 
     data = self.__pickle_data__
     
@@ -356,7 +356,7 @@ def _pickle_finalize_world(self):
     _pickle_finalize_shapelist(world, world.groundBody, gb_data['shapeList'])
 
     # And then go through each variable, setting the properties
-    for var in gb_data.keys():
+    for var in list(gb_data.keys()):
         value = gb_data[var]
         if isinstance(value, (b2Shape)) or var=='shapeList':
             pass
@@ -478,7 +478,7 @@ def _pickle_get_controller(self, world=None):
     Get the state of a controller
     """
     if not world:
-        raise b2PickleError, "Controllers can't be saved without the world itself"
+        raise b2PickleError("Controllers can't be saved without the world itself")
 
     ignore_prop =['thisown', 'this', 'bodyList']
     defn = globals()[ "%sDef" % self.__class__.__name__ ]
@@ -506,7 +506,7 @@ def _pickle_get_joint(self, world=None):
     Get the state of a joint.
     """
     if not world:
-        raise b2PickleError, "Joints can't be saved without the world itself"
+        raise b2PickleError("Joints can't be saved without the world itself")
 
     # Take the available variables in the _definition_
     # and then create a dictionary
@@ -528,7 +528,7 @@ def _pickle_get_joint(self, world=None):
     # Recreate the body/joint lists.
     bodyList = world.bodyList
     jointList= world.jointList
-    for key, value in ret.iteritems():
+    for key, value in ret.items():
         if isinstance(value, b2Body):
             ret[key]=bodyList.index(value)
         elif isinstance(value, b2Joint):
