@@ -618,7 +618,8 @@
                       e_distanceJoint : "Distance",
                       e_prismaticJoint: "Prismatic",
                       e_pulleyJoint   : "Pulley",
-                      e_revoluteJoint : "Revolute" }
+                      e_revoluteJoint : "Revolute",
+                      e_lineJoint     : "Line" }
             return types[self.type]
         %}
     }
