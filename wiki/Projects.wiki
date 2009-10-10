@@ -4,6 +4,7 @@
 === Libraries / Add-ons / Learning Utilities ===
 
  * [http://mekanimo.net/ Mekanimo] Simulation designer for games/learning/etc. with nice GUI and export options
+ * [http://sifter.org/~simon/aichallenge/01/challenge.html Simon Funk's AI Challenge] An interesting AI challenge for everyone
  * [http://home.gna.org/box2dsimulator/Html/index.html Box2dSimulator] A 2D physics engine for long run robotic experiments
  * [http://code.google.com/p/pybox2d-foil/ pybox2d-foil] Airfoil physics simulation for pyBox2D by [http://code.google.com/u/snickell/ snickell]
  * [http://code.google.com/p/pytform/ pytform] Work in progress pyglet 2d polygon-based game development kit
