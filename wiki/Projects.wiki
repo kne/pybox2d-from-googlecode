@@ -20,6 +20,7 @@
  * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
  * [http://code.google.com/p/gamecomp/ NaN]'s "The day mom tied us together", fun and innovative little side scroller (with a cool intro) ([http://www.pyweek.org/e/NaN7/ PyWeek page])
  * [http://nuigroup.com/forums/viewthread/3200/ tPhysics], a Multi-Touch Physics Sandbox. Video demo looks like fun! (should use b2PolygonDef.checkValues() to fix the polygon problems)
+ * [http://code.google.com/p/mazes/ Mazes] by benjamin.debski, a conversion of his old hand-drawn paper mazes into a game
 
 === Up and Coming ===
 
