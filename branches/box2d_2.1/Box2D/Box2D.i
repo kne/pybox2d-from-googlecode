@@ -246,7 +246,7 @@
             debugDraw           = property(None, __SetDebugDraw)
 
             # other functions:
-            # CreateBody, DestroyBody, CreateJoint, DestroyJoint
+            # CreateBody, DestroyBody, DestroyJoint
             # Step, ClearForces, DrawDebugData, QueryAABB, RayCast,
             # IsLocked
         %}
@@ -499,11 +499,11 @@
         vertices = property(__get_vertices_tuple, None)
         normals = property(__get_normals_tuple, None)
         %}
-        const b2Vec2* getVertex(uint16 vnum) {
+        const b2Vec2* __GetVertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->m_vertices[vnum] );
         }
-        const b2Vec2* getNormal(uint16 vnum) {
+        const b2Vec2* __GetNormal(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->m_normals[vnum] );
         }
@@ -512,6 +512,7 @@
     %rename (vertices) b2PolygonShape::m_vertices;
     %rename (normal) b2PolygonShape::m_normal;
     %rename (vertexCount) b2PolygonShape::m_vertexCount;
+    %ignore b2PolygonShape::GetVertex;
 
     /*
     %extend b2GearJoint {
@@ -539,7 +540,7 @@
             """
             Return a downcasted/typecasted version of the joint
             """
-            return (getattr(self, "as%sJoint" % self.__type_name())) ()
+            return (getattr(self, "__as%sJoint" % self.__type_name())) ()
 
         # Read-only
         next = property(__GetNext, None)
@@ -599,6 +600,8 @@
     %rename(__GetBodyB) b2Joint::GetBodyB;
     %rename(__GetType) b2Joint::GetType;
     %rename(__IsActive) b2Joint::IsActive;
+    %rename(__GetAnchorA) b2Joint::GetAnchorA;
+    %rename(__GetAnchorB) b2Joint::GetAnchorB;
 
     %extend b2RevoluteJoint {
     public:
@@ -612,8 +615,8 @@
             limitEnabled = property(__IsLimitEnabled, __EnableLimit)
 
             # Read-only
-            anchorB = property(lambda self: self.__GetAnchorB, None)
-            anchorA = property(lambda self: self.__GetAnchorA, None)
+            anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
+            anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
             jointAngle = property(__GetJointAngle, None)
             motorTorque = property(__GetMotorTorque, None)
             jointSpeed = property(__GetJointSpeed, None)
@@ -629,11 +632,9 @@
     %rename(__GetLowerLimit) b2RevoluteJoint::GetLowerLimit;
     %rename(__GetJointAngle) b2RevoluteJoint::GetJointAngle;
     %rename(__GetMotorSpeed) b2RevoluteJoint::GetMotorSpeed;
-    %rename(__GetAnchorA) b2RevoluteJoint::GetAnchorA;
     %rename(__GetMotorTorque) b2RevoluteJoint::GetMotorTorque;
     %rename(__GetJointSpeed) b2RevoluteJoint::GetJointSpeed;
     %rename(__IsLimitEnabled) b2RevoluteJoint::IsLimitEnabled;
-    %rename(__GetAnchorB) b2RevoluteJoint::GetAnchorB;
     %rename(__SetMotorSpeed) b2RevoluteJoint::SetMotorSpeed;
     %rename(__EnableLimit) b2RevoluteJoint::EnableLimit;
     %rename(__SetMaxMotorTorque) b2RevoluteJoint::SetMaxMotorTorque;
@@ -653,8 +654,8 @@
 
             # Read-only
             motorForce = property(__GetMotorForce, None)
-            anchorB = property(lambda self: self.__GetAnchorB, None)
-            anchorA = property(lambda self: self.__GetAnchorA, None)
+            anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
+            anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
             jointSpeed = property(__GetJointSpeed, None)
             jointTranslation = property(__GetJointTranslation, None)
 

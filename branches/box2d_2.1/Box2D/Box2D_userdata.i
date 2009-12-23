@@ -35,12 +35,38 @@ public:
         ret=self->CreateBody(defn);
         return ret;
     }
-    b2Joint* CreateJoint(b2JointDef* defn) {
-        b2Joint* ret;
+    PyObject* CreateJoint(b2JointDef* defn) {
+        b2Joint* joint;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
-        ret=self->CreateJoint(defn);
-        return ret;
+
+        joint=self->CreateJoint(defn);
+
+        switch (joint->GetType())
+        {
+        case e_unknownJoint:
+            return NULL;
+        case e_revoluteJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2RevoluteJoint*), 0);
+        case e_prismaticJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2PrismaticJoint*), 0);
+        case e_distanceJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2DistanceJoint*), 0);
+        case e_pulleyJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2PulleyJoint*), 0);
+        case e_mouseJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2MouseJoint*), 0);
+        case e_gearJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2GearJoint*), 0);
+        case e_lineJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2LineJoint*), 0);
+        case e_weldJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2WeldJoint*), 0);
+        case e_frictionJoint:
+            return SWIG_NewPointerObj(joint, $descriptor(b2FrictionJoint*), 0);
+        default:
+            return NULL;
+        }
     }
     void DestroyBody(b2Body* body) {
         Py_XDECREF((PyObject*)body->GetUserData());
