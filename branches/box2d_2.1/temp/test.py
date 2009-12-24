@@ -1,12 +1,13 @@
-classname = "b2RevoluteJoint"
-gets = "GetAnchorA GetAnchorB GetJointAngle GetJointSpeed GetLowerLimit GetMotorSpeed GetMotorTorque GetUpperLimit IsLimitEnabled IsMotorEnabled".split(" ")
-sets = "EnableLimit EnableMotor SetMaxMotorTorque SetMotorSpeed".split(" ")
+classname = "b2FrictionJoint"
+gets = "GetMaxForce GetMaxTorque".split(" ")
+sets = "SetMaxForce SetMaxTorque".split(" ")
 
 # remove duplicates
 gets = list(set(gets))
 sets = list(set(sets))
 
-renames = ["%%rename(__%s) %s::%s;" % (s, classname, s) for s in gets+sets]
+renames = ["%%rename(__%s) %s::%s;" % (s, classname, s) for s in gets+sets
+                    if s not in ('GetAnchorA', 'GetAnchorB')]
 
 gets_mod=[]
 for s in gets:
@@ -52,7 +53,10 @@ for name, g, s in getter_setter:
 print "            # Read-only"
 for name, g in getter:
     newname= name[0].lower() + name[1:]
-    print "            %s = property(__%s, None)" % (newname, g)
+    if newname in ('anchorA', 'anchorB'):
+        print "            %s = property(lambda self: self._b2Joint__%s(), None)" % (newname, name)
+    else:
+        print "            %s = property(__%s, None)" % (newname, g)
 
 print "            # Write-only"
 for s in setter:

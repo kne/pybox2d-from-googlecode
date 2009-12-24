@@ -127,6 +127,7 @@ public:
 
 	/// Set the maximum motor force, usually in N.
 	void SetMaxMotorForce(float32 force);
+	float32 GetMaxMotorForce() const;
 
 	/// Get the current motor force, usually in N.
 	float32 GetMotorForce() const;
@@ -171,4 +172,8 @@ inline float32 b2PrismaticJoint::GetMotorSpeed() const
 	return m_motorSpeed;
 }
 
+float32 b2PrismaticJoint::GetMaxMotorForce() const
+{
+	return m_maxMotorForce;
+}
 #endif

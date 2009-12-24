@@ -21,7 +21,8 @@
 %module(directors="1") Box2D
 %{
     #include "Box2D/Box2D.h"
-    float32 b2LineJoint::GetMaxMotorForce() const { return 0.0f; }
+//    float32 b2LineJoint::GetMaxMotorForce() const { return 0.0f; }
+//       wrote my own function body for this, but hopefully itll be fixed in svn soon
 %}
 
 #ifdef SWIGPYTHON
@@ -364,6 +365,8 @@
 
         %pythoncode %{
         __iter__ = lambda self: iter( (self.x, self.y) )
+        __eq__ = lambda self, other: (self.x == other.x and self.y == other.y)
+        __ne__ = lambda self,other: (self.x != other.x or self.y != other.y)
         def __repr__(self):
             return "b2Vec2(%g,%g)" % (self.x, self.y)
         def copy(self):
@@ -611,6 +614,7 @@
             motorSpeed = property(__GetMotorSpeed, __SetMotorSpeed)
             upperLimit = property(__GetUpperLimit, lambda self, v: self.SetLimits(self.lowerLimit, v))
             lowerLimit = property(__GetLowerLimit, lambda self, v: self.SetLimits(v, self.upperLimit))
+            limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.SetLimits(*v) )
             motorEnabled = property(__IsMotorEnabled, __EnableMotor)
             limitEnabled = property(__IsLimitEnabled, __EnableLimit)
 
@@ -651,6 +655,7 @@
             limitEnabled = property(__IsLimitEnabled, __EnableLimit)
             upperLimit = property(__GetUpperLimit, lambda self, v: self.SetLimits(self.lowerLimit, v))
             lowerLimit = property(__GetLowerLimit, lambda self, v: self.SetLimits(v, self.upperLimit))
+            limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.SetLimits(*v) )
 
             # Read-only
             motorForce = property(__GetMotorForce, None)
@@ -678,6 +683,139 @@
     %rename(__SetMaxMotorForce) b2LineJoint::SetMaxMotorForce;
     %rename(__EnableMotor) b2LineJoint::EnableMotor;
 
+    %extend b2PrismaticJoint {
+    public:
+        %pythoncode %{
+
+            # Read-write properties
+            motorSpeed = property(__GetMotorSpeed, __SetMotorSpeed)
+            motorEnabled = property(__IsMotorEnabled, __EnableMotor)
+            limitEnabled = property(__IsLimitEnabled, __EnableLimit)
+            upperLimit = property(__GetUpperLimit, lambda self, v: self.SetLimits(self.lowerLimit, v))
+            lowerLimit = property(__GetLowerLimit, lambda self, v: self.SetLimits(v, self.upperLimit))
+            limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.SetLimits(*v) )
+            maxMotorForce = property(__GetMaxMotorForce, __SetMaxMotorForce)
+
+            # Read-only
+            motorForce = property(__GetMotorForce, None)
+            jointTranslation = property(__GetJointTranslation, None)
+            anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
+            anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
+            jointSpeed = property(__GetJointSpeed, None)
+
+        %}
+    }
+
+    %rename(__IsMotorEnabled) b2PrismaticJoint::IsMotorEnabled;
+    %rename(__GetMotorSpeed) b2PrismaticJoint::GetMotorSpeed;
+    %rename(__GetMotorForce) b2PrismaticJoint::GetMotorForce;
+    %rename(__GetJointTranslation) b2PrismaticJoint::GetJointTranslation;
+    %rename(__GetUpperLimit) b2PrismaticJoint::GetUpperLimit;
+    %rename(__GetJointSpeed) b2PrismaticJoint::GetJointSpeed;
+    %rename(__IsLimitEnabled) b2PrismaticJoint::IsLimitEnabled;
+    %rename(__GetLowerLimit) b2PrismaticJoint::GetLowerLimit;
+    %rename(__SetMotorSpeed) b2PrismaticJoint::SetMotorSpeed;
+    %rename(__EnableLimit) b2PrismaticJoint::EnableLimit;
+    %rename(__SetMaxMotorForce) b2PrismaticJoint::SetMaxMotorForce;
+    %rename(__GetMaxMotorForce) b2PrismaticJoint::GetMaxMotorForce;
+    %rename(__EnableMotor) b2PrismaticJoint::EnableMotor;
+
+    %extend b2DistanceJoint {
+    public:
+        %pythoncode %{
+
+            # Read-write properties
+            length = property(__GetLength, __SetLength)
+            frequency = property(__GetFrequency, __SetFrequency)
+            dampingRatio = property(__GetDampingRatio, __SetDampingRatio)
+
+            # Read-only
+            anchorA = property(lambda self: self._b2Joint__AnchorA(), None)
+            anchorB = property(lambda self: self._b2Joint__AnchorB(), None)
+
+        %}
+    }
+
+    %rename(__GetLength) b2DistanceJoint::GetLength;
+    %rename(__GetFrequency) b2DistanceJoint::GetFrequency;
+    %rename(__GetDampingRatio) b2DistanceJoint::GetDampingRatio;
+    %rename(__SetDampingRatio) b2DistanceJoint::SetDampingRatio;
+    %rename(__SetLength) b2DistanceJoint::SetLength;
+    %rename(__SetFrequency) b2DistanceJoint::SetFrequency;
+
+    %extend b2PulleyJoint {
+    public:
+        %pythoncode %{
+
+            # Read-only
+            groundAnchorB = property(__GetGroundAnchorB, None)
+            groundAnchorA = property(__GetGroundAnchorA, None)
+            anchorB = property(lambda self: self._b2Joint__AnchorB(), None)
+            anchorA = property(lambda self: self._b2Joint__AnchorA(), None)
+            length2 = property(__GetLength2, None)
+            length1 = property(__GetLength1, None)
+            ratio = property(__GetRatio, None)
+
+        %}
+    }
+
+    %rename(__GetGroundAnchorB) b2PulleyJoint::GetGroundAnchorB;
+    %rename(__GetGroundAnchorA) b2PulleyJoint::GetGroundAnchorA;
+    %rename(__GetLength2) b2PulleyJoint::GetLength2;
+    %rename(__GetLength1) b2PulleyJoint::GetLength1;
+    %rename(__GetRatio) b2PulleyJoint::GetRatio;
+
+    %extend b2MouseJoint {
+    public:
+        %pythoncode %{
+
+            # Read-write properties
+            maxForce = property(__GetMaxForce, __SetMaxForce)
+            frequency = property(__GetFrequency, __SetFrequency)
+            dampingRatio = property(__GetDampingRatio, __SetDampingRatio)
+            target = property(__GetTarget, __SetTarget)
+
+        %}
+    }
+
+    %rename(__GetMaxForce) b2MouseJoint::GetMaxForce;
+    %rename(__GetFrequency) b2MouseJoint::GetFrequency;
+    %rename(__GetDampingRatio) b2MouseJoint::GetDampingRatio;
+    %rename(__GetTarget) b2MouseJoint::GetTarget;
+    %rename(__SetDampingRatio) b2MouseJoint::SetDampingRatio;
+    %rename(__SetTarget) b2MouseJoint::SetTarget;
+    %rename(__SetMaxForce) b2MouseJoint::SetMaxForce;
+    %rename(__SetFrequency) b2MouseJoint::SetFrequency;
+
+    %extend b2GearJoint {
+    public:
+        %pythoncode %{
+            # Read-write properties
+            ratio = property(__GetRatio, __SetRatio)
+
+        %}
+    }
+
+    %rename(__GetRatio) b2GearJoint::GetRatio;
+    %rename(__SetRatio) b2GearJoint::SetRatio;
+
+    %extend b2WeldJoint {
+    }
+
+    %extend b2FrictionJoint {
+    public:
+        %pythoncode %{
+            # Read-write properties
+            maxForce = property(__GetMaxForce, __SetMaxForce)
+            maxTorque = property(__GetMaxTorque, __SetMaxTorque)
+        %}
+    }
+
+    %rename(__GetMaxForce) b2FrictionJoint::GetMaxForce;
+    %rename(__GetMaxTorque) b2FrictionJoint::GetMaxTorque;
+    %rename(__SetMaxTorque) b2FrictionJoint::SetMaxTorque;
+    %rename(__SetMaxForce) b2FrictionJoint::SetMaxForce;
+
     %extend b2JointDef {
     public:
         %pythoncode %{
@@ -685,7 +823,6 @@
             return b2JointTypes[self.type]
         %}
     }
-
 
     %include "Dynamics/Joints/b2Joint.h"
 
