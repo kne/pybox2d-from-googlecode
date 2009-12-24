@@ -117,9 +117,9 @@ class testBasic (unittest.TestCase):
         # check to make sure they are at least accessible 
         joint.GetReactionForce(1.0)
         joint.GetReactionTorque(1.0)
-        i = joint.jointAngle
+        i = joint.angle
         i = joint.motorTorque
-        i = joint.jointSpeed
+        i = joint.speed
         i = joint.anchorA
         i = joint.anchorB
         joint.maxMotorTorque = 10.0
@@ -151,8 +151,8 @@ class testBasic (unittest.TestCase):
         i = joint.motorForce
         i = joint.anchorA
         i = joint.anchorB
-        i = joint.jointSpeed
-        i = joint.jointTranslation
+        i = joint.speed
+        i = joint.translation
         joint.GetReactionForce(1.0)
         joint.GetReactionTorque(1.0)
 
@@ -246,8 +246,8 @@ class testBasic (unittest.TestCase):
         i = joint.motorForce
         i = joint.anchorA
         i = joint.anchorB
-        i = joint.jointSpeed
-        i = joint.jointTranslation
+        i = joint.speed
+        i = joint.translation
         joint.GetReactionForce(1.0)
         joint.GetReactionTorque(1.0)
 

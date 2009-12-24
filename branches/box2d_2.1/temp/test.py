@@ -1,6 +1,6 @@
-classname = "b2FrictionJoint"
-gets = "GetMaxForce GetMaxTorque".split(" ")
-sets = "SetMaxForce SetMaxTorque".split(" ")
+classname = "b2Contact"
+gets = "IsContinuous IsEnabled IsSensor IsTouching GetNext GetManifold GetFixtureB GetFixtureA".split(" ")
+sets = "SetEnabled SetSensor".split(" ")
 
 # remove duplicates
 gets = list(set(gets))
@@ -41,11 +41,12 @@ for i, s in enumerate(gets_mod):
 setter = [s for s in sets if s is not None]
 
 print """
+    /**** %s ****/
     %%extend %s {
     public:
         %%pythoncode %%{
-""" % (classname)
-print "            # Read-write properties"
+            # Read-write properties
+""" % (classname[2:], classname)
 for name, g, s in getter_setter:
     newname= name[0].lower() + name[1:]
     print "            %s = property(__%s, __%s)" % (newname, g, s)
@@ -72,5 +73,5 @@ print """
         %}
     }
 """
-print "    ",
+print "   ",
 print "\n    ".join(renames)

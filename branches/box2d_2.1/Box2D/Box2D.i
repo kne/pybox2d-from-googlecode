@@ -25,6 +25,10 @@
 //       wrote my own function body for this, but hopefully itll be fixed in svn soon
 %}
 
+#note:
+# swig generated names: _Box2D.<class>_<name>
+# python obfuscated names: __<class>_<name>
+
 #ifdef SWIGPYTHON
     #ifdef USE_EXCEPTIONS
         // See Common/b2Settings.h also
@@ -85,6 +89,24 @@
 
     /* ---- handle userData ---- */
     %include "Box2D/Box2D_userdata.i"
+
+    /* ---- classes to ignore ---- */
+    //Most of these are just internal structures, so there is no need to have them
+    // accessible by Python. You can safely comment out any %ignore if you for some reason
+    // do need them. Shrinks the library by a bit, also.
+    %ignore b2BroadPhase;
+    %ignore b2Chunk;
+    %ignore b2DynamicTree;
+    %ignore b2DynamicTreeNode;
+    %ignore b2Island;
+    %ignore b2Position;
+    %ignore b2Velocity;
+    %ignore b2TimeStep;
+    %ignore b2Simplex;
+    %ignore b2SimplexVertex;
+    %ignore b2SimplexCache;
+    %ignore b2StackAllocator;
+    %ignore b2StackEntry;
 
     /* ---- typemaps ---- */
     %typemap(in) b2Vec2* self {
@@ -219,6 +241,7 @@
     %}
 
     /* ---- extending classes ---- */
+    /**** World ****/
     %extend b2World {
     public:        
         %pythoncode %{
@@ -236,7 +259,7 @@
             contactCount  = property(__GetContactCount, None)
             bodyCount     = property(__GetBodyCount, None)
             proxyCount    = property(__GetProxyCount, None)
-            joints    = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
+            joints    = property(lambda self: [joint.downcast() for joint in _list_from_linked_list(self.__GetJointList_internal())], None)
             bodies    = property(lambda self: _list_from_linked_list(self.__GetBodyList_internal()), None)
             contacts  = property(lambda self: _list_from_linked_list(self.__GetContactList_internal()), None)
 
@@ -266,9 +289,27 @@
     %rename (__GetProxyCount) b2World::GetProxyCount;
     %rename (__GetBodyCount) b2World::GetBodyCount;
 
+    /**** Fixture ****/
     %extend b2Fixture {
     public:
         long __hash__() { return (long)self; }
+        
+        PyObject* __GetShape() {
+            b2Shape* shape=$self->GetShape();
+            if (!shape)
+                return NULL;
+
+            switch (shape->GetType())
+            {
+            case b2Shape::e_circle:
+                return SWIG_NewPointerObj(shape, $descriptor(b2CircleShape*), 0);
+            case b2Shape::e_polygon:
+                return SWIG_NewPointerObj(shape, $descriptor(b2PolygonShape*), 0);
+            case b2Shape::e_unknown:
+            default:
+                return NULL;
+            }
+        }
 
         %pythoncode %{
             __eq__ = b2FixtureCompare
@@ -299,7 +340,7 @@
     %rename(__IsSensor) b2Fixture::IsSensor;
     %rename(__GetType) b2Fixture::GetType;
     %rename(__GetMassData) b2Fixture::GetMassData;
-    %rename(__GetShape) b2Fixture::GetShape;
+    %rename(__GetShape_uncasted) b2Fixture::GetShape;
     %rename(__GetAABB) b2Fixture::GetAABB;
     %rename(__GetDensity) b2Fixture::GetDensity;
     %rename(__GetBody) b2Fixture::GetBody;
@@ -357,8 +398,9 @@
     %rename(sub_vector) b2Vec2::operator -= (const b2Vec2& v);
     %rename(mul_float ) b2Vec2::operator *= (float32 a);
 
-    // Vector class
+    /**** Vector classes ****/
     %extend b2Vec2 {
+    public:
         b2Vec2(b2Vec2& other) {
             return new b2Vec2(other.x, other.y);
         }
@@ -398,8 +440,11 @@
                 return self.x*v[0] + self.y*v[1]
             else:
                 return self.x*v.x + self.y*v.y
-
-        tuple = property(lambda self: tuple(self.x, self.y), None)
+        def __set(self, x, y):
+            self.x = x
+            self.y = y
+    
+        tuple = property(lambda self: tuple(self.x, self.y), lambda self, value: self.__set(*value))
         length = property(__Length, None)
         lengthSquared = property(__LengthSquared, None)
         valid = property(__IsValid, None)
@@ -425,11 +470,104 @@
             return b2Vec2($self->x / a, $self->y / a);
         }
         void div_float(float32 a) {
-            self->x /= a;
-            self->y /= a;
+            $self->x /= a;
+            $self->y /= a;
         }
     }
 
+    %extend b2Vec3 {
+    public:
+        b2Vec3(b2Vec3& other) {
+            return new b2Vec3(other.x, other.y, other.z);
+        }
+
+        b2Vec3(b2Vec2& other) {
+            return new b2Vec3(other.x, other.y, 0.0f);
+        }
+
+        %pythoncode %{
+        __iter__ = lambda self: iter( (self.x, self.y, self.z) )
+        __eq__ = lambda self, other: (self.x == other.x and self.y == other.y and self.z == other.z)
+        __ne__ = lambda self,other: (self.x != other.x or self.y != other.y or self.z != other.z)
+        def __repr__(self):
+            return "b2Vec3(%g,%g,%g)" % (self.x, self.y, self.z)
+        def copy(self):
+            """
+            Return a copy of the vector.
+            Remember that the following:
+                a = b2Vec3()
+                b = a
+            Does not copy the vector itself, but b now refers to a.
+            """
+            return b2Vec3(self.x, self.y, self.z)
+        def __iadd__(self, other):
+            self.add_vector(other)
+            return self
+        def __isub__(self, other):
+            self.sub_vector(other)
+            return self
+        def __imul__(self, a):
+            self.mul_float(a)
+            return self
+        def __idiv__(self, a):
+            self.div_float(a)
+            return self
+        def dot(self, v):
+            """
+            Dot product with v (list/tuple or b2Vec3)
+            """
+            if isinstance(v, (list, tuple)):
+                return self.x*v[0] + self.y*v[1] + self.z*v[2]
+            else:
+                return self.x*v.x + self.y*v.y + self.z*v.z
+        def __set(self, x, y, z):
+            self.x = x
+            self.y = y
+            self.z = z
+    
+        tuple = property(lambda self: tuple(self.x, self.y, self.z), lambda self, value: self.__set(*value))
+        length = property(_Box2D.b2Vec3___Length, None)
+        lengthSquared = property(_Box2D.b2Vec3___LengthSquared, None)
+        valid = property(_Box2D.b2Vec3___IsValid, None)
+
+        %}
+
+        bool __IsValid() {
+            return b2IsValid($self->x) && b2IsValid($self->y) && b2IsValid($self->z);
+        }
+        float32 __Length() {
+            return b2Sqrt($self->x * $self->x + $self->y * $self->y + $self->z * $self->z);
+        }
+        float32 __LengthSquared() {
+            return ($self->x * $self->x + $self->y * $self->y + $self->z * $self->z);
+        }
+        b2Vec3 __div__(float32 a) {
+            return b2Vec3($self->x / a, $self->y / a, $self->z / a);
+        }
+        b2Vec3 __mul__(float32 a) {
+            return b2Vec3($self->x * a, $self->y * a, $self->z * a);
+        }
+        b2Vec3 __add__(b2Vec3* other) {
+            return b2Vec3($self->x + other->x, $self->y + other->y, $self->z + other->z);
+        }
+        b2Vec3 __sub__(b2Vec3* other) {
+            return b2Vec3($self->x - other->x, $self->y - other->y, $self->z - other->z);
+        }
+
+        b2Vec3 __rmul__(float32 a) {
+            return b2Vec3($self->x * a, $self->y * a, $self->z * a);
+        }
+        b2Vec3 __rdiv__(float32 a) {
+            return b2Vec3($self->x / a, $self->y / a, self->z / a);
+        }
+        void div_float(float32 a) {
+            $self->x /= a;
+            $self->y /= a;
+            $self->z /= a;
+        }
+    }
+
+    /**** Shape ****/
     %extend b2Shape {
     public:
         long __hash__() { return (long)self; }
@@ -462,6 +600,7 @@
     %rename(radius) b2Shape::m_radius;
     %rename(__GetType) b2Shape::GetType;
 
+    /**** CircleShape ****/
     %extend b2CircleShape {
     public:
         %pythoncode %{
@@ -473,6 +612,7 @@
     %rename (pos) b2CircleShape::m_p;
 
     //Let python access all the vertices in the b2PolygonDef/Shape
+    /**** PolygonShape ****/
     %extend b2PolygonShape {
     public:
         %pythoncode %{
@@ -517,15 +657,7 @@
     %rename (vertexCount) b2PolygonShape::m_vertexCount;
     %ignore b2PolygonShape::GetVertex;
 
-    /*
-    %extend b2GearJoint {
-    public:
-        %pythoncode %{
-            joint1 = property(lambda self: (self.revolute1 and self.revolute1) or self.prismatic1, None)
-            joint2 = property(lambda self: (self.revolute2 and self.revolute2) or self.prismatic2, None)
-        %}
-    }
-*/
+    /**** Joint ****/
     %extend b2Joint {
     public:
         long __hash__() { return (long)self; }
@@ -606,6 +738,7 @@
     %rename(__GetAnchorA) b2Joint::GetAnchorA;
     %rename(__GetAnchorB) b2Joint::GetAnchorB;
 
+    /**** RevoluteJoint ****/
     %extend b2RevoluteJoint {
     public:
         %pythoncode %{
@@ -621,9 +754,9 @@
             # Read-only
             anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
             anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
-            jointAngle = property(__GetJointAngle, None)
+            angle = property(__GetJointAngle, None)
             motorTorque = property(__GetMotorTorque, None)
-            jointSpeed = property(__GetJointSpeed, None)
+            speed = property(__GetJointSpeed, None)
 
             # Write-only
             maxMotorTorque = property(None, __SetMaxMotorTorque)
@@ -644,6 +777,7 @@
     %rename(__SetMaxMotorTorque) b2RevoluteJoint::SetMaxMotorTorque;
     %rename(__EnableMotor) b2RevoluteJoint::EnableMotor;
 
+    /**** LineJoint ****/
     %extend b2LineJoint {
     public:
         %pythoncode %{
@@ -653,20 +787,21 @@
             maxMotorForce = property(__GetMaxMotorForce, __SetMaxMotorForce)
             motorEnabled = property(__IsMotorEnabled, __EnableMotor)
             limitEnabled = property(__IsLimitEnabled, __EnableLimit)
-            upperLimit = property(__GetUpperLimit, lambda self, v: self.SetLimits(self.lowerLimit, v))
-            lowerLimit = property(__GetLowerLimit, lambda self, v: self.SetLimits(v, self.upperLimit))
-            limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.SetLimits(*v) )
+            upperLimit = property(__GetUpperLimit, lambda self, v: self.__SetLimits(self.lowerLimit, v))
+            lowerLimit = property(__GetLowerLimit, lambda self, v: self.__SetLimits(v, self.upperLimit))
+            limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.__SetLimits(*v) )
 
             # Read-only
             motorForce = property(__GetMotorForce, None)
             anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
             anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
-            jointSpeed = property(__GetJointSpeed, None)
-            jointTranslation = property(__GetJointTranslation, None)
+            speed = property(__GetJointSpeed, None)
+            translation = property(__GetJointTranslation, None)
 
         %}
     }
 
+    %rename(__SetLimits) b2LineJoint::SetLimits;
     %rename(__IsMotorEnabled) b2LineJoint::IsMotorEnabled;
     %rename(__GetMotorSpeed) b2LineJoint::GetMotorSpeed;
     %rename(__GetMotorForce) b2LineJoint::GetMotorForce;
@@ -683,6 +818,7 @@
     %rename(__SetMaxMotorForce) b2LineJoint::SetMaxMotorForce;
     %rename(__EnableMotor) b2LineJoint::EnableMotor;
 
+    /**** PrismaticJoint ****/
     %extend b2PrismaticJoint {
     public:
         %pythoncode %{
@@ -698,10 +834,10 @@
 
             # Read-only
             motorForce = property(__GetMotorForce, None)
-            jointTranslation = property(__GetJointTranslation, None)
+            translation = property(__GetJointTranslation, None)
             anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
             anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
-            jointSpeed = property(__GetJointSpeed, None)
+            speed = property(__GetJointSpeed, None)
 
         %}
     }
@@ -720,6 +856,7 @@
     %rename(__GetMaxMotorForce) b2PrismaticJoint::GetMaxMotorForce;
     %rename(__EnableMotor) b2PrismaticJoint::EnableMotor;
 
+    /**** DistanceJoint ****/
     %extend b2DistanceJoint {
     public:
         %pythoncode %{
@@ -743,6 +880,7 @@
     %rename(__SetLength) b2DistanceJoint::SetLength;
     %rename(__SetFrequency) b2DistanceJoint::SetFrequency;
 
+    /**** PulleyJoint ****/
     %extend b2PulleyJoint {
     public:
         %pythoncode %{
@@ -765,6 +903,7 @@
     %rename(__GetLength1) b2PulleyJoint::GetLength1;
     %rename(__GetRatio) b2PulleyJoint::GetRatio;
 
+    /**** MouseJoint ****/
     %extend b2MouseJoint {
     public:
         %pythoncode %{
@@ -787,6 +926,7 @@
     %rename(__SetMaxForce) b2MouseJoint::SetMaxForce;
     %rename(__SetFrequency) b2MouseJoint::SetFrequency;
 
+    /**** GearJoint ****/
     %extend b2GearJoint {
     public:
         %pythoncode %{
@@ -799,9 +939,11 @@
     %rename(__GetRatio) b2GearJoint::GetRatio;
     %rename(__SetRatio) b2GearJoint::SetRatio;
 
+    /**** WeldJoint ****/
     %extend b2WeldJoint {
     }
 
+    /**** FrictionJoint ****/
     %extend b2FrictionJoint {
     public:
         %pythoncode %{
@@ -816,6 +958,7 @@
     %rename(__SetMaxTorque) b2FrictionJoint::SetMaxTorque;
     %rename(__SetMaxForce) b2FrictionJoint::SetMaxForce;
 
+    /**** JointDef ****/
     %extend b2JointDef {
     public:
         %pythoncode %{
@@ -842,14 +985,18 @@
 
     %}
 
+    /**** Color ****/
     %extend b2Color {
+    public:
         %pythoncode %{
         __iter__ = lambda self: iter((self.r, self.g, self.b)) 
          %}
     }
 
     
+    /**** Body ****/
     %extend b2Body {
+    public:
         long __hash__() { return (long)self; }
         %pythoncode %{
             __eq__ = b2BodyCompare
@@ -858,7 +1005,7 @@
                 """
                 Get a b2MassData object that represents this b2Body
 
-                NOTE: To just get the mass, use body.mass (body.GetMass())
+                NOTE: To just get the mass, use body.mass
                 """
                 ret = b2MassData()
                 ret.center=self.localCenter
@@ -868,10 +1015,10 @@
             
             def __iter__(self):
                 """
-                Iterates over the shapes in the body
+                Iterates over the fixtures in the body
                 """
-                for shape in self.shapeList:
-                    yield shape
+                for fixture in self.fixtures:
+                    yield fixture
 
             # Read-write properties
             sleepingAllowed = property(__IsSleepingAllowed, __SetSleepingAllowed)
@@ -938,6 +1085,36 @@
     %rename(__SetLinearDamping) b2Body::SetLinearDamping;
     %rename(__SetType) b2Body::SetType;
 
+    /**** Contact ****/
+    %extend b2Contact {
+    public:
+        %pythoncode %{
+            # Read-write properties
+
+            sensor = property(__IsSensor, __SetSensor)
+            enabled = property(__IsEnabled, __SetEnabled)
+            # Read-only
+            next = property(__GetNext, None)
+            touching = property(__IsTouching, None)
+            fixtureB = property(__GetFixtureB, None)
+            fixtureA = property(__GetFixtureA, None)
+            continuous = property(__IsContinuous, None)
+            manifold = property(__GetManifold, None)
+            # Write-only
+
+        %}
+    }
+
+    %rename(__GetNext) b2Contact::GetNext;
+    %rename(__IsTouching) b2Contact::IsTouching;
+    %rename(__IsSensor) b2Contact::IsSensor;
+    %rename(__GetFixtureB) b2Contact::GetFixtureB;
+    %rename(__GetFixtureA) b2Contact::GetFixtureA;
+    %rename(__IsContinuous) b2Contact::IsContinuous;
+    %rename(__GetManifold) b2Contact::GetManifold;
+    %rename(__IsEnabled) b2Contact::IsEnabled;
+    %rename(__SetEnabled) b2Contact::SetEnabled;
+    %rename(__SetSensor) b2Contact::SetSensor;
 
     /* Additional supporting C++ code */
     %typemap(out) bool b2CheckPolygon(b2PolygonShape*) {
