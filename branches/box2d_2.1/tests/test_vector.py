@@ -1,5 +1,5 @@
 import unittest
-from Box2D import *
+from Box2D import b2Vec2, b2Vec3
 
 class testVector (unittest.TestCase):
     def test_vector(self):

@@ -122,7 +122,12 @@ class testBasic (unittest.TestCase):
         i = joint.speed
         i = joint.anchorA
         i = joint.anchorB
+        joint.upperLimit = 2
         joint.maxMotorTorque = 10.0
+        try:
+            joint.foobar = 2
+        except TypeError:
+            pass # good
 
     # ---- prismatic joint ----
     def prismatic_definition(self, body1, body2, anchor, axis):
@@ -300,7 +305,7 @@ class testBasic (unittest.TestCase):
             try:
                 joint = self.world.CreateJoint(dfn)
             except Exception, s:
-                self.fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
+                self.fail("Failed on bodies %s and %s, joint creation (%s)" % (bodyA.userData, bodyB.userData, s))
                 
             try:
                 asserts(dfn, joint)
