@@ -245,6 +245,37 @@
     %extend b2World {
     public:        
         %pythoncode %{
+            def __init__(self, *args, **kwargs): 
+                """__init__(self, *args, **kwargs) -> b2World
+                Non-named arguments:
+                 b2World(gravity, doSleep)
+
+                Examples:
+                 b2World( (0,-10), True)
+                 b2World( gravity=(0,-10), doSleep=True)
+
+                Required arguments:
+                * gravity
+                * doSleep
+                """
+                required = ('gravity', 'doSleep')
+                if args:
+                    for key, value in zip(required, args):
+                        if key not in kwargs:
+                            kwargs[key]=value
+                if kwargs:
+                    missing=[v for v in required if v not in kwargs]
+                    if missing:
+                        raise ValueError('Arguments missing: %s' % ','.join(missing) )
+                else:
+                    raise ValueError('Arguments required: %s' % ','.join(required) )
+
+                args=( kwargs['gravity'], kwargs['doSleep'] )
+                _Box2D.b2World_swiginit(self,_Box2D.new_b2World(*args))
+
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+
             def __iter__(self):
                 """
                 Iterates over the bodies in the world
@@ -288,6 +319,32 @@
     %rename (__GetContactCount) b2World::GetContactCount;
     %rename (__GetProxyCount) b2World::GetProxyCount;
     %rename (__GetBodyCount) b2World::GetBodyCount;
+
+    /**** BodyDef ****/
+    %extend b2BodyDef {
+    public:        
+        %pythoncode %{
+            def __init__(self, **kwargs): 
+                """__init__(self, **kwargs) -> b2BodyDef """
+                _Box2D.b2BodyDef_swiginit(self,_Box2D.new_b2BodyDef())
+
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+        %}
+    }
+
+    /**** FixtureDef ****/
+    %extend b2FixtureDef {
+    public:        
+        %pythoncode %{
+            def __init__(self, **kwargs): 
+                """__init__(self, **kwargs) -> b2FixtureDef """
+                _Box2D.b2FixtureDef_swiginit(self,_Box2D.new_b2FixtureDef())
+
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+        %}
+    }
 
     /**** Fixture ****/
     %extend b2Fixture {
@@ -604,6 +661,15 @@
     %extend b2CircleShape {
     public:
         %pythoncode %{
+        def __init__(self, **kwargs): 
+            """__init__(self) -> b2CircleShape"""
+            if not kwargs:
+                _Box2D.b2CircleShape_swiginit(self,_Box2D.new_b2CircleShape())
+                return
+            self.__init__()
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         %}
@@ -618,6 +684,17 @@
         %pythoncode %{
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
+        def __init__(self, **kwargs): 
+            """__init__(self) -> b2PolygonShape"""
+            if not kwargs:
+                _Box2D.b2PolygonShape_swiginit(self,_Box2D.new_b2PolygonShape())
+                return
+            self.__init__()
+            for key, value in kwargs.items():
+                if key=='box':
+                    self.SetAsBox(*value)
+                else:
+                    setattr(self, key, value)
         def __repr__(self):
             return "b2PolygonShape(vertices: %s)" % (self.getVertices_tuple(), self.GetVertexCount())
         def __get_vertices_tuple(self):
@@ -641,6 +718,7 @@
 
         vertices = property(__get_vertices_tuple, None)
         normals = property(__get_normals_tuple, None)
+        box = property(None, lambda self, value: self.SetAsBox(*value))
         %}
         const b2Vec2* __GetVertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
@@ -665,10 +743,10 @@
         __eq__ = b2JointCompare
         __ne__ = lambda self,other: not b2JointCompare(self,other)
         def __setattr__(self, var, value):
-            if self.__dict__.has_key(var):
+            if var in dir(self):
                 super(b2Joint, self).__setattr__(var, value)
             else: 
-                raise TypeError("Shadow class has no property '%s'. Typo? (%s)" % (var, type(self)))
+                raise TypeError("Shadow class has no property '%s'. %s Typo?" % (var, type(self)))
         __delattr__ = __setattr__
 
         def __type_name(self):

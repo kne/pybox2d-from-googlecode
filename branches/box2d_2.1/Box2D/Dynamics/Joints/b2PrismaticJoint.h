@@ -172,8 +172,4 @@ inline float32 b2PrismaticJoint::GetMotorSpeed() const
 	return m_motorSpeed;
 }
 
-float32 b2PrismaticJoint::GetMaxMotorForce() const
-{
-	return m_maxMotorForce;
-}
 #endif
