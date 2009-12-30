@@ -23,7 +23,13 @@
 #include <cmath>
 
 #define B2_NOT_USED(x) x
+#ifdef USE_EXCEPTIONS
+#include <Python.h>
+class b2AssertException {};
+#define b2Assert(A) if (!(A)) { PyErr_SetString(PyExc_AssertionError, #A); throw b2AssertException(); }
+#else
 #define b2Assert(A) assert(A)
+#endif
 
 typedef signed char	int8;
 typedef signed short int16;

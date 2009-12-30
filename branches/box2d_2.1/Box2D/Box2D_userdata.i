@@ -68,15 +68,16 @@ public:
             return NULL;
         }
     }
+
     void DestroyBody(b2Body* body) {
         Py_XDECREF((PyObject*)body->GetUserData());
         self->DestroyBody(body);
     }
+
     void DestroyJoint(b2Joint* joint) {
         Py_XDECREF((PyObject*)joint->GetUserData());
         self->DestroyJoint(joint);
     }
-
 }
 
 %extend b2Body {
