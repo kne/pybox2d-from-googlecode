@@ -28,14 +28,14 @@
 
 %extend b2World {
 public:        
-    b2Body* CreateBody(b2BodyDef* defn) {
+    b2Body* __CreateBody(b2BodyDef* defn) {
         b2Body* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
         ret=self->CreateBody(defn);
         return ret;
     }
-    PyObject* CreateJoint(b2JointDef* defn) {
+    PyObject* __CreateJoint(b2JointDef* defn) {
         b2Joint* joint;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
@@ -92,13 +92,13 @@ public:
         ret=self->CreateFixture(defn);
         return ret;
     }
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -108,19 +108,19 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
     %}
 }
 
 %extend b2Joint {
 public:        
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -130,19 +130,19 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
     %}
 }
 
 %extend b2Fixture {
 public:        
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -152,14 +152,14 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
     %}
 }
 
 //Allow access to userData in definitions, with proper destruction
 %extend b2JointDef {
 public:
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -168,7 +168,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -178,7 +178,7 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}
@@ -186,7 +186,7 @@ public:
 
 %extend b2BodyDef {
 public:
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -195,7 +195,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -205,7 +205,7 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}
@@ -213,7 +213,7 @@ public:
 
 %extend b2FixtureDef {
 public:
-    PyObject* GetUserData() {
+    PyObject* __GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -222,7 +222,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void SetUserData(PyObject* data) {
+    void __SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -232,7 +232,7 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(GetUserData, SetUserData)
+        userData = property(__GetUserData, __SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}

@@ -131,7 +131,7 @@
         if (PyTuple_Check($input) || PyList_Check($input)) {
             int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
             if (sz != 2) {
-                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", sz);
                 SWIG_fail;
             }
             int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
@@ -163,7 +163,7 @@
         if (PyTuple_Check($input) || PyList_Check($input)) {
             int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
             if (sz != 2) {
-                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", PyTuple_Size($input));
+                PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 2, got length %d", sz);
                 SWIG_fail;
             }
             int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.x);
@@ -283,6 +283,30 @@
                 for body in self.bodies:
                     yield body
 
+            def CreateBody(self, defn):
+                body=self.__CreateBody(defn)
+                if defn.fixtures:
+                    for fixture in defn.fixtures:
+                        if isinstance(fixture, (list, tuple)):
+                            # create a fixture from a shape, in format (shape, density)
+                            body.CreateFixture(*fixture)
+                        elif isinstance(fixture, b2FixtureDef):
+                            # create a fixture from a b2FixtureDef
+                            body.CreateFixture(fixture)
+                        else:
+                            raise ValueError('Unexpected element in fixture list: %s (type %s)' % (fixture, type(fixture)))
+                return body
+
+            def CreateJoint(self, defn):
+                if isinstance(defn, b2GearJointDef):
+                    if not defn.joint1 or not defn.joint2:
+                        raise ValueError('Joint(s) not set')
+                else:
+                    if not defn.bodyA or not defn.bodyB:
+                        raise ValueError('Body or bodies not set')
+                joint=self.__CreateJoint(defn)
+                return joint
+
             # Read-write properties
             gravity   = property(__GetGravity   , __SetGravity)
    
@@ -301,7 +325,7 @@
             debugDraw           = property(None, __SetDebugDraw)
 
             # other functions:
-            # CreateBody, DestroyBody, DestroyJoint
+            # DestroyBody, DestroyJoint
             # Step, ClearForces, DrawDebugData, QueryAABB, RayCast,
             # IsLocked
         %}
@@ -330,6 +354,8 @@
 
                 for key, value in kwargs.items():
                     setattr(self, key, value)
+            
+            fixtures = None
         %}
     }
 
@@ -691,24 +717,40 @@
                 return
             self.__init__()
             for key, value in kwargs.items():
-                if key=='box':
-                    self.SetAsBox(*value)
-                else:
-                    setattr(self, key, value)
+                setattr(self, key, value)
         def __repr__(self):
-            return "b2PolygonShape(vertices: %s)" % (self.getVertices_tuple(), self.GetVertexCount())
-        def __get_vertices_tuple(self):
+            return "b2PolygonShape(vertices: %s)" % (self.vertices)
+        def __get_vertices(self):
             """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
-            vertices = []
-            for i in range(0, self.GetVertexCount()):
-                vertices.append( (self.getVertex(i).x, self.getVertex(i).y ) )
-            return vertices
-        def __get_normals_tuple(self):
+            return [ (self.__get_vertex(i).x, self.__get_vertex(i).y )
+                             for i in xrange(0, self.vertexCount)]
+        def __get_normals(self):
             """Returns all of the normals as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
-            vertices = []
-            for i in range(0, self.GetVertexCount()):
-                vertices.append( (self.getNormal(i).x, self.getNormal(i).y ) )
-            return vertices
+            return [ (self.__get_normal(i).x, self.__get_normal(i).y )
+                             for i in xrange(0, self.vertexCount)]
+        def __clear_vertices(self):
+            self.vertexCount=0
+            for i in range(0, b2_maxPolygonVertices):
+                self.__set_vertex(i, 0, 0)
+        def __set_vertices(self, values):
+            if not values:
+                self.__clear_vertices()
+            else:
+                if len(values) < 2 or len(values) > b2_maxPolygonVertices:
+                    raise ValueError('Expected tuple or list of length >= 2 and less than b2_maxPolygonVertices=%d, got length %d.' %
+                                         (b2_maxPolygonVertices, len(values)))
+                for i,value in enumerate(values):
+                    if isinstance(value, (tuple, list)):
+                        if len(value) != 2:
+                            raise ValueError('Expected tuple or list of length 2, got length %d' % len(value))
+                        self.__set_vertex(i, *value)
+                    elif isinstance(value, b2Vec2):
+                        self.__set_vertex(i, value)
+                    else:
+                        raise ValueError('Expected tuple, list, or b2Vec2, got %s' % type(value))
+                    self.vertexCount=i+1 # follow along in case of an exception to indicate valid number set
+            self.__set_vertices_internal() # calculates normals, centroid, etc.
+
         def __iter__(self):
             """
             Iterates over the vertices in the polygon
@@ -716,24 +758,42 @@
             for v in self.vertices:
                 yield v
 
-        vertices = property(__get_vertices_tuple, None)
-        normals = property(__get_normals_tuple, None)
-        box = property(None, lambda self, value: self.SetAsBox(*value))
+        def __IsValid(self):
+            return b2CheckPolygon(self)
+
+        valid = property(__IsValid, None, doc="Checks the polygon to see if it can be properly created. Raises ValueError for invalid shapes.")
+        vertices = property(__get_vertices, __set_vertices)
+        normals = property(__get_normals, None)
+        box = property(None, lambda self, value: self.SetAsBox(*value), doc="Property replacement for running SetAsBox (Write-only)")
+        edge = property(None, lambda self, value: self.SetAsEdge(*value), doc="Property replacement for running SetAsEdge (Write-only)")
         %}
-        const b2Vec2* __GetVertex(uint16 vnum) {
+        const b2Vec2* __get_vertex(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->m_vertices[vnum] );
         }
-        const b2Vec2* __GetNormal(uint16 vnum) {
+        const b2Vec2* __get_normal(uint16 vnum) {
             if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
             return &( $self->m_normals[vnum] );
         }
+        void __set_vertex(uint16 vnum, b2Vec2& value) {
+            if (vnum < $self->m_vertexCount)
+                $self->m_vertices[vnum].Set(value.x, value.y);
+        }
+        void __set_vertex(uint16 vnum, float32 x, float32 y) {
+            if (vnum < $self->m_vertexCount)
+                $self->m_vertices[vnum].Set(x, y);
+        }
+        void __set_vertices_internal() {
+            $self->Set($self->m_vertices, $self->m_vertexCount);
+        }
     }
     %rename (centroid) b2PolygonShape::m_centroid;
-    %rename (vertices) b2PolygonShape::m_vertices;
-    %rename (normal) b2PolygonShape::m_normal;
     %rename (vertexCount) b2PolygonShape::m_vertexCount;
+    %rename (__set_vertices_internal) b2PolygonShape::Set;
+    %ignore b2PolygonShape::m_normals;
+    %ignore b2PolygonShape::vertices;
     %ignore b2PolygonShape::GetVertex;
+    %ignore b2PolygonShape::GetVertexCount;
 
     /**** Joint ****/
     %extend b2Joint {
@@ -1294,8 +1354,8 @@
 
         bool b2CheckVertices(b2Vec2* vertices, int32 count, bool additional_checks=true) {
             // Get the vertices transformed into the body frame.
-            if (count < 3 || count >= b2_maxPolygonVertices) {
-                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
+            if (count < 2 || count >= b2_maxPolygonVertices) {
+                PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 2 and < b2_maxPolygonVertices");
                 return false;
             }
 

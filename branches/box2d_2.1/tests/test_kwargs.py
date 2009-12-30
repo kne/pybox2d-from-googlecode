@@ -15,7 +15,27 @@ class testBasic (unittest.TestCase):
 
         groundBody.CreateFixture(b2PolygonShape(box=(50,10)))
 
-        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4)))
+        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
+                        fixtures=[]))
+        try:
+            body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
+                            fixtures=[b2PolygonShape(box=(5,1))]))
+        except ValueError:
+            pass # good
+        
+        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
+                        fixtures=[ (b2PolygonShape(box=(2,1)), 1.0) ]))
+
+        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
+                        fixtures=[ (b2PolygonShape(box=(2,1)), 1.0),
+                                   (b2PolygonShape(box=(2,1)), 1.0) 
+                            ]))
+         
+        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
+                        fixtures=[ b2FixtureDef( shape=b2CircleShape(radius=1), density=1, friction=0.3),
+                                    (b2PolygonShape(box=(2,1)), 1.0),
+                                    (b2PolygonShape(box=(2,1)), 1.0) 
+                            ]))
          
         body.CreateFixture(b2FixtureDef( shape=b2CircleShape(radius=1), density=1, friction=0.3))
          
