@@ -34,26 +34,10 @@ public:
     %pythoncode %{
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
-        def __type_name(self):
-            return b2ShapeTypes[type]
-        def downcast(self):
-            return (getattr(self, "__as%sShape" % self.__type_name())) ()
         # Read-only
         type = property(__GetType, None)
         
     %}
-
-    b2CircleShape* __asCircleShape() {
-        if ($self->GetType()==b2Shape::e_circle)
-            return (b2CircleShape*)$self;
-        return NULL;
-    }
-
-    b2PolygonShape* __asPolygonShape() {
-        if ($self->GetType()==b2Shape::e_polygon)
-            return (b2PolygonShape*)$self;
-        return NULL;
-    }
 }
 
 %ignore b2Shape::m_type;

@@ -50,24 +50,6 @@ public:
 %extend b2Fixture {
 public:
     long __hash__() { return (long)self; }
-    
-    PyObject* __GetShape() {
-        b2Shape* shape=$self->GetShape();
-        if (!shape)
-            return NULL;
-
-        switch (shape->GetType())
-        {
-        case b2Shape::e_circle:
-            return SWIG_NewPointerObj(shape, $descriptor(b2CircleShape*), 0);
-        case b2Shape::e_polygon:
-            return SWIG_NewPointerObj(shape, $descriptor(b2PolygonShape*), 0);
-        case b2Shape::e_unknown:
-        default:
-            return NULL;
-        }
-    }
-
     %pythoncode %{
         __eq__ = b2FixtureCompare
         __ne__ = lambda self,other: not b2FixtureCompare(self,other)
@@ -97,7 +79,7 @@ public:
 %rename(__IsSensor) b2Fixture::IsSensor;
 %rename(__GetType) b2Fixture::GetType;
 %rename(__GetMassData) b2Fixture::GetMassData;
-%rename(__GetShape_uncasted) b2Fixture::GetShape;
+%rename(__GetShape) b2Fixture::GetShape;
 %rename(__GetAABB) b2Fixture::GetAABB;
 %rename(__GetDensity) b2Fixture::GetDensity;
 %rename(__GetBody) b2Fixture::GetBody;

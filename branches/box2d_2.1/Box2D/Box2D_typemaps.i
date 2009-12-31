@@ -123,3 +123,59 @@
         PyTuple_SetItem($input, i, vertex);
     }
 }
+
+/* Properly downcast joints for all return values using b2Joint */
+%typemap(out) b2Joint* {
+    
+    if ($1) {
+        switch (($1)->GetType())
+        {
+        case e_revoluteJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2RevoluteJoint*), 0); break;
+        case e_prismaticJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2PrismaticJoint*), 0); break;
+        case e_distanceJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2DistanceJoint*), 0); break;
+        case e_pulleyJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2PulleyJoint*), 0); break;
+        case e_mouseJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2MouseJoint*), 0); break;
+        case e_gearJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2GearJoint*), 0); break;
+        case e_lineJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2LineJoint*), 0); break;
+        case e_weldJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2WeldJoint*), 0); break;
+        case e_frictionJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2FrictionJoint*), 0); break;
+        case e_unknownJoint:
+        default:
+            $result=Py_None; 
+            Py_INCREF($result);
+            break;
+        }
+    } else {
+        $result=Py_None; 
+        Py_INCREF($result);
+    }
+}
+
+/* Properly downcast shapes for all return values using b2Shape */
+%typemap(out) b2Shape* {
+    if ($1) {
+        switch (($1)->GetType())
+        {
+        case b2Shape::e_circle:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2CircleShape*), 0); break;
+        case b2Shape::e_polygon:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2PolygonShape*), 0); break;
+        case b2Shape::e_unknown:
+        default:
+            $result=Py_None; 
+            Py_INCREF($result);
+        }
+    } else {
+        $result=Py_None; 
+        Py_INCREF($result);
+    }
+}

@@ -32,18 +32,6 @@ public:
             raise TypeError("Shadow class has no property '%s'. %s Typo?" % (var, type(self)))
     __delattr__ = __setattr__
 
-    def __type_name(self):
-        """
-        Return the name of the joint from:
-         Unknown, Mouse, Gear, Distance, Prismatic, Pulley, Revolute
-        """
-        return b2JointTypes[self.type]
-    def downcast(self):
-        """
-        Return a downcasted/typecasted version of the joint
-        """
-        return (getattr(self, "__as%sJoint" % self.__type_name())) ()
-
     # Read-only
     next = property(__GetNext, None)
     bodyA = property(__GetBodyA, None)
@@ -53,48 +41,6 @@ public:
 
     %}
 
-    b2MouseJoint* __asMouseJoint() {
-        if ($self->GetType()==e_mouseJoint)
-            return (b2MouseJoint*)$self;
-        return NULL;
-    }
-
-    b2GearJoint* __asGearJoint() {
-        if ($self->GetType()==e_gearJoint)
-            return (b2GearJoint*)$self;
-        return NULL;
-    }
-
-    b2DistanceJoint* __asDistanceJoint() {
-        if ($self->GetType()==e_distanceJoint)
-            return (b2DistanceJoint*)$self;
-        return NULL;
-    }
-
-    b2PrismaticJoint* __asPrismaticJoint() {
-        if ($self->GetType()==e_prismaticJoint)
-            return (b2PrismaticJoint*)$self;
-        return NULL;
-    }
-
-    b2PulleyJoint* __asPulleyJoint() {
-        if ($self->GetType()==e_pulleyJoint)
-            return (b2PulleyJoint*)$self;
-        return NULL;
-    }
-
-    b2RevoluteJoint* __asRevoluteJoint() {
-        if ($self->GetType()==e_revoluteJoint)
-            return (b2RevoluteJoint*)$self;
-        return NULL;
-    }
-
-    b2LineJoint* __asLineJoint() {
-        if ($self->GetType()==e_lineJoint)
-            return (b2LineJoint*)$self;
-        return NULL;
-    }
-        
 }
 
 %rename(__GetNext) b2Joint::GetNext;
