@@ -18,41 +18,43 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+%feature("shadow") b2World::b2World(const b2Vec2& gravity, bool doSleep) {
+    def __init__(self, *args, **kwargs): 
+        """__init__(self, *args, **kwargs) -> b2World
+        Non-named arguments:
+         b2World(gravity, doSleep)
+
+        Examples:
+         b2World( (0,-10), True)
+         b2World( gravity=(0,-10), doSleep=True)
+
+        Required arguments:
+        * gravity
+        * doSleep
+        """
+        required = ('gravity', 'doSleep')
+        if args:
+            for key, value in zip(required, args):
+                if key not in kwargs:
+                    kwargs[key]=value
+        if kwargs:
+            missing=[v for v in required if v not in kwargs]
+            if missing:
+                raise ValueError('Arguments missing: %s' % ','.join(missing) )
+        else:
+            raise ValueError('Arguments required: %s' % ','.join(required) )
+
+        args=( kwargs['gravity'], kwargs['doSleep'] )
+        _Box2D.b2World_swiginit(self,_Box2D.new_b2World(*args))
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+}
 
 %extend b2World {
 public:        
     %pythoncode %{
-        def __init__(self, *args, **kwargs): 
-            """__init__(self, *args, **kwargs) -> b2World
-            Non-named arguments:
-             b2World(gravity, doSleep)
-
-            Examples:
-             b2World( (0,-10), True)
-             b2World( gravity=(0,-10), doSleep=True)
-
-            Required arguments:
-            * gravity
-            * doSleep
-            """
-            required = ('gravity', 'doSleep')
-            if args:
-                for key, value in zip(required, args):
-                    if key not in kwargs:
-                        kwargs[key]=value
-            if kwargs:
-                missing=[v for v in required if v not in kwargs]
-                if missing:
-                    raise ValueError('Arguments missing: %s' % ','.join(missing) )
-            else:
-                raise ValueError('Arguments required: %s' % ','.join(required) )
-
-            args=( kwargs['gravity'], kwargs['doSleep'] )
-            _Box2D.b2World_swiginit(self,_Box2D.new_b2World(*args))
-
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-
         def __iter__(self):
             """
             Iterates over the bodies in the world

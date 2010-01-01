@@ -45,9 +45,7 @@ public:
 %rename(__GetType) b2Shape::GetType;
 
 /**** CircleShape ****/
-%extend b2CircleShape {
-public:
-    %pythoncode %{
+%feature("shadow") b2CircleShape::b2CircleShape() {
     def __init__(self, **kwargs): 
         """__init__(self) -> b2CircleShape"""
         if not kwargs:
@@ -56,7 +54,11 @@ public:
         self.__init__()
         for key, value in kwargs.items():
             setattr(self, key, value)
+}
 
+%extend b2CircleShape {
+public:
+    %pythoncode %{
     __eq__ = b2ShapeCompare
     __ne__ = lambda self,other: not b2ShapeCompare(self,other)
     %}
@@ -64,13 +66,8 @@ public:
 
 %rename (pos) b2CircleShape::m_p;
 
-//Let python access all the vertices in the b2PolygonDef/Shape
 /**** PolygonShape ****/
-%extend b2PolygonShape {
-public:
-    %pythoncode %{
-    __eq__ = b2ShapeCompare
-    __ne__ = lambda self,other: not b2ShapeCompare(self,other)
+%feature("shadow") b2PolygonShape::b2PolygonShape() {
     def __init__(self, **kwargs): 
         """__init__(self) -> b2PolygonShape"""
         if not kwargs:
@@ -79,6 +76,13 @@ public:
         self.__init__()
         for key, value in kwargs.items():
             setattr(self, key, value)
+}
+
+%extend b2PolygonShape {
+public:
+    %pythoncode %{
+    __eq__ = b2ShapeCompare
+    __ne__ = lambda self,other: not b2ShapeCompare(self,other)
     def __repr__(self):
         return "b2PolygonShape(vertices: %s)" % (self.vertices)
     def __get_vertices(self):
@@ -110,7 +114,8 @@ public:
                 else:
                     raise ValueError('Expected tuple, list, or b2Vec2, got %s' % type(value))
                 self.vertexCount=i+1 # follow along in case of an exception to indicate valid number set
-            self.__set_vertices_internal() # calculates normals, centroid, etc.
+            if self.valid:
+                self.__set_vertices_internal() # calculates normals, centroid, etc.
 
     def __iter__(self):
         """
@@ -128,6 +133,7 @@ public:
     box = property(None, lambda self, value: self.SetAsBox(*value), doc="Property replacement for running SetAsBox (Write-only)")
     edge = property(None, lambda self, value: self.SetAsEdge(*value), doc="Property replacement for running SetAsEdge (Write-only)")
     %}
+
     const b2Vec2* __get_vertex(uint16 vnum) {
         if (vnum >= b2_maxPolygonVertices) return NULL;
         return &( $self->m_vertices[vnum] );

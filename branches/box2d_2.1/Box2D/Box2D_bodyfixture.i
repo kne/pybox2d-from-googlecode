@@ -19,30 +19,35 @@
 */
 
 /**** BodyDef ****/
+%feature("shadow") b2BodyDef::b2BodyDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2BodyDef """
+        _Box2D.b2BodyDef_swiginit(self,_Box2D.new_b2BodyDef())
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+}
+
 %extend b2BodyDef {
 public:        
     %pythoncode %{
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2BodyDef """
-            _Box2D.b2BodyDef_swiginit(self,_Box2D.new_b2BodyDef())
-
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-        
         fixtures = None
     %}
 }
 
 /**** FixtureDef ****/
+%feature("shadow") b2FixtureDef::b2FixtureDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2FixtureDef """
+        _Box2D.b2FixtureDef_swiginit(self,_Box2D.new_b2FixtureDef())
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+}
+
 %extend b2FixtureDef {
 public:        
     %pythoncode %{
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2FixtureDef """
-            _Box2D.b2FixtureDef_swiginit(self,_Box2D.new_b2FixtureDef())
-
-            for key, value in kwargs.items():
-                setattr(self, key, value)
     %}
 }
 

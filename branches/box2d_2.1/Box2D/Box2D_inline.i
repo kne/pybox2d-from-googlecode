@@ -61,29 +61,12 @@ b2AABBOverlaps(AABB1, [AABB2/point])
         return a==b;
     }
 
-    // Add some functions that might be commonly used
-    bool b2AABBOverlaps(const b2AABB& aabb, const b2Vec2& point) {
-        //If point is in aabb (including a small buffer around it), return true.
-        if (point.x < (aabb.upperBound.x + b2_epsilon) &&
-            point.x > (aabb.lowerBound.x - b2_epsilon) &&
-            point.y < (aabb.upperBound.y + b2_epsilon) &&
-            point.y > (aabb.lowerBound.y - b2_epsilon))
-                return true;
-        return false;
-    }
-    
-    bool b2AABBOverlaps(const b2AABB& aabb, const b2AABB& aabb2) {
-        //If aabb and aabb2 overlap, return true. (modified from b2BroadPhase::InRange)
-        b2Vec2 d = b2Max(aabb.lowerBound - aabb2.upperBound, aabb2.lowerBound - aabb.upperBound);
-        return b2Max(d.x, d.y) < 0.0f;
-    }
-
     // Modified from the b2PolygonShape constructor
     // Should be as accurate as the original version
     b2Vec2 __b2ComputeCentroid(const b2Vec2* vs, int32 count) {
         b2Vec2 c; c.Set(0.0f, 0.0f);
-        if (count < 3 || count >= b2_maxPolygonVertices) {
-            PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and < b2_maxPolygonVertices");
+        if (count < 3 || count > b2_maxPolygonVertices) {
+            PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 3 and <= b2_maxPolygonVertices");
             return c;
         }
 
@@ -126,8 +109,8 @@ b2AABBOverlaps(AABB1, [AABB2/point])
 
     bool b2CheckVertices(b2Vec2* vertices, int32 count, bool additional_checks=true) {
         // Get the vertices transformed into the body frame.
-        if (count < 2 || count >= b2_maxPolygonVertices) {
-            PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 2 and < b2_maxPolygonVertices");
+        if (count < 2 || count > b2_maxPolygonVertices) {
+            PyErr_SetString(PyExc_ValueError, "Vertex count must be >= 2 and <= b2_maxPolygonVertices");
             return false;
         }
 
@@ -217,7 +200,6 @@ b2AABBOverlaps(AABB1, [AABB2/point])
 /* Additional supporting Python code */
 %pythoncode %{
 b2_epsilon = 1.192092896e-07
-B2_FLT_MAX     = 3.402823466e+38
 
 def _list_from_linked_list(first):
     lst = []

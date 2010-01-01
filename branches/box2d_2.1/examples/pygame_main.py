@@ -719,13 +719,10 @@ class Framework(object):
         # Create a mouse joint on the selected body (assuming it's dynamic)
 
         # Make a small box.
-        aabb = b2AABB()
-        aabb.lowerBound = p - (0.001, 0.001)
-        aabb.upperBound = p + (0.001, 0.001)
+        aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
 
         # Query the world for overlapping shapes.
         body = None
-        k_maxCount = 10 # maximum amount of shapes to return
 
         query = QueryCallback()
         self.world.QueryAABB(query, aabb)

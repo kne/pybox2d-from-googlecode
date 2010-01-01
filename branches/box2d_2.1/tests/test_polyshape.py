@@ -1,5 +1,6 @@
 import unittest
 from Box2D import *
+from math import cos, sin
 
 class cl (b2ContactListener):
     pass
@@ -13,8 +14,8 @@ class testBasic (unittest.TestCase):
                         fixtures=[ (b2PolygonShape(vertices=v), 1.0) ]))
         for v1, v2 in zip(v, body.fixtures[0].shape.vertices):
             if v1 != v2:
-                raise Exception('Vertices before and after creation unequal. Before=%s After=%s'
-                        % (v, body.fixtures[0].shape.vertices))
+                raise Exception('Vertices before and after creation unequal. Before and after zipped=%s'
+                        % zip(v, body.fixtures[0].shape.vertices))
 
     def test_vertices(self):
 
@@ -36,8 +37,8 @@ class testBasic (unittest.TestCase):
         body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
                         fixtures=[ (b2PolygonShape(), 1.0) ]))
         self.dotest(world, [])
-        self.dotest(world, [(0,1),(1,1),(-1,1)] )
-        self.dotest(world, [b2Vec2(0,1),(1,1),b2Vec2(-1,1)] )
+        self.dotest(world, [(1,0),(1,1),(-1,1)] )
+        self.dotest(world, [b2Vec2(1,0),(1,1),b2Vec2(-1,1)] )
         try:
             self.dotest(world, [(0,1,5),(1,1)] )
         except ValueError,s:
@@ -45,7 +46,13 @@ class testBasic (unittest.TestCase):
         else:
             raise Exception("Should have failed with ValueError / length 3")
 
-        self.dotest(world, [(0,1)]*b2_maxPolygonVertices )
+        pi=b2_pi
+        n=b2_maxPolygonVertices
+
+        # int so floating point representation inconsistencies 
+        # don't make the vertex check fail
+        v = [(int(20*cos(x*2*pi/n)), int(20*sin(x*2*pi/n))) for x in range(n)]
+        self.dotest(world, v)
 
         try:
             self.dotest(world, [(0,1)]*(b2_maxPolygonVertices+1) )
@@ -54,9 +61,8 @@ class testBasic (unittest.TestCase):
         else:
             raise Exception("Should have failed with ValueError / max+1")
 
-        shape=b2PolygonShape(vertices=[(0,1),(0,-1),(-1,0)] )
         try:
-            shape.valid
+            shape=b2PolygonShape(vertices=[(1,0),(0,-1),(-1,0)] )
         except ValueError,s:
             pass # good, not convex
         else:

@@ -277,3 +277,48 @@ public:
 }
 
 %rename(__GetAngle) b2Transform::GetAngle;
+
+/**** AABB ****/
+%rename(__contains__) b2AABB::Contains;
+%rename(__IsValid) b2AABB::IsValid;
+%rename(__GetExtents) b2AABB::GetExtents;
+%rename(__GetCenter) b2AABB::GetCenter;
+
+%include "Box2D/Collision/b2Collision.h"
+
+%feature("shadow") b2AABB::b2AABB() {
+    def __init__(self, **kwargs):
+        """__init__(self, **kwargs) -> b2AABB """
+        _Box2D.b2AABB_swiginit(self,_Box2D.new_b2AABB())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+}
+
+%extend b2AABB {
+public:
+    %pythoncode %{
+        # Read-only
+        valid = property(__IsValid, None)
+        extents = property(__GetExtents, None)
+        center = property(__GetCenter, None)
+
+    %}
+
+    bool __contains__(const b2Vec2& point) {
+        //If point is in aabb (including a small buffer around it), return true.
+        if (point.x < ($self->upperBound.x + b2_epsilon) &&
+            point.x > ($self->lowerBound.x - b2_epsilon) &&
+            point.y < ($self->upperBound.y + b2_epsilon) &&
+            point.y > ($self->lowerBound.y - b2_epsilon))
+                return true;
+        return false;
+    }
+    
+    bool overlaps(const b2AABB& aabb2) {
+        //If aabb and aabb2 overlap, return true. (modified from b2BroadPhase::InRange)
+        b2Vec2 d = b2Max($self->lowerBound - aabb2.upperBound, aabb2.lowerBound - $self->upperBound);
+        return b2Max(d.x, d.y) < 0.0f;
+    }
+
+}
+

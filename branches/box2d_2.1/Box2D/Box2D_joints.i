@@ -272,133 +272,84 @@ public:
 %rename(__SetMaxForce) b2FrictionJoint::SetMaxForce;
 
 /**** Extend all of the joint definitions to allow kwargs ****/
-%extend b2JointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2JointDef """
-            _Box2D.b2JointDef_swiginit(self,_Box2D.new_b2JointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2JointDef::b2JointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2JointDef """
+        _Box2D.b2JointDef_swiginit(self,_Box2D.new_b2JointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2RevoluteJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2RevoluteJointDef """
-            _Box2D.b2RevoluteJointDef_swiginit(self,_Box2D.new_b2RevoluteJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2RevoluteJointDef::b2RevoluteJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2RevoluteJointDef """
+        _Box2D.b2RevoluteJointDef_swiginit(self,_Box2D.new_b2RevoluteJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2PrismaticJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2PrismaticJointDef """
-            _Box2D.b2PrismaticJointDef_swiginit(self,_Box2D.new_b2PrismaticJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2PrismaticJointDef::b2PrismaticJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2PrismaticJointDef """
+        _Box2D.b2PrismaticJointDef_swiginit(self,_Box2D.new_b2PrismaticJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2DistanceJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2DistanceJointDef """
-            _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2DistanceJointDef::b2DistanceJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2DistanceJointDef """
+        _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2PulleyJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2PulleyJointDef """
-            _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2PulleyJointDef::b2PulleyJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2PulleyJointDef """
+        _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2MouseJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2MouseJointDef """
-            _Box2D.b2MouseJointDef_swiginit(self,_Box2D.new_b2MouseJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2MouseJointDef::b2MouseJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2MouseJointDef """
+        _Box2D.b2MouseJointDef_swiginit(self,_Box2D.new_b2MouseJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2GearJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2GearJointDef """
-            _Box2D.b2GearJointDef_swiginit(self,_Box2D.new_b2GearJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2GearJointDef::b2GearJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2GearJointDef """
+        _Box2D.b2GearJointDef_swiginit(self,_Box2D.new_b2GearJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2LineJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2LineJointDef """
-            _Box2D.b2LineJointDef_swiginit(self,_Box2D.new_b2LineJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2LineJointDef::b2LineJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2LineJointDef """
+        _Box2D.b2LineJointDef_swiginit(self,_Box2D.new_b2LineJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2WeldJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2WeldJointDef """
-            _Box2D.b2WeldJointDef_swiginit(self,_Box2D.new_b2WeldJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2WeldJointDef::b2WeldJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2WeldJointDef """
+        _Box2D.b2WeldJointDef_swiginit(self,_Box2D.new_b2WeldJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
-
-%extend b2FrictionJointDef {
-public:
-    %pythoncode %{
-
-        def __init__(self, **kwargs): 
-            """__init__(self, **kwargs) -> b2FrictionJointDef """
-            _Box2D.b2FrictionJointDef_swiginit(self,_Box2D.new_b2FrictionJointDef())
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    %}
+%feature("shadow") b2FrictionJointDef::b2FrictionJointDef() {
+    def __init__(self, **kwargs): 
+        """__init__(self, **kwargs) -> b2FrictionJointDef """
+        _Box2D.b2FrictionJointDef_swiginit(self,_Box2D.new_b2FrictionJointDef())
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 }
 
 /* -- End joint definitions -- */
