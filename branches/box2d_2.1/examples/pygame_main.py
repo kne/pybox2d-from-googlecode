@@ -358,13 +358,14 @@ class fwGUI(gui.Table):
             self.form['singleStep'].value = False
 
 class QueryCallback(b2QueryCallback):
-    def __init__(self): 
+    def __init__(self, p): 
         super(QueryCallback, self).__init__()
-        self.point = None
+        self.point = p
         self.fixture = None
 
     def ReportFixture(self, fixture):
         body = fixture.body
+        print 'callback', body.type, b2_dynamicBody
         if body.type == b2_dynamicBody:
             inside=fixture.TestPoint(self.point)
             if inside:
@@ -466,6 +467,7 @@ class Framework(object):
         self.gui_app.init(container)
 
         self.viewCenter = (0,10.0*20.0)
+        self.groundbody = self.world.CreateBody(b2BodyDef())
 
     def setCenter(self, value):
         """
@@ -625,17 +627,17 @@ class Framework(object):
         self.destroyList = []
 
         # If the bomb is frozen, get rid of it.
-        if self.bomb and self.bomb.IsFrozen():
+        if self.bomb and not self.bomb.awake:
             self.world.DestroyBody(self.bomb)
             self.bomb = None
 
         # Take care of additional drawing (stats, fps, mouse joint, slingshot bomb, contact points)
         if settings.drawStats:
             self.DrawStringCR("proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
-                self.world.GetProxyCount(), b2_maxProxies, self.world.GetPairCount(), b2_maxPairs) )
+                self.world.proxyCount, b2_maxProxies, self.world.pairCount, b2_maxPairs) )
 
             self.DrawStringCR("bodies/contacts/joints = %d/%d/%d" %
-                (self.world.GetBodyCount(), self.world.GetContactCount(), self.world.GetJointCount()))
+                (self.world.bodyCount, self.world.contactCount, self.world.jointCount))
 
             self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
@@ -647,18 +649,17 @@ class Framework(object):
         
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
-            body = self.mouseJoint.GetBody2()
-            p1 = body.GetWorldPoint(self.mouseJoint.localAnchor)
+            p1 = self.mouseJoint.anchorB
             p2 = self.mouseJoint.target
 
-            self.debugDraw.DrawPoint(p1, settings.pointSize, (0,1.0,0))
-            self.debugDraw.DrawPoint(p2, settings.pointSize, (0,1.0,0))
-            self.debugDraw.DrawSegment(p1, p2, (0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(p1, settings.pointSize, b2Color(0,1.0,0))
+            self.debugDraw.DrawPoint(p2, settings.pointSize, b2Color(0,1.0,0))
+            self.debugDraw.DrawSegment(p1, p2, b2Color(0.8,0.8,0.8))
 
         # Draw the slingshot bomb
         if self.bombSpawning:
-            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, (0,0,1.0))
-            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, (0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, b2Color(0,0,1.0))
+            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, b2Color(0.8,0.8,0.8))
 
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
@@ -667,11 +668,11 @@ class Framework(object):
 
             for point in self.points:
                 if point.state == fwContactTypes.contactAdded:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.95, 0.3))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.95, 0.3))
                 elif point.state == fwContactTypes.contactPersisted:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.3, 0.3, 0.95))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.3, 0.95))
                 elif point.state == fwContactTypes.contactRemoved:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, (0.95, 0.3, 0.3))
+                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.95,0.3, 0.3))
                 #else: # elif point.state == fwContactTypes.contactPreSolve:
                 #    pass
 
@@ -722,21 +723,21 @@ class Framework(object):
         aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
 
         # Query the world for overlapping shapes.
-        body = None
-
-        query = QueryCallback()
+        query = QueryCallback(p)
+        print aabb.lowerBound, aabb.upperBound
         self.world.QueryAABB(query, aabb)
         
         if query.fixture:
             body = query.fixture.body
             # A body was selected, create the mouse joint
-            md = b2MouseJointDef()
-            md.body1   = self.world.GetGroundBody()
-            md.body2   = body
-            md.target  = p
-            md.maxForce= 1000.0 * body.GetMass()
-            self.mouseJoint = self.world.CreateJoint(md).getAsType()
-            body.WakeUp()
+            md = b2MouseJointDef(
+                    bodyA=self.groundbody,
+                    bodyB=body, 
+                    target=p,
+                    maxForce=1000.0*body.mass)
+
+            self.mouseJoint = self.world.CreateJoint(md)
+            body.awake = True
 
     def MouseUp(self, p):
         """
@@ -755,7 +756,7 @@ class Framework(object):
         """
         self.mouseWorld = p
         if self.mouseJoint:
-            self.mouseJoint.SetTarget(p)
+            self.mouseJoint.target = p
 
     def SpawnBomb(self, worldPt):
         """
@@ -789,28 +790,20 @@ class Framework(object):
             self.world.DestroyBody(self.bomb)
             self.bomb = None
 
-        bd = b2BodyDef()
-        bd.allowSleep = True
-        bd.position = position
-        bd.isBullet = True
-        self.bomb = self.world.CreateBody(bd)
-        self.bomb.SetLinearVelocity(velocity)
-
-        sd = b2CircleDef()
-        sd.radius = 0.3
-        sd.density = 20.0
-        sd.restitution = 0.1
-
-        minV = position - (0.3,0.3)
-        maxV = position + (0.3,0.3)
-
-        aabb = b2AABB()
-        aabb.lowerBound = minV
-        aabb.upperBound = maxV
-
-        if self.world.InRange(aabb):
-            self.bomb.CreateFixture(sd)
-            self.bomb.SetMassFromShapes()
+        self.bomb = self.world.CreateBody(
+                    b2BodyDef(
+                        allowSleep=True, 
+                        position=position, 
+                        linearVelocity=velocity,
+                        type=b2_dynamicBody,
+                        fixtures=[
+                            b2FixtureDef(
+                                shape=b2CircleShape(radius=0.3), 
+                                density=20, 
+                                restitution=0.1 )
+                            ]
+                        )
+                    )
 
     def LaunchRandomBomb(self):
         """
@@ -929,3 +922,5 @@ def main(test_class):
 if __name__=="__main__":
     from test_empty import Empty
     main(Empty)
+
+#s/\.Get\(.\)\(.\{-\}\)()/.\L\1\l\2/g

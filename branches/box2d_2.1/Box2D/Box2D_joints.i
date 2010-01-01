@@ -38,6 +38,8 @@ public:
     bodyB = property(__GetBodyB, None)
     type = property(__GetType, None)
     active = property(__IsActive, None)
+    anchorB = property(__GetAnchorB, None)
+    anchorA = property(__GetAnchorA, None)
 
     %}
 
@@ -65,8 +67,6 @@ public:
         limitEnabled = property(__IsLimitEnabled, __EnableLimit)
 
         # Read-only
-        anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
-        anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
         angle = property(__GetJointAngle, None)
         motorTorque = property(__GetMotorTorque, None)
         speed = property(__GetJointSpeed, None)
@@ -106,8 +106,6 @@ public:
 
         # Read-only
         motorForce = property(__GetMotorForce, None)
-        anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
-        anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
         speed = property(__GetJointSpeed, None)
         translation = property(__GetJointTranslation, None)
 
@@ -119,8 +117,6 @@ public:
 %rename(__GetMotorSpeed) b2LineJoint::GetMotorSpeed;
 %rename(__GetMotorForce) b2LineJoint::GetMotorForce;
 %rename(__GetMaxMotorForce) b2LineJoint::GetMaxMotorForce;
-%rename(__GetAnchorB) b2LineJoint::GetAnchorB;
-%rename(__GetAnchorA) b2LineJoint::GetAnchorA;
 %rename(__GetUpperLimit) b2LineJoint::GetUpperLimit;
 %rename(__GetJointSpeed) b2LineJoint::GetJointSpeed;
 %rename(__GetJointTranslation) b2LineJoint::GetJointTranslation;
@@ -148,8 +144,6 @@ public:
         # Read-only
         motorForce = property(__GetMotorForce, None)
         translation = property(__GetJointTranslation, None)
-        anchorA = property(lambda self: self._b2Joint__GetAnchorA(), None)
-        anchorB = property(lambda self: self._b2Joint__GetAnchorB(), None)
         speed = property(__GetJointSpeed, None)
 
     %}
@@ -179,10 +173,6 @@ public:
         frequency = property(__GetFrequency, __SetFrequency)
         dampingRatio = property(__GetDampingRatio, __SetDampingRatio)
 
-        # Read-only
-        anchorA = property(lambda self: self._b2Joint__AnchorA(), None)
-        anchorB = property(lambda self: self._b2Joint__AnchorB(), None)
-
     %}
 }
 
@@ -201,8 +191,6 @@ public:
         # Read-only
         groundAnchorB = property(__GetGroundAnchorB, None)
         groundAnchorA = property(__GetGroundAnchorA, None)
-        anchorB = property(lambda self: self._b2Joint__AnchorB(), None)
-        anchorA = property(lambda self: self._b2Joint__AnchorA(), None)
         length2 = property(__GetLength2, None)
         length1 = property(__GetLength1, None)
         ratio = property(__GetRatio, None)

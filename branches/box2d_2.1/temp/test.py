@@ -1,5 +1,5 @@
-classname = "b2AABB"
-gets = "GetCenter GetExtents IsValid".split(" ")
+classname = "b2DebugDraw"
+gets = "GetFlags SetFlags ClearFlags AppendFlags".split(" ")
 sets = "".split(" ")
 kwargs = True
 
