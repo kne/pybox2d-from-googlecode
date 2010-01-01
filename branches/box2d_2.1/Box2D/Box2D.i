@@ -24,6 +24,8 @@
 
 %module(directors="1") Box2D
 %{
+    /* To disable assertions->exceptions, comment out the two lines that define
+        USE_EXCEPTIONS */
     #define USE_EXCEPTIONS 1
     #include "Box2D/Box2D.h"
 //    float32 b2LineJoint::GetMaxMotorForce() const { return 0.0f; }
@@ -36,8 +38,10 @@
 */
 
 #ifdef SWIGPYTHON
+    #define USE_EXCEPTIONS 1
     #ifdef USE_EXCEPTIONS
-        // See Common/b2Settings.h also
+        /* See Common/b2Settings.h also. It defines b2Assert to instead throw
+        an exception if USE_EXCEPTIONS is defined. */
         %include "exception.i"
 
         %exception {
@@ -46,6 +50,26 @@
             } catch(b2AssertException) {
                 // error already set, pass it on to python
             }
+        }
+
+        /* Director-exceptions are a result of callbacks that happen as a result to
+           the physics step or debug draw, usually. So, catch those errors and report
+           them back to Python. */
+        %exception b2World::Step {
+            try { $action }
+            catch (Swig::DirectorException) { SWIG_fail; }
+        }
+        %exception b2World::DrawDebugData {
+            try { $action }
+            catch (Swig::DirectorException) { SWIG_fail; }
+        }
+        %exception b2World::QueryAABB {
+            try { $action }
+            catch (Swig::DirectorException) { SWIG_fail; }
+        }
+        %exception b2World::RayCast {
+            try { $action }
+            catch (Swig::DirectorException) { SWIG_fail; }
         }
     #endif
 
@@ -79,16 +103,11 @@
     %feature("director") b2ContactFilter;
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
-
-    /* Director-exceptions are a result of callbacks that happen as a result to
-       the physics step, usually. So, catch those errors and report them back to Python. */
-    %exception b2World::Step {
-        try { $action }
-        catch (Swig::DirectorException) { SWIG_fail; }
-    }
+    %feature("director") b2QueryCallback;
+    %feature("director") b2RaycastCallback;
 
     /* ---- includes ---- */
-    // The order of these is important. 
+    /* The order of these is important. */
     %include "Box2D/Box2D_doxygen.i"
     %include "Box2D/Box2D_printing.i"
     %include "Box2D/Box2D_inline.i"
@@ -106,7 +125,26 @@
     public:
         %pythoncode %{
         __iter__ = lambda self: iter((self.r, self.g, self.b)) 
+        def __SetBytes(self, value):
+            if len(value) != 3:
+                raise ValueError('Expected length 3 list')
+            self.r, self.g, self.b = value[0]/255, value[1]/255, value[2]/255
+        def __SetTuple(self, value):
+            if len(value) != 3:
+                raise ValueError('Expected length 3 list')
+            self.r, self.g, self.b = value[0], value[1], value[2]
+
+        list  = property(lambda self: list(self), __SetTuple)
+        bytes = property(lambda self: [int(self.r*255), int(self.g*255), int(self.b*255)], __SetBytes)
          %}
+
+        b2Color __div__(float32 a) {
+            return b2Color($self->r / a, $self->g / a, $self->b / a);
+        }
+        b2Color __mul__(float32 a) {
+            return b2Color($self->r * a, $self->g * a, $self->b * a);
+        }
+         
     }
 
     /**** Contact ****/

@@ -70,6 +70,9 @@ public:
                     elif isinstance(fixture, b2FixtureDef):
                         # create a fixture from a b2FixtureDef
                         body.CreateFixture(fixture)
+                    elif isinstance(fixture, b2Shape):
+                        # create a fixture from a b2Shape, assuming density of 0.0
+                        body.CreateFixture(fixture, 0.0)
                     else:
                         raise ValueError('Unexpected element in fixture list: %s (type %s)' % (fixture, type(fixture)))
             return body
@@ -87,45 +90,47 @@ public:
         # The logic behind these functions is that they increase the refcount
         # of the listeners as you set them, so it is no longer necessary to keep
         # a copy on your own. Upon destruction of the object, it should be cleared
-        # also clearing the refcount of the function. TODO: test this
-        def __SetDestructionListener(self, fcn):
-            self.__listeners['destruction']=fcn
-            self.__SetDestructionListener_internal(fcn)
+        # also clearing the refcount of the function.
+        # Now using it also to buffer previously write-only values in the shadowed
+        # class to make them read-write.
+        # TODO: test this
+        def __GetData(self, name):
+            if name in self.__data.keys():
+                return self.__data[name]
+            else:
+                return None
+        def __SetData(self, name, value, fcn):
+            self.__data[name] = value
+            fcn(value)
 
-        def __SetContactListener(self, fcn):
-            self.__listeners['contact']=fcn
-            self.__SetContactListener_internal(fcn)
-
-        def __SetContactFilter(self, fcn):
-            self.__listeners['contactfilter']=fcn
-            self.__SetContactFilter_internal(fcn)
-
-        def __SetDebugDraw(self, fcn):
-            self.__listeners['debugdraw']=fcn
-            self.__SetDebugDraw_internal(fcn)
-        
         # Read-write properties
         gravity   = property(__GetGravity   , __SetGravity)
-        __listeners = {} # holds the listeners so they can be properly destroyed
+        __data = {} # holds the listeners so they can be properly destroyed, and buffer other data
+        destructionListener = property(lambda self: self.__GetData('destruction'), 
+                                            lambda self, fcn: self.__SetData('destruction', fcn, self.__SetDestructionListener_internal))
+        contactListener     = property(lambda self: self.__GetData('contact'), 
+                                            lambda self, fcn: self.__SetData('contact', fcn, self.__SetContactListener_internal))
+        contactFilter       = property(lambda self: self.__GetData('contactfilter'),
+                                            lambda self, fcn: self.__SetData('contactfilter', fcn, self.__SetContactFilter_internal))
+        debugDraw           = property(lambda self: self.__GetData('debugdraw'),
+                                            lambda self, fcn: self.__SetData('debugdraw', fcn, self.__SetDebugDraw_internal))
+        continuousPhysics = property(lambda self: self.__GetData('continuousphysics'), 
+                                lambda self, fcn: self.__SetData('continuousphysics', fcn, self.__SetContinuousPhysics_internal))
+        warmStarting = property(lambda self: self.__GetData('warmstarting'), 
+                                lambda self, fcn: self.__SetData('warmstarting', fcn, self.__SetWarmStarting_internal))
 
         # Read-only 
         contactCount  = property(__GetContactCount, None)
         bodyCount     = property(__GetBodyCount, None)
         proxyCount    = property(__GetProxyCount, None)
-        joints    = property(lambda self: [joint.downcast() for joint in _list_from_linked_list(self.__GetJointList_internal())], None)
+        joints    = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
         bodies    = property(lambda self: _list_from_linked_list(self.__GetBodyList_internal()), None)
         contacts  = property(lambda self: _list_from_linked_list(self.__GetContactList_internal()), None)
-
-        # Write-only
-        destructionListener = property(None, __SetDestructionListener)
-        contactListener     = property(None, __SetContactListener)
-        contactFilter       = property(None, __SetContactFilter)
-        debugDraw           = property(None, __SetDebugDraw)
+        locked    = property(__IsLocked, None)
 
         # other functions:
         # DestroyBody, DestroyJoint
-        # Step, ClearForces, DrawDebugData, QueryAABB, RayCast,
-        # IsLocked
+        # Step, ClearForces, DrawDebugData, QueryAABB, RayCast
     %}
 }
 
@@ -141,4 +146,7 @@ public:
 %rename (__GetContactCount) b2World::GetContactCount;
 %rename (__GetProxyCount) b2World::GetProxyCount;
 %rename (__GetBodyCount) b2World::GetBodyCount;
+%rename (__IsLocked) b2World::IsLocked;
+%rename (__SetContinuousPhysics_internal) b2World::SetContinuousPhysics;
+%rename (__SetWarmStarting_internal) b2World::SetWarmStarting;
 

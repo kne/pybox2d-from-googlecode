@@ -8,11 +8,17 @@ class testBasic (unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_vertices(self):
-        def dotest(v):
-            body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
-                            fixtures=[ (b2PolygonShape(vertices=v), 1.0) ]))
+    def dotest(self, world, v):
+        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,0),
+                        fixtures=[ (b2PolygonShape(vertices=v), 1.0) ]))
+        for v1, v2 in zip(v, body.fixtures[0].shape.vertices):
+            if v1 != v2:
+                raise Exception('Vertices before and after creation unequal. Before=%s After=%s'
+                        % (v, body.fixtures[0].shape.vertices))
 
+    def test_vertices(self):
+
+        body = None
         self.cont_list=cl()
         world = b2World(gravity=(0,-10), doSleep=True, contactListener=self.cont_list)
 
@@ -25,31 +31,38 @@ class testBasic (unittest.TestCase):
         except ValueError:
             pass # good
         else:
-            raise Exception("Should have failed with ValueError")
-         
+            raise Exception("Should have failed with ValueError / length 1")
+
         body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
                         fixtures=[ (b2PolygonShape(), 1.0) ]))
-        dotest([])
-        dotest( [(0,1),(1,1),(-1,1)] )
-        dotest( [b2Vec2(0,1),(1,1),b2Vec2(-1,1)] )
+        self.dotest(world, [])
+        self.dotest(world, [(0,1),(1,1),(-1,1)] )
+        self.dotest(world, [b2Vec2(0,1),(1,1),b2Vec2(-1,1)] )
         try:
-            dotest( [(0,1,5),(1,1)] )
+            self.dotest(world, [(0,1,5),(1,1)] )
         except ValueError,s:
             pass # good
         else:
-            raise Exception("Should have failed with ValueError")
+            raise Exception("Should have failed with ValueError / length 3")
 
-        dotest( [(0,1)]*b2_maxPolygonVertices )
+        self.dotest(world, [(0,1)]*b2_maxPolygonVertices )
 
         try:
-            dotest( [(0,1)]*(b2_maxPolygonVertices+1) )
+            self.dotest(world, [(0,1)]*(b2_maxPolygonVertices+1) )
         except ValueError,s:
             pass # good
         else:
-            raise Exception("Should have failed with ValueError")
+            raise Exception("Should have failed with ValueError / max+1")
 
-        shape=b2PolygonShape(vertices=[(0,1),(1,1),(-1,1)] )
-        shape=b2PolygonShape(vertices=[(0,0), (0,0)] )
+        shape=b2PolygonShape(vertices=[(0,1),(0,-1),(-1,0)] )
+        try:
+            shape.valid
+        except ValueError,s:
+            pass # good, not convex
+        else:
+            raise Exception("Should have failed with ValueError / checkpolygon")
+
+        shape=b2PolygonShape(vertices=[(0,0), (0,1), (-1,0)] )
         print shape.valid
 
 if __name__ == '__main__':

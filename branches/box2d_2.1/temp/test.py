@@ -1,6 +1,6 @@
-classname = "b2Contact"
-gets = "IsContinuous IsEnabled IsSensor IsTouching GetNext GetManifold GetFixtureB GetFixtureA".split(" ")
-sets = "SetEnabled SetSensor".split(" ")
+classname = "b2Transform"
+gets = "GetAngle".split(" ")
+sets = "".split(" ")
 
 # remove duplicates
 gets = list(set(gets))

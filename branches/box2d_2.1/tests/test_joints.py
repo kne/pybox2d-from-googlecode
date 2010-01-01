@@ -353,6 +353,14 @@ class testBasic (unittest.TestCase):
     def test_friction(self):
         self.do_joint_test("friction", {} )
 
+    def test_emptyjoint(self):
+        try: 
+            self.world.CreateJoint( b2.b2RevoluteJointDef() )
+        except ValueError:
+            pass # good
+        else:
+            raise Exception('Empty joint should have raised an exception')
+        
     def test_gear(self):
         # creates 2 revolute joints and then joins them, so it's done separately
         ground=self.world.CreateBody( b2.b2BodyDef() )

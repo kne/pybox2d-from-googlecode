@@ -45,8 +45,8 @@ public:
 
     %pythoncode %{
     __iter__ = lambda self: iter( (self.x, self.y) )
-    __eq__ = lambda self, other: (self.x == other.x and self.y == other.y)
-    __ne__ = lambda self,other: (self.x != other.x or self.y != other.y)
+    __eq__ = lambda self, other: b2equ(self, other)
+    __ne__ = lambda self,other: not b2equ(self, other)
     def __repr__(self):
         return "b2Vec2(%g,%g)" % (self.x, self.y)
     def copy(self):
@@ -70,17 +70,23 @@ public:
     def __idiv__(self, a):
         self.div_float(a)
         return self
-    def dot(self, v):
-        """
-        Dot product with v (list/tuple or b2Vec2)
-        """
-        if isinstance(v, (list, tuple)):
-            return self.x*v[0] + self.y*v[1]
-        else:
-            return self.x*v.x + self.y*v.y
     def __set(self, x, y):
         self.x = x
         self.y = y
+    def __getitem__(self, i): 
+        if i==0:
+            return self.x
+        elif i==1:
+            return self.y
+        else:
+            raise IndexError
+    def __setitem__(self, i, value): 
+        if i==0:
+            self.x=value
+        elif i==1:
+            self.y=value
+        else:
+            raise IndexError
 
     tuple = property(lambda self: tuple(self.x, self.y), lambda self, value: self.__set(*value))
     length = property(__Length, None)
@@ -88,7 +94,10 @@ public:
     valid = property(__IsValid, None)
 
     %}
-    b2Vec2 __div__(float32 a) { //convenience function
+    float32 dot(b2Vec2& other) {
+        return $self->x * other.x + $self->y * other.y;
+    }
+    b2Vec2 __div__(float32 a) {
         return b2Vec2($self->x / a, $self->y / a);
     }
     b2Vec2 __mul__(float32 a) {
@@ -166,6 +175,24 @@ public:
         self.x = x
         self.y = y
         self.z = z
+    def __getitem__(self, i): 
+        if i==0:
+            return self.x
+        elif i==1:
+            return self.y
+        elif i==2:
+            return self.z
+        else:
+            raise IndexError
+    def __setitem__(self, i, value): 
+        if i==0:
+            self.x=value
+        elif i==1:
+            self.y=value
+        elif i==2:
+            self.z=value
+        else:
+            raise IndexError
 
     tuple = property(lambda self: tuple(self.x, self.y, self.z), lambda self, value: self.__set(*value))
     length = property(_Box2D.b2Vec3___Length, None)
@@ -208,3 +235,45 @@ public:
         $self->z /= a;
     }
 }
+
+/**** Mat22 ****/
+%extend b2Mat22 {
+public:
+    %pythoncode %{
+        # Read-only
+        inverse = property(__GetInverse, None)
+        angle = property(__GetAngle, None)
+
+    %}
+    b2Vec2 __mul__(b2Vec2* other) {
+        return b2Vec2($self->col1.x * other->x + $self->col2.x * other->y, $self->col1.y * other->x + $self->col2.y * other->y);
+    }
+    b2Mat22 __mul__(b2Mat22* other) {
+        return b2Mat22(b2Mul(*($self), other->col1), b2Mul(*($self), other->col2));
+    }
+    b2Mat22 __add__(b2Mat22* other) {
+        return b2Mat22($self->col1 + other->col1, $self->col2 + other->col2);
+    }
+}
+
+%rename(__GetInverse) b2Mat22::GetInverse;
+%rename(__GetAngle) b2Mat22::GetAngle;
+%rename(set) b2Mat22::Set;
+
+/**** Transform ****/
+%extend b2Transform {
+public:
+    %pythoncode %{
+        # Read-only
+        angle = property(__GetAngle, None)
+
+    %}
+    b2Vec2 __mul__(b2Vec2& v) {
+        float32 x = $self->position.x + $self->R.col1.x * v.x + $self->R.col2.x * v.y;
+        float32 y = $self->position.y + $self->R.col1.y * v.x + $self->R.col2.y * v.y;
+
+        return b2Vec2(x, y);
+    }
+}
+
+%rename(__GetAngle) b2Transform::GetAngle;

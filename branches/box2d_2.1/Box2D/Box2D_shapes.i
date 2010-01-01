@@ -110,7 +110,7 @@ public:
                 else:
                     raise ValueError('Expected tuple, list, or b2Vec2, got %s' % type(value))
                 self.vertexCount=i+1 # follow along in case of an exception to indicate valid number set
-        self.__set_vertices_internal() # calculates normals, centroid, etc.
+            self.__set_vertices_internal() # calculates normals, centroid, etc.
 
     def __iter__(self):
         """
@@ -129,19 +129,19 @@ public:
     edge = property(None, lambda self, value: self.SetAsEdge(*value), doc="Property replacement for running SetAsEdge (Write-only)")
     %}
     const b2Vec2* __get_vertex(uint16 vnum) {
-        if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
+        if (vnum >= b2_maxPolygonVertices) return NULL;
         return &( $self->m_vertices[vnum] );
     }
     const b2Vec2* __get_normal(uint16 vnum) {
-        if (vnum >= b2_maxPolygonVertices || vnum >= self->GetVertexCount()) return NULL;
+        if (vnum >= b2_maxPolygonVertices) return NULL;
         return &( $self->m_normals[vnum] );
     }
     void __set_vertex(uint16 vnum, b2Vec2& value) {
-        if (vnum < $self->m_vertexCount)
+        if (vnum < b2_maxPolygonVertices)
             $self->m_vertices[vnum].Set(value.x, value.y);
     }
     void __set_vertex(uint16 vnum, float32 x, float32 y) {
-        if (vnum < $self->m_vertexCount)
+        if (vnum < b2_maxPolygonVertices)
             $self->m_vertices[vnum].Set(x, y);
     }
     void __set_vertices_internal() {

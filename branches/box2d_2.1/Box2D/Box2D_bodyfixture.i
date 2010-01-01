@@ -50,6 +50,13 @@ public:
 %extend b2Fixture {
 public:
     long __hash__() { return (long)self; }
+    /* This destructor is ignored by SWIG, but it stops the erroneous
+    memory leak error. Will have to test with older versions of SWIG
+    to ensure this is ok (tested with 1.3.40)
+    */
+    ~b2Fixture() {
+    }
+
     %pythoncode %{
         __eq__ = b2FixtureCompare
         __ne__ = lambda self,other: not b2FixtureCompare(self,other)
@@ -179,3 +186,5 @@ public:
 %rename(__SetAwake) b2Body::SetAwake;
 %rename(__SetLinearDamping) b2Body::SetLinearDamping;
 %rename(__SetType) b2Body::SetType;
+
+//
