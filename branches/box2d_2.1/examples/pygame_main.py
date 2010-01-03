@@ -39,6 +39,7 @@ Mouse:
 
 You can easily add your own tests based on test_empty.
 """
+from __future__ import print_function
 import pygame
 from Box2D import *
 from pygame.locals import *
@@ -365,7 +366,7 @@ class QueryCallback(b2QueryCallback):
 
     def ReportFixture(self, fixture):
         body = fixture.body
-        print 'callback', body.type, b2_dynamicBody
+        print('callback', body.type, b2_dynamicBody)
         if body.type == b2_dynamicBody:
             inside=fixture.TestPoint(self.point)
             if inside:
@@ -455,8 +456,8 @@ class Framework(object):
             try:
                 self.font = pygame.font.Font("freesansbold.ttf", 15)
             except IOError:
-                print "Unable to load default font or 'freesansbold.ttf'"
-                print "Disabling text drawing."
+                print("Unable to load default font or 'freesansbold.ttf'")
+                print("Disabling text drawing.")
                 self.DrawString = lambda x,y,z: 0
 
         # GUI Initialization
@@ -724,7 +725,6 @@ class Framework(object):
 
         # Query the world for overlapping shapes.
         query = QueryCallback(p)
-        print aabb.lowerBound, aabb.upperBound
         self.world.QueryAABB(query, aabb)
         
         if query.fixture:
@@ -913,7 +913,7 @@ def main(test_class):
     """
     Loads the test class and executes it.
     """
-    print "Loading %s..." % test_class.name
+    print("Loading %s..." % test_class.name)
     test = test_class()
     if fwSettings.onlyInit:
         return

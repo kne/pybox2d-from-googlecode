@@ -76,9 +76,9 @@
     #pragma SWIG nowarn=314
 
     /* ---- classes to ignore ---- */
-    //Most of these are just internal structures, so there is no need to have them
-    // accessible by Python. You can safely comment out any %ignore if you for some reason
-    // do need them. Shrinks the library by a bit, also.
+    /*Most of these are just internal structures, so there is no need to have them
+      accessible by Python. You can safely comment out any %ignore if you for some reason
+      do need them. Ignoring shrinks the library by a small amount. */
     %ignore b2BroadPhase;
     %ignore b2ContactManager;
     %ignore b2Chunk;
@@ -98,7 +98,7 @@
     /* Autodoc puts the basic docstrings for each function */
     %feature("autodoc", "1");
 
-    /* Add callback support for the following classes: */
+    /* Add callback support for the following classes */
     %feature("director") b2ContactListener;
     %feature("director") b2ContactFilter;
     %feature("director") b2DestructionListener;
@@ -108,16 +108,42 @@
 
     /* ---- includes ---- */
     /* The order of these is important. */
+
+    /* Doxygen-generated docstrings. Can safely be commented out. */
     %include "Box2D/Box2D_doxygen.i"
+
+    /* __dir__ replacement. Can safely be commented out. */
+    %include "Box2D/Box2D_dir.i"
+
+    /* __repr__ replacement -- pretty printing. Can safely be commented out. */
     %include "Box2D/Box2D_printing.i"
+
+    /* Miscellaneous inline code. */
     %include "Box2D/Box2D_inline.i"
+
+    /* Miscellaneous extended classes (b2Color, b2Contact, etc.) */
     %include "Box2D/Box2D_misc.i"
+    
+    /* Typemaps that allow for tuples to be used in place of vectors, 
+        the removal of getAsType, etc. */
     %include "Box2D/Box2D_typemaps.i"
+
+    /* b2Vec2, b2Vec3, b2Mat22, b2Transform, b2AABB and related extensions. */
     %include "Box2D/Box2D_vectors.i"
+
+    /* Allows for userData to be used. Also modifies CreateBody/Joint. */
     %include "Box2D/Box2D_userdata.i"
+
+    /* b2World only. */
     %include "Box2D/Box2D_world.i"
+
+    /* b2Body, b2Fixture, and related definitions. */
     %include "Box2D/Box2D_bodyfixture.i"
+
+    /* b2Shape, b2CircleShape, b2PolygonShape. */
     %include "Box2D/Box2D_shapes.i"
+
+    /* All joints and definitions. Defines b2JointTypes dict. */
     %include "Box2D/Box2D_joints.i"
 
 #endif

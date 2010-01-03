@@ -18,33 +18,12 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-%feature("docstring") b2CheckPolygon "
-    Checks the Polygon definition to see if upon creation it will cause an assertion.
-    Raises ValueError if an assertion would be raised.
-
-    b2PolygonDef* poly     - the polygon definition
-    bool additional_checks - whether or not to run additional checks
-
-    Additional checking: usually only in DEBUG mode on the C++ code.
-
-    While shapes that pass this test can be created without assertions,
-    they will ultimately create unexpected behavior. It's recommended
-    to _not_ use any polygon that fails this test.
-";
-
-%feature("docstring") b2AABBOverlaps "Checks if two AABBs overlap, or if a point
-lies in an AABB
-
-b2AABBOverlaps(AABB1, [AABB2/point])
-";
-
 %typemap(out) bool b2CheckPolygon(b2PolygonShape*) {
     if (!$1) 
         SWIG_fail;
     else
         $result = SWIG_From_bool(static_cast< bool >($1));
 }
-
 
 %inline %{
     // Add support for == and != in Python for shapes, joints, and bodies.
@@ -236,3 +215,23 @@ def b2FixtureCompare(a, b):
     return __b2PythonFixturePointerEquals__(a, b)
 
 %}
+
+%feature("docstring") b2CheckPolygon "
+    Checks the Polygon definition to see if upon creation it will cause an assertion.
+    Raises ValueError if an assertion would be raised.
+
+    b2PolygonDef* poly     - the polygon definition
+    bool additional_checks - whether or not to run additional checks
+
+    Additional checking: usually only in DEBUG mode on the C++ code.
+
+    While shapes that pass this test can be created without assertions,
+    they will ultimately create unexpected behavior. It's recommended
+    to _not_ use any polygon that fails this test.
+";
+
+%feature("docstring") b2AABBOverlaps "Checks if two AABBs overlap, or if a point
+lies in an AABB
+
+b2AABBOverlaps(AABB1, [AABB2/point])
+";

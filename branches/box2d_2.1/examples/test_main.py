@@ -19,6 +19,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from __future__ import print_function
 from settings import fwSettings
 
 # Note that if you are making your own program and want it to be pyglet/pygame
@@ -32,10 +33,10 @@ if fwSettings.backend in known_backends:
 else:
     from sys import argv
 
-    print '''
+    print('''
 Please set a proper "backend".
 Either use the command line:
 > %s --backend pygame
 or edit the default settings in settings.py.
-    ''' % (argv[0])
+    ''' % (argv[0]))
     exit(0)

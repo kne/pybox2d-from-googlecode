@@ -106,7 +106,7 @@ public:
             fcn(value)
 
         # Read-write properties
-        gravity   = property(__GetGravity   , __SetGravity)
+        gravity   = property(__GetGravity, __SetGravity)
         __data = {} # holds the listeners so they can be properly destroyed, and buffer other data
         destructionListener = property(lambda self: self.__GetData('destruction'), 
                                             lambda self, fcn: self.__SetData('destruction', fcn, self.__SetDestructionListener_internal))

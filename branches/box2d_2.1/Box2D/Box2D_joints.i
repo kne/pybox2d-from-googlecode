@@ -25,12 +25,6 @@ public:
     %pythoncode %{
     __eq__ = b2JointCompare
     __ne__ = lambda self,other: not b2JointCompare(self,other)
-    def __setattr__(self, var, value):
-        if var in dir(self):
-            super(b2Joint, self).__setattr__(var, value)
-        else: 
-            raise TypeError("Shadow class has no property '%s'. %s Typo?" % (var, type(self)))
-    __delattr__ = __setattr__
 
     # Read-only
     next = property(__GetNext, None)
