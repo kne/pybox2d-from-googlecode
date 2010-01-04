@@ -124,6 +124,7 @@ public:
         # Read-only 
         contactCount  = property(__GetContactCount, None)
         bodyCount     = property(__GetBodyCount, None)
+        jointCount    = property(__GetJointCount, None)
         proxyCount    = property(__GetProxyCount, None)
         joints    = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
         bodies    = property(lambda self: _list_from_linked_list(self.__GetBodyList_internal()), None)
@@ -139,6 +140,7 @@ public:
 %rename (__GetGravity) b2World::GetGravity;
 %rename (__SetGravity) b2World::SetGravity;
 %rename (__GetJointList_internal) b2World::GetJointList;
+%rename (__GetJointCount) b2World::GetJointCount;
 %rename (__GetBodyList_internal) b2World::GetBodyList;
 %rename (__GetContactList_internal) b2World::GetContactList;
 %rename (__SetDestructionListener_internal) b2World::SetDestructionListener;

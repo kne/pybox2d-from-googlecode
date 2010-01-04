@@ -121,13 +121,16 @@
     /* Miscellaneous inline code. */
     %include "Box2D/Box2D_inline.i"
 
-    /* Miscellaneous extended classes (b2Color, b2Contact, etc.) */
+    /* Miscellaneous extended classes (b2Color) */
     %include "Box2D/Box2D_misc.i"
-    
+
     /* Typemaps that allow for tuples to be used in place of vectors, 
         the removal of getAsType, etc. */
     %include "Box2D/Box2D_typemaps.i"
 
+    /* Contact-related classes (b2Contact, b2Manifold, etc.) */
+    %include "Box2D/Box2D_contact.i"
+    
     /* b2Vec2, b2Vec3, b2Mat22, b2Transform, b2AABB and related extensions. */
     %include "Box2D/Box2D_vectors.i"
 

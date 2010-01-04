@@ -38,10 +38,8 @@ class fwSettings(object):
     drawAABBs=False
     drawOBBs=False
     drawPairs=False
-    drawContactPoints=False
-    drawContactNormals=False
-    drawContactForces=False
-    drawFrictionForces=False
+    drawContactPoints=True
+    drawContactNormals=True
     drawFPS=True
     drawMenu=True             # toggle by pressing F1
     drawCOMs=False            # Centers of mass

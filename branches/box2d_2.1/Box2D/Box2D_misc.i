@@ -46,33 +46,4 @@ public:
      
 }
 
-/**** Contact ****/
-%extend b2Contact {
-public:
-    %pythoncode %{
-        # Read-write properties
-        sensor = property(__IsSensor, __SetSensor)
-        enabled = property(__IsEnabled, __SetEnabled)
-
-        # Read-only
-        next = property(__GetNext, None)
-        touching = property(__IsTouching, None)
-        fixtureB = property(__GetFixtureB, None)
-        fixtureA = property(__GetFixtureA, None)
-        continuous = property(__IsContinuous, None)
-        manifold = property(__GetManifold, None)
-
-    %}
-}
-
-%rename(__GetNext) b2Contact::GetNext;
-%rename(__IsTouching) b2Contact::IsTouching;
-%rename(__IsSensor) b2Contact::IsSensor;
-%rename(__GetFixtureB) b2Contact::GetFixtureB;
-%rename(__GetFixtureA) b2Contact::GetFixtureA;
-%rename(__IsContinuous) b2Contact::IsContinuous;
-%rename(__GetManifold) b2Contact::GetManifold;
-%rename(__IsEnabled) b2Contact::IsEnabled;
-%rename(__SetEnabled) b2Contact::SetEnabled;
-%rename(__SetSensor) b2Contact::SetSensor;
 

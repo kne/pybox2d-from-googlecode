@@ -94,41 +94,6 @@ class fwContactPoint:
     id  = None
     state = 0
 
-class fwContactListener(b2ContactListener):
-    """
-    Handles all of the contact states passed in from 
-
-    """
-    test = None
-    def __init__(self):
-        super(fwContactListener, self).__init__()
-
-    def handleCall(self, state, point):
-        if not self.test: return
-
-        cp          = fwContactPoint()
-        cp.shape1   = point.shape1
-        cp.shape2   = point.shape2
-        cp.position = point.position.copy()
-        cp.normal   = point.normal.copy()
-        cp.id       = point.id
-        cp.state    = state
-        self.test.points.append(cp)
-
-    def Add(self, point):
-        self.handleCall(fwContactTypes.contactAdded, point)
-
-    def Persist(self, point):
-        self.handleCall(fwContactTypes.contactPersisted, point)
-
-    def Remove(self, point):
-        self.handleCall(fwContactTypes.contactRemoved, point)
-
-    def PreSolve(self, point, old_manifold):
-        pass # TODO
-        #self.handleCall(fwContactTypes.contactPreSolve, point)
-        #print point
-
 class fwDebugDraw(b2DebugDraw):
     """
     This debug draw class accepts callbacks from Box2D (which specifies what to draw)
@@ -366,17 +331,16 @@ class QueryCallback(b2QueryCallback):
 
     def ReportFixture(self, fixture):
         body = fixture.body
-        print('callback', body.type, b2_dynamicBody)
         if body.type == b2_dynamicBody:
             inside=fixture.TestPoint(self.point)
             if inside:
                 self.fixture=fixture
-                # We found the object, sto stop the query
+                # We found the object, so stop the query
                 return False
         # Continue the query
         return True
 
-class Framework(object):
+class Framework(b2ContactListener):
     """
     The main testbed framework.
     It handles basically everything:
@@ -390,7 +354,7 @@ class Framework(object):
     name = "None"
 
     # Box2D-related
-    points             = []
+    points             = None
     world              = None
     bomb               = None
     mouseJoint         = None
@@ -402,7 +366,6 @@ class Framework(object):
 
     # Box2D-callbacks
     destructionListener= None
-    contactListener    = None
     debugDraw          = None
 
     # Screen/rendering-related
@@ -420,20 +383,20 @@ class Framework(object):
     gui_table = None
 
     def __init__(self):
+        super(Framework, self).__init__()
+
         # Box2D Initialization
         gravity = (0.0, -10.0)
         doSleep = True
         self.world = b2World(gravity, doSleep)
 
         self.destructionListener = fwDestructionListener()
-        self.contactListener = fwContactListener()
         self.debugDraw = fwDebugDraw()
 
         self.destructionListener.test = self
-        self.contactListener.test = self
         
         self.world.destructionListener=self.destructionListener
-        self.world.contactListener=self.contactListener
+        self.world.contactListener=self
         self.world.debugDraw=self.debugDraw
 
         # Pygame Initialization
@@ -520,7 +483,7 @@ class Framework(object):
                     pass
                 elif event.button == 3: #right
                     self.rMouseDown = True
-                elif event.button ==4:
+                elif event.button == 4:
                     self.viewZoom *= 1.1
                 elif event.button == 5:
                     self.viewZoom /= 1.1
@@ -570,6 +533,10 @@ class Framework(object):
             pygame.display.flip()
             clock.tick(self.settings.hz)
             self.fps = clock.get_fps()
+
+        self.world.contactListener = None
+        self.world.destructionListener=None
+        self.world.debugDraw=None
 
     def Step(self, settings):
         """
@@ -634,11 +601,8 @@ class Framework(object):
 
         # Take care of additional drawing (stats, fps, mouse joint, slingshot bomb, contact points)
         if settings.drawStats:
-            self.DrawStringCR("proxies(max) = %d(%d), pairs(max) = %d(%d)" % (
-                self.world.proxyCount, b2_maxProxies, self.world.pairCount, b2_maxPairs) )
-
-            self.DrawStringCR("bodies/contacts/joints = %d/%d/%d" %
-                (self.world.bodyCount, self.world.contactCount, self.world.jointCount))
+            self.DrawStringCR("bodies=%d contacts=%d joints=%d proxies=%d" %
+                (self.world.bodyCount, self.world.contactCount, self.world.jointCount, self.world.proxyCount))
 
             self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
@@ -653,8 +617,8 @@ class Framework(object):
             p1 = self.mouseJoint.anchorB
             p2 = self.mouseJoint.target
 
-            self.debugDraw.DrawPoint(p1, settings.pointSize, b2Color(0,1.0,0))
-            self.debugDraw.DrawPoint(p2, settings.pointSize, b2Color(0,1.0,0))
+            self.debugDraw.DrawPoint(p1, settings.pointSize, b2Color(0,1,0))
+            self.debugDraw.DrawPoint(p2, settings.pointSize, b2Color(0,1,0))
             self.debugDraw.DrawSegment(p1, p2, b2Color(0.8,0.8,0.8))
 
         # Draw the slingshot bomb
@@ -668,19 +632,15 @@ class Framework(object):
             k_axisScale = 0.3
 
             for point in self.points:
-                if point.state == fwContactTypes.contactAdded:
+                if point.state == b2_addState:
                     self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.95, 0.3))
-                elif point.state == fwContactTypes.contactPersisted:
+                elif point.state == b2_persistState:
                     self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.3, 0.95))
-                elif point.state == fwContactTypes.contactRemoved:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.95,0.3, 0.3))
-                #else: # elif point.state == fwContactTypes.contactPreSolve:
-                #    pass
 
                 if settings.drawContactNormals:
                     p1 = point.position
                     p2 = p1 + k_axisScale * point.normal
-                    self.debugDraw.DrawSegment(p1, p2, (0.4, 0.9, 0.4))
+                    self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4))
 
     def _Keyboard_Event(self, key):
         """
@@ -882,8 +842,40 @@ class Framework(object):
     def __del__(self):
         pass
 
+    def PreSolve(self, contact, old_manifold):
+        manifold = contact.manifold
+        if manifold.pointCount == 0:
+            return
+
+        fixtureA = contact.fixtureA
+        fixtureB = contact.fixtureB
+
+        state1, state2 = b2GetPointStates(old_manifold, manifold)
+
+        if not state2:
+            return
+
+        worldManifold = contact.worldManifold
+        
+        for i, point in enumerate(state2):
+            self.points.append(
+                    b2ContactPoint(
+                        fixtureA = fixtureA,
+                        fixtureB = fixtureB,
+                        position = worldManifold.points[i],
+                        normal = worldManifold.normal,
+                        state = state2[i]
+                        ) 
+                    )
+
     # These can/should be implemented in the subclass: (Step() also if necessary)
     # See test_Empty.py for a simple example.
+    def BeginContact(self, contact):
+        pass
+    def EndContact(self, contact):
+        pass
+    def PostSolve(self, contact, impulse):
+        pass
 
     def ShapeDestroyed(self, shape):
         """

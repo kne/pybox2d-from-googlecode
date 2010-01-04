@@ -64,9 +64,9 @@ class ApplyForce (Framework):
                 )
      
         gravity = 10.0
-        fixture = b2FixtureDef(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3)
+        fixtures = [ b2FixtureDef(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3) ]
         for i in xrange(10):
-            body=self.world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,5+1.54*i), fixtures=[fixture]))
+            body=self.world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,5+1.54*i), fixtures=fixtures))
 
             # For a circle: I = 0.5 * m * r * r ==> r = sqrt(2 * I / m)
             r = sqrt(2.0 * body.inertia / body.mass)
