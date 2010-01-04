@@ -10,7 +10,7 @@ class testBasic (unittest.TestCase):
             world = Box2D.b2World(Box2D.b2Vec2(0.0, -10.0), True)
             world = Box2D.b2World((0.0, -10.0), True)
             world = Box2D.b2World([0.0, -10.0], False)
-        except Exception, s:
+        except Exception as s:
             self.fail("Failed to create world (%s)" % s)
 
     def test_helloworld(self):

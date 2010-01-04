@@ -84,7 +84,7 @@
 %extend b2Manifold {
 public:
     %pythoncode %{
-        def __setattr__(self, var, value): raise Exception("Type %s is immutable")
+        def __setattr__(self, var, value): raise Exception("Type %s is immutable" % self.__class__.__name__)
         __delattr__ = __setattr__
         def __GetPoints(self):
             return [self.__GetPoint(i) for i in range(self.pointCount)]
@@ -106,7 +106,7 @@ public:
 %extend b2WorldManifold {
 public:
     %pythoncode %{
-        def __setattr__(self, var, value): raise Exception("Type %s is immutable")
+        def __setattr__(self, var, value): raise Exception("Type %s is immutable" % self.__class__.__name__)
         __delattr__ = __setattr__
     %}
 
@@ -172,7 +172,7 @@ public:
     def __init__(self, **kwargs):
         """__init__(self, **kwargs) -> b2ContactPoint """
         _Box2D.b2ContactPoint_swiginit(self,_Box2D.new_b2ContactPoint())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 

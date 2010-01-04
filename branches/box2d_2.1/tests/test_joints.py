@@ -11,7 +11,7 @@ class testBasic (unittest.TestCase):
     def setUp(self):
         try:
             self.world = b2.b2World(b2.b2Vec2(0.0, -10.0), True)
-        except Exception, s:
+        except Exception as s:
             self.fail("Failed to create world (%s)" % s)
 
         try:
@@ -19,7 +19,7 @@ class testBasic (unittest.TestCase):
             self.dbody1.userData = "dbody1"
             self.dbody2 = self.create_body((0, 12))
             self.dbody2.userData = "dbody2"
-        except Exception, s:
+        except Exception as s:
             self.fail("Failed to create dynamic bodies (%s)" % s)
 
         try:
@@ -27,7 +27,7 @@ class testBasic (unittest.TestCase):
             self.sbody1.userData = "sbody1"
             self.sbody2 = self.create_body((1, 4), False)
             self.sbody2.userData = "sbody2"
-        except Exception, s:
+        except Exception as s:
             self.fail("Failed to create static bodies (%s)" % s)
 
     def create_body(self, position, dynamic=True):
@@ -299,32 +299,32 @@ class testBasic (unittest.TestCase):
         for bodyA, bodyB in itertools.permutations( ( self.sbody1, self.sbody2, self.dbody1, self.dbody2), 2 ):
             try:
                 dfn = create(body1=bodyA, body2=bodyB, **init_args)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 joint = self.world.CreateJoint(dfn)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s, joint creation (%s)" % (bodyA.userData, bodyB.userData, s))
                 
             try:
                 asserts(dfn, joint)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s, joint assertions (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 checks(dfn, joint)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s, joint checks (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 self.step_world(10)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s, joint simulation (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 self.world.DestroyJoint(joint)
-            except Exception, s:
+            except Exception as s:
                 self.fail("Failed on bodies %s and %s joint deletion (%s)" % (bodyA.userData, bodyB.userData, s))
 
 

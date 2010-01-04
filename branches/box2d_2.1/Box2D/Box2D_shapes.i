@@ -52,7 +52,7 @@ public:
             _Box2D.b2CircleShape_swiginit(self,_Box2D.new_b2CircleShape())
             return
         self.__init__()
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -74,7 +74,7 @@ public:
             _Box2D.b2PolygonShape_swiginit(self,_Box2D.new_b2PolygonShape())
             return
         self.__init__()
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -88,11 +88,11 @@ public:
     def __get_vertices(self):
         """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
         return [ (self.__get_vertex(i).x, self.__get_vertex(i).y )
-                         for i in xrange(0, self.vertexCount)]
+                         for i in range(0, self.vertexCount)]
     def __get_normals(self):
         """Returns all of the normals as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
         return [ (self.__get_normal(i).x, self.__get_normal(i).y )
-                         for i in xrange(0, self.vertexCount)]
+                         for i in range(0, self.vertexCount)]
     def __clear_vertices(self):
         self.vertexCount=0
         for i in range(0, b2_maxPolygonVertices):

@@ -47,7 +47,7 @@
         args=( kwargs['gravity'], kwargs['doSleep'] )
         _Box2D.b2World_swiginit(self,_Box2D.new_b2World(*args))
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 
 }
@@ -97,7 +97,7 @@ public:
         # class to make them read-write.
         # TODO: test this
         def __GetData(self, name):
-            if name in self.__data.keys():
+            if name in list(self.__data.keys()):
                 return self.__data[name]
             else:
                 return None

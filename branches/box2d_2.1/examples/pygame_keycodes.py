@@ -167,5 +167,5 @@ if __name__ == '__main__':
     for nm_val in [(key, locals.__dict__[key])
                    for key in dir(locals)
                    if key.startswith('K_')]:
-        print "%s = %s" % nm_val
+        print("%s = %s" % nm_val)
                         

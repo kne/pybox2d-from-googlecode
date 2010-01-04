@@ -258,7 +258,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2JointDef """
         _Box2D.b2JointDef_swiginit(self,_Box2D.new_b2JointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -266,7 +266,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2RevoluteJointDef """
         _Box2D.b2RevoluteJointDef_swiginit(self,_Box2D.new_b2RevoluteJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -274,7 +274,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2PrismaticJointDef """
         _Box2D.b2PrismaticJointDef_swiginit(self,_Box2D.new_b2PrismaticJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -282,7 +282,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2DistanceJointDef """
         _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -290,7 +290,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2PulleyJointDef """
         _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -298,7 +298,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2MouseJointDef """
         _Box2D.b2MouseJointDef_swiginit(self,_Box2D.new_b2MouseJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -306,7 +306,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2GearJointDef """
         _Box2D.b2GearJointDef_swiginit(self,_Box2D.new_b2GearJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -314,7 +314,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2LineJointDef """
         _Box2D.b2LineJointDef_swiginit(self,_Box2D.new_b2LineJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -322,7 +322,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2WeldJointDef """
         _Box2D.b2WeldJointDef_swiginit(self,_Box2D.new_b2WeldJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -330,7 +330,7 @@ public:
     def __init__(self, **kwargs): 
         """__init__(self, **kwargs) -> b2FrictionJointDef """
         _Box2D.b2FrictionJointDef_swiginit(self,_Box2D.new_b2FrictionJointDef())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 

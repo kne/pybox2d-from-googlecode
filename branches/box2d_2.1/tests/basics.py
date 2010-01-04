@@ -7,7 +7,7 @@ class testBasic (unittest.TestCase):
     def test_import(self):
         try:
             import Box2D
-        except ImportError, s:
+        except ImportError as s:
             self.fail("Unable to import Box2D library (%s)" % s)
 
 if __name__ == '__main__':

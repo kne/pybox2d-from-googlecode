@@ -7,6 +7,20 @@ class testVector (unittest.TestCase):
         v2 = b2Vec2(x, y)
         v3 = b2Vec3(x, y, z)
 
+        v = b2Vec2(x, y)
+        v += (0,0)
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        v -= (0,0)
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        v /= 1
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        v *= 1
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+
         v = v2 + v2
         self.assertEquals(v.x, x*2)
         self.assertEquals(v.y, y*2)
@@ -51,6 +65,23 @@ class testVector (unittest.TestCase):
         self.assertEquals(v.y, y*2)
         self.assertEquals(v.z, z*2)
 
+        v = b2Vec3(x, y, z)
+        v += (0,0,0)
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        self.assertEquals(v.z, z)
+        v -= (0,0,0)
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        self.assertEquals(v.z, z)
+        v /= 1
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        self.assertEquals(v.z, z)
+        v *= 1
+        self.assertEquals(v.x, x)
+        self.assertEquals(v.y, y)
+        self.assertEquals(v.z, z)
 if __name__ == '__main__':
     unittest.main()
 

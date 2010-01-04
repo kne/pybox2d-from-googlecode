@@ -24,7 +24,7 @@
         """__init__(self, **kwargs) -> b2BodyDef """
         _Box2D.b2BodyDef_swiginit(self,_Box2D.new_b2BodyDef())
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
@@ -41,7 +41,7 @@ public:
         """__init__(self, **kwargs) -> b2FixtureDef """
         _Box2D.b2FixtureDef_swiginit(self,_Box2D.new_b2FixtureDef())
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 

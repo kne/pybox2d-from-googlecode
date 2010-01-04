@@ -41,7 +41,7 @@ class testBasic (unittest.TestCase):
         self.dotest(world, [b2Vec2(1,0),(1,1),b2Vec2(-1,1)] )
         try:
             self.dotest(world, [(0,1,5),(1,1)] )
-        except ValueError,s:
+        except ValueError as s:
             pass # good
         else:
             raise Exception("Should have failed with ValueError / length 3")
@@ -56,20 +56,20 @@ class testBasic (unittest.TestCase):
 
         try:
             self.dotest(world, [(0,1)]*(b2_maxPolygonVertices+1) )
-        except ValueError,s:
+        except ValueError as s:
             pass # good
         else:
             raise Exception("Should have failed with ValueError / max+1")
 
         try:
             shape=b2PolygonShape(vertices=[(1,0),(0,-1),(-1,0)] )
-        except ValueError,s:
+        except ValueError as s:
             pass # good, not convex
         else:
             raise Exception("Should have failed with ValueError / checkpolygon")
 
         shape=b2PolygonShape(vertices=[(0,0), (0,1), (-1,0)] )
-        print shape.valid
+        temp=shape.valid
 
 if __name__ == '__main__':
     unittest.main()

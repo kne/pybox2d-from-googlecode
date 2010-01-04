@@ -44,7 +44,6 @@ import pygame
 from Box2D import *
 from pygame.locals import *
 from settings import fwSettings
-from pgu import gui
 
 # Use psyco if available
 try:
@@ -218,111 +217,6 @@ class fwDebugDraw(b2DebugDraw):
         """
         return value/self.viewZoom
 
-class fwGUI(gui.Table):
-    """
-    Deals with the initialization and changing the settings based on the GUI 
-    controls. Callbacks are not used, but the checkboxes and sliders are polled
-    by the main loop.
-    """
-    checkboxes =( ("Warm Starting", "enableWarmStarting"), 
-                  ("Time of Impact", "enableContinuous"), 
-                  ("Draw", None),
-                  ("Shapes", "drawShapes"), 
-                  ("Joints", "drawJoints"), 
-                  ("AABBs", "drawAABBs"), 
-                  ("Pairs", "drawPairs"), 
-                  ("Contact Points", "drawContactPoints"), 
-                  ("Contact Normals", "drawContactNormals"), 
-                  ("Center of Masses", "drawCOMs"), 
-                  ("Statistics", "drawStats"),
-                  ("FPS", "drawFPS"),
-                  ("Control", None),
-                  ("Pause", "pause"),
-                  ("Single Step", "singleStep") )
-    form = None
-
-    def __init__(self,settings, **params):
-        # The framework GUI is just basically a HTML-like table.
-        # There are 2 columns, and basically everything is right-aligned.
-        gui.Table.__init__(self,**params)
-        self.form=gui.Form()
-
-        fg = (255,255,255)
-
-        # "Hertz"
-        self.tr()
-        self.td(gui.Label("F1: Toggle Menu",color=(255,0,0)),align=1,colspan=2)
-
-        self.tr()
-        self.td(gui.Label("Hertz",color=fg),align=1,colspan=2)
-
-        # Hertz slider
-        self.tr()
-        e = gui.HSlider(settings.hz,5,200,size=20,width=100,height=16,name='hz')
-        self.td(e,colspan=2,align=1)
-
-        # "Vel Iters"
-        self.tr()
-        self.td(gui.Label("Vel Iters",color=fg),align=1,colspan=2)
-
-        # Velocity Iterations slider (min 1, max 500)
-        self.tr()
-        e = gui.HSlider(settings.velocityIterations,1,500,size=20,width=100,height=16,name='velIters')
-        self.td(e,colspan=2,align=1)
-
-        # "Pos Iters"
-        self.tr()
-        self.td(gui.Label("Pos Iters",color=fg),align=1,colspan=2)
-
-        # Position Iterations slider (min 0, max 100)
-        self.tr()
-        e = gui.HSlider(settings.positionIterations,0,100,size=20,width=100,height=16,name='posIters')
-        self.td(e,colspan=2,align=1)
-
-        # Add each of the checkboxes.
-        for text, variable in self.checkboxes:
-            self.tr()
-            if variable == None:
-                # Checkboxes that have no variable (i.e., None) are just labels.
-                self.td(gui.Label(text, color=fg), align=1, colspan=2)
-            else:
-                # Add the label and then the switch/checkbox
-                self.td(gui.Label(text, color=fg), align=1)
-                self.td(gui.Switch(value=getattr(settings, variable),name=variable))
-
-    def updateGUI(self, settings):
-        """
-        Change all of the GUI elements based on the current settings
-        """
-        for text, variable in self.checkboxes:
-            if not variable: continue
-            if hasattr(settings, variable):
-                self.form[variable].value = getattr(settings, variable)
-
-        # Now do the sliders
-        self.form['hz'].value       = settings.hz
-        self.form['posIters'].value = settings.positionIterations
-        self.form['velIters'].value = settings.velocityIterations
-
-    def updateSettings(self, settings):
-        """
-        Change all of the settings based on the current state of the GUI.
-        """
-        for text, variable in self.checkboxes:
-            if variable == None: continue
-            setattr(settings, variable, self.form[variable].value)
-
-        # Now do the sliders
-        settings.hz = int(self.form['hz'].value)
-        settings.positionIterations = int(self.form['posIters'].value)
-        settings.velocityIterations = int(self.form['velIters'].value)
-
-        # If we're in single-step mode, update the GUI to reflect that.
-        if settings.singleStep:
-            settings.pause=True
-            self.form['pause'].value = True
-            self.form['singleStep'].value = False
-
 class QueryCallback(b2QueryCallback):
     def __init__(self, p): 
         super(QueryCallback, self).__init__()
@@ -378,10 +272,6 @@ class Framework(b2ContactListener):
     font               = None
     fps                = 0
 
-    # GUI-related (PGU)
-    gui_app   = None
-    gui_table = None
-
     def __init__(self):
         super(Framework, self).__init__()
 
@@ -423,13 +313,6 @@ class Framework(b2ContactListener):
                 print("Disabling text drawing.")
                 self.DrawString = lambda x,y,z: 0
 
-        # GUI Initialization
-        self.gui_app = gui.App()
-        self.gui_table=fwGUI(self.settings)
-        container = gui.Container(align=1,valign=-1)
-        container.add(self.gui_table,0,0)
-        self.gui_app.init(container)
-
         self.viewCenter = (0,10.0*20.0)
         self.groundbody = self.world.CreateBody(b2BodyDef())
 
@@ -457,7 +340,6 @@ class Framework(b2ContactListener):
     def checkEvents(self):
         """
         Check for pygame events (mainly keyboard/mouse events).
-        Passes the events onto the GUI also.
         """
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -494,8 +376,6 @@ class Framework(b2ContactListener):
                 if self.rMouseDown:
                     self.viewCenter -= (event.rel[0], -event.rel[1])
 
-            self.gui_app.event(event) #Pass the event to the GUI
-
         return True
 
     def run(self):
@@ -505,7 +385,7 @@ class Framework(b2ContactListener):
         Continues to run while checkEvents indicates the user has 
         requested to quit.
 
-        Updates the screen and tells the GUI to paint itself.
+        Updates the screen.
         """
         running = True
         clock = pygame.time.Clock()
@@ -519,9 +399,6 @@ class Framework(b2ContactListener):
 
             # Run the simulation loop 
             self.SimulationLoop()
-
-            if self.settings.drawMenu:
-                self.gui_app.paint(self.screen)
 
             pygame.display.flip()
             clock.tick(self.settings.hz)
@@ -572,7 +449,7 @@ class Framework(b2ContactListener):
 
         # Set the other settings that aren't contained in the flags
         self.world.warmStarting=settings.enableWarmStarting
-    	self.world.continuousPhysics=settings.enableContinuous
+        self.world.continuousPhysics=settings.enableContinuous
 
         # Reset the collision points
         self.points = []
@@ -799,15 +676,8 @@ class Framework(b2ContactListener):
         # Draw the name of the test running
         self.DrawStringCR(self.name, (127,127,255))
 
-        # Update the settings based on the GUI
-        self.gui_table.updateSettings(self.settings)
-
         # Do the main physics step
         self.Step(self.settings)
-
-        # In case during the step the settings changed, update the GUI reflecting
-        # those settings.
-        self.gui_table.updateGUI(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
         """
@@ -836,6 +706,8 @@ class Framework(b2ContactListener):
         pass
 
     def PreSolve(self, contact, old_manifold):
+        return
+
         manifold = contact.manifold
         if manifold.pointCount == 0:
             return

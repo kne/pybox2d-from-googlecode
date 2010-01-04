@@ -19,7 +19,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from test_main import *
+from pygame_main_nogui import *
 from math import sqrt
 
 class ApplyForce (Framework):
@@ -65,7 +65,7 @@ class ApplyForce (Framework):
      
         gravity = 10.0
         fixtures = [ b2FixtureDef(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3) ]
-        for i in xrange(10):
+        for i in range(10):
             body=self.world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,5+1.54*i), fixtures=fixtures))
 
             # For a circle: I = 0.5 * m * r * r ==> r = sqrt(2 * I / m)

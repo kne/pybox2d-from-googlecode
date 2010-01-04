@@ -32,9 +32,12 @@
 //Since Python (apparently) requires __imul__ to return self,
 //these void operators will not do. So, rename them, then call them
 //with Python code, and return self. (see further down in b2Vec2)
-%rename(add_vector) b2Vec2::operator += (const b2Vec2& v);
-%rename(sub_vector) b2Vec2::operator -= (const b2Vec2& v);
-%rename(mul_float ) b2Vec2::operator *= (float32 a);
+%rename(__add_vector) b2Vec2::operator += (const b2Vec2& v);
+%rename(__sub_vector) b2Vec2::operator -= (const b2Vec2& v);
+%rename(__mul_float ) b2Vec2::operator *= (float32 a);
+%rename(__add_vector) b2Vec3::operator += (const b2Vec3& v);
+%rename(__sub_vector) b2Vec3::operator -= (const b2Vec3& v);
+%rename(__mul_float ) b2Vec3::operator *= (float32 a);
 
 /**** Vector classes ****/
 %extend b2Vec2 {
@@ -59,16 +62,19 @@ public:
         """
         return b2Vec2(self.x, self.y)
     def __iadd__(self, other):
-        self.add_vector(other)
+        self.__add_vector(other)
         return self
     def __isub__(self, other):
-        self.sub_vector(other)
+        self.__sub_vector(other)
         return self
     def __imul__(self, a):
-        self.mul_float(a)
+        self.__mul_float(a)
+        return self
+    def __itruediv__(self, a):
+        self.__div_float(a)
         return self
     def __idiv__(self, a):
-        self.div_float(a)
+        self.__div_float(a)
         return self
     def __set(self, x, y):
         self.x = x
@@ -97,6 +103,9 @@ public:
     float32 dot(b2Vec2& other) {
         return $self->x * other.x + $self->y * other.y;
     }
+    b2Vec2 __truediv__(float32 a) { //python 3k
+        return b2Vec2($self->x / a, $self->y / a);
+    }
     b2Vec2 __div__(float32 a) {
         return b2Vec2($self->x / a, $self->y / a);
     }
@@ -116,7 +125,7 @@ public:
     b2Vec2 __rdiv__(float32 a) {
         return b2Vec2($self->x / a, $self->y / a);
     }
-    void div_float(float32 a) {
+    void __div_float(float32 a) {
         $self->x /= a;
         $self->y /= a;
     }
@@ -152,16 +161,19 @@ public:
         """
         return b2Vec3(self.x, self.y, self.z)
     def __iadd__(self, other):
-        self.add_vector(other)
+        self.__add_vector(other)
         return self
     def __isub__(self, other):
-        self.sub_vector(other)
+        self.__sub_vector(other)
         return self
     def __imul__(self, a):
-        self.mul_float(a)
+        self.__mul_float(a)
+        return self
+    def __itruediv__(self, a):
+        self.__div_float(a)
         return self
     def __idiv__(self, a):
-        self.div_float(a)
+        self.__div_float(a)
         return self
     def dot(self, v):
         """
@@ -210,6 +222,9 @@ public:
     float32 __LengthSquared() {
         return ($self->x * $self->x + $self->y * $self->y + $self->z * $self->z);
     }
+    b2Vec3 __truediv__(float32 a) {
+        return b2Vec3($self->x / a, $self->y / a, $self->z / a);
+    }
     b2Vec3 __div__(float32 a) {
         return b2Vec3($self->x / a, $self->y / a, $self->z / a);
     }
@@ -229,7 +244,7 @@ public:
     b2Vec3 __rdiv__(float32 a) {
         return b2Vec3($self->x / a, $self->y / a, self->z / a);
     }
-    void div_float(float32 a) {
+    void __div_float(float32 a) {
         $self->x /= a;
         $self->y /= a;
         $self->z /= a;
@@ -290,7 +305,7 @@ public:
     def __init__(self, **kwargs):
         """__init__(self, **kwargs) -> b2AABB """
         _Box2D.b2AABB_swiginit(self,_Box2D.new_b2AABB())
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(self, key, value)
 }
 
