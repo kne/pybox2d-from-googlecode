@@ -55,14 +55,6 @@
     %}
 }
 
-
-%extend b2BlockAllocator {
-    %pythoncode %{
-        __dir__ = _dir_filter
-    %}
-}
-
-
 %extend b2Body {
     %pythoncode %{
         __dir__ = _dir_filter
@@ -140,13 +132,6 @@
 }
 
 
-%extend b2ContactRegister {
-    %pythoncode %{
-        __dir__ = _dir_filter
-    %}
-}
-
-
 %extend b2DebugDraw {
     %pythoncode %{
         __dir__ = _dir_filter
@@ -188,12 +173,6 @@
     %}
 }
 
-
-%extend b2DistanceProxy {
-    %pythoncode %{
-        __dir__ = _dir_filter
-    %}
-}
 
 
 %extend b2Filter {

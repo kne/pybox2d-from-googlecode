@@ -91,13 +91,6 @@
 }
 
 
-%feature("shadow") b2BlockAllocator::b2BlockAllocator() {
-    def __init__(self, **kwargs):
-        _Box2D.b2BlockAllocator_swiginit(self,_Box2D.new_b2BlockAllocator())
-        _init_kwargs(self, **kwargs)
-}
-
-
 %feature("shadow") b2Body::b2Body() {
     def __init__(self, **kwargs):
         _Box2D.b2Body_swiginit(self,_Box2D.new_b2Body())
@@ -161,12 +154,6 @@
 }
 
 
-%feature("shadow") b2ContactRegister::b2ContactRegister() {
-    def __init__(self, **kwargs):
-        _Box2D.b2ContactRegister_swiginit(self,_Box2D.new_b2ContactRegister())
-        _init_kwargs(self, **kwargs)
-}
-
 
 %feature("shadow") b2DistanceInput::b2DistanceInput() {
     def __init__(self, **kwargs):
@@ -195,12 +182,6 @@
         _init_kwargs(self, **kwargs)
 }
 
-
-%feature("shadow") b2DistanceProxy::b2DistanceProxy() {
-    def __init__(self, **kwargs):
-        _Box2D.b2DistanceProxy_swiginit(self,_Box2D.new_b2DistanceProxy())
-        _init_kwargs(self, **kwargs)
-}
 
 
 %feature("shadow") b2Filter::b2Filter() {

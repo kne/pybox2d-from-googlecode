@@ -105,6 +105,9 @@
     %ignore b2SimplexCache;
     %ignore b2StackAllocator;
     %ignore b2StackEntry;
+    %ignore b2ContactRegister;
+    %ignore b2DistanceProxy;
+    %ignore b2BlockAllocator;
 
     /* ---- features ---- */
     /* Autodoc puts the basic docstrings for each function */

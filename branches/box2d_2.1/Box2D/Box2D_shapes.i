@@ -41,6 +41,7 @@ public:
 }
 
 %ignore b2Shape::m_type;
+%ignore b2Shape::Clone;
 %rename(radius) b2Shape::m_radius;
 %rename(__GetType) b2Shape::GetType;
 
