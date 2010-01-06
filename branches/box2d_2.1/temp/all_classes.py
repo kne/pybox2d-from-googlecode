@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+# add "b2ContactPoint", as it's custom
+
 # First, define some classes not seen by swig
 ignore = ["b2ContactConstraint", "b2PolygonContact", "b2PolygonAndCircleContact", "b2CircleContact", "b2JointType", "b2BodyType", "b2ContactSolver", "b2PointState", "b2WorldQueryWrapper", "b2WorldRayCastWrapper", "b2SeparationFunction", "b2Block", "b2ContactConstraintPoint", "b2PositionSolverManifold", "b2LimitState"]
 
@@ -26,6 +28,7 @@ all_classes= [
     "b2ClipVertex", 
     "b2Color", 
     "b2Contact", 
+    "b2ContactPoint", 
     "b2ContactConstraint", 
     "b2ContactConstraintPoint", 
     "b2ContactEdge", 

@@ -24,9 +24,6 @@
 
 %module(directors="1") Box2D
 %{
-    /* To disable assertions->exceptions, comment out the two lines that define
-        USE_EXCEPTIONS */
-    #define USE_EXCEPTIONS 1
     #include "Box2D/Box2D.h"
 //    float32 b2LineJoint::GetMaxMotorForce() const { return 0.0f; }
 //       wrote my own function body for this, but hopefully itll be fixed in svn soon
@@ -38,7 +35,9 @@
 */
 
 #ifdef SWIGPYTHON
-    #define USE_EXCEPTIONS 1
+    /* To disable assertions->exceptions, comment out the two lines that define
+        USE_EXCEPTIONS. One is here, one is in Common/b2Settings.h  */
+    #define USE_EXCEPTIONS
     #ifdef USE_EXCEPTIONS
         /* See Common/b2Settings.h also. It defines b2Assert to instead throw
         an exception if USE_EXCEPTIONS is defined. */
@@ -47,31 +46,44 @@
         %exception {
             try {
                 $action
-            } catch(b2AssertException) {
+            } catch (b2AssertException) { 
                 // error already set, pass it on to python
+                SWIG_fail;
             }
         }
-
-        /* Director-exceptions are a result of callbacks that happen as a result to
-           the physics step or debug draw, usually. So, catch those errors and report
-           them back to Python. */
-        %exception b2World::Step {
-            try { $action }
-            catch (Swig::DirectorException) { SWIG_fail; }
-        }
-        %exception b2World::DrawDebugData {
-            try { $action }
-            catch (Swig::DirectorException) { SWIG_fail; }
-        }
-        %exception b2World::QueryAABB {
-            try { $action }
-            catch (Swig::DirectorException) { SWIG_fail; }
-        }
-        %exception b2World::RayCast {
-            try { $action }
-            catch (Swig::DirectorException) { SWIG_fail; }
-        }
     #endif
+
+    /* Director-exceptions are a result of callbacks that happen as a result to
+       the physics step or debug draw, usually. So, catch those errors and report
+       them back to Python. 
+       
+       Example: 
+       If there is a typo in your b2DebugDraw instance's DrawPolygon (in
+       Python), when you call world.DrawDebugData(), callbacks will be made
+       to such functions as that. Being Python code called from the C++ module, 
+       they turn into director exceptions then and will crash the application
+       unless handled in C++ (try/catch) and then passed to Python (SWIG_fail).
+       */
+    %exception b2World::Step {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
+    %exception b2World::DrawDebugData {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
+    %exception b2World::QueryAABB {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
+    %exception b2World::RayCast {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
 
     #pragma SWIG nowarn=314
 
@@ -114,6 +126,9 @@
 
     /* __dir__ replacement. Can safely be commented out. */
     %include "Box2D/Box2D_dir.i"
+
+    /* __init__ replacement allowing kwargs. Can safely be commented out, but tests will fail. */
+    %include "Box2D/Box2D_kwargs.i"
 
     /* __repr__ replacement -- pretty printing. Can safely be commented out. */
     %include "Box2D/Box2D_printing.i"

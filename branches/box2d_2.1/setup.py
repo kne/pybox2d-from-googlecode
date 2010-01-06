@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Setup script for pyBox2D distribution.
+Setup script for pybox2d.
 
 For installation instructions, see INSTALL.
 
@@ -13,6 +13,7 @@ If that worked, then:
 
 from __future__ import print_function
 import os
+import sys
 from glob import glob
 
 setuptools_version=None
@@ -56,12 +57,15 @@ def write_init():
     license_header = open(os.path.join('Box2D', 'pybox2d_license_header.txt')).read()
 
     # create the source code for the file
-    init_source = [ "",
-        "from Box2D import *",
-        "__version__      = '%s'"    % version_str,
-        "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number),
-        ]
+    if sys.version_info >= (3, 0):
+        init_source = [ "from .Box2D import *" ]
+    else:
+        init_source = [ "from Box2D import *" ]
 
+    init_source.extend( [
+        "__version__      = '%s'"    % version_str,
+        "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number), ]
+        )
     # and create the __init__ file with the appropriate version string
     f=open('__init__.py', 'w')
     f.write(license_header)
@@ -82,7 +86,7 @@ box2d_source_files = [os.path.join('Box2D', 'Box2D.i')] + \
     sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 # arguments to pass to SWIG. for old versions of SWIG, -O (optimize) might not be present.
-swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -outdir .'
+swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -globals b2Globals -outdir .'
 
 pybox2d_extension = \
     Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')

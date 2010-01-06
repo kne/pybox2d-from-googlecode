@@ -20,13 +20,13 @@
 
 
 %typemap(in) b2Vec2* self {
-    int res1 = SWIG_ConvertPtr($input, (void**)&$1, SWIGTYPE_p_b2Vec2, 0);
+    int res1 = SWIG_ConvertPtr($input, (void**)&$1, $descriptor(b2Vec2*), 0);
     if (!SWIG_IsOK(res1)) {
         SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
     }
 }
 %typemap(in) b2Vec3* self {
-    int res1 = SWIG_ConvertPtr($input, (void**)&$1, SWIGTYPE_p_b2Vec3, 0);
+    int res1 = SWIG_ConvertPtr($input, (void**)&$1, $descriptor(b2Vec3*), 0);
     if (!SWIG_IsOK(res1)) {
         SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
     }
@@ -37,13 +37,13 @@
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec2*,b2Vec2& {
    $1 = (PyList_Check($input)  || 
          PyTuple_Check($input) || 
-         SWIG_CheckState(SWIG_ConvertPtr($input, 0, SWIGTYPE_p_b2Vec2, 0))
+         SWIG_CheckState(SWIG_ConvertPtr($input, 0, $descriptor(b2Vec2*), 0))
         ) ? 1 : 0;
 }
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec3*,b2Vec3& {
    $1 = (PyList_Check($input)  || 
          PyTuple_Check($input) || 
-         SWIG_CheckState(SWIG_ConvertPtr($input, 0, SWIGTYPE_p_b2Vec3, 0))
+         SWIG_CheckState(SWIG_ConvertPtr($input, 0, $descriptor(b2Vec3*), 0))
         ) ? 1 : 0;
 }
 
@@ -200,6 +200,28 @@
         $result=(PyObject*)$1;
 
     Py_INCREF($result);
+}
+
+%typemap(in) b2Manifold* oldManifold{
+    void* argp=NULL;
+    int res3 = SWIG_ConvertPtr($input, &argp, $descriptor(b2Manifold *), 0);
+    Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
+    bool upcall_ = (director && (director->swig_get_self()==swig_obj[0]));
+    if (upcall_) {
+        /* This conversion fails on py3k when attempting to call the 
+           b2_defaultListener.PreSolve() and I cannot quite figure out why.
+           I think it has something to do with the fact that the default implementation
+           is in C++, the director method gets called, then it attempts to call a nonexistent
+           Python function, ... or something like that.
+
+           In any case, the base b2ContactListener does nothing, so whatever args
+           we pass it, that's fine.
+           TODO
+           */
+    } else if (!SWIG_IsOK(res3)) {
+        SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+    }
+    $1 = reinterpret_cast<b2Manifold*>(argp);
 }
 
 %typemap(directorin) b2Vec2* vertices {

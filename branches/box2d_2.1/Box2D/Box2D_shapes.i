@@ -45,17 +45,6 @@ public:
 %rename(__GetType) b2Shape::GetType;
 
 /**** CircleShape ****/
-%feature("shadow") b2CircleShape::b2CircleShape() {
-    def __init__(self, **kwargs): 
-        """__init__(self) -> b2CircleShape"""
-        if not kwargs:
-            _Box2D.b2CircleShape_swiginit(self,_Box2D.new_b2CircleShape())
-            return
-        self.__init__()
-        for key, value in list(kwargs.items()):
-            setattr(self, key, value)
-}
-
 %extend b2CircleShape {
 public:
     %pythoncode %{
@@ -67,17 +56,6 @@ public:
 %rename (pos) b2CircleShape::m_p;
 
 /**** PolygonShape ****/
-%feature("shadow") b2PolygonShape::b2PolygonShape() {
-    def __init__(self, **kwargs): 
-        """__init__(self) -> b2PolygonShape"""
-        if not kwargs:
-            _Box2D.b2PolygonShape_swiginit(self,_Box2D.new_b2PolygonShape())
-            return
-        self.__init__()
-        for key, value in list(kwargs.items()):
-            setattr(self, key, value)
-}
-
 %extend b2PolygonShape {
 public:
     %pythoncode %{

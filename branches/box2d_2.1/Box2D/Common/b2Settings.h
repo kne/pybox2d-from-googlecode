@@ -22,6 +22,8 @@
 #include <cassert>
 #include <cmath>
 
+#define USE_EXCEPTIONS
+
 #define B2_NOT_USED(x) x
 #ifdef USE_EXCEPTIONS
 #include <Python.h>

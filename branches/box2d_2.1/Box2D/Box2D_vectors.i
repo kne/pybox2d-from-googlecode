@@ -301,14 +301,6 @@ public:
 
 %include "Box2D/Collision/b2Collision.h"
 
-%feature("shadow") b2AABB::b2AABB() {
-    def __init__(self, **kwargs):
-        """__init__(self, **kwargs) -> b2AABB """
-        _Box2D.b2AABB_swiginit(self,_Box2D.new_b2AABB())
-        for key, value in list(kwargs.items()):
-            setattr(self, key, value)
-}
-
 %extend b2AABB {
 public:
     %pythoncode %{

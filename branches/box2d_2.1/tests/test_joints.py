@@ -1,5 +1,4 @@
 import unittest
-import Box2D as b2
 import itertools
 
 class testBasic (unittest.TestCase):
@@ -8,9 +7,22 @@ class testBasic (unittest.TestCase):
     dbody2 = None
     sbody1 = None
     sbody2 = None
+
+    def _fail(self, s):
+        # This little function would save us from an AssertionError on garbage collection.
+        # It forces the gc to take care of the world early.
+        self.world = None
+        self.dbody1 = None
+        self.dbody2 = None
+        self.sbody1 = None
+        self.sbody2 = None
+        self.b2 = None
+        self.fail(s)
+
     def setUp(self):
+        self.b2 = __import__('Box2D')
         try:
-            self.world = b2.b2World(b2.b2Vec2(0.0, -10.0), True)
+            self.world = self.b2.b2World(self.b2.b2Vec2(0.0, -10.0), True)
         except Exception as s:
             self.fail("Failed to create world (%s)" % s)
 
@@ -20,7 +32,7 @@ class testBasic (unittest.TestCase):
             self.dbody2 = self.create_body((0, 12))
             self.dbody2.userData = "dbody2"
         except Exception as s:
-            self.fail("Failed to create dynamic bodies (%s)" % s)
+            self._fail("Failed to create dynamic bodies (%s)" % s)
 
         try:
             self.sbody1 = self.create_body((0, 0), False)
@@ -28,22 +40,22 @@ class testBasic (unittest.TestCase):
             self.sbody2 = self.create_body((1, 4), False)
             self.sbody2.userData = "sbody2"
         except Exception as s:
-            self.fail("Failed to create static bodies (%s)" % s)
+            self._fail("Failed to create static bodies (%s)" % s)
 
     def create_body(self, position, dynamic=True):
-        bodyDef = b2.b2BodyDef()
-        fixtureDef = b2.b2FixtureDef()
+        bodyDef = self.b2.b2BodyDef()
+        fixtureDef = self.b2.b2FixtureDef()
         if dynamic:
-            bodyDef.type = b2.b2_dynamicBody
+            bodyDef.type = self.b2.b2_dynamicBody
             fixtureDef.density = 1
         else:
-            bodyDef.type = b2.b2_staticBody
+            bodyDef.type = self.b2.b2_staticBody
             fixtureDef.density = 0
 
         bodyDef.position = position
         body = self.world.CreateBody(bodyDef)
          
-        dynamicBox = b2.b2PolygonShape()
+        dynamicBox = self.b2.b2PolygonShape()
         dynamicBox.SetAsBox(1, 1)
 
         fixtureDef.shape = dynamicBox
@@ -53,22 +65,22 @@ class testBasic (unittest.TestCase):
         return body
 
     def create_circle_body(self, position, dynamic=True):
-        bodyDef = b2.b2BodyDef()
-        fixtureDef = b2.b2FixtureDef()
+        bodyDef = self.b2.b2BodyDef()
+        fixtureDef = self.b2.b2FixtureDef()
         if dynamic:
-            bodyDef.type = b2.b2_dynamicBody
+            bodyDef.type = self.b2.b2_dynamicBody
             fixtureDef.density = 1
         else:
-            bodyDef.type = b2.b2_staticBody
+            bodyDef.type = self.b2.b2_staticBody
             fixtureDef.density = 0
 
         bodyDef.position = position
         body = self.world.CreateBody(bodyDef)
          
-        circle = b2.b2CircleShape()
+        circle = self.b2.b2CircleShape()
         circle.radius = 1.0
 
-        fixtureDef = b2.b2FixtureDef()
+        fixtureDef = self.b2.b2FixtureDef()
         fixtureDef.shape = circle
         fixtureDef.density = 1
         fixtureDef.friction = 0.3
@@ -93,13 +105,13 @@ class testBasic (unittest.TestCase):
 
     # ---- revolute joint ----
     def revolute_definition(self, body1, body2, anchor):
-        dfn=b2.b2RevoluteJointDef()
+        dfn=self.b2.b2RevoluteJointDef()
         dfn.Initialize(body1, body2, anchor)
-        dfn.motorSpeed = 1.0 * b2.b2_pi
+        dfn.motorSpeed = 1.0 * self.b2.b2_pi
         dfn.maxMotorTorque = 10000.0
         dfn.enableMotor = False
-        dfn.lowerAngle = -0.25 * b2.b2_pi
-        dfn.upperAngle = 0.5 * b2.b2_pi
+        dfn.lowerAngle = -0.25 * self.b2.b2_pi
+        dfn.upperAngle = 0.5 * self.b2.b2_pi
         dfn.enableLimit = True
         dfn.collideConnected = True
         return dfn
@@ -131,7 +143,7 @@ class testBasic (unittest.TestCase):
 
     # ---- prismatic joint ----
     def prismatic_definition(self, body1, body2, anchor, axis):
-        dfn=b2.b2PrismaticJointDef()
+        dfn=self.b2.b2PrismaticJointDef()
         dfn.Initialize(body1, body2, anchor, axis)
         dfn.motorSpeed = 10
         dfn.maxMotorForce = 1000.0
@@ -163,9 +175,9 @@ class testBasic (unittest.TestCase):
 
     # ---- distance joint ----
     def distance_definition(self, body1, body2, anchorA, anchorB):
-        dfn=b2.b2DistanceJointDef()
+        dfn=self.b2.b2DistanceJointDef()
         dfn.Initialize(body1, body2, anchorA, anchorB)
-        dfn.length = (b2.b2Vec2(*anchorA) - b2.b2Vec2(*anchorB)).length
+        dfn.length = (self.b2.b2Vec2(*anchorA) - self.b2.b2Vec2(*anchorB)).length
         dfn.frequencyHz = 4.0
         dfn.dampingRatio = 0.5
         return dfn
@@ -183,7 +195,11 @@ class testBasic (unittest.TestCase):
 
     # ---- pulley joint ----
     def pulley_definition(self, body1, body2):
-        dfn=b2.b2PulleyJointDef()
+        if body2.mass == 0 or body1.mass == 0:
+            body1 = self.dbody2
+            body2 = self.dbody1
+
+        dfn=self.b2.b2PulleyJointDef()
         a, b = 2, 4
         y, L = 16, 12
 
@@ -207,7 +223,11 @@ class testBasic (unittest.TestCase):
   
     # ---- mouse joint ----
     def mouse_definition(self, body1, body2):
-        dfn=b2.b2MouseJointDef()
+        dfn=self.b2.b2MouseJointDef()
+        if body2.mass == 0:
+            body2 = self.dbody1
+            if body2 == body1:
+                body1 = self.sbody1
         dfn.bodyA = body1
         dfn.bodyB = body2
         dfn.target = (2, 1)
@@ -226,7 +246,7 @@ class testBasic (unittest.TestCase):
 
     # ---- line joint ----
     def line_definition(self, body1, body2, anchor, axis):
-        dfn=b2.b2LineJointDef()
+        dfn=self.b2.b2LineJointDef()
         dfn.Initialize(body1, body2, anchor, axis)
         dfn.motorSpeed = 0
         dfn.maxMotorForce = 100.0
@@ -258,7 +278,7 @@ class testBasic (unittest.TestCase):
 
     # ---- weld joint ----
     def weld_definition(self, body1, body2):
-        dfn=b2.b2WeldJointDef()
+        dfn=self.b2.b2WeldJointDef()
         dfn.bodyA = body1
         dfn.bodyB = body2
         return dfn
@@ -272,7 +292,7 @@ class testBasic (unittest.TestCase):
 
     # ---- friction joint ----
     def friction_definition(self, body1, body2):
-        dfn=b2.b2FrictionJointDef()
+        dfn=self.b2.b2FrictionJointDef()
         dfn.bodyA = body1
         dfn.bodyB = body2
         dfn.localAnchorA = dfn.localAnchorB = (0,0)
@@ -300,33 +320,40 @@ class testBasic (unittest.TestCase):
             try:
                 dfn = create(body1=bodyA, body2=bodyB, **init_args)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 joint = self.world.CreateJoint(dfn)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s, joint creation (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("Failed on bodies %s and %s, joint creation (%s)" % (bodyA.userData, bodyB.userData, s))
                 
             try:
                 asserts(dfn, joint)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s, joint assertions (%s)" % (bodyA.userData, bodyB.userData, s))
+                self.world.DestroyJoint(joint)
+                self._fail("Failed on bodies %s and %s, joint assertions (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 checks(dfn, joint)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s, joint checks (%s)" % (bodyA.userData, bodyB.userData, s))
+                self.world.DestroyJoint(joint)
+                self._fail("Failed on bodies %s and %s, joint checks (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
-                self.step_world(10)
+                self.step_world(5)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s, joint simulation (%s)" % (bodyA.userData, bodyB.userData, s))
+                # self.world.DestroyJoint(joint) # -> locked
+                try:
+                    # Ok, this will cause an assertion to go off during unwinding (in the b2StackAllocator deconstructor),
+                    # so do it once, catch that, and then fail finally
+                    self.fail() 
+                except AssertionError:
+                    self._fail("Failed on bodies %s and %s, joint simulation (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 self.world.DestroyJoint(joint)
             except Exception as s:
-                self.fail("Failed on bodies %s and %s joint deletion (%s)" % (bodyA.userData, bodyB.userData, s))
-
+                self._fail("Failed on bodies %s and %s joint deletion (%s)" % (bodyA.userData, bodyB.userData, s))
 
     # --- the actual tests ---
     def test_revolute(self):
@@ -355,7 +382,7 @@ class testBasic (unittest.TestCase):
 
     def test_emptyjoint(self):
         try: 
-            self.world.CreateJoint( b2.b2RevoluteJointDef() )
+            self.world.CreateJoint( self.b2.b2RevoluteJointDef() )
         except ValueError:
             pass # good
         else:
@@ -363,23 +390,23 @@ class testBasic (unittest.TestCase):
         
     def test_gear(self):
         # creates 2 revolute joints and then joins them, so it's done separately
-        ground=self.world.CreateBody( b2.b2BodyDef() )
-        shape=b2.b2PolygonShape()
+        ground=self.world.CreateBody( self.b2.b2BodyDef() )
+        shape=self.b2.b2PolygonShape()
         shape.SetAsEdge((50.0, 0.0), (-50.0, 0.0))
         ground.CreateFixture(shape)
 
         body1=self.create_circle_body((-3, 12))
         body2=self.create_circle_body(( 0, 12))
 
-        jd1=b2.b2RevoluteJointDef() 
+        jd1=self.b2.b2RevoluteJointDef() 
         jd1.Initialize(ground, body1, body1.position)
         joint1 = self.world.CreateJoint(jd1)
         
-        jd2=b2.b2RevoluteJointDef() 
+        jd2=self.b2.b2RevoluteJointDef() 
         jd2.Initialize(ground, body2, body2.position)
         joint2 = self.world.CreateJoint(jd2)
 
-        gjd=b2.b2GearJointDef()
+        gjd=self.b2.b2GearJointDef()
         gjd.bodyA = body1
         gjd.bodyB = body2
         gjd.joint1 = joint1

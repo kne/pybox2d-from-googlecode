@@ -65,16 +65,25 @@ public:
         def CreateBody(self, defn):
             body=self.__CreateBody(defn)
             if defn.fixtures:
-                for fixture in defn.fixtures:
+                for i, fixture in enumerate(defn.fixtures):
                     if isinstance(fixture, (list, tuple)):
                         # create a fixture from a shape, in format (shape, density)
-                        body.CreateFixture(*fixture)
+                        try:
+                            body.CreateFixture(*fixture)
+                        except Exception as ex:
+                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
                     elif isinstance(fixture, b2FixtureDef):
                         # create a fixture from a b2FixtureDef
-                        body.CreateFixture(fixture)
+                        try:
+                            body.CreateFixture(fixture)
+                        except Exception as ex:
+                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
                     elif isinstance(fixture, b2Shape):
                         # create a fixture from a b2Shape, assuming density of 0.0
-                        body.CreateFixture(fixture, 0.0)
+                        try:
+                            body.CreateFixture(fixture, 0.0)
+                        except Exception as ex:
+                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
                     else:
                         raise ValueError('Unexpected element in fixture list: %s (type %s)' % (fixture, type(fixture)))
             return body

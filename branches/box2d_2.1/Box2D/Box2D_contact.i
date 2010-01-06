@@ -84,8 +84,6 @@
 %extend b2Manifold {
 public:
     %pythoncode %{
-        def __setattr__(self, var, value): raise Exception("Type %s is immutable" % self.__class__.__name__)
-        __delattr__ = __setattr__
         def __GetPoints(self):
             return [self.__GetPoint(i) for i in range(self.pointCount)]
         points = property(__GetPoints, None)
@@ -106,8 +104,6 @@ public:
 %extend b2WorldManifold {
 public:
     %pythoncode %{
-        def __setattr__(self, var, value): raise Exception("Type %s is immutable" % self.__class__.__name__)
-        __delattr__ = __setattr__
     %}
 
     PyObject* __GetPoints() {
@@ -167,14 +163,6 @@ public:
 
 /**** Create our own ContactPoint structure ****/
 /* And allow kwargs for it */
-
-%feature("shadow") b2ContactPoint::b2ContactPoint() {
-    def __init__(self, **kwargs):
-        """__init__(self, **kwargs) -> b2ContactPoint """
-        _Box2D.b2ContactPoint_swiginit(self,_Box2D.new_b2ContactPoint())
-        for key, value in list(kwargs.items()):
-            setattr(self, key, value)
-}
 
 %inline {
     class b2ContactPoint
