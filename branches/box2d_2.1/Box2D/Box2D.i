@@ -139,7 +139,7 @@
     /* Miscellaneous inline code. */
     %include "Box2D/Box2D_inline.i"
 
-    /* Miscellaneous extended classes (b2Color) */
+    /* Miscellaneous extended classes: b2Color, b2Version, b2DistanceProxy, b2DebugDraw */
     %include "Box2D/Box2D_misc.i"
 
     /* Typemaps that allow for tuples to be used in place of vectors, 
@@ -150,7 +150,7 @@
     %include "Box2D/Box2D_contact.i"
     
     /* b2Vec2, b2Vec3, b2Mat22, b2Transform, b2AABB and related extensions. */
-    %include "Box2D/Box2D_vectors.i"
+    %include "Box2D/Box2D_math.i"
 
     /* Allows for userData to be used. Also modifies CreateBody/Joint. */
     %include "Box2D/Box2D_userdata.i"

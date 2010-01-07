@@ -1,9 +1,7 @@
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
-# Python version Copyright (c) 2008 kne / sirkne at gmail dot com
-# 
-# Implemented using the pybox2d SWIG interface for Box2D (pygooglecode.com)
+# Python version Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -44,7 +42,13 @@ import pygame
 from Box2D import *
 from pygame.locals import *
 from settings import fwSettings
-from pgu import gui
+
+try:
+    from pygame_gui import (fwGUI, gui)
+    GUIEnabled = True
+except ImportError:
+    print('Unable to load PGU; GUI disabled.')
+    GUIEnabled = False
 
 # Use psyco if available
 try:
@@ -59,8 +63,8 @@ class fwDestructionListener(b2DestructionListener):
     "SayGoodbye" is called when a joint or shape is deleted.
     """
     test = None
-    def __init__(self):
-        super(fwDestructionListener, self).__init__()
+    def __init__(self, **kwargs):
+        super(fwDestructionListener, self).__init__(**kwargs)
 
     def SayGoodbye(self, object):
         if isinstance(object, b2Joint):
@@ -71,29 +75,6 @@ class fwDestructionListener(b2DestructionListener):
         elif isinstance(object, b2Shape):
             self.test.ShapeDestroyed(object)
 
-class fwContactTypes:
-    """
-    Acts as an enum, holding the types necessary for contacts:
-    Added, persisted, and removed
-    """
-    contactUnknown   = 0
-    contactAdded     = 1
-    contactPersisted = 2
-    contactRemoved   = 3
-
-class fwContactPoint:
-    """
-    Structure holding the necessary information for a contact point.
-    All of the information is copied from the contact listener callbacks.
-    """
-    shape1 = None
-    shape2 = None
-    normal = None
-    position = None
-    velocity = None
-    id  = None
-    state = 0
-
 class fwDebugDraw(b2DebugDraw):
     """
     This debug draw class accepts callbacks from Box2D (which specifies what to draw)
@@ -102,23 +83,16 @@ class fwDebugDraw(b2DebugDraw):
     If you are writing your own game, you likely will not want to use debug drawing.
     Debug drawing, as its name implies, is for debugging.
     """
-    circle_segments = 16
     surface = None
-    viewZoom = 1.0
-    viewCenter = None
-    viewOffset = None
-    width, height = 0, 0
-    def __init__(self): super(fwDebugDraw, self).__init__()
-    def _setValues(self, viewZoom, viewCenter, viewOffset, width, height):
-        """
-        Sets the view zoom, center, offset, and width and height of the screen such that access 
-        to the main window is unnecessary.
-        """
-        self.viewZoom=viewZoom
-        self.viewCenter=viewCenter
-        self.viewOffset=viewOffset
-        self.width = width 
-        self.height = height
+    viewZoom = property(lambda self: self.test.viewZoom, None)
+    viewCenter = property(lambda self: self.test.viewCenter, None)
+    viewOffset = property(lambda self: self.test.viewOffset, None)
+    screenSize = property(lambda self: self.test.screenSize, None)
+    def __init__(self, **kwargs): 
+        super(fwDebugDraw, self).__init__(**kwargs)
+
+    def __set_screensize(self, size):
+        self.width, self.height = size
 
     def DrawPoint(self, p, size, color):
         """
@@ -207,125 +181,16 @@ class fwDebugDraw(b2DebugDraw):
 
     def to_screen(self, pt):
         """
-        Input:  (x, y) - a tuple in world coordinates
-        Output: (x, y) - a tuple in screen coordinates
+        Input:  (x, y) - a b2Vec2 or tuple in world coordinates
+        Output: (x, y) - a tuple in integral screen coordinates
         """
-        return ((pt[0] * self.viewZoom) - self.viewOffset.x, self.height - ((pt[1] * self.viewZoom) - self.viewOffset.y))
-    def scaleValue(self, value):
-        """
-        Input: value - unscaled value
-        Output: scaled value according to the view zoom ratio
-        """
-        return value/self.viewZoom
+        return (int((pt[0] * self.viewZoom) - self.viewOffset.x), 
+                int(self.screenSize.y - ((pt[1] * self.viewZoom) - self.viewOffset.y))
+                )
 
-class fwGUI(gui.Table):
-    """
-    Deals with the initialization and changing the settings based on the GUI 
-    controls. Callbacks are not used, but the checkboxes and sliders are polled
-    by the main loop.
-    """
-    checkboxes =( ("Warm Starting", "enableWarmStarting"), 
-                  ("Time of Impact", "enableContinuous"), 
-                  ("Draw", None),
-                  ("Shapes", "drawShapes"), 
-                  ("Joints", "drawJoints"), 
-                  ("AABBs", "drawAABBs"), 
-                  ("Pairs", "drawPairs"), 
-                  ("Contact Points", "drawContactPoints"), 
-                  ("Contact Normals", "drawContactNormals"), 
-                  ("Center of Masses", "drawCOMs"), 
-                  ("Statistics", "drawStats"),
-                  ("FPS", "drawFPS"),
-                  ("Control", None),
-                  ("Pause", "pause"),
-                  ("Single Step", "singleStep") )
-    form = None
-
-    def __init__(self,settings, **params):
-        # The framework GUI is just basically a HTML-like table.
-        # There are 2 columns, and basically everything is right-aligned.
-        gui.Table.__init__(self,**params)
-        self.form=gui.Form()
-
-        fg = (255,255,255)
-
-        # "Hertz"
-        self.tr()
-        self.td(gui.Label("F1: Toggle Menu",color=(255,0,0)),align=1,colspan=2)
-
-        self.tr()
-        self.td(gui.Label("Hertz",color=fg),align=1,colspan=2)
-
-        # Hertz slider
-        self.tr()
-        e = gui.HSlider(settings.hz,5,200,size=20,width=100,height=16,name='hz')
-        self.td(e,colspan=2,align=1)
-
-        # "Vel Iters"
-        self.tr()
-        self.td(gui.Label("Vel Iters",color=fg),align=1,colspan=2)
-
-        # Velocity Iterations slider (min 1, max 500)
-        self.tr()
-        e = gui.HSlider(settings.velocityIterations,1,500,size=20,width=100,height=16,name='velIters')
-        self.td(e,colspan=2,align=1)
-
-        # "Pos Iters"
-        self.tr()
-        self.td(gui.Label("Pos Iters",color=fg),align=1,colspan=2)
-
-        # Position Iterations slider (min 0, max 100)
-        self.tr()
-        e = gui.HSlider(settings.positionIterations,0,100,size=20,width=100,height=16,name='posIters')
-        self.td(e,colspan=2,align=1)
-
-        # Add each of the checkboxes.
-        for text, variable in self.checkboxes:
-            self.tr()
-            if variable == None:
-                # Checkboxes that have no variable (i.e., None) are just labels.
-                self.td(gui.Label(text, color=fg), align=1, colspan=2)
-            else:
-                # Add the label and then the switch/checkbox
-                self.td(gui.Label(text, color=fg), align=1)
-                self.td(gui.Switch(value=getattr(settings, variable),name=variable))
-
-    def updateGUI(self, settings):
-        """
-        Change all of the GUI elements based on the current settings
-        """
-        for text, variable in self.checkboxes:
-            if not variable: continue
-            if hasattr(settings, variable):
-                self.form[variable].value = getattr(settings, variable)
-
-        # Now do the sliders
-        self.form['hz'].value       = settings.hz
-        self.form['posIters'].value = settings.positionIterations
-        self.form['velIters'].value = settings.velocityIterations
-
-    def updateSettings(self, settings):
-        """
-        Change all of the settings based on the current state of the GUI.
-        """
-        for text, variable in self.checkboxes:
-            if variable == None: continue
-            setattr(settings, variable, self.form[variable].value)
-
-        # Now do the sliders
-        settings.hz = int(self.form['hz'].value)
-        settings.positionIterations = int(self.form['posIters'].value)
-        settings.velocityIterations = int(self.form['velIters'].value)
-
-        # If we're in single-step mode, update the GUI to reflect that.
-        if settings.singleStep:
-            settings.pause=True
-            self.form['pause'].value = True
-            self.form['singleStep'].value = False
-
-class QueryCallback(b2QueryCallback):
+class fwQueryCallback(b2QueryCallback):
     def __init__(self, p): 
-        super(QueryCallback, self).__init__()
+        super(fwQueryCallback, self).__init__()
         self.point = p
         self.fixture = None
 
@@ -390,28 +255,24 @@ class Framework(b2ContactListener):
         doSleep = True
         self.world = b2World(gravity, doSleep)
 
-        self.destructionListener = fwDestructionListener()
-        self.debugDraw = fwDebugDraw()
-
-        self.destructionListener.test = self
-        
+        self.destructionListener = fwDestructionListener(test=self)
         self.world.destructionListener=self.destructionListener
         self.world.contactListener=self
-        self.world.debugDraw=self.debugDraw
 
-        # Pygame Initialization
         if fwSettings.onlyInit: # testing mode doesn't initialize pygame
             return
 
+        # Pygame Initialization
         pygame.init()
-
         caption= "Python Box2D Testbed - " + self.name
         pygame.display.set_caption(caption)
 
+        # Screen and debug draw
         self.screen = pygame.display.set_mode( (640,480) )
-        self.debugDraw.surface = self.screen
-
         self.screenSize = b2Vec2(*self.screen.get_size())
+
+        self.debugDraw = fwDebugDraw(surface=self.screen, test=self)
+        self.world.debugDraw=self.debugDraw
         
         try:
             self.font = pygame.font.Font(None, 15)
@@ -424,11 +285,12 @@ class Framework(b2ContactListener):
                 self.DrawString = lambda x,y,z: 0
 
         # GUI Initialization
-        self.gui_app = gui.App()
-        self.gui_table=fwGUI(self.settings)
-        container = gui.Container(align=1,valign=-1)
-        container.add(self.gui_table,0,0)
-        self.gui_app.init(container)
+        if GUIEnabled:
+            self.gui_app = gui.App()
+            self.gui_table=fwGUI(self.settings)
+            container = gui.Container(align=1,valign=-1)
+            container.add(self.gui_table,0,0)
+            self.gui_app.init(container)
 
         self.viewCenter = (0,10.0*20.0)
         self.groundbody = self.world.CreateBody(b2BodyDef())
@@ -441,11 +303,9 @@ class Framework(b2ContactListener):
         """
         self._viewCenter = b2Vec2( *value )
         self._viewOffset = self._viewCenter - self.screenSize/2
-        self.debugDraw._setValues(self.viewZoom, self.viewCenter, self.viewOffset, self.screenSize.x, self.screenSize.y)
     
     def setZoom(self, zoom):
         self._viewZoom = zoom
-        self.debugDraw.viewZoom = zoom
 
     viewZoom   = property(lambda self: self._viewZoom, setZoom,
                            doc='Zoom factor for the display')
@@ -494,7 +354,8 @@ class Framework(b2ContactListener):
                 if self.rMouseDown:
                     self.viewCenter -= (event.rel[0], -event.rel[1])
 
-            self.gui_app.event(event) #Pass the event to the GUI
+            if GUIEnabled:
+                self.gui_app.event(event) #Pass the event to the GUI
 
         return True
 
@@ -520,7 +381,7 @@ class Framework(b2ContactListener):
             # Run the simulation loop 
             self.SimulationLoop()
 
-            if self.settings.drawMenu:
+            if GUIEnabled and self.settings.drawMenu:
                 self.gui_app.paint(self.screen)
 
             pygame.display.flip()
@@ -554,25 +415,18 @@ class Framework(b2ContactListener):
 
             self.DrawStringCR("****PAUSED****", (200,0,0))
 
-        # Set the flags based on what the settings show (uses a bitwise or mask)
-        flag_info = [
-            (settings.drawShapes,     b2DebugDraw.e_shapeBit),
-            (settings.drawJoints,     b2DebugDraw.e_jointBit),
-            (settings.drawAABBs,      b2DebugDraw.e_aabbBit),
-            (settings.drawPairs,      b2DebugDraw.e_pairBit),
-            (settings.drawCOMs,       b2DebugDraw.e_centerOfMassBit),
-            ]
-
-        flags = 0
-        for setting, flag in flag_info:
-            if setting:
-                flags |= flag
-
-        self.debugDraw.SetFlags(flags)
+        # Set the flags based on what the settings show
+        self.debugDraw.SetFlags(
+            drawShapes=settings.drawShapes,
+            drawJoints=settings.drawJoints,
+            drawAABBs=settings.drawAABBs,
+            drawPairs=settings.drawPairs,
+            drawCOMs=settings.drawCOMs
+                )
 
         # Set the other settings that aren't contained in the flags
         self.world.warmStarting=settings.enableWarmStarting
-    	self.world.continuousPhysics=settings.enableContinuous
+        self.world.continuousPhysics=settings.enableContinuous
 
         # Reset the collision points
         self.points = []
@@ -677,7 +531,7 @@ class Framework(b2ContactListener):
         aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
 
         # Query the world for overlapping shapes.
-        query = QueryCallback(p)
+        query = fwQueryCallback(p)
         self.world.QueryAABB(query, aabb)
         
         if query.fixture:
@@ -799,15 +653,17 @@ class Framework(b2ContactListener):
         # Draw the name of the test running
         self.DrawStringCR(self.name, (127,127,255))
 
-        # Update the settings based on the GUI
-        self.gui_table.updateSettings(self.settings)
+        if GUIEnabled:
+            # Update the settings based on the GUI
+            self.gui_table.updateSettings(self.settings)
 
         # Do the main physics step
         self.Step(self.settings)
 
-        # In case during the step the settings changed, update the GUI reflecting
-        # those settings.
-        self.gui_table.updateGUI(self.settings)
+        if GUIEnabled:
+            # In case during the step the settings changed, update the GUI reflecting
+            # those settings.
+            self.gui_table.updateGUI(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
         """

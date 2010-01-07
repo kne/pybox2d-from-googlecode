@@ -31,19 +31,23 @@ Remaining classes: 66
               b2Body Box2D_bodyfixture.i, Box2D_userdata.i
      b2FrictionJoint Box2D_joints.i
 
-Unmodified classes
-b2RayCastCallback  # Director added, should be ok (TODO: check raycasts)
-b2ContactImpulse   # TODO: check this (PostSolve)
-b2DistanceProxy    # TODO: Needed for b2DistanceInput
-b2Mat33            # TODO: Add support for b2Mat33 * b2Vec3
-b2Segment          # TODO: TestSegment with output
-b2Sweep            # TODO: Modify GetTransform to return the xform
+Newly modified, to check/test
+-----------------------------
+b2DistanceProxy    # Needed for b2DistanceInput
+b2Mat33            # Add support for b2Mat33 * b2Vec3 / TODO: test all matrix math, and add a test
+b2Segment          # TestSegment with output
 b2Version          # TODO: __repr__ modification
+
+Unmodified classes
+------------------
+b2ContactImpulse   # TODO: check this (PostSolve)
+b2RayCastCallback  # Director added, should be ok (TODO: check raycasts)
 b2DebugDraw        # Director added, should be ok
 b2DestructionList. # Director added, should be ok
 b2QueryCallback    # Director added, should be ok
 b2BlockAllocator   # Could possibly be used with b2Shape.Clone(), 
                    # but not without access to the block allocator. Ignoring this and the clone function.
+b2Sweep            # Actually should be ok
 b2ClipVertex       # Basic struct
 b2ContactPoint     # Created in Box2D_contact.i
 b2ContactEdge      # Basic struct

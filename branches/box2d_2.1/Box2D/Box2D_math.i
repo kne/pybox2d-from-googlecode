@@ -269,11 +269,55 @@ public:
     b2Mat22 __add__(b2Mat22* other) {
         return b2Mat22($self->col1 + other->col1, $self->col2 + other->col2);
     }
+    b2Mat22 __sub__(b2Mat22* other) {
+        return b2Mat22($self->col1 - other->col1, $self->col2 - other->col2);
+    }
+    b2Mat22& __iadd__(b2Mat22* other) {
+        $self->col1 += other->col1;
+        $self->col2 += other->col2;
+        return *$self;
+    }
+    b2Mat22& __isub__(b2Mat22* other) {
+        $self->col1 -= other->col1;
+        $self->col2 -= other->col2;
+        return *$self;
+    }
 }
 
 %rename(__GetInverse) b2Mat22::GetInverse;
 %rename(__GetAngle) b2Mat22::GetAngle;
 %rename(set) b2Mat22::Set;
+
+/**** Mat33 ****/
+%extend b2Mat33 {
+public:
+    %pythoncode %{
+    %}
+    b2Vec3 __mul__(b2Vec3& v) {
+        return v.x * $self->col1 + v.y * $self->col2 + v.z * $self->col3;
+    }
+    b2Mat33 __add__(b2Mat33* other) {
+        return b2Mat33($self->col1 + other->col1, $self->col2 + other->col2, $self->col3 + other->col3);
+    }
+    b2Mat33 __sub__(b2Mat33* other) {
+        return b2Mat33($self->col1 - other->col1, $self->col2 - other->col2, $self->col3 - other->col3);
+    }
+    b2Mat33& __iadd__(b2Mat33* other) {
+        $self->col1 += other->col1;
+        $self->col2 += other->col2;
+        $self->col3 += other->col3;
+        return *$self;
+    }
+    b2Mat33& __isub__(b2Mat33* other) {
+        $self->col1 -= other->col1;
+        $self->col2 -= other->col2;
+        $self->col3 -= other->col3;
+        return *$self;
+    }
+}
+
+%rename(__GetAngle) b2Mat33::GetAngle;
+%rename(set) b2Mat33::Set;
 
 /**** Transform ****/
 %extend b2Transform {

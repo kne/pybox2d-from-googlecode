@@ -3,8 +3,6 @@
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
 # 
-# Implemented using the pybox2d SWIG interface for Box2D (pygooglecode.com)
-# 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
 # arising from the use of this software.
@@ -19,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main_nogui import *
+from pygame_main import *
 from math import sqrt
 
 class ApplyForce (Framework):
