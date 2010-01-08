@@ -90,7 +90,7 @@ box2d_source_files = [os.path.join('Box2D', 'Box2D.i')] + \
 swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -globals b2Globals -outdir .'
 
 pybox2d_extension = \
-    Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')
+    Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.', '-Wno-unused'], language='c++')
 
 LONG_DESCRIPTION = \
 """ 2D physics library Box2D %s for usage in Python.
