@@ -45,8 +45,8 @@ class fwGUI(gui.Table):
     form = None
 
     def __init__(self,settings, **params):
-        # The framework GUI is just basically a HTML-like table.
-        # There are 2 columns, and basically everything is right-aligned.
+        # The framework GUI is just basically a HTML-like table
+        # There are 2 columns right-aligned on the screen
         gui.Table.__init__(self,**params)
         self.form=gui.Form()
 

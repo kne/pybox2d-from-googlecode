@@ -31,9 +31,15 @@
         SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
     }
 }
+%typemap(in) b2Color* self {
+    int res1 = SWIG_ConvertPtr($input, (void**)&$1, $descriptor(b2Color*), 0);
+    if (!SWIG_IsOK(res1)) {
+        SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+    }
+}
 
 //Resolve ambiguities in overloaded functions when you pass a tuple or list when 
-//SWIG expects a b2Vec2 or b2Vec3
+//SWIG expects a b2Vec2 (b2Vec3, b2Color)
 %typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Vec2*,b2Vec2& {
    $1 = (PyList_Check($input)  || 
          PyTuple_Check($input) || 
@@ -44,6 +50,12 @@
    $1 = (PyList_Check($input)  || 
          PyTuple_Check($input) || 
          SWIG_CheckState(SWIG_ConvertPtr($input, 0, $descriptor(b2Vec3*), 0))
+        ) ? 1 : 0;
+}
+%typemap(typecheck,precedence=SWIG_TYPECHECK_POINTER) b2Color*,b2Color& {
+   $1 = (PyList_Check($input)  || 
+         PyTuple_Check($input) || 
+         SWIG_CheckState(SWIG_ConvertPtr($input, 0, $descriptor(b2Color*), 0))
         ) ? 1 : 0;
 }
 
@@ -76,6 +88,44 @@
             SWIG_fail;
         }
         temp =(b2Vec2&) *$1;
+    }
+    $1 = &temp;
+}
+
+// Allow b2Color* arguments be passed in as tuples or lists
+%typemap(in) b2Color* (b2Color temp) {
+    //input - $input -> ($1_type) $1 $1_descriptor
+    if (PyTuple_Check($input) || PyList_Check($input)) {
+        int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
+        if (sz != 3) {
+            PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 3, got length %d", sz);
+            SWIG_fail;
+        }
+        int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.r);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 0");
+            SWIG_fail;
+        } 
+        res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.g);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 1");
+            SWIG_fail;
+        } 
+        res1 = SWIG_AsVal_float(PySequence_GetItem($input, 2), &temp.b);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 2");
+            SWIG_fail;
+        } 
+    } else if ($input==Py_None) {
+        temp.Set(0.0f,0.0f,0.0f);
+        Py_DECREF(Py_None); // TODO: check
+    } else {
+        int res1 = SWIG_ConvertPtr($input, (void**)&$1, $1_descriptor, 0);
+        if (!SWIG_IsOK(res1)) {
+            SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+            SWIG_fail;
+        }
+        temp =(b2Color&) *$1;
     }
     $1 = &temp;
 }
@@ -150,7 +200,45 @@
     $1 = &temp;
 }
 
-// Allow b2Vec3* arguments be passed in as tuples or lists
+// Allow b2Color& arguments be passed in as tuples or lists
+%typemap(in) b2Color& (b2Color temp) {
+    //input - $input -> ($1_type) $1 $1_descriptor
+    if (PyTuple_Check($input) || PyList_Check($input)) {
+        int sz = (PyList_Check($input) ? PyList_Size($input) : PyTuple_Size($input));
+        if (sz != 3) {
+            PyErr_Format(PyExc_TypeError, "Expected tuple or list of length 3, got length %d", sz);
+            SWIG_fail;
+        }
+        int res1 = SWIG_AsVal_float(PySequence_GetItem($input, 0), &temp.r);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 0");
+            SWIG_fail;
+        } 
+        res1 = SWIG_AsVal_float(PySequence_GetItem($input, 1), &temp.g);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 1");
+            SWIG_fail;
+        } 
+        res1 = SWIG_AsVal_float(PySequence_GetItem($input, 2), &temp.b);
+        if (!SWIG_IsOK(res1)) {
+            PyErr_SetString(PyExc_TypeError,"Converting from sequence to b2Color, expected int/float arguments index 2");
+            SWIG_fail;
+        } 
+    } else if ($input==Py_None) {
+        temp.Set(0.0f,0.0f,0.0f);
+        Py_DECREF(Py_None); // TODO: check
+    } else {
+        int res1 = SWIG_ConvertPtr($input, (void**)&$1, $1_descriptor, 0);
+        if (!SWIG_IsOK(res1)) {
+            SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "$symname" "', argument " "$1_name"" of type '" "$1_type""'"); 
+            SWIG_fail;
+        }
+        temp =(b2Color&) *$1;
+    }
+    $1 = &temp;
+}
+
+// Allow b2Vec3& arguments be passed in as tuples or lists
 %typemap(in) b2Vec3& (b2Vec3 temp) {
     //input - $input -> ($1_type) $1 $1_descriptor
     if (PyTuple_Check($input) || PyList_Check($input)) {

@@ -19,15 +19,15 @@
 */
 
 //These operators do not work unless explicitly defined like this 
-%rename(b2add) operator  + (const b2Vec2& a, const b2Vec2& b);
-%rename(b2add) operator  + (const b2Mat22& A, const b2Mat22& B);
-%rename(b2sub) operator  - (const b2Vec2& a, const b2Vec2& b);
-%rename(b2mul) operator  * (float32 s, const b2Vec2& a);
-%rename(b2equ) operator == (const b2Vec2& a, const b2Vec2& b);
+%ignore operator  + (const b2Vec2& a, const b2Vec2& b);
+%ignore operator  + (const b2Mat22& A, const b2Mat22& B);
+%ignore operator  - (const b2Vec2& a, const b2Vec2& b);
+%ignore operator  * (float32 s, const b2Vec2& a);
+%ignore operator == (const b2Vec2& a, const b2Vec2& b);
 
-%rename(b2mul) operator * (float32 s, const b2Vec3& a);
-%rename(b2add) operator + (const b2Vec3& a, const b2Vec3& b);
-%rename(b2sub) operator - (const b2Vec3& a, const b2Vec3& b);
+%ignore operator * (float32 s, const b2Vec3& a);
+%ignore operator + (const b2Vec3& a, const b2Vec3& b);
+%ignore operator - (const b2Vec3& a, const b2Vec3& b);
 
 //Since Python (apparently) requires __imul__ to return self,
 //these void operators will not do. So, rename them, then call them
@@ -48,8 +48,8 @@ public:
 
     %pythoncode %{
     __iter__ = lambda self: iter( (self.x, self.y) )
-    __eq__ = lambda self, other: b2equ(self, other)
-    __ne__ = lambda self,other: not b2equ(self, other)
+    __eq__ = lambda self, other: self.__equ(other)
+    __ne__ = lambda self,other: not self.__equ(other)
     def __repr__(self):
         return "b2Vec2(%g,%g)" % (self.x, self.y)
     def copy(self):
@@ -100,6 +100,9 @@ public:
     valid = property(__IsValid, None)
 
     %}
+    bool __equ(b2Vec2& other) {
+        return ($self->x == other.x && $self->y == other.y);
+    }
     float32 dot(b2Vec2& other) {
         return $self->x * other.x + $self->y * other.y;
     }
@@ -260,33 +263,42 @@ public:
         angle = property(__GetAngle, None)
 
     %}
-    b2Vec2 __mul__(b2Vec2* other) {
-        return b2Vec2($self->col1.x * other->x + $self->col2.x * other->y, $self->col1.y * other->x + $self->col2.y * other->y);
+    b2Vec2 __mul__(b2Vec2* v) {
+        return b2Vec2($self->col1.x * v->x + $self->col2.x * v->y, $self->col1.y * v->x + $self->col2.y * v->y);
     }
-    b2Mat22 __mul__(b2Mat22* other) {
-        return b2Mat22(b2Mul(*($self), other->col1), b2Mul(*($self), other->col2));
+    b2Mat22 __mul__(b2Mat22* m) {
+        return b2Mat22(b2Mul(*($self), m->col1), b2Mul(*($self), m->col2));
     }
-    b2Mat22 __add__(b2Mat22* other) {
-        return b2Mat22($self->col1 + other->col1, $self->col2 + other->col2);
+    b2Mat22 __add__(b2Mat22* m) {
+        return b2Mat22($self->col1 + m->col1, $self->col2 + m->col2);
     }
-    b2Mat22 __sub__(b2Mat22* other) {
-        return b2Mat22($self->col1 - other->col1, $self->col2 - other->col2);
+    b2Mat22 __sub__(b2Mat22* m) {
+        return b2Mat22($self->col1 - m->col1, $self->col2 - m->col2);
     }
-    b2Mat22& __iadd__(b2Mat22* other) {
-        $self->col1 += other->col1;
-        $self->col2 += other->col2;
-        return *$self;
+    void __iadd(b2Mat22* m) {
+        $self->col1 += m->col1;
+        $self->col2 += m->col2;
     }
-    b2Mat22& __isub__(b2Mat22* other) {
-        $self->col1 -= other->col1;
-        $self->col2 -= other->col2;
-        return *$self;
+    void __isub(b2Mat22* m) {
+        $self->col1 -= m->col1;
+        $self->col2 -= m->col2;
     }
 }
 
 %rename(__GetInverse) b2Mat22::GetInverse;
 %rename(__GetAngle) b2Mat22::GetAngle;
 %rename(set) b2Mat22::Set;
+
+%feature("shadow") b2Mat22::__iadd__ {
+    def __iadd__(self, other):
+        self.__iadd(other)
+        return self
+}
+%feature("shadow") b2Mat22::__isub__ {
+    def __iadd__(self, other):
+        self.__iadd(other)
+        return self
+}
 
 /**** Mat33 ****/
 %extend b2Mat33 {
@@ -302,18 +314,27 @@ public:
     b2Mat33 __sub__(b2Mat33* other) {
         return b2Mat33($self->col1 - other->col1, $self->col2 - other->col2, $self->col3 - other->col3);
     }
-    b2Mat33& __iadd__(b2Mat33* other) {
+    void __iadd(b2Mat33* other) {
         $self->col1 += other->col1;
         $self->col2 += other->col2;
         $self->col3 += other->col3;
-        return *$self;
     }
-    b2Mat33& __isub__(b2Mat33* other) {
+    void __isub(b2Mat33* other) {
         $self->col1 -= other->col1;
         $self->col2 -= other->col2;
         $self->col3 -= other->col3;
-        return *$self;
     }
+}
+
+%feature("shadow") b2Mat33::__iadd__ {
+    def __iadd__(self, other):
+        self.__iadd(other)
+        return self
+}
+%feature("shadow") b2Mat33::__isub__ {
+    def __iadd__(self, other):
+        self.__iadd(other)
+        return self
 }
 
 %rename(__GetAngle) b2Mat33::GetAngle;
@@ -328,10 +349,8 @@ public:
 
     %}
     b2Vec2 __mul__(b2Vec2& v) {
-        float32 x = $self->position.x + $self->R.col1.x * v.x + $self->R.col2.x * v.y;
-        float32 y = $self->position.y + $self->R.col1.y * v.x + $self->R.col2.y * v.y;
-
-        return b2Vec2(x, y);
+        return b2Vec2($self->position.x + $self->R.col1.x * v.x + $self->R.col2.x * v.y, 
+                $self->position.y + $self->R.col1.y * v.x + $self->R.col2.y * v.y);
     }
 }
 

@@ -57,15 +57,16 @@ def write_init():
     license_header = open(os.path.join('Box2D', 'pybox2d_license_header.txt')).read()
 
     # create the source code for the file
-    if sys.version_info >= (3, 0):
-        init_source = [ "from .Box2D import *" ]
+    if sys.version_info >= (2, 5):
+        import_string = "from .Box2D import *"
     else:
-        init_source = [ "from Box2D import *" ]
+        import_string = "from Box2D import *"
 
-    init_source.extend( [
+    init_source = [
+        import_string,
         "__version__      = '%s'"    % version_str,
         "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number), ]
-        )
+
     # and create the __init__ file with the appropriate version string
     f=open('__init__.py', 'w')
     f.write(license_header)

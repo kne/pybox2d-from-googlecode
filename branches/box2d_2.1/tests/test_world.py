@@ -1,7 +1,7 @@
 import unittest
 import Box2D
 
-class testBasic (unittest.TestCase):
+class testWorld (unittest.TestCase):
     def setUp(self):
         pass
 

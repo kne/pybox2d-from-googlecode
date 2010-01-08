@@ -1,7 +1,7 @@
 import unittest
 import itertools
 
-class testBasic (unittest.TestCase):
+class testJoints (unittest.TestCase):
     world = None
     dbody1 = None
     dbody2 = None

@@ -5,7 +5,7 @@ from math import cos, sin
 class cl (b2ContactListener):
     pass
 
-class testBasic (unittest.TestCase):
+class testPolyshape (unittest.TestCase):
     def setUp(self):
         pass
 

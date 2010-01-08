@@ -22,8 +22,18 @@
 /**** Color ****/
 %extend b2Color {
 public:
+    b2Color(b2Color& other) {
+        return new b2Color(other.r, other.g, other.b);
+    }
+
     %pythoncode %{
     __iter__ = lambda self: iter((self.r, self.g, self.b)) 
+    __eq__ = lambda self, other: self.__equ(other)
+    __ne__ = lambda self,other: not self.__equ(other)
+    def __repr__(self):
+        return "b2Color(%g,%g,%g)" % (self.r, self.g, self.b)
+    def copy(self):
+        return b2Color(self.r, self.g, self.b)
     def __SetBytes(self, value):
         if len(value) != 3:
             raise ValueError('Expected length 3 list')
@@ -58,44 +68,78 @@ public:
     b2Color __truediv__(float32 a) {
         return b2Color($self->r / a, $self->g / a, $self->b / a);
     }
+    b2Color __add__(b2Color& o) {
+        return b2Color($self->r + o.r, $self->g + o.g, $self->b + o.b);
+    }
+    b2Color __sub__(b2Color& o) {
+        return b2Color($self->r - o.r, $self->g - o.g, $self->b - o.b);
+    }
     b2Color __div__(float32 a) {
         return b2Color($self->r / a, $self->g / a, $self->b / a);
+    }
+    b2Color __rmul__(float32 a) {
+        return b2Color($self->r * a, $self->g * a, $self->b * a);
     }
     b2Color __mul__(float32 a) {
         return b2Color($self->r * a, $self->g * a, $self->b * a);
     }
-    b2Color& __isub__(b2Color& o) {
+    void __isub(b2Color& o) {
         $self->r -= o.r;
         $self->g -= o.g;
         $self->b -= o.b;
-        return *($self);
     }
-    b2Color& __itruediv__(b2Color& o) {
+    void __itruediv(b2Color& o) {
         $self->r /= o.r;
         $self->g /= o.g;
         $self->b /= o.b;
-        return *($self);
     }
-    b2Color& __idiv__(b2Color& o) {
+    void __idiv(b2Color& o) {
         $self->r /= o.r;
         $self->g /= o.g;
         $self->b /= o.b;
-        return *($self);
     }
-    b2Color& __imul__(b2Color& o) {
+    void __imul(b2Color& o) {
         $self->r *= o.r;
         $self->g *= o.g;
         $self->b *= o.b;
-        return *($self);
     }
-    b2Color& __iadd__(b2Color& o) {
+    void __iadd(b2Color& o) {
         $self->r += o.r;
         $self->g += o.g;
         $self->b += o.b;
-        return *($self);
+    }
+    bool __equ(b2Color& b) {
+        return ($self->r == b.r && $self->g==b.g && $self->b==b.b);
     }
      
 }
+
+%feature("shadow") b2Color::__iadd {
+    def __iadd__(self, other):
+        self.__iadd(other)
+        return self
+}
+%feature("shadow") b2Color::__isub {
+    def __isub__(self, other):
+        self.__isub(other)
+        return self
+}
+%feature("shadow") b2Color::__imul {
+    def __imul__(self, other):
+        self.__imul(other)
+        return self
+}
+%feature("shadow") b2Color::__idiv {
+    def __idiv__(self, other):
+        self.__idiv(other)
+        return self
+}
+%feature("shadow") b2Color::__itruediv {
+    def __itruediv__(self, other):
+        self.__itruediv(other)
+        return self
+}
+
 
 /**** DistanceProxy ****/
 %extend b2DistanceProxy {
