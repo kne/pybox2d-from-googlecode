@@ -32,7 +32,6 @@ class fwSettings(object):
     # Drawing
     drawStats=False
     drawShapes=True
-    drawControllers=True
     drawJoints=True
     drawCoreShapes=False
     drawAABBs=False
