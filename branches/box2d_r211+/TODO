@@ -1,5 +1,0 @@
-Renames for m_
-Convert all examples
-Update docstrings, pretty printing, docs, etc.
-Wait on new Box2D SVN as more changes are supposedly coming
-Fix pickling with new changes (or just get rid of it, don't think it's used)
