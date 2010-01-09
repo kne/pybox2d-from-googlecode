@@ -324,6 +324,12 @@
     }
 }
 
+%typemap(directorin) b2Vec2& {
+    $input = PyTuple_New(2);
+    PyTuple_SetItem( $input, 0, PyFloat_FromDouble((float32)$1_name.x));
+    PyTuple_SetItem( $input, 1, PyFloat_FromDouble((float32)$1_name.y));
+}
+
 /* Properly downcast joints for all return values using b2Joint */
 %typemap(out) b2Joint* {
     

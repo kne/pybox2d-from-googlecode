@@ -27,16 +27,16 @@
 
 %inline %{
     // Add support for == and != in Python for shapes, joints, and bodies.
-    bool __b2PythonJointPointerEquals__(b2Joint* a, b2Joint* b) {
+    bool __(b2Joint* a, b2Joint* b) {
         return a==b;
     }
-    bool __b2PythonBodyPointerEquals__(b2Body* a, b2Body* b) {
+    bool __bodyeq(b2Body* a, b2Body* b) {
         return a==b;
     }
-    bool __b2PythonShapePointerEquals__(b2Shape* a, b2Shape* b) {
+    bool __shapeeq(b2Shape* a, b2Shape* b) {
         return a==b;
     }
-    bool __b2PythonFixturePointerEquals__(b2Fixture* a, b2Fixture* b) {
+    bool __fixtureeq(b2Fixture* a, b2Fixture* b) {
         return a==b;
     }
 
@@ -200,19 +200,19 @@ def _list_from_linked_list(first):
 def b2ShapeCompare(a, b):
     if not isinstance(a, b2Shape) or not isinstance(b, b2Shape):
         return False
-    return __b2PythonShapePointerEquals__(a, b)
+    return __shapeeq(a, b)
 def b2BodyCompare(a, b):
     if not isinstance(a, b2Body) or not isinstance(b, b2Body):
         return False
-    return __b2PythonBodyPointerEquals__(a, b)
+    return __bodyeq(a, b)
 def b2JointCompare(a, b):
     if not isinstance(a, b2Joint) or not isinstance(b, b2Joint):
         return False
-    return __b2PythonJointPointerEquals__(a, b)
+    return __jointeq(a, b)
 def b2FixtureCompare(a, b):
     if not isinstance(a, b2Fixture) or not isinstance(b, b2Fixture):
         return False
-    return __b2PythonFixturePointerEquals__(a, b)
+    return __fixtureeq(a, b)
 
 %}
 

@@ -119,7 +119,7 @@
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
     %feature("director") b2QueryCallback;
-    %feature("director") b2RaycastCallback;
+    %feature("director") b2RayCastCallback;
 
     /* ---- includes ---- */
     /* The order of these is important. */

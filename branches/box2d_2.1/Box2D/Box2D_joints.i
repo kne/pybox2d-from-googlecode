@@ -253,20 +253,17 @@ public:
 %rename(__SetMaxTorque) b2FrictionJoint::SetMaxTorque;
 %rename(__SetMaxForce) b2FrictionJoint::SetMaxForce;
 
-%include "Dynamics/Joints/b2Joint.h"
-
-%pythoncode %{
-    b2JointTypes = {
-        e_unknownJoint : "Unknown",
-        e_revoluteJoint : "Revolute",
-        e_prismaticJoint : "Prismatic",
-        e_distanceJoint : "Distance",
-        e_pulleyJoint : "Pulley",
-        e_mouseJoint : "Mouse",
-        e_gearJoint : "Gear",
-        e_lineJoint : "Line",
-        e_weldJoint : "Weld",
-        e_frictionJoint : "Friction",
-    }
-
-%}
+%ignore e_atLowerLimit;
+%ignore e_atUpperLimit;
+%ignore e_distanceJoint;
+%ignore e_equalLimits;
+%ignore e_frictionJoint;
+%ignore e_gearJoint;
+%ignore e_inactiveLimit;
+%ignore e_lineJoint;
+%ignore e_mouseJoint;
+%ignore e_prismaticJoint;
+%ignore e_pulleyJoint;
+%ignore e_revoluteJoint;
+%ignore e_unknownJoint;
+%ignore e_weldJoint;

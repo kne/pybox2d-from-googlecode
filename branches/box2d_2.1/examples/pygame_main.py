@@ -134,7 +134,7 @@ class fwDebugDraw(b2DebugDraw):
 
     def DrawCircle(self, center, radius, color, drawwidth=1):
         """
-        Draw a wireframe circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        Draw a wireframe circle given the center, radius, axis of orientation and color.
         """
         radius *= self.viewZoom
         if radius < 1: radius = 1
@@ -143,21 +143,18 @@ class fwDebugDraw(b2DebugDraw):
         center = self.to_screen(center)
         pygame.draw.circle(self.surface, color.bytes, center, radius, drawwidth)
 
-    def DrawSolidCircle(self, center_v, radius, axis, color):
+    def DrawSolidCircle(self, center, radius, axis, color):
         """
-        Draw a solid circle given the b2Vec2 center_v, radius, axis of orientation and color.
+        Draw a solid circle given the center, radius, axis of orientation and color.
         """
         radius *= self.viewZoom
         if radius < 1: radius = 1
         else: radius = int(radius)
 
-        center = self.to_screen(center_v)
+        center = self.to_screen(center)
         pygame.draw.circle(self.surface, (color/2).bytes+[127], center, radius, 0)
-
         pygame.draw.circle(self.surface, color.bytes, center, radius, 1)
-
-        p = radius * axis
-        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p.x, center[1] + p.y)) 
+        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - radius*axis[0], center[1] + radius*axis[1])) 
 
     def DrawPolygon(self, in_vertices, vertexCount, color):
         """
@@ -454,7 +451,7 @@ class Framework(b2ContactListener):
             self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
 
-            self.DrawStringCR("heap bytes = %d" % cvar.b2_byteCount)
+            self.DrawStringCR("heap bytes = %d" % b2Globals.b2_byteCount)
 
         if settings.drawFPS:
             self.DrawStringCR("FPS %d" % self.fps)
