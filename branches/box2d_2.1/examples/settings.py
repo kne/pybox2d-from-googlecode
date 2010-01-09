@@ -38,6 +38,7 @@ class fwSettings(object):
     drawOBBs=False
     drawPairs=False
     drawContactPoints=False
+    maxContactPoints=100
     drawContactNormals=False
     drawFPS=True
     drawMenu=True             # toggle by pressing F1

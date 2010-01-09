@@ -160,7 +160,7 @@ class fwDebugDraw(b2DebugDrawExtended):
         else: radius = int(radius)
         if world_coordinates:
             center = self.to_screen(center)
-
+        print(center)
         pygame.draw.circle(self.surface, (color/2).bytes+[127], center, radius, 0)
         pygame.draw.circle(self.surface, color.bytes, center, radius, 1)
         pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - radius*axis[0], center[1] + radius*axis[1])) 
@@ -481,7 +481,6 @@ class Framework(b2ContactListener):
 
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
-
             for point in self.points:
                 if point['state'] == b2_addState:
                     self.debugDraw.DrawPoint(point['position'], settings.pointSize, b2Color(0.3, 0.95, 0.3), world_coordinates=True)
@@ -702,6 +701,11 @@ class Framework(b2ContactListener):
     def PreSolve(self, contact, old_manifold):
         # This is a critical function when there are many contacts in the world.
         # It should be optimized as much as possible.
+        if not (self.settings.drawContactPoints or self.settings.drawContactNormals):
+            return
+        elif len(self.points) > self.settings.maxContactPoints:
+            return
+
         manifold = contact.manifold
         if manifold.pointCount == 0:
             return

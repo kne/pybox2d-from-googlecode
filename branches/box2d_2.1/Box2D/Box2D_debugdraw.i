@@ -78,11 +78,11 @@
 %typemap(directorin) (const b2Vec2* conv_vertices, int32 vertexCount) {
     $input = this->__Convert($1_name, $2_name);
 }
-%typemap(directorin) const b2Vec2* conv_p1 {
-    $input = this->to_screen($1_name);
+%typemap(directorin) const b2Vec2& conv_p1 {
+    $input = this->to_screen((b2Vec2&)$1_name);
 }
-%typemap(directorin) const b2Vec2* conv_p2 {
-    $input = this->to_screen($1_name);
+%typemap(directorin) const b2Vec2& conv_p2 {
+    $input = this->to_screen((b2Vec2&)$1_name);
 }
 
 %include "Box2D/Dynamics/b2WorldCallbacks.h"
