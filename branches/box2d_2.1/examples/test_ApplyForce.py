@@ -22,6 +22,7 @@ from math import sqrt
 
 class ApplyForce (Framework):
     name="ApplyForce"
+    description="Use w, a, and d to control the ship."
     def __init__(self):
         super(ApplyForce, self).__init__()
         self.world.gravity = (0.0, 0.0)

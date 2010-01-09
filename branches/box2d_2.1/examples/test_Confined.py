@@ -22,6 +22,7 @@ from random import random
 
 class Confined (Framework):
     name="Confined space"
+    description="Press c to create a circle"
     def __init__(self):
         super(Confined, self).__init__()
 

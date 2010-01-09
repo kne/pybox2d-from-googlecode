@@ -72,6 +72,16 @@
         _init_kwargs(self, **kwargs)
 }
 
+%feature("shadow") b2DebugDrawExtended::b2DebugDrawExtended() {
+    def __init__(self, **kwargs):
+        if self.__class__ == b2DebugDrawExtended:
+            _self = None
+        else:
+            _self = self
+        _Box2D.b2DebugDrawExtended_swiginit(self,_Box2D.new_b2DebugDrawExtended(_self, ))
+        _init_kwargs(self, **kwargs)
+}
+
 
 %feature("shadow") b2DestructionListener::b2DestructionListener() {
     def __init__(self, **kwargs):

@@ -75,7 +75,7 @@ class fwDestructionListener(b2DestructionListener):
         elif isinstance(object, b2Shape):
             self.test.ShapeDestroyed(object)
 
-class fwDebugDraw(b2DebugDraw):
+class fwDebugDraw(b2DebugDrawExtended):
     """
     This debug draw class accepts callbacks from Box2D (which specifies what to draw)
     and handles all of the rendering.
@@ -84,40 +84,47 @@ class fwDebugDraw(b2DebugDraw):
     Debug drawing, as its name implies, is for debugging.
     """
     surface = None
-    viewZoom = property(lambda self: self.test.viewZoom, None)
-    viewCenter = property(lambda self: self.test.viewCenter, None)
-    viewOffset = property(lambda self: self.test.viewOffset, None)
-    screenSize = property(lambda self: self.test.screenSize, None)
     def __init__(self, **kwargs): 
         super(fwDebugDraw, self).__init__(**kwargs)
+        self.flipX = False
+        self.flipY = True
+        self.convertVertices = True
 
-    def __set_screensize(self, size):
-        self.width, self.height = size
+    def StartDraw(self):
+        self.zoom=self.test.viewZoom
+        self.center=self.test.viewCenter
+        self.offset=self.test.viewOffset
+        self.screenSize=self.test.screenSize
 
-    def DrawPoint(self, p, size, color):
+    def DrawPoint(self, p, size, color, world_coordinates=False):
         """
         Draw a single point at point p given a pixel size and color.
         """
-        self.DrawCircle(p, size/self.viewZoom, color, drawwidth=0)
+        if world_coordinates:
+            p=self.to_screen(p)
+        self.DrawCircle(p, size/self.zoom, color, drawwidth=0)
         
-    def DrawAABB(self, aabb, color):
+    def DrawAABB(self, aabb, color, world_coordinates=False):
         """
         Draw a wireframe around the AABB with the given color.
         """
-        points = [self.to_screen(p) for p in [
-                    (aabb.lowerBound.x, aabb.lowerBound.y ),
+        points = [  (aabb.lowerBound.x, aabb.lowerBound.y ),
                     (aabb.upperBound.x, aabb.lowerBound.y ),
                     (aabb.upperBound.x, aabb.upperBound.y ),
-                    (aabb.lowerBound.x, aabb.upperBound.y ),
-                    ] ]
+                    (aabb.lowerBound.x, aabb.upperBound.y ) ]
         
+        if world_coordinates:
+            points=[self.to_screen(p) for p in points]
         pygame.draw.aalines(self.surface, color, True, points)
 
-    def DrawSegment(self, p1, p2, color):
+    def DrawSegment(self, p1, p2, color, world_coordinates=False):
         """
         Draw the line segment from p1-p2 with the specified color.
         """
-        pygame.draw.aaline(self.surface, color.bytes, self.to_screen(p1), self.to_screen(p2))
+        if world_coordinates:
+            p1, p2 = self.to_screen(p1), self.to_screen(p2)
+
+        pygame.draw.aaline(self.surface, color.bytes, p1, p2)
 
     def DrawTransform(self, xf):
         """
@@ -132,58 +139,55 @@ class fwDebugDraw(b2DebugDraw):
         pygame.draw.aaline(self.surface, (255,0,0), p1, p2)
         pygame.draw.aaline(self.surface, (0,255,0), p1, p3)
 
-    def DrawCircle(self, center, radius, color, drawwidth=1):
+    def DrawCircle(self, center, radius, color, drawwidth=1, world_coordinates=False):
         """
         Draw a wireframe circle given the center, radius, axis of orientation and color.
         """
-        radius *= self.viewZoom
+        radius *= self.zoom
         if radius < 1: radius = 1
         else: radius = int(radius)
+        if world_coordinates:
+            p1, p2 = self.to_screen(p1), self.to_screen(p2)
 
-        center = self.to_screen(center)
         pygame.draw.circle(self.surface, color.bytes, center, radius, drawwidth)
 
-    def DrawSolidCircle(self, center, radius, axis, color):
+    def DrawSolidCircle(self, center, radius, axis, color, world_coordinates=False):
         """
         Draw a solid circle given the center, radius, axis of orientation and color.
         """
-        radius *= self.viewZoom
+        radius *= self.zoom
         if radius < 1: radius = 1
         else: radius = int(radius)
+        if world_coordinates:
+            center = self.to_screen(center)
 
-        center = self.to_screen(center)
         pygame.draw.circle(self.surface, (color/2).bytes+[127], center, radius, 0)
         pygame.draw.circle(self.surface, color.bytes, center, radius, 1)
         pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - radius*axis[0], center[1] + radius*axis[1])) 
 
-    def DrawPolygon(self, in_vertices, vertexCount, color):
+    def DrawPolygon(self, vertices, color, world_coordinates=False):
         """
-        Draw a wireframe polygon given the world vertices in_vertices (tuples) with the specified color.
+        Draw a wireframe polygon given the world vertices vertices (tuples) with the specified color.
         """
-        if len(in_vertices) == 2:
-            pygame.draw.aaline(self.surface, color.bytes, self.to_screen(in_vertices[0]), self.to_screen(in_vertices[1]))
+        if world_coordinates:
+            vertices = [self.to_screen(v) for v in vertices]
+
+        if len(vertices) == 2:
+            pygame.draw.aaline(self.surface, color.bytes, vertices[0], vertices)
         else:
-            pygame.draw.polygon(self.surface, color.bytes, [self.to_screen(v) for v in in_vertices], 1)
+            pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
         
-    def DrawSolidPolygon(self, in_vertices, vertexCount, color):
+    def DrawSolidPolygon(self, vertices, color, world_coordinates=False):
         """
-        Draw a filled polygon given the world vertices in_vertices (tuples) with the specified color.
+        Draw a filled polygon given the world vertices vertices (tuples) with the specified color.
         """
-        if len(in_vertices) == 2:
-            pygame.draw.aaline(self.surface, color.bytes, self.to_screen(in_vertices[0]), self.to_screen(in_vertices[1]))
+        if world_coordinates:
+            vertices = [self.to_screen(v) for v in vertices]
+        if len(vertices) == 2:
+            pygame.draw.aaline(self.surface, color.bytes, vertices[0], vertices[1])
         else:
-            vertices = [self.to_screen(v) for v in in_vertices]
             pygame.draw.polygon(self.surface, (color/2).bytes+[127], vertices, 0)
             pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
-
-    def to_screen(self, pt):
-        """
-        Input:  (x, y) - a b2Vec2 or tuple in world coordinates
-        Output: (x, y) - a tuple in integral screen coordinates
-        """
-        return (int((pt[0] * self.viewZoom) - self.viewOffset.x), 
-                int(self.screenSize.y - ((pt[1] * self.viewZoom) - self.viewOffset.y))
-                )
 
 class fwQueryCallback(b2QueryCallback):
     def __init__(self, p): 
@@ -214,6 +218,7 @@ class Framework(b2ContactListener):
     See test_Empty.py or any of the other tests for more information.
     """
     name = "None"
+    description = None
 
     # Box2D-related
     points             = None
@@ -421,6 +426,10 @@ class Framework(b2ContactListener):
             drawCOMs=settings.drawCOMs
                 )
 
+        # Update the debug draw settings so that the vertices will be properly
+        # converted to screen coordinates
+        self.debugDraw.StartDraw()
+
         # Set the other settings that aren't contained in the flags
         self.world.warmStarting=settings.enableWarmStarting
         self.world.continuousPhysics=settings.enableContinuous
@@ -443,6 +452,9 @@ class Framework(b2ContactListener):
             self.world.DestroyBody(self.bomb)
             self.bomb = None
 
+        if settings.drawFPS:
+            self.DrawStringCR("FPS %d" % self.fps)
+        
         # Take care of additional drawing (stats, fps, mouse joint, slingshot bomb, contact points)
         if settings.drawStats:
             self.DrawStringCR("bodies=%d contacts=%d joints=%d proxies=%d" %
@@ -453,38 +465,35 @@ class Framework(b2ContactListener):
 
             self.DrawStringCR("heap bytes = %d" % b2Globals.b2_byteCount)
 
-        if settings.drawFPS:
-            self.DrawStringCR("FPS %d" % self.fps)
-        
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
             p1 = self.mouseJoint.anchorB
             p2 = self.mouseJoint.target
 
-            self.debugDraw.DrawPoint(p1, settings.pointSize, b2Color(0,1,0))
-            self.debugDraw.DrawPoint(p2, settings.pointSize, b2Color(0,1,0))
-            self.debugDraw.DrawSegment(p1, p2, b2Color(0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(p1, settings.pointSize, b2Color(0,1,0), world_coordinates=True)
+            self.debugDraw.DrawPoint(p2, settings.pointSize, b2Color(0,1,0), world_coordinates=True)
+            self.debugDraw.DrawSegment(p1, p2, b2Color(0.8,0.8,0.8), world_coordinates=True)
 
         # Draw the slingshot bomb
         if self.bombSpawning:
-            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, b2Color(0,0,1.0))
-            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, b2Color(0.8,0.8,0.8))
+            self.debugDraw.DrawPoint(self.bombSpawnPoint, settings.pointSize, b2Color(0,0,1.0), world_coordinates=True)
+            self.debugDraw.DrawSegment(self.bombSpawnPoint, self.mouseWorld, b2Color(0.8,0.8,0.8), world_coordinates=True)
 
         # Draw each of the contact points in different colors.
         if self.settings.drawContactPoints:
-            #k_impulseScale = 0.1
-            k_axisScale = 0.3
 
             for point in self.points:
-                if point.state == b2_addState:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.95, 0.3))
-                elif point.state == b2_persistState:
-                    self.debugDraw.DrawPoint(point.position, settings.pointSize, b2Color(0.3, 0.3, 0.95))
+                if point['state'] == b2_addState:
+                    self.debugDraw.DrawPoint(point['position'], settings.pointSize, b2Color(0.3, 0.95, 0.3), world_coordinates=True)
+                elif point['state'] == b2_persistState:
+                    self.debugDraw.DrawPoint(point['position'], settings.pointSize, b2Color(0.3, 0.3, 0.95), world_coordinates=True)
 
-                if settings.drawContactNormals:
-                    p1 = point.position
-                    p2 = p1 + k_axisScale * point.normal
-                    self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4))
+        if settings.drawContactNormals:
+            k_axisScale = 0.3
+            for point in self.points:
+                p1 = b2Vec2(point['position'])
+                p2 = p1 + k_axisScale * point['normal']
+                self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
 
     def _Keyboard_Event(self, key):
         """
@@ -650,6 +659,10 @@ class Framework(b2ContactListener):
         # Draw the name of the test running
         self.DrawStringCR(self.name, (127,127,255))
 
+        if self.description:
+            # Draw the name of the test running
+            self.DrawStringCR(self.description, (127,255,127))
+
         if GUIEnabled:
             # Update the settings based on the GUI
             self.gui_table.updateSettings(self.settings)
@@ -673,41 +686,49 @@ class Framework(b2ContactListener):
         """
         Draw some text, str, at screen coordinates (x, y).
         """
-        text = self.font.render(str, True, color)
-        self.screen.blit(text, (x,y))
+        self.screen.blit(self.font.render(str, True, color), (x,y))
 
     def DrawStringCR(self, str, color=(229,153,153,255)):
         """
         Draw some text at the top status lines
         and advance to the next line.
         """
-        text = self.font.render(str, True, color)
-        self.screen.blit(text, (5,self.textLine))
+        self.screen.blit(self.font.render(str, True, color), (5,self.textLine))
         self.textLine += 15
 
     def __del__(self):
         pass
 
     def PreSolve(self, contact, old_manifold):
+        # This is a critical function when there are many contacts in the world.
+        # It should be optimized as much as possible.
         manifold = contact.manifold
         if manifold.pointCount == 0:
             return
 
-        fixtureA = contact.fixtureA
-        fixtureB = contact.fixtureB
-
         state1, state2 = b2GetPointStates(old_manifold, manifold)
-
         if not state2:
             return
 
         worldManifold = contact.worldManifold
         
         for i, point in enumerate(state2):
+            # TODO: find some way to speed all of this up.
+            self.points.append(
+                    {
+                        'fixtureA' : contact.fixtureA,
+                        'fixtureB' : contact.fixtureB,
+                        'position' : worldManifold.points[i],
+                        'normal' : worldManifold.normal,
+                        'state' : state2[i]
+                    }  )
+
+            continue
+            # This is slow, creating a new type with the kwargs and all.
             self.points.append(
                     b2ContactPoint(
-                        fixtureA = fixtureA,
-                        fixtureB = fixtureB,
+                        fixtureA = contact.fixtureA,
+                        fixtureB = contact.fixtureB,
                         position = worldManifold.points[i],
                         normal = worldManifold.normal,
                         state = state2[i]

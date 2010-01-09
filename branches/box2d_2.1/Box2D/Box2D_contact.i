@@ -111,8 +111,8 @@ public:
         PyObject* point;
         for (int i=0; i < b2_maxManifoldPoints; i++) {
             point = PyTuple_New(2);
-            PyTuple_SetItem(point, 0, PyFloat_FromDouble((float32)$self->m_points[i].x));
-            PyTuple_SetItem(point, 1, PyFloat_FromDouble((float32)$self->m_points[i].y));
+            PyTuple_SetItem(point, 0, SWIG_From_double((float32)$self->m_points[i].x));
+            PyTuple_SetItem(point, 1, SWIG_From_double((float32)$self->m_points[i].y));
 
             PyTuple_SetItem(ret, i, point);
         }

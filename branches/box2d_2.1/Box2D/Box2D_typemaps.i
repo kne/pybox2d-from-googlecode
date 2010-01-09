@@ -317,8 +317,8 @@
     PyObject* vertex;
     for (int i=0; i < vertexCount; i++) {
         vertex = PyTuple_New(2);
-        PyTuple_SetItem(vertex, 0, PyFloat_FromDouble((float32)vertices[i].x));
-        PyTuple_SetItem(vertex, 1, PyFloat_FromDouble((float32)vertices[i].y));
+        PyTuple_SetItem(vertex, 0, SWIG_From_double((float32)vertices[i].x));
+        PyTuple_SetItem(vertex, 1, SWIG_From_double((float32)vertices[i].y));
 
         PyTuple_SetItem($input, i, vertex);
     }
@@ -326,8 +326,8 @@
 
 %typemap(directorin) b2Vec2& {
     $input = PyTuple_New(2);
-    PyTuple_SetItem( $input, 0, PyFloat_FromDouble((float32)$1_name.x));
-    PyTuple_SetItem( $input, 1, PyFloat_FromDouble((float32)$1_name.y));
+    PyTuple_SetItem( $input, 0, SWIG_From_double((float32)$1_name.x));
+    PyTuple_SetItem( $input, 1, SWIG_From_double((float32)$1_name.y));
 }
 
 /* Properly downcast joints for all return values using b2Joint */

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
-# Python version Copyright (c) 2008 kne / sirkne at gmail dot com
+# Python version Copyright (c) 2010 kne / sirkne at gmail dot com
 # 
 # Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlecode.com)
 # 
@@ -26,7 +26,7 @@ class Empty(Framework):
 
     """
     name = "Empty" # Name of the class to display
-    _pickle_vars=[] # variables to pickle (save/load). e.g., ['name', 'var1', 'var2']
+    description="The description text goes here"
     def __init__(self):
         """ 
         Initialize all of your objects here.
@@ -76,12 +76,8 @@ class Empty(Framework):
         """
         pass
 
-    #def BoundaryViolated(self, body):
-    #    """
-    #    The body went out of the world's extents.
-    #    """
-    #    See pygame_main's implementation of BoundaryViolated for more information
-    #    about pickling and general stability.
+    # More functions can be changed to allow for contact monitoring and such.
+    # See the other testbed examples for more information.
 
 if __name__=="__main__":
     main(Empty)

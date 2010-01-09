@@ -109,6 +109,7 @@
     %ignore b2DistanceProxy;
     %ignore b2BlockAllocator;
 
+
     /* ---- features ---- */
     /* Autodoc puts the basic docstrings for each function */
     %feature("autodoc", "1");
@@ -118,6 +119,7 @@
     %feature("director") b2ContactFilter;
     %feature("director") b2DestructionListener;
     %feature("director") b2DebugDraw;
+    %feature("director") b2DebugDrawExtended;
     %feature("director") b2QueryCallback;
     %feature("director") b2RayCastCallback;
 
@@ -139,7 +141,7 @@
     /* Miscellaneous inline code. */
     %include "Box2D/Box2D_inline.i"
 
-    /* Miscellaneous extended classes: b2Color, b2Version, b2DistanceProxy, b2DebugDraw */
+    /* Miscellaneous extended classes: b2Color, b2Version, b2DistanceProxy */
     %include "Box2D/Box2D_misc.i"
 
     /* Typemaps that allow for tuples to be used in place of vectors, 
@@ -166,6 +168,9 @@
 
     /* All joints and definitions. Defines b2JointTypes dict. */
     %include "Box2D/Box2D_joints.i"
+
+    /* All joints and definitions. Defines b2JointTypes dict. */
+    %include "Box2D/Box2D_debugdraw.i"
 
 #endif
 

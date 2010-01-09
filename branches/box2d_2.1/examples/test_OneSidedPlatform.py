@@ -22,6 +22,7 @@ from math import sqrt
 
 class OneSidedPlatform (Framework):
     name="One-sided Platform"
+    description="Try to move the shape with the mouse through the platform from all directions"
     def __init__(self):
         super(OneSidedPlatform, self).__init__()
 

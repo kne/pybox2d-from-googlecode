@@ -197,24 +197,3 @@ public:
     %}
 }
 
-/**** DebugDraw ****/
-%extend b2DebugDraw {
-    %pythoncode %{
-        def SetFlags(self, **kwargs):
-            flags = 0
-            if 'drawShapes' in kwargs and kwargs['drawShapes']:
-                flags |= b2DebugDraw.e_shapeBit
-            if 'drawJoints' in kwargs and kwargs['drawJoints']:
-                flags |= b2DebugDraw.e_jointBit
-            if 'drawAABBs' in kwargs and kwargs['drawAABBs']:
-                flags |= b2DebugDraw.e_aabbBit
-            if 'drawPairs' in kwargs and kwargs['drawPairs']:
-                flags |= b2DebugDraw.e_pairBit
-            if 'drawCOMs' in kwargs and kwargs['drawCOMs']:
-                flags |= b2DebugDraw.e_centerOfMassBit
-            self.__SetFlags(flags)
-        %}
-}
-
-%rename (__SetFlags) b2DebugDraw::SetFlags;
-
