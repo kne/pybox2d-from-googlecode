@@ -253,6 +253,299 @@ public:
 %rename(__SetMaxTorque) b2FrictionJoint::SetMaxTorque;
 %rename(__SetMaxForce) b2FrictionJoint::SetMaxForce;
 
+/**** Add some of the functionality that Initialize() offers for joint definitions ****/
+/**** DistanceJointDef ****/
+%extend b2DistanceJointDef {
+    %pythoncode %{
+        def __update_length(self):
+            if self.bodyA and self.bodyB:
+                d = self.anchorB - self.anchorA
+                self.length = d.Length()
+        def __set_anchorA(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.__update_length()
+        def __set_anchorB(self, value):
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+            self.__update_length()
+        def __get_anchorA(self):
+            if not self.bodyA:
+                raise Exception('bodyA not set. Did you mean to check localAnchor?')
+            return self.bodyA.GetWorldPoint(self.localAnchorA)
+        def __get_anchorB(self):
+            if not self.bodyB:
+                raise Exception('bodyB not set. Did you mean to check localAnchor?')
+            return self.bodyB.GetWorldPoint(self.localAnchorB)
+
+        anchorA = property(__get_anchorA, __set_anchorA, 
+                doc="""Body A's anchor in world coordinates.
+                    Getting the property depends on both bodyA and localAnchorA.
+                    Setting the property requires that bodyA be set.""")
+        anchorB = property(__get_anchorA, __set_anchorB, 
+                doc="""Body B's anchor in world coordinates.
+                    Getting the property depends on both bodyB and localAnchorB.
+                    Setting the property requires that bodyB be set.""")
+    %}
+}
+
+%feature("shadow") b2DistanceJointDef::b2DistanceJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+}
+
+
+/**** FrictionJointDef ****/
+%extend b2FrictionJointDef {
+    %pythoncode %{
+        def __set_anchor(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchor(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldPoint(self.localAnchorA)
+            if self.bodyB:
+                return self.bodyB.GetWorldPoint(self.localAnchorB)
+            raise Exception('Neither body was set; unable to get world point.')
+
+        anchor = property(__get_anchor, __set_anchor, 
+                doc="""The anchor in world coordinates.
+                    Getting the property depends on either bodyA and localAnchorA or 
+                    bodyB and localAnchorB.
+                    Setting the property requires that both bodies be set.""")
+    %}
+}
+
+%feature("shadow") b2FrictionJointDef::b2FrictionJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2FrictionJointDef_swiginit(self,_Box2D.new_b2FrictionJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+}
+
+
+/**** LineJointDef ****/
+%extend b2LineJointDef {
+    %pythoncode %{
+        def __set_anchor(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchor(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldPoint(self.localAnchorA)
+            if self.bodyB:
+                return self.bodyB.GetWorldPoint(self.localAnchorB)
+            raise Exception('Neither body was set; unable to get world point.')
+        def __set_axis(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            self.localAxisA=self.bodyA.GetLocalVector(value)
+        def __get_axis(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldVector(self.localAxisA)
+            raise Exception('Body A unset; unable to get world vector.')
+
+        anchor = property(__get_anchor, __set_anchor, 
+                doc="""The anchor in world coordinates.
+                    Getting the property depends on either bodyA and localAnchorA or 
+                    bodyB and localAnchorB.
+                    Setting the property requires that both bodies be set.""")
+        axis = property(__get_axis, __set_axis, 
+                doc="""The world translation axis on bodyA.
+                    Getting the property depends on bodyA and localAxisA.
+                    Setting the property requires that bodyA be set.""")
+    %}
+}
+%feature("shadow") b2LineJointDef::b2LineJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2LineJointDef_swiginit(self,_Box2D.new_b2LineJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+}
+
+
+
+/**** WeldJointDef ****/
+%extend WeldJointDef {
+    %pythoncode %{
+        def __set_anchor(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchor(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldPoint(self.localAnchorA)
+            if self.bodyB:
+                return self.bodyB.GetWorldPoint(self.localAnchorB)
+            raise Exception('Neither body was set; unable to get world point.')
+        def __set_axis(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            self.localAxisA=self.bodyA.GetLocalVector(value)
+        def __get_axis(self):
+            if not self.bodyA:
+                raise Exception('Body A unset; unable to get world vector.')
+            return self.bodyA.GetWorldVector(self.localAxisA)
+
+        anchor = property(__get_anchor, __set_anchor, 
+                doc="""The anchor in world coordinates.
+                    Getting the property depends on either bodyA and localAnchorA or 
+                    bodyB and localAnchorB.
+                    Setting the property requires that both bodies be set.""")
+        axis = property(__get_axis, __set_axis, 
+                doc="""The world translation axis on bodyA.
+                    Getting the property depends on bodyA and localAxisA.
+                    Setting the property requires that bodyA be set.""")
+    %}
+}
+
+%feature("shadow") b2PrismaticJointDef::b2PrismaticJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2PrismaticJointDef_swiginit(self,_Box2D.new_b2PrismaticJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+        if self.bodyA and self.bodyB and 'referenceAngle' not in kwargs:
+            self.referenceAngle = self.bodyB.angle - self.bodyA.angle
+}
+
+/**** PulleyJointDef ****/
+%extend b2PulleyJointDef {
+    %pythoncode %{
+        def __update_length(self):
+            if self.bodyA and self.bodyB:
+                d = self.anchorB - self.anchorA
+                self.length = d.Length()
+        def __set_anchorA(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.__update_length()
+        def __set_anchorB(self, value):
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+            self.__update_length()
+        def __get_anchorA(self):
+            if not self.bodyA:
+                raise Exception('bodyA not set. Did you mean to check localAnchor?')
+            return self.bodyA.GetWorldPoint(self.localAnchorA)
+        def __get_anchorB(self):
+            if not self.bodyB:
+                raise Exception('bodyB not set. Did you mean to check localAnchor?')
+            return self.bodyB.GetWorldPoint(self.localAnchorB)
+
+        anchorA = property(__get_anchorA, __set_anchorA, 
+                doc="""Body A's anchor in world coordinates.
+                    Getting the property depends on both bodyA and localAnchorA.
+                    Setting the property requires that bodyA be set.""")
+        anchorB = property(__get_anchorA, __set_anchorB, 
+                doc="""Body B's anchor in world coordinates.
+                    Getting the property depends on both bodyB and localAnchorB.
+                    Setting the property requires that bodyB be set.""")
+    %}
+}
+
+%feature("shadow") b2PulleyJointDef::b2PulleyJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+
+        lengthA_set=False
+        if 'anchorA' in kwargs and 'groundAnchorA' in kwargs and 'lengthA' not in kwargs:
+            d1 = self.anchorA - self.groundAnchorA
+            self.lengthA = d1.Length()
+            lengthA_set=True
+
+        lengthB_set=False
+        if 'anchorB' in kwargs and 'groundAnchorB' in kwargs and 'lengthB' not in kwargs:
+            d2 = self.anchorB - self.groundAnchorB
+            self.lengthB = d2.Length()
+            lengthB_set=True
+
+        if 'ratio' in kwargs:
+            assert(self.ratio > b2_epsilon) # Ratio too small
+            if lengthA_set and lengthB_set:
+                C = self.lengthA + self.ratio * self.lengthB
+                self.maxLengthA = C - self.ratio * b2_minPulleyLength
+                self.maxLengthB = (C - b2_minPulleyLength) / self.ratio
+}
+
+/**** RevoluteJointDef ****/
+%extend b2RevoluteJointDef {
+    %pythoncode %{
+        def __set_anchor(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchor(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldPoint(self.localAnchorA)
+            if self.bodyB:
+                return self.bodyB.GetWorldPoint(self.localAnchorB)
+            raise Exception('Neither body was set; unable to get world point.')
+        anchor = property(__get_anchor, __set_anchor, 
+                doc="""The anchor in world coordinates.
+                    Getting the property depends on either bodyA and localAnchorA or 
+                    bodyB and localAnchorB.
+                    Setting the property requires that both bodies be set.""")
+    %}
+}
+
+%feature("shadow") b2RevoluteJointDef::b2RevoluteJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2RevoluteJointDef_swiginit(self,_Box2D.new_b2RevoluteJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+        if self.bodyA and self.bodyB and 'referenceAngle' not in kwargs:
+            self.referenceAngle = self.bodyB.angle - self.bodyA.angle
+}
+
+/**** WeldJointDef ****/
+%extend b2WeldJointDef {
+    %pythoncode %{
+        def __set_anchor(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchor(self):
+            if self.bodyA:
+                return self.bodyA.GetWorldPoint(self.localAnchorA)
+            if self.bodyB:
+                return self.bodyB.GetWorldPoint(self.localAnchorB)
+            raise Exception('Neither body was set; unable to get world point.')
+        anchor = property(__get_anchor, __set_anchor, 
+                doc="""The anchor in world coordinates.
+                    Getting the property depends on either bodyA and localAnchorA or 
+                    bodyB and localAnchorB.
+                    Setting the property requires that both bodies be set.""")
+    %}
+}
+
+%feature("shadow") b2WeldJointDef::b2WeldJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2WeldJointDef_swiginit(self,_Box2D.new_b2WeldJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
+        if self.bodyA and self.bodyB and 'referenceAngle' not in kwargs:
+            self.referenceAngle = self.bodyB.angle - self.bodyA.angle
+}
+
+/**** Hide the now useless enums ****/
 %ignore e_atLowerLimit;
 %ignore e_atUpperLimit;
 %ignore e_distanceJoint;

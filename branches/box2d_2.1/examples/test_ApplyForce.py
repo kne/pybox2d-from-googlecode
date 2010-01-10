@@ -72,10 +72,10 @@ class ApplyForce (Framework):
 
             self.world.CreateJoint(
                     b2FrictionJointDef(
-                        localAnchorA=(0,0), 
-                        localAnchorB=(0,0), 
                         bodyA = ground,
                         bodyB = body,
+                        localAnchorA=(0,0), 
+                        localAnchorB=(0,0), 
                         collideConnected=True,
                         maxForce = body.mass * gravity,
                         maxTorque = body.mass * r * gravity)

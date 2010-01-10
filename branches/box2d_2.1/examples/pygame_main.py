@@ -160,7 +160,6 @@ class fwDebugDraw(b2DebugDrawExtended):
         else: radius = int(radius)
         if world_coordinates:
             center = self.to_screen(center)
-        print(center)
         pygame.draw.circle(self.surface, (color/2).bytes+[127], center, radius, 0)
         pygame.draw.circle(self.surface, color.bytes, center, radius, 1)
         pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - radius*axis[0], center[1] + radius*axis[1])) 
@@ -502,7 +501,7 @@ class Framework(b2ContactListener):
         ones onto the test via the Keyboard() function.
         """
         if key==K_z:       # Zoom in
-            self.viewZoom = min(1.1 * self.viewZoom, 20.0)
+            self.viewZoom = min(1.1 * self.viewZoom, 50.0)
         elif key==K_x:     # Zoom out
             self.viewZoom = max(0.9 * self.viewZoom, 0.02)
         elif key==K_SPACE: # Launch a bomb

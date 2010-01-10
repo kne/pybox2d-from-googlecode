@@ -24,8 +24,20 @@
             try:
                 setattr(self, key, value)
             except Exception as ex:
-                raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' 
+                raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
                             % (self.__class__.__name__, key, ex))
+    def _init_jointdef_kwargs(self, **kwargs):
+        keys = list(kwargs.items()) 
+        if 'bodyA' in kwargs or 'bodyB' in kwargs:
+            # A little trick, make sure that bodyA and bodyB are defined before the rest
+            bodies = dict((key, kwargs[key]) for key in kwargs.keys()
+                                if key in ('bodyA', 'bodyB'))
+            _init_kwargs(self, **bodies)
+            others = dict((key, kwargs[key]) for key in kwargs.keys()
+                                if key not in ('bodyA', 'bodyB'))
+            _init_kwargs(self, **others)
+        else:
+            _init_kwargs(self, **kwargs)
 %}
 
 
@@ -179,13 +191,6 @@
 }
 
 
-%feature("shadow") b2DistanceJointDef::b2DistanceJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
-        _init_kwargs(self, **kwargs)
-}
-
-
 %feature("shadow") b2DistanceOutput::b2DistanceOutput() {
     def __init__(self, **kwargs):
         _Box2D.b2DistanceOutput_swiginit(self,_Box2D.new_b2DistanceOutput())
@@ -221,12 +226,6 @@
         _init_kwargs(self, **kwargs)
 }
 
-
-%feature("shadow") b2FrictionJointDef::b2FrictionJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2FrictionJointDef_swiginit(self,_Box2D.new_b2FrictionJointDef())
-        _init_kwargs(self, **kwargs)
-}
 
 
 %feature("shadow") b2GearJoint::b2GearJoint() {
@@ -267,13 +266,6 @@
 %feature("shadow") b2LineJoint::b2LineJoint() {
     def __init__(self, **kwargs):
         _Box2D.b2LineJoint_swiginit(self,_Box2D.new_b2LineJoint())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2LineJointDef::b2LineJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2LineJointDef_swiginit(self,_Box2D.new_b2LineJointDef())
         _init_kwargs(self, **kwargs)
 }
 
@@ -347,24 +339,9 @@
         _init_kwargs(self, **kwargs)
 }
 
-
-%feature("shadow") b2PrismaticJointDef::b2PrismaticJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2PrismaticJointDef_swiginit(self,_Box2D.new_b2PrismaticJointDef())
-        _init_kwargs(self, **kwargs)
-}
-
-
 %feature("shadow") b2PulleyJoint::b2PulleyJoint() {
     def __init__(self, **kwargs):
         _Box2D.b2PulleyJoint_swiginit(self,_Box2D.new_b2PulleyJoint())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2PulleyJointDef::b2PulleyJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
         _init_kwargs(self, **kwargs)
 }
 
@@ -386,13 +363,6 @@
 %feature("shadow") b2RevoluteJoint::b2RevoluteJoint() {
     def __init__(self, **kwargs):
         _Box2D.b2RevoluteJoint_swiginit(self,_Box2D.new_b2RevoluteJoint())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2RevoluteJointDef::b2RevoluteJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2RevoluteJointDef_swiginit(self,_Box2D.new_b2RevoluteJointDef())
         _init_kwargs(self, **kwargs)
 }
 
@@ -449,13 +419,6 @@
 %feature("shadow") b2WeldJoint::b2WeldJoint() {
     def __init__(self, **kwargs):
         _Box2D.b2WeldJoint_swiginit(self,_Box2D.new_b2WeldJoint())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2WeldJointDef::b2WeldJointDef() {
-    def __init__(self, **kwargs):
-        _Box2D.b2WeldJointDef_swiginit(self,_Box2D.new_b2WeldJointDef())
         _init_kwargs(self, **kwargs)
 }
 
