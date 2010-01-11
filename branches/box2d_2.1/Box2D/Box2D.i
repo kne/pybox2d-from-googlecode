@@ -109,7 +109,6 @@
     %ignore b2DistanceProxy;
     %ignore b2BlockAllocator;
 
-
     /* ---- features ---- */
     /* Autodoc puts the basic docstrings for each function */
     %feature("autodoc", "1");

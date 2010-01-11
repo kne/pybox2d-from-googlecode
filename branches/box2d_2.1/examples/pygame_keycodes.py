@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
-# Python version Copyright (c) 2008 kne / sirkne at gmail dot com
+# Python version Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # Implemented using the pybox2d SWIG interface for Box2D (pybox2d.googlecode.com
 # 

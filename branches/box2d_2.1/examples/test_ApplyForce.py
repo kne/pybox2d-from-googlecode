@@ -31,15 +31,14 @@ class ApplyForce (Framework):
         angle=0.5*b2_pi
 
         # The boundaries
-        ground = self.world.CreateBody(
-                b2BodyDef(
-                    position=(0, 20), 
-                    fixtures=[
-                        b2PolygonShape(edge=[(-20,-20),(-20, 20)]),
-                        b2PolygonShape(edge=[( 20,-20),( 20, 20)]),
-                        b2PolygonShape(edge=[(-20, 20),( 20, 20)]),
-                        b2PolygonShape(edge=[(-20,-20),( 20,-20)]),
-                        ]) )
+        ground = self.world.CreateBody(b2BodyDef( position=(0, 20) ))
+        ground.CreateEdgeChain(
+                            [ (-20,-20),
+                              (-20, 20),
+                              ( 20, 20),
+                              ( 20,-20),
+                              (-20,-20) ]
+                            )
 
         xf1 = b2Transform()
         xf1.R.set(0.3524 * b2_pi)

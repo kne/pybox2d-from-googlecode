@@ -52,6 +52,12 @@ public:
     __ne__ = lambda self,other: not self.__equ(other)
     def __repr__(self):
         return "b2Vec2(%g,%g)" % (self.x, self.y)
+    def __len__(self):
+        return 2
+    def __neg__(self):
+        return b2Vec2(-self.x, -self.y)
+    def __copy__(self):
+        return b2Vec2(self.x, self.y)
     def copy(self):
         """
         Return a copy of the vector.
@@ -94,7 +100,7 @@ public:
         else:
             raise IndexError
 
-    tuple = property(lambda self: tuple(self.x, self.y), lambda self, value: self.__set(*value))
+    tuple = property(lambda self: (self.x, self.y), lambda self, value: self.__set(*value))
     length = property(__Length, None)
     lengthSquared = property(__LengthSquared, None)
     valid = property(__IsValid, None)
@@ -154,6 +160,12 @@ public:
     __ne__ = lambda self,other: (self.x != other.x or self.y != other.y or self.z != other.z)
     def __repr__(self):
         return "b2Vec3(%g,%g,%g)" % (self.x, self.y, self.z)
+    def __len__(self):
+        return 3
+    def __copy__(self):
+        return b2Vec3(self.x, self.y, self.z)
+    def __neg__(self):
+        return b2Vec3(-self.x, -self.y, -self.z)
     def copy(self):
         """
         Return a copy of the vector.
@@ -209,7 +221,7 @@ public:
         else:
             raise IndexError
 
-    tuple = property(lambda self: tuple(self.x, self.y, self.z), lambda self, value: self.__set(*value))
+    tuple = property(lambda self: (self.x, self.y, self.z), lambda self, value: self.__set(*value))
     length = property(_Box2D.b2Vec3___Length, None)
     lengthSquared = property(_Box2D.b2Vec3___LengthSquared, None)
     valid = property(_Box2D.b2Vec3___IsValid, None)

@@ -19,6 +19,7 @@
 
 from pygame_main import *
 
+
 class Cantilever (Framework):
     name="Cantilever"
     description="Note the difference in stiffness between the two sets of cantilevers. This is due to the inertiaScale."

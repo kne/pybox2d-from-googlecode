@@ -260,7 +260,7 @@ public:
         def __update_length(self):
             if self.bodyA and self.bodyB:
                 d = self.anchorB - self.anchorA
-                self.length = d.Length()
+                self.length = d.length
         def __set_anchorA(self, value):
             if not self.bodyA:
                 raise Exception('bodyA not set.')
@@ -273,18 +273,18 @@ public:
             self.__update_length()
         def __get_anchorA(self):
             if not self.bodyA:
-                raise Exception('bodyA not set. Did you mean to check localAnchor?')
+                raise Exception('bodyA not set.')
             return self.bodyA.GetWorldPoint(self.localAnchorA)
         def __get_anchorB(self):
             if not self.bodyB:
-                raise Exception('bodyB not set. Did you mean to check localAnchor?')
+                raise Exception('bodyB not set.')
             return self.bodyB.GetWorldPoint(self.localAnchorB)
 
         anchorA = property(__get_anchorA, __set_anchorA, 
                 doc="""Body A's anchor in world coordinates.
                     Getting the property depends on both bodyA and localAnchorA.
                     Setting the property requires that bodyA be set.""")
-        anchorB = property(__get_anchorA, __set_anchorB, 
+        anchorB = property(__get_anchorB, __set_anchorB, 
                 doc="""Body B's anchor in world coordinates.
                     Getting the property depends on both bodyB and localAnchorB.
                     Setting the property requires that bodyB be set.""")
@@ -295,6 +295,8 @@ public:
     def __init__(self, **kwargs):
         _Box2D.b2DistanceJointDef_swiginit(self,_Box2D.new_b2DistanceJointDef())
         _init_jointdef_kwargs(self, **kwargs)
+        if 'localAnchorA' in kwargs and 'localAnchorB' in kwargs and 'length' not in kwargs:
+            self.__update_length()
 }
 
 
@@ -375,7 +377,7 @@ public:
 
 
 /**** WeldJointDef ****/
-%extend WeldJointDef {
+%extend b2WeldJointDef {
     %pythoncode %{
         def __set_anchor(self, value):
             if not self.bodyA:
@@ -423,9 +425,12 @@ public:
 %extend b2PulleyJointDef {
     %pythoncode %{
         def __update_length(self):
-            if self.bodyA and self.bodyB:
-                d = self.anchorB - self.anchorA
-                self.length = d.Length()
+            if self.bodyA:
+                d1 = self.anchorA - self.groundAnchorA
+                self.lengthA = d1.length
+            if self.bodyB:
+                d1 = self.anchorB - self.groundAnchorB
+                self.lengthB = d1.length
         def __set_anchorA(self, value):
             if not self.bodyA:
                 raise Exception('bodyA not set.')
@@ -438,18 +443,18 @@ public:
             self.__update_length()
         def __get_anchorA(self):
             if not self.bodyA:
-                raise Exception('bodyA not set. Did you mean to check localAnchor?')
+                raise Exception('bodyA not set.')
             return self.bodyA.GetWorldPoint(self.localAnchorA)
         def __get_anchorB(self):
             if not self.bodyB:
-                raise Exception('bodyB not set. Did you mean to check localAnchor?')
+                raise Exception('bodyB not set.')
             return self.bodyB.GetWorldPoint(self.localAnchorB)
 
         anchorA = property(__get_anchorA, __set_anchorA, 
                 doc="""Body A's anchor in world coordinates.
                     Getting the property depends on both bodyA and localAnchorA.
                     Setting the property requires that bodyA be set.""")
-        anchorB = property(__get_anchorA, __set_anchorB, 
+        anchorB = property(__get_anchorB, __set_anchorB, 
                 doc="""Body B's anchor in world coordinates.
                     Getting the property depends on both bodyB and localAnchorB.
                     Setting the property requires that bodyB be set.""")
@@ -460,22 +465,32 @@ public:
     def __init__(self, **kwargs):
         _Box2D.b2PulleyJointDef_swiginit(self,_Box2D.new_b2PulleyJointDef())
         _init_jointdef_kwargs(self, **kwargs)
-
+        
         lengthA_set=False
+        lengthB_set=False
+        if 'anchorA' in kwargs or 'anchorB' in kwargs:
+            # Some undoing -- if the user specified the length, we might
+            # have overwritten it, so reset it.
+            if 'lengthA' in kwargs:
+                self.lengthA = kwargs['lengthA']
+                lengthA_set=True
+            if 'lengthB' in kwargs:
+                self.lengthB = kwargs['lengthB']
+                lengthB_set=True
+
         if 'anchorA' in kwargs and 'groundAnchorA' in kwargs and 'lengthA' not in kwargs:
             d1 = self.anchorA - self.groundAnchorA
-            self.lengthA = d1.Length()
+            self.lengthA = d1.length
             lengthA_set=True
 
-        lengthB_set=False
         if 'anchorB' in kwargs and 'groundAnchorB' in kwargs and 'lengthB' not in kwargs:
             d2 = self.anchorB - self.groundAnchorB
-            self.lengthB = d2.Length()
+            self.lengthB = d2.length
             lengthB_set=True
 
         if 'ratio' in kwargs:
             assert(self.ratio > b2_epsilon) # Ratio too small
-            if lengthA_set and lengthB_set:
+            if lengthA_set and lengthB_set and 'maxLengthA' not in kwargs and 'maxLengthB' not in kwargs:
                 C = self.lengthA + self.ratio * self.lengthB
                 self.maxLengthA = C - self.ratio * b2_minPulleyLength
                 self.maxLengthB = (C - b2_minPulleyLength) / self.ratio

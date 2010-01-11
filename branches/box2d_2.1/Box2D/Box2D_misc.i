@@ -32,6 +32,10 @@ public:
     __ne__ = lambda self,other: not self.__equ(other)
     def __repr__(self):
         return "b2Color(%g,%g,%g)" % (self.r, self.g, self.b)
+    def __len__(self):
+        return 3
+    def __copy__(self):
+        return b2Color(self.r, self.g, self.b)
     def copy(self):
         return b2Color(self.r, self.g, self.b)
     def __SetBytes(self, value):

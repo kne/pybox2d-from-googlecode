@@ -109,6 +109,26 @@ public:
             for fixture in self.fixtures:
                 yield fixture
 
+        def CreateEdgeChain(self, edge_list):
+            """
+            Creates a body a set of connected edge chains.
+            Expects edge_list to be a list of vertices, length >= 2.
+            """
+            prev=None
+            if len(edge_list) < 2:
+                raise ValueError('Edge list length >= 2')
+
+            shape=b2PolygonShape(edge=[list(i) for i in edge_list[0:2]])
+            self.CreateFixture(shape)
+
+            prev = edge_list[1]
+            for edge in edge_list[1:]:
+                if len(edge) != 2:
+                    raise ValueError('Vertex length != 2, "%s"' % list(edge))
+                shape.edge = [list(prev), list(edge)]
+                self.CreateFixture(shape)
+                prev=edge
+
         # Read-write properties
         sleepingAllowed = property(__IsSleepingAllowed, __SetSleepingAllowed)
         angularVelocity = property(__GetAngularVelocity, __SetAngularVelocity)
