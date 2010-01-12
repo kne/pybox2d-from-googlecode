@@ -27,7 +27,7 @@
 
 %inline %{
     // Add support for == and != in Python for shapes, joints, and bodies.
-    bool __(b2Joint* a, b2Joint* b) {
+    bool __jointeq(b2Joint* a, b2Joint* b) {
         return a==b;
     }
     bool __bodyeq(b2Body* a, b2Body* b) {

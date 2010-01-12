@@ -77,20 +77,29 @@ class Web (Framework):
     def Keyboard(self, key):
         if key==K_b:
             for body in self.bodies:
-                self.bodies.remove(body)
+                # Gets both FixtureDestroyed and JointDestroyed callbacks.
                 self.world.DestroyBody(body)
                 break
 
         elif key==K_j:
             for joint in self.joints:
-                self.joints.remove(joint)
+                # Does not get a JointDestroyed callback!
                 self.world.DestroyJoint(joint)
+                self.joints.remove(joint)
                 break
+
+    def FixtureDestroyed(self, fixture):
+        body = fixture.body
+        if body in self.bodies:
+            self.bodies.remove(body)
+            print("Fixture destroyed, removing its body from the list. Bodies left: %d" \
+                    % len(self.bodies))
 
     def JointDestroyed(self, joint):
         if joint in self.joints:
             self.joints.remove(joint)
-            print "Joint destroyed and removed from the list"
+            print("Joint destroyed and removed from the list. Joints left: %d" \
+                    % len(self.joints))
 
 if __name__=="__main__":
      main(Web)

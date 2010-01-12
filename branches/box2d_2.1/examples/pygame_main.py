@@ -72,8 +72,8 @@ class fwDestructionListener(b2DestructionListener):
                 self.test.mouseJoint=None
             else:
                 self.test.JointDestroyed(object)
-        elif isinstance(object, b2Shape):
-            self.test.ShapeDestroyed(object)
+        elif isinstance(object, b2Fixture):
+            self.test.FixtureDestroyed(object)
 
 class fwDebugDraw(b2DebugDrawExtended):
     """
@@ -747,9 +747,9 @@ class Framework(b2ContactListener):
     def PostSolve(self, contact, impulse):
         pass
 
-    def ShapeDestroyed(self, shape):
+    def FixtureDestroyed(self, fixture):
         """
-        Callback indicating 'shape' has been destroyed.
+        Callback indicating 'fixture' has been destroyed.
         """
         pass
 

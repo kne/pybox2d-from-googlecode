@@ -84,6 +84,16 @@
         catch (Swig::DirectorException) { SWIG_fail; }
         catch (b2AssertException) { SWIG_fail; }
     }
+    %exception b2World::DestroyJoint {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
+    %exception b2World::DestroyBody {
+        try { $action }
+        catch (Swig::DirectorException) { SWIG_fail; }
+        catch (b2AssertException) { SWIG_fail; }
+    }
 
     #pragma SWIG nowarn=314
 

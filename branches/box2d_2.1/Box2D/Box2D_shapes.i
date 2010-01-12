@@ -18,15 +18,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-%pythoncode %{
-
-    b2ShapeTypes = {
-        _Box2D.b2Shape_e_unknown : "Unknown",
-        _Box2D.b2Shape_e_circle  : "Circle",
-        _Box2D.b2Shape_e_polygon : "Polygon", }
-
-%}
-
 /**** Shape ****/
 %extend b2Shape {
 public:
@@ -49,8 +40,6 @@ public:
 %extend b2CircleShape {
 public:
     %pythoncode %{
-    __eq__ = b2ShapeCompare
-    __ne__ = lambda self,other: not b2ShapeCompare(self,other)
     %}
 }
 
@@ -60,8 +49,6 @@ public:
 %extend b2PolygonShape {
 public:
     %pythoncode %{
-    __eq__ = b2ShapeCompare
-    __ne__ = lambda self,other: not b2ShapeCompare(self,other)
     def __repr__(self):
         return "b2PolygonShape(vertices: %s)" % (self.vertices)
     def __get_vertices(self):
