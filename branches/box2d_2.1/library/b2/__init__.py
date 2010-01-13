@@ -1,7 +1,6 @@
-#!/usr/bin/python
+# pybox2d -- http://pybox2d.googlecode.com
 #
-# C++ version copyright 2010 Erin Catto http://www.gphysics.com
-# Python version copyright 2010 Ken Lauer / sirkne at gmail dot com
+# Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -16,4 +15,30 @@
 # 2. Altered source versions must be plainly marked as such, and must not be
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
-# 
+
+__author__='Ken Lauer'
+__license__='zlib'
+__date__="$Date$"
+__version__="$Revision$"
+__doc__="""
+This module holds the full usable contents of pybox2d. 
+It offers an alternative syntax in the form of:
+
+    from Box2D.b2 import *
+    a = vec2(1,1) + vec2(2,2)
+
+This is fully equivalent to:
+
+    from Box2D import *
+    a = b2Vec2(1,1) + b2Vec2(2,2)
+
+All classes that exist in the main module that are prefixed 
+by b2 or b2_ have been stripped. Beware that importing *
+from a module is generally frowned upon -- this is mainly
+here for convenience in debugging sessions where typing 
+b2Vec2 repeatedly gets very old very quickly (trust me,
+I know.)
+"""
+
+# Populated by the parent package (see the end of ../Box2D.py)
+pass

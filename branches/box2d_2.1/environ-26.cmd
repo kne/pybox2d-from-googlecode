@@ -1,4 +1,5 @@
 @echo off
+set LC_ALL=en_US
 set PYTHON_PATH=C:\python26\
 set SWIG_PATH=C:\swigwin-1.3.40\
 set PATH=%PATH%;%PYTHON_PATH%;%SWIG_PATH%

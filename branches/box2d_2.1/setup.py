@@ -16,6 +16,11 @@ import os
 import sys
 from glob import glob
 
+__author__='Ken Lauer'
+__license__='zlib'
+__date__="$Date$"
+__version__="$Revision$"
+
 setuptools_version=None
 try:
     import setuptools
@@ -24,7 +29,9 @@ try:
     print('Using setuptools (version %s).' % setuptools_version)
 except:
     from distutils.core import (setup, Extension)
-    print('Setuptools not found; falling back on distutils.')
+    print("""Setuptools not found; falling back on distutils. 
+            !!! This might fail. Please install setuptools by running ez_setup.py for Python
+            2.x or ez_setup3.0.py for Python 3.x""")
 
 if setuptools_version:
     if (setuptools_version in ["0.6c%d"%i for i in range(1,9)] # old versions
@@ -52,42 +59,54 @@ release_number = 0
 # create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))
 
+# setup some paths and names
+library_path='library'
+library_name='Box2D'
+source_dir='Box2D'
+swig_source='Box2D.i'
+
 def write_init(): 
     # read in the license header
-    license_header = open(os.path.join('Box2D', 'pybox2d_license_header.txt')).read()
+    license_header = open(os.path.join(source_dir, 'pybox2d_license_header.txt')).read()
 
     # create the source code for the file
     if sys.version_info >= (2, 5):
-        import_string = "from .Box2D import *"
+        import_string = "from .%s import *" % library_name
     else:
-        import_string = "from Box2D import *"
+        import_string = "from %s import *" % library_name
 
     init_source = [
         import_string,
-        "__version__      = '%s'"    % version_str,
-        "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number), ]
+        "__author__ = '%s'" % __date__ ,
+        "__version__ = '%s'" % version_str,
+        "__version_info__ = (%s,%d)" % (box2d_version.replace('.', ','), release_number), 
+        "__revision__ = '%s'" % __version__,
+        "__license__ = '%s'" % __license__ ,
+        "__date__ = '%s'" % __date__ , ]
 
     # and create the __init__ file with the appropriate version string
-    f=open('__init__.py', 'w')
+    f=open(os.path.join(library_path, '__init__.py'), 'w')
     f.write(license_header)
     f.write( '\n'.join(init_source) )
     f.close()
     
 source_paths = [
-    os.path.join('Box2D', 'Dynamics'),
-    os.path.join('Box2D', 'Dynamics', 'Contacts'),
-    os.path.join('Box2D', 'Dynamics', 'Joints'),
-    os.path.join('Box2D', 'Common'),
-    os.path.join('Box2D', 'Collision'),
-    os.path.join('Box2D', 'Collision', 'Shapes'),
+    os.path.join(source_dir, 'Dynamics'),
+    os.path.join(source_dir, 'Dynamics', 'Contacts'),
+    os.path.join(source_dir, 'Dynamics', 'Joints'),
+    os.path.join(source_dir, 'Common'),
+    os.path.join(source_dir, 'Collision'),
+    os.path.join(source_dir, 'Collision', 'Shapes'),
     ]
 
 # glob all of the paths and then flatten the list into one
-box2d_source_files = [os.path.join('Box2D', 'Box2D.i')] + \
+box2d_source_files = [os.path.join(source_dir, swig_source)] + \
     sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 # arguments to pass to SWIG. for old versions of SWIG, -O (optimize) might not be present.
-swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -globals b2Globals -outdir .'
+swig_arguments = \
+        '-c++ -I%s -O -includeall -ignoremissing -w201 -globals b2Globals -outdir %s' \
+        % (library_name, library_path)
 
 # depending on the platform, add extra compilation arguments. hopefully if the platform
 # isn't windows, g++ will be used; -Wno-unused then would suppress some annoying warnings
@@ -108,7 +127,7 @@ LONG_DESCRIPTION = \
     homepage.
 
     pybox2d homepage: http://pybox2d.googlecode.com
-    Box2D's homepage: http://www.box2d.org
+    Box2D homepage: http://www.box2d.org
     """ % (box2d_version,)
 
 CLASSIFIERS = [
@@ -134,9 +153,11 @@ setup_dict = dict(
     url              ="http://pybox2d.googlecode.com/",
     long_description = LONG_DESCRIPTION,
     classifiers      = CLASSIFIERS,
-    packages         = ['Box2D'],
-    package_dir      = {'Box2D': '.'},
-    test_suite       = "tests",
+    packages         = ['Box2D', 'Box2D.b2'],
+    package_dir      = {'Box2D': library_path, 
+                        'Box2D.b2': os.path.join(library_path, 'b2'),
+                        'Box2D.tests' : 'tests'},
+    test_suite       = 'tests',
     options          = { 'build_ext': { 'swig_opts' : swig_arguments } },
     ext_modules      = [ pybox2d_extension ]
     )

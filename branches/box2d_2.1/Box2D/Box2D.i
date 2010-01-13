@@ -181,7 +181,28 @@
     /* All joints and definitions. Defines b2JointTypes dict. */
     %include "Box2D/Box2D_debugdraw.i"
 
-#endif
+    /* Include everything from the C++ library now */
+    %include "Box2D/Box2D.h"
 
-%include "Box2D/Box2D.h"
+    /* And finally tag on the secondary namespace code to the end of Box2D.py */
+    %pythoncode %{
+        # Initialize the alternative namespace b2.*
+        # To see what this is, try import Box2D; print(dir(Box2D.b2))
+        from sys import version_info
+        if version_info >= (2, 5):
+            from . import b2
+        else:
+            import b2
+        del locals()['version_info']
+
+        s=None
+        for s in locals():
+            if 'swigregister' not in s and s!='b2' and s[:2]=='b2':
+                if s[2]=='_': # Covers b2_*
+                    setattr(b2, s[3].lower() + s[4:], locals()[s])
+                else: # The other b2*
+                    setattr(b2, s[2].lower() + s[3:], locals()[s])
+        del locals()['s']
+    %}
+#endif
 
