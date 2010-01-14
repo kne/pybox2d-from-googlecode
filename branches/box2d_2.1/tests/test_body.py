@@ -5,7 +5,7 @@ import Box2D
 class cl (b2ContactListener):
     pass
 
-class testBody (unittest.TestCase):
+class test_body (unittest.TestCase):
     def setUp(self):
         pass
 

@@ -60,10 +60,11 @@ release_number = 0
 version_str = "%sb%s" % (box2d_version, str(release_number))
 
 # setup some paths and names
-library_path='library'
-library_name='Box2D'
-source_dir='Box2D'
-swig_source='Box2D.i'
+library_base='library' # the directory where the egg base will be for setuptools develop command
+library_name='Box2D'   # the final name that the library should end up being
+library_path=os.path.join(library_base, library_name) # library/Box2D (e.g.)
+source_dir='Box2D' # where all of the C++ and SWIG source resides
+swig_source='Box2D.i' # the main SWIG source file
 
 def write_init(): 
     # read in the license header
@@ -158,8 +159,11 @@ setup_dict = dict(
                         'Box2D.b2': os.path.join(library_path, 'b2'),
                         'Box2D.tests' : 'tests'},
     test_suite       = 'tests',
-    options          = { 'build_ext': { 'swig_opts' : swig_arguments } },
-    ext_modules      = [ pybox2d_extension ]
+    options          = { 'build_ext': { 'swig_opts' : swig_arguments },
+                         'egg_info' : { 'egg_base' : library_base },
+                        },
+    ext_modules      = [ pybox2d_extension ],
+    force_install=lambda x: x.foobar,
     )
 
 # run the actual setup from distutils
