@@ -665,7 +665,8 @@ class Framework(b2ContactListener):
 
         if self.description:
             # Draw the name of the test running
-            self.DrawStringCR(self.description, (127,255,127))
+            for s in self.description.split('\n'):
+                self.DrawStringCR(s, (127,255,127))
 
         if GUIEnabled:
             # Update the settings based on the GUI

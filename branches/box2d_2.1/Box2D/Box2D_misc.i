@@ -201,3 +201,31 @@ public:
     %}
 }
 
+/*** Replace b2Distance ***/
+%inline %{
+    b2DistanceOutput* b2Distance(b2Shape* shapeA, b2Shape* shapeB, b2Transform& transformA, b2Transform& transformB, bool useRadii=true) {
+        b2DistanceInput input;
+        b2DistanceOutput* out=new b2DistanceOutput;
+        b2SimplexCache cache;
+
+        input.proxyA.Set(shapeA);
+        input.proxyB.Set(shapeB);
+        input.transformA = transformA;
+        input.transformB = transformB;
+        input.useRadii = useRadii;
+
+        cache.count=0;
+        b2Distance(out, &cache, &input);
+        return out;
+    }
+    b2DistanceOutput* b2Distance(b2DistanceInput* input) {
+        b2DistanceOutput* out=new b2DistanceOutput;
+        b2SimplexCache cache;
+        cache.count=0;
+        b2Distance(out, &cache, input);
+        return out;
+    }
+%}
+
+%newobject b2Distance;
+%ignore b2Distance;

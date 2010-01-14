@@ -201,7 +201,10 @@
                 if s[2]=='_': # Covers b2_*
                     setattr(b2, s[3].lower() + s[4:], locals()[s])
                 else: # The other b2*
-                    setattr(b2, s[2].lower() + s[3:], locals()[s])
+                    if s[3].isupper():
+                        setattr(b2, s[2:], locals()[s])
+                    else:
+                        setattr(b2, s[2].lower() + s[3:], locals()[s])
         del locals()['s']
     %}
 #endif
