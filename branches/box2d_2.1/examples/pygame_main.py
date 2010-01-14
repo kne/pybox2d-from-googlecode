@@ -219,37 +219,43 @@ class Framework(b2ContactListener):
     name = "None"
     description = None
 
-    # Box2D-related
-    points             = None
-    world              = None
-    bomb               = None
-    mouseJoint         = None
-    settings           = fwSettings
-    bombSpawning       = False
-    bombSpawnPoint     = None
-    mouseWorld         = None
-    destroyList        = []
+    def __reset(self):
+        """ Reset all of the variables to their starting values.
+        Not to be called except at initialization."""
+        # Box2D-related
+        self.points             = []
+        self.world              = None
+        self.bomb               = None
+        self.mouseJoint         = None
+        self.settings           = fwSettings
+        self.bombSpawning       = False
+        self.bombSpawnPoint     = None
+        self.mouseWorld         = None
+        self.destroyList        = []
+        self.using_contacts     = False
 
-    # Box2D-callbacks
-    destructionListener= None
-    debugDraw          = None
+        # Box2D-callbacks
+        self.destructionListener= None
+        self.debugDraw          = None
 
-    # Screen/rendering-related
-    _viewZoom          = 10.0
-    _viewCenter        = None
-    _viewOffset        = None
-    screenSize         = None
-    rMouseDown         = False
-    textLine           = 30
-    font               = None
-    fps                = 0
+        # Screen/rendering-related
+        self._viewZoom          = 10.0
+        self._viewCenter        = None
+        self._viewOffset        = None
+        self.screenSize         = None
+        self.rMouseDown         = False
+        self.textLine           = 30
+        self.font               = None
+        self.fps                = 0
 
-    # GUI-related (PGU)
-    gui_app   = None
-    gui_table = None
+        # GUI-related (PGU)
+        self.gui_app   = None
+        self.gui_table = None
 
     def __init__(self):
         super(Framework, self).__init__()
+
+        self.__reset()
 
         # Box2D Initialization
         gravity = (0.0, -10.0)
@@ -700,7 +706,7 @@ class Framework(b2ContactListener):
     def PreSolve(self, contact, old_manifold):
         # This is a critical function when there are many contacts in the world.
         # It should be optimized as much as possible.
-        if not (self.settings.drawContactPoints or self.settings.drawContactNormals):
+        if not (self.settings.drawContactPoints or self.settings.drawContactNormals or self.using_contacts):
             return
         elif len(self.points) > self.settings.maxContactPoints:
             return

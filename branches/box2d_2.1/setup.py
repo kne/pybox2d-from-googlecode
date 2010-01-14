@@ -163,7 +163,6 @@ setup_dict = dict(
                          'egg_info' : { 'egg_base' : library_base },
                         },
     ext_modules      = [ pybox2d_extension ],
-    force_install=lambda x: x.foobar,
     )
 
 # run the actual setup from distutils
