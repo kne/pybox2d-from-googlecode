@@ -300,7 +300,7 @@ class Framework(b2ContactListener):
             self.gui_app.init(container)
 
         self.viewCenter = (0,10.0*20.0)
-        self.groundbody = self.world.CreateBody(b2BodyDef())
+        self.groundbody = self.world.CreateBody()
 
     def setCenter(self, value):
         """
@@ -547,13 +547,12 @@ class Framework(b2ContactListener):
         if query.fixture:
             body = query.fixture.body
             # A body was selected, create the mouse joint
-            md = b2MouseJointDef(
+            self.mouseJoint = self.world.CreateJoint(
+                    type=b2MouseJointDef,
                     bodyA=self.groundbody,
                     bodyB=body, 
                     target=p,
                     maxForce=1000.0*body.mass)
-
-            self.mouseJoint = self.world.CreateJoint(md)
             body.awake = True
 
     def MouseUp(self, p):
@@ -608,18 +607,15 @@ class Framework(b2ContactListener):
             self.bomb = None
 
         self.bomb = self.world.CreateBody(
-                    b2BodyDef(
                         allowSleep=True, 
                         position=position, 
                         linearVelocity=velocity,
                         type=b2_dynamicBody,
-                        fixtures=[
-                            b2FixtureDef(
-                                shape=b2CircleShape(radius=0.3), 
-                                density=20, 
-                                restitution=0.1 )
-                            ]
-                        )
+                        fixtures=b2FixtureDef( 
+                            shape=b2CircleShape(radius=0.3), 
+                            density=20, 
+                            restitution=0.1 )
+                            
                     )
 
     def LaunchRandomBomb(self):

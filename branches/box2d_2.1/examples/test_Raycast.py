@@ -48,11 +48,7 @@ class Raycast (Framework):
         self.world.gravity = (0,0)
         # The ground
         ground = self.world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ 
-                            b2PolygonShape(edge=[(-40,  0),( 40,  0)]),
-                        ]
-                    )
+                    fixtures=b2PolygonShape(edge=[(-40,  0),( 40,  0)])
                 )
 
         # The various shapes
@@ -85,7 +81,7 @@ class Raycast (Framework):
         defn = b2BodyDef(
                     position=pos, 
                     type=b2_dynamicBody,
-                    fixtures=[ b2FixtureDef(shape=shape, friction=0.3) ],
+                    fixtures=b2FixtureDef(shape=shape, friction=0.3),
                     angle=(b2_pi * (2.0*random() - 1.0)),
                     )
 
@@ -122,13 +118,13 @@ class Raycast (Framework):
         # The callback has been called by this point, and if a fixture was hit it will have been
         # set to callback.fixture.
         if callback.fixture:
-            self.debugDraw.DrawPoint(callback.point, 5.0, b2Color(0.4, 0.9, 0.4))
-            self.debugDraw.DrawSegment(point1, callback.point, b2Color(0.8, 0.8, 0.8))
+            self.debugDraw.DrawPoint(callback.point, 5.0, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
+            self.debugDraw.DrawSegment(point1, callback.point, b2Color(0.8, 0.8, 0.8), world_coordinates=True)
 
             head = callback.point + 0.5 * callback.normal
-            self.debugDraw.DrawSegment(callback.point, head, b2Color(0.9, 0.9, 0.4))
+            self.debugDraw.DrawSegment(callback.point, head, b2Color(0.9, 0.9, 0.4), world_coordinates=True)
         else:
-            self.debugDraw.DrawSegment(point1, point2, b2Color(0.8, 0.8, 0.8))
+            self.debugDraw.DrawSegment(point1, point2, b2Color(0.8, 0.8, 0.8), world_coordinates=True)
 
         self.angle += 0.25*b2_pi/180
         

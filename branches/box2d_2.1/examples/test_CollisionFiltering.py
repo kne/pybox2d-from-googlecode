@@ -35,11 +35,7 @@ class CollisionFiltering (Framework):
         # Ground body
         world = self.world
         ground = world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ 
-                        b2PolygonShape(edge=[(-40,0),(40,0)]) 
-                        ]
-                    )
+                    fixtures=b2PolygonShape(edge=[(-40,0),(40,0)]) 
                 )
 
         # Define the groups that fixtures can fall into
@@ -84,7 +80,7 @@ class CollisionFiltering (Framework):
         
         # Small triangle
         triangle=b2FixtureDef(
-                shape=b2PolygonShape(vertices= [(-1,0), ( 1,0), ( 0,2)]),
+                shape=b2PolygonShape(vertices= [(-1,0),(1,0),(0,2)]),
                 density=1,
                 filter = b2Filter(
                     groupIndex = smallGroup,
@@ -94,11 +90,9 @@ class CollisionFiltering (Framework):
                 )
 
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=(-5,2),
-                    fixtures=[triangle],
-                    )
+                type=b2_dynamicBody,
+                position=(-5,2),
+                fixtures=triangle,
                 )
 
         # Large triangle (recycle definitions)
@@ -106,12 +100,10 @@ class CollisionFiltering (Framework):
         triangle.filter.groupIndex = largeGroup
 
         trianglebody=world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=(-5,6),
-                    fixtures=[triangle],
-                    fixedRotation=True, # <-- note that the large triangle will not rotate
-                    )
+                type=b2_dynamicBody,
+                position=(-5,6),
+                fixtures=triangle,
+                fixedRotation=True, # <-- note that the large triangle will not rotate
                 )
 
         # Small box
@@ -127,23 +119,19 @@ class CollisionFiltering (Framework):
                 )
 
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=(0,2),
-                    fixtures=[box],
-                    )
+                type=b2_dynamicBody,
+                position=(0,2),
+                fixtures=box,
                 )
 
         # Large box
         box.shape.box = (2, 1)
         box.filter.groupIndex = largeGroup
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=(0,6),
-                    fixtures=[box],
-                    )
-                )
+                type=b2_dynamicBody,
+                position=(0,6),
+                fixtures=box,
+            )
 
         # Small circle
         circle=b2FixtureDef(
@@ -157,48 +145,41 @@ class CollisionFiltering (Framework):
                 )
 
         world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=(5,2),
-                    fixtures=[circle],
-                    )
+                    fixtures=circle,
                 )
 
         # Large circle
         circle.shape.radius *= 2
         circle.filter.groupIndex = largeGroup
         world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=(5,6),
-                    fixtures=[circle],
-                    )
+                    fixtures=circle,
                 )
 
         # Create a joint for fun on the big triangle
         # Note that it does not inherit or have anything to do with the
         # filter settings of the attached triangle. 
-        box=(b2PolygonShape(box=(0.5, 1)), 1)
+        box=dict(shape=b2PolygonShape(box=(0.5, 1)), density=1)
 
         testbody=world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=(-5,10),
-                    fixtures=[box],
-                    )
+                    fixtures=box,
                 )
         world.CreateJoint(
-                b2PrismaticJointDef(
-                    bodyA=trianglebody,
-                    bodyB=testbody,
-                    enableLimit=True,
-                    localAnchorA=(0, 4),
-                    localAnchorB=(0, 0),
-                    localAxis1=(0, 1),
-                    lowerTranslation=-1,
-                    upperTranslation=1,
-                    )
-                )
+            type=b2PrismaticJointDef,
+            bodyA=trianglebody,
+            bodyB=testbody,
+            enableLimit=True,
+            localAnchorA=(0, 4),
+            localAnchorB=(0, 0),
+            localAxis1=(0, 1),
+            lowerTranslation=-1,
+            upperTranslation=1,
+            )
 
 
 if __name__=="__main__":

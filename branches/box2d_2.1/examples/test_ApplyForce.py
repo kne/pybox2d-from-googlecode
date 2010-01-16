@@ -49,20 +49,22 @@ class ApplyForce (Framework):
         xf2.position = b2Mul(xf2.R, (-1.0, 0.0))
 
         self.body = self.world.CreateBody(
-                b2BodyDef(
                     position=(0, 2), 
                     angle=b2_pi,
                     angularDamping=5,
                     linearDamping=0.1,
                     type=b2_dynamicBody,
-                    fixtures=[ 
-                        (b2PolygonShape(vertices=[xf1*(-1,0), xf1*(1,0), xf1*(0,.5)]), 2.0),
-                        (b2PolygonShape(vertices=[xf2*(-1,0), xf2*(1,0), xf2*(0,.5)]), 2.0) ]
+                    fixtures=dict( 
+                        shape=[ 
+                            b2PolygonShape(vertices=[xf1*(-1,0), xf1*(1,0), xf1*(0,.5)]),
+                            b2PolygonShape(vertices=[xf2*(-1,0), xf2*(1,0), xf2*(0,.5)]) 
+                            ],
+                        density=2.0,
                     )
                 )
      
         gravity = 10.0
-        fixtures = [ b2FixtureDef(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3) ]
+        fixtures = dict(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3)
         for i in range(10):
             body=self.world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,5+1.54*i), fixtures=fixtures))
 

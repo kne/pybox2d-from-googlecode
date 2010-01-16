@@ -62,41 +62,76 @@ public:
             for body in self.bodies:
                 yield body
 
-        def CreateBody(self, defn):
+        def CreateBody(self, *args, **kwargs):
+            """
+            Create a body in the world.
+            Takes a single b2BodyDef argument, or kwargs to pass to a temporary b2BodyDef.
+            world.CreateBody(position=(1,2), angle=1) is short for:
+            world.CreateBody(b2BodyDef(position=(1,2), angle=1))
+
+            If the definition (or kwargs) sets 'fixtures', they will be created on the 
+            newly created body.
+
+            CreateBody(..., fixtures=fixture)
+            
+            This is short for:
+            body = CreateBody(...)
+            body.CreateFixture(fixture)
+
+            See help(b2Body.CreateFixture) for more information, and note that a dict
+            argument is accepted so you can pass in kwargs with this syntax.
+            """
+            if len(args) > 1:
+                raise TypeError('Takes only one argument, or kwargs to b2BodyDef')
+            elif len(args)==1 and isinstance(args[0], b2BodyDef):
+                defn = args[0]
+            else:
+                defn =b2BodyDef(**kwargs) 
+
             body=self.__CreateBody(defn)
+                
             if defn.fixtures:
-                for i, fixture in enumerate(defn.fixtures):
-                    if isinstance(fixture, (list, tuple)):
-                        # create a fixture from a shape, in format (shape, density)
-                        try:
-                            body.CreateFixture(*fixture)
-                        except Exception as ex:
-                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
-                    elif isinstance(fixture, b2FixtureDef):
-                        # create a fixture from a b2FixtureDef
-                        try:
-                            body.CreateFixture(fixture)
-                        except Exception as ex:
-                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
-                    elif isinstance(fixture, b2Shape):
-                        # create a fixture from a b2Shape, assuming density of 0.0
-                        try:
-                            body.CreateFixture(fixture, 0.0)
-                        except Exception as ex:
-                            raise ex.__class__('CreateFixture failed on fixture #%d (%s)' % (i, ex))
-                    else:
-                        raise ValueError('Unexpected element in fixture list: %s (type %s)' % (fixture, type(fixture)))
+                body.CreateFixture(defn.fixtures)
+
             return body
 
-        def CreateJoint(self, defn):
+        def CreateJoint(self, *args, **kwargs):
+            """
+            Create a joint in the world.
+            Takes a single b2JointDef argument, or kwargs to pass to a temporary b2JointDef.
+
+            All of these are exactly equivalent:
+            world.CreateJoint(type=b2RevoluteJoint, bodyA=body, bodyB=body2)
+            world.CreateJoint(type=b2RevoluteJointDef, bodyA=body, bodyB=body2)
+            world.CreateJoint(b2RevoluteJointDef(bodyA=body, bodyB=body2))
+            """
+            if len(args) > 1:
+                raise TypeError('Takes only one argument, or kwargs to b2JointDef')
+            elif len(args)==1 and isinstance(args[0], b2JointDef):
+                defn = args[0]
+            else:
+                if not kwargs or 'type' not in kwargs:
+                    raise TypeError('Expected type kwarg of b2Joint or b2JointDef')
+
+                type_ = kwargs['type']
+                if issubclass(type_, b2JointDef):
+                    class_type = type_
+                elif issubclass(type_, b2Joint):  # a b2Joint passed in, so get the b2JointDef
+                    class_type = globals()[type_.__name__ + 'Def']
+                else:
+                    raise TypeError('Expected type kwarg of b2Joint or b2JointDef')
+
+                del kwargs['type']
+                defn =class_type(**kwargs) 
+
             if isinstance(defn, b2GearJointDef):
                 if not defn.joint1 or not defn.joint2:
-                    raise ValueError('Joint(s) not set')
+                    raise ValueError('Gear joint requires that both joint1 and joint2 be set')
             else:
                 if not defn.bodyA or not defn.bodyB:
-                    raise ValueError('Body or bodies not set')
-            joint=self.__CreateJoint(defn)
-            return joint
+                    raise ValueError('Body or bodies not set (bodyA, bodyB)')
+
+            return self.__CreateJoint(defn)
 
         # The logic behind these functions is that they increase the refcount
         # of the listeners as you set them, so it is no longer necessary to keep

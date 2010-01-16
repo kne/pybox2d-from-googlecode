@@ -29,72 +29,60 @@ class BodyTypes (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ 
-                        b2PolygonShape(edge=[(-20,0),(20,0)]) 
-                        ]
-                    )
+                    fixtures=b2PolygonShape(edge=[(-20,0),(20,0)]) 
                 )
 
         # The attachment
-        fixture=(b2PolygonShape(box=(0.5,2)), 2.0) # (shape, density)
+        fixture=dict(shape=b2PolygonShape(box=(0.5,2)), density=2.0)
         self.attachment=self.world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=(0,3), 
-                    fixtures=[fixture],
-                    )
+                    fixtures=fixture,
                 )
-    
+
         # The platform
-        fixture=b2FixtureDef(
-                    shape=b2PolygonShape(box=(4,0.5)),
-                    friction=0.6,
-                    density=2,
+        fixture=dict(
+                shape=b2PolygonShape(box=(4,0.5)), 
+                density=2,
+                friction=0.6,
                 )
                
         self.platform=self.world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
-                    position=(0,3), 
-                    fixtures=[fixture],
-                    )
+                    position=(0,5), 
+                    fixtures=fixture,
                 )
         
         # The joints joining the attachment/platform and ground/platform
         self.world.CreateJoint(
-                b2RevoluteJointDef(
-                    bodyA=self.attachment,
-                    bodyB=self.platform,
-                    anchor=(0,5),
-                    maxMotorTorque=50,
-                    enableMotor=True
-                    )
-                )
+                type=b2RevoluteJoint,
+                bodyA=self.attachment,
+                bodyB=self.platform,
+                anchor=(0,5),
+                maxMotorTorque=50,
+                enableMotor=True
+            )
 
         self.world.CreateJoint(
-                b2PrismaticJointDef(
-                        bodyA=ground,
-                        bodyB=self.platform,
-                        anchor=(0,5),
-                        axis=(1,0),
-                        maxMotorForce = 1000,
-                        enableMotor = True,
-                        lowerTranslation = -10,
-                        upperTranslation = 10,
-                        enableLimit = True 
-                    )
-                )
+                type=b2PrismaticJoint,
+                bodyA=ground,
+                bodyB=self.platform,
+                anchor=(0,5),
+                axis=(1,0),
+                maxMotorForce = 1000,
+                enableMotor = True,
+                lowerTranslation = -10,
+                upperTranslation = 10,
+                enableLimit = True 
+            )
 
         # And the payload that initially sits upon the platform
         # Reusing the fixture we previously defined above
-        fixture.shape.box = (0.75, 0.75)
+        fixture['shape'].box = (0.75, 0.75)
         self.payload=self.world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=(0,8), 
-                    fixtures=[fixture],
-                    )
+                    fixtures=fixture,
                 )
 
 

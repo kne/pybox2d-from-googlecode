@@ -30,23 +30,19 @@ class Breakable (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ 
-                        b2PolygonShape(edge=[(-40,0),(40,0)]) 
-                        ]
-                    )
+                    fixtures= b2PolygonShape(edge=[(-40,0),(40,0)]) 
                 )
 
         # The breakable body
-        self.shapes = [ (b2PolygonShape(box=(0.5,0.5,(-0.5,0),0)), 1.0),
-                        (b2PolygonShape(box=(0.5,0.5,( 0.5,0),0)), 1.0) ]
-
+        self.shapes = (b2PolygonShape(box=(0.5,0.5,(-0.5,0),0)),
+                       b2PolygonShape(box=(0.5,0.5,( 0.5,0),0))
+                       )
         self.body=self.world.CreateBody(
                 b2BodyDef(
                     type=b2_dynamicBody,
                     position=(0,40), 
                     angle=0.25*b2_pi,
-                    fixtures=self.shapes
+                    fixtures={ 'shape' : self.shapes, 'density' : 1.0 },
                     )
                 )
     
@@ -72,12 +68,10 @@ class Breakable (Framework):
         self.fixture2 = None
         
         body2=self.world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=body.position,
-                    angle=body.angle,
-                    fixtures=[ self.shapes[1] ]
-                    )
+                type=b2_dynamicBody,
+                position=body.position,
+                angle=body.angle,
+                fixtures={ 'shape' : self.shapes[1], 'density' : 1.0},
                 )
         # Compute consistent velocities for new bodies based on cached velocity.
         velocity1 = self.velocity + b2Cross(self.angularVelocity, body.worldCenter - center)

@@ -27,28 +27,20 @@ class Bridge (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ 
-                        b2PolygonShape(edge=[(-40,0),(40,0)]) 
-                        ]
-                    )
+                    fixtures= b2PolygonShape(edge=[(-40,0),(40,0)]) 
                 )
 
-        plank=b2FixtureDef(
-                    shape=b2PolygonShape(box=(0.5,0.125)),
+        plank=dict( shape=b2PolygonShape(box=(0.5,0.125)),
                     friction=0.2,
-                    density=20,
-                )
-
+                    density=20
+                    )
 
         prevBody = ground
         for i in range(self.numPlanks):
             body = self.world.CreateBody(
-                    b2BodyDef(
                         type=b2_dynamicBody,
                         position=(-14.5+i,5), 
-                        fixtures=[plank],
-                        )
+                        fixtures=plank,
                     )
 
             self.world.CreateJoint(
@@ -69,29 +61,25 @@ class Bridge (Framework):
                 )
             )
 
-        fixture= [b2PolygonShape(vertices=
+        fixture=dict(shape=b2PolygonShape(vertices=
                         [(-0.5,0.0),
                          ( 0.5,0.0),
                          ( 0.0,1.5),
                         ]),
-                    1.0, ]  # (shape, density)
+                    density=1.0 ) 
         for i in range(2):
             self.world.CreateBody(
-                    b2BodyDef(
-                        type=b2_dynamicBody,
-                        position=(-8+8*i,12),
-                        fixtures=[fixture],
-                        )
+                    type=b2_dynamicBody, 
+                    position=(-8+8*i,12), 
+                    fixtures=fixture,
                     )
 
-        fixture= [b2CircleShape(radius=0.5), 1] # (shape, density)
+        fixture=dict(shape=b2CircleShape(radius=0.5), density=1)
         for i in range(3):
             self.world.CreateBody(
-                    b2BodyDef(
-                        type=b2_dynamicBody,
-                        position=(-6+6*i,10),
-                        fixtures=[fixture],
-                        )
+                    type=b2_dynamicBody,
+                    position=(-6+6*i,10),
+                    fixtures=fixture,
                     )
 
 if __name__=="__main__":

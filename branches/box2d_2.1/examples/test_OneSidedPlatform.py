@@ -28,30 +28,24 @@ class OneSidedPlatform (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                b2BodyDef(
                     fixtures=[ b2PolygonShape(edge=[(-20,0),(20, 0)]) ]
-                    )
                 )
 
         # The platform
         half_height=0.5
         ypos = 10
         body = self.world.CreateBody(
-                b2BodyDef(
-                    position=(0, ypos),
-                    fixtures=[ b2PolygonShape(box=(3, half_height)) ]
-                    )
-                )
+                position=(0, ypos),
+                fixtures=b2PolygonShape(box=(3, half_height))
+            )
         self.platform = body.fixtures[0]
 
         # The circular character
         body = self.world.CreateBody(
-                b2BodyDef(
-                    position=(0, 12), 
-                    type=b2_dynamicBody,
-                    fixtures=[ (b2CircleShape(radius=0.5), 1.0) ]
-                    )
-                )
+                position=(0, 12), 
+                type=b2_dynamicBody,
+                fixtures=b2FixtureDef(shape=b2CircleShape(radius=0.5), density=1.0),
+            )
 
         self.character = body.fixtures[0]
         body.linearVelocity=(0, -50)

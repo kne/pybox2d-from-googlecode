@@ -376,8 +376,8 @@ public:
 
 
 
-/**** WeldJointDef ****/
-%extend b2WeldJointDef {
+/**** PrismaticJointDef ****/
+%extend b2PrismaticJointDef {
     %pythoncode %{
         def __set_anchor(self, value):
             if not self.bodyA:

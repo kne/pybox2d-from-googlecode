@@ -17,6 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from __future__ import print_function
 from test_main import *
 
 class CollisionProcessing (Framework):
@@ -42,27 +43,24 @@ class CollisionProcessing (Framework):
 
         # Small triangle
         triangle=b2FixtureDef(
-                shape=b2PolygonShape(vertices= [(-1,0), ( 1,0), ( 0,2)]),
+                shape=b2PolygonShape(vertices= [(-1,0),(1,0),(0,2)]),
                 density=1,
                 )
 
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=random_vector(),
-                    fixtures=[triangle],
-                    )
+                type=b2_dynamicBody,
+                position=random_vector(),
+                fixtures=triangle,
                 )
 
         # Large triangle (recycle definitions)
         triangle.shape.vertices = [2.0*b2Vec2(v) for v in triangle.shape.vertices]
 
         trianglebody=world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=random_vector(),
-                    fixtures=[triangle],
-                    )
+                type=b2_dynamicBody,
+                position=random_vector(),
+                fixtures=triangle,
+                fixedRotation=True, # <-- note that the large triangle will not rotate
                 )
 
         # Small box
@@ -73,22 +71,18 @@ class CollisionProcessing (Framework):
                 )
 
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=random_vector(),
-                    fixtures=[box],
-                    )
+                type=b2_dynamicBody,
+                position=random_vector(),
+                fixtures=box,
                 )
 
         # Large box
         box.shape.box = (2, 1)
         world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody,
-                    position=random_vector(),
-                    fixtures=[box],
-                    )
-                )
+                type=b2_dynamicBody,
+                position=random_vector(),
+                fixtures=box,
+            )
 
         # Small circle
         circle=b2FixtureDef(
@@ -97,24 +91,19 @@ class CollisionProcessing (Framework):
                 )
 
         world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=random_vector(),
-                    fixtures=[circle],
-                    )
+                    fixtures=circle,
                 )
 
         # Large circle
         circle.shape.radius *= 2
         world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody,
                     position=random_vector(),
-                    fixtures=[circle],
-                    )
+                    fixtures=circle,
                 )
 
-     
     def Step(self, settings):
         # We are going to destroy some bodies according to contact
         # points. We must buffer the bodies that should be destroyed

@@ -59,7 +59,7 @@ public:
         Py_XDECREF((PyObject*)fixture->GetUserData());
         self->DestroyFixture(fixture);
     }
-    b2Fixture* CreateFixture(b2FixtureDef* defn) {
+    b2Fixture* __CreateFixture(b2FixtureDef* defn) {
         b2Fixture* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
@@ -218,13 +218,14 @@ public:
 %ignore GetUserData;
 %ignore userData;
 
-%newobject b2World::CreateBody;
-%newobject b2World::CreateJoint;
-%newobject b2Body::CreateFixture;
+%newobject b2World::__CreateBody;
+%newobject b2World::__CreateJoint;
+%newobject b2Body::__CreateFixture;
+%rename (__CreateFixture) b2Body::CreateFixture(const b2Shape* shape, float32 density);
 
 %ignore b2World::CreateBody;
 %ignore b2World::CreateJoint;
-%ignore b2Body::CreateFixture(const b2FixtureDef*);
+%ignore b2Body::CreateFixture;
 
 %ignore b2World::DestroyBody;
 %ignore b2World::DestroyJoint;
