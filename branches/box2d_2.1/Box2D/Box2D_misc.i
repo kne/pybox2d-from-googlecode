@@ -203,7 +203,10 @@ public:
 
 /*** Replace b2Distance ***/
 %inline %{
-    b2DistanceOutput* b2Distance(b2Shape* shapeA, b2Shape* shapeB, b2Transform& transformA, b2Transform& transformB, bool useRadii=true) {
+    b2DistanceOutput* _b2Distance(b2Shape* shapeA, b2Shape* shapeB, b2Transform& transformA, b2Transform& transformB, bool useRadii=true) {
+        if (!shapeA || !shapeB)
+            return NULL;
+
         b2DistanceInput input;
         b2DistanceOutput* out=new b2DistanceOutput;
         b2SimplexCache cache;
@@ -218,7 +221,10 @@ public:
         b2Distance(out, &cache, &input);
         return out;
     }
-    b2DistanceOutput* b2Distance(b2DistanceInput* input) {
+    b2DistanceOutput* _b2Distance(b2DistanceInput* input) {
+        if (!input)
+            return NULL;
+
         b2DistanceOutput* out=new b2DistanceOutput;
         b2SimplexCache cache;
         cache.count=0;
@@ -227,5 +233,50 @@ public:
     }
 %}
 
+%pythoncode %{
+    def b2Distance(*args, **kwargs):
+        """
+        Compute the closest points between two shapes.
+
+        Can be called one of several ways:
+        + b2Distance(b2DistanceInput) # utilizes the b2DistanceInput structure, where you define your own proxies
+        + b2Distance(shapeA, shapeB, transformA, transformB, useRadii) # where transform[A,B] are of type b2Transform
+
+        Or utilizing kwargs:
+        + b2Distance(shapeA=a, shapeB=b, transformA=sa, transformB=sb [, useRadii=True])
+
+        Returns a tuple in the form:
+         ((pointAx, pointAy), (pointBx, pointBy), distance, iterations)
+        """
+        if len(args) in (1, 4, 5):
+            out=_b2Distance(*args)
+        elif kwargs: # use kwargs
+            shapeA = kwargs['shapeA']
+            shapeB = kwargs['shapeB']
+            transformA = kwargs['transformA']
+            transformB = kwargs['transformB']
+            if 'useRadii' in kwargs:
+                useRadii = kwargs['useRadii']
+            else:
+                useRadii=True
+            out=_b2Distance(shapeA, shapeB, transformA, transformB, useRadii)
+        else:
+            raise ValueError('Expected arguments for b2Distance or kwargs')
+
+        return (tuple(out.pointA), tuple(out.pointB), out.distance, out.iterations)
+%}
+
 %newobject b2Distance;
 %ignore b2Distance;
+
+/**** Sweep ****/
+%extend b2Sweep {
+public:
+    b2Transform* GetTransform(float32 alpha) {
+        b2Transform* out=new b2Transform;
+        $self->GetTransform(out, alpha);
+        return out;
+    }
+}
+
+%newobject b2Sweep::GetTransform;

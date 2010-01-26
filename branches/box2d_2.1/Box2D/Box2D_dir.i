@@ -153,6 +153,13 @@
 }
 
 
+%extend b2DistanceProxy {
+    %pythoncode %{
+        __dir__ = _dir_filter
+    %}
+}
+
+
 %extend b2DistanceJoint {
     %pythoncode %{
         __dir__ = _dir_filter

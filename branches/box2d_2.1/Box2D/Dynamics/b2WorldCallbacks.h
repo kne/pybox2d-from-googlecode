@@ -104,7 +104,7 @@ public:
 	/// the next step.
 	virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 	{
-		B2_NOT_USED(contact);	
+		B2_NOT_USED(contact);
 		B2_NOT_USED(oldManifold);
 	}
 
@@ -215,5 +215,6 @@ public:
 protected:
 	uint32 m_drawFlags;
 };
+
 
 #endif

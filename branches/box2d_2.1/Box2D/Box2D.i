@@ -25,8 +25,6 @@
 %module(directors="1") Box2D
 %{
     #include "Box2D/Box2D.h"
-//    float32 b2LineJoint::GetMaxMotorForce() const { return 0.0f; }
-//       wrote my own function body for this, but hopefully itll be fixed in svn soon
 %}
 
 /*note:
@@ -116,7 +114,6 @@
     %ignore b2StackAllocator;
     %ignore b2StackEntry;
     %ignore b2ContactRegister;
-    %ignore b2DistanceProxy;
     %ignore b2BlockAllocator;
 
     /* ---- features ---- */
@@ -207,5 +204,6 @@
                         setattr(b2, s[2].lower() + s[3:], locals()[s])
         del locals()['s']
     %}
+
 #endif
 

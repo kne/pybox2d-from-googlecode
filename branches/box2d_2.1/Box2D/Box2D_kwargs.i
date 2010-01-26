@@ -429,3 +429,10 @@
         _init_kwargs(self, **kwargs)
 }
 
+%feature("shadow") b2DistanceProxy::b2DistanceProxy() {
+    def __init__(self, **kwargs):
+        _Box2D.b2DistanceProxy_swiginit(self,_Box2D.new_b2DistanceProxy())
+        _init_kwargs(self, **kwargs)
+}
+
+

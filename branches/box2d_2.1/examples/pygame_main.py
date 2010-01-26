@@ -468,8 +468,6 @@ class Framework(b2ContactListener):
             self.DrawStringCR("hz %d vel/pos iterations %d/%d" %
                 (settings.hz, settings.velocityIterations, settings.positionIterations))
 
-            self.DrawStringCR("heap bytes = %d" % b2Globals.b2_byteCount)
-
         # If there's a mouse joint, draw the connection between the object and the current pointer position.
         if self.mouseJoint:
             p1 = self.mouseJoint.anchorB

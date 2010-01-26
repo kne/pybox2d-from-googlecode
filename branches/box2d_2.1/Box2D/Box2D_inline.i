@@ -26,6 +26,9 @@
 }
 
 %inline %{
+    // Wrap toi settings
+    extern int32 b2_toiMaxIters, b2_toiMaxRootIters;
+
     // Add support for == and != in Python for shapes, joints, and bodies.
     bool __jointeq(b2Joint* a, b2Joint* b) {
         return a==b;

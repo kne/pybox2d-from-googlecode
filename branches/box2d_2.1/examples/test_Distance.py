@@ -19,7 +19,6 @@
 
 from pygame_main import *
 
-
 class Distance (Framework):
     name="Distance"
     description="Use WASD to move and QE to rotate the small rectangle.\nThe distance between the marked points is shown."
@@ -44,17 +43,17 @@ class Distance (Framework):
         super(Distance, self).Step(settings)
 
         # Calculate the distance between the two shapes with the specified transforms
-        out=b2Distance(self.polygonA, self.polygonB, self.transformA, self.transformB)
-        self.DrawStringCR('Distance = %g' % out.distance)
-        self.DrawStringCR('Iterations = %d' % out.iterations)
+        pointA, pointB, distance, iterations=b2Distance(self.polygonA, self.polygonB, self.transformA, self.transformB)
+        self.DrawStringCR('Distance = %g' % distance)
+        self.DrawStringCR('Iterations = %d' % iterations)
 
         # Manually transform the vertices and draw the shapes
         for shape, transform in [(self.polygonA, self.transformA), (self.polygonB, self.transformB)]:
             new_verts = [transform * v for v in shape.vertices]
             self.debugDraw.DrawPolygon(new_verts, b2Color(0.9, 0.9, 0.9), world_coordinates=True)
 
-        self.debugDraw.DrawPoint(out.pointA, 4, b2Color(1,0,0), world_coordinates=True)
-        self.debugDraw.DrawPoint(out.pointB, 4, b2Color(1,1,0), world_coordinates=True)
+        self.debugDraw.DrawPoint(pointA, 4, b2Color(1,0,0), world_coordinates=True)
+        self.debugDraw.DrawPoint(pointB, 4, b2Color(1,1,0), world_coordinates=True)
 
     def Keyboard(self, key):
         if key==K_a:

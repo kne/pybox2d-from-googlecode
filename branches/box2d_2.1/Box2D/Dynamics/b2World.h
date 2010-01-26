@@ -92,7 +92,9 @@ public:
 				int32 positionIterations);
 
 	/// Call this after you are done with time steps to clear the forces. You normally
-	/// call this after each call to Step, unless you are performing sub-steps.
+	/// call this after each call to Step, unless you are performing sub-steps. By default,
+	/// forces will be automatically cleared, so you don't need to call this function.
+	/// @see SetAutoClearForces
 	void ClearForces();
 
 	/// Call this to draw shapes and other debug draw data.
@@ -102,7 +104,7 @@ public:
 	/// provided AABB.
 	/// @param callback a user implemented callback class.
 	/// @param aabb the query box.
-	void QueryAABB(b2QueryCallback* callback, const b2AABB& aabb);
+	void QueryAABB(b2QueryCallback* callback, const b2AABB& aabb) const;
 
 	/// Ray-cast the world for all fixtures in the path of the ray. Your callback
 	/// controls whether you get the closest point, any point, or n-points.
@@ -110,7 +112,7 @@ public:
 	/// @param callback a user implemented callback class.
 	/// @param point1 the ray starting point
 	/// @param point2 the ray ending point
-	void RayCast(b2RayCastCallback* callback, const b2Vec2& point1, const b2Vec2& point2);
+	void RayCast(b2RayCastCallback* callback, const b2Vec2& point1, const b2Vec2& point2) const;
 
 	/// Get the world body list. With the returned body, use b2Body::GetNext to get
 	/// the next body in the world list. A NULL body indicates the end of the list.
@@ -155,6 +157,12 @@ public:
 	/// Is the world locked (in the middle of a time step).
 	bool IsLocked() const;
 
+	/// Set flag to control automatic clearing of forces after each time step.
+	void SetAutoClearForces(bool flag);
+
+	/// Get the flag that controls automatic clearing of forces after each time step.
+	bool GetAutoClearForces() const;
+
 private:
 
 	// m_flags
@@ -162,6 +170,7 @@ private:
 	{
 		e_newFixture	= 0x0001,
 		e_locked		= 0x0002,
+		e_clearForces	= 0x0004,
 	};
 
 	friend class b2Body;
@@ -169,7 +178,8 @@ private:
 	friend class b2Controller;
 
 	void Solve(const b2TimeStep& step);
-	void SolveTOI(const b2TimeStep& step);
+	void SolveTOI();
+	void SolveTOI(b2Body* body);
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Fixture* shape, const b2Transform& xf, const b2Color& color);
@@ -249,6 +259,24 @@ inline b2Vec2 b2World::GetGravity() const
 inline bool b2World::IsLocked() const
 {
 	return (m_flags & e_locked) == e_locked;
+}
+
+inline void b2World::SetAutoClearForces(bool flag)
+{
+	if (flag)
+	{
+		m_flags |= e_clearForces;
+	}
+	else
+	{
+		m_flags &= ~e_clearForces;
+	}
+}
+
+/// Get the flag that controls automatic clearing of forces after each time step.
+inline bool b2World::GetAutoClearForces() const
+{
+	return (m_flags & e_clearForces) == e_clearForces;
 }
 
 #endif

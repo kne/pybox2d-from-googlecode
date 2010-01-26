@@ -75,11 +75,8 @@
 %ignore b2GetPointStates;
 
 /**** Manifold ****/
-%rename (localPlaneNormal) b2Manifold::m_localPlaneNormal;
-%rename (localPoint) b2Manifold::m_localPoint;
-%rename (pointCount) b2Manifold::m_pointCount;
-%rename (type_) b2Manifold::m_type;
-%ignore b2Manifold::m_points;
+%rename (type_) b2Manifold::type;
+%ignore b2Manifold::points;
 
 %extend b2Manifold {
 public:
@@ -90,9 +87,9 @@ public:
     %}
 
     b2ManifoldPoint* __GetPoint(int i) {
-        if (i >= b2_maxManifoldPoints || i >= $self->m_pointCount)
+        if (i >= b2_maxManifoldPoints || i >= $self->pointCount)
             return NULL;
-        return &( $self->m_points[i] );
+        return &( $self->points[i] );
     }
     
 }
@@ -125,8 +122,7 @@ public:
 %ignore b2ContactImpulse::tangentImpulses;
 
 /**** WorldManifold ****/
-%rename (normal) b2WorldManifold::m_normal;
-%ignore b2WorldManifold::m_points;
+%ignore b2WorldManifold::points;
 
 %extend b2WorldManifold {
 public:
@@ -138,8 +134,8 @@ public:
         PyObject* point;
         for (int i=0; i < b2_maxManifoldPoints; i++) {
             point = PyTuple_New(2);
-            PyTuple_SetItem(point, 0, SWIG_From_double((float32)$self->m_points[i].x));
-            PyTuple_SetItem(point, 1, SWIG_From_double((float32)$self->m_points[i].y));
+            PyTuple_SetItem(point, 0, SWIG_From_double((float32)$self->points[i].x));
+            PyTuple_SetItem(point, 1, SWIG_From_double((float32)$self->points[i].y));
 
             PyTuple_SetItem(ret, i, point);
         }
@@ -161,15 +157,12 @@ public:
             return ret
 
         # Read-write properties
-        sensor = property(__IsSensor, __SetSensor)
         enabled = property(__IsEnabled, __SetEnabled)
 
         # Read-only
         next = property(__GetNext, None)
-        touching = property(__IsTouching, None)
         fixtureB = property(__GetFixtureB, None)
         fixtureA = property(__GetFixtureA, None)
-        continuous = property(__IsContinuous, None)
         manifold = property(__GetManifold, None)
         worldManifold = property(__GetWorldManifold, None)
 
@@ -177,16 +170,12 @@ public:
 }
 
 %rename(__GetNext) b2Contact::GetNext;
-%rename(__IsTouching) b2Contact::IsTouching;
-%rename(__IsSensor) b2Contact::IsSensor;
 %rename(__GetFixtureB) b2Contact::GetFixtureB;
 %rename(__GetFixtureA) b2Contact::GetFixtureA;
-%rename(__IsContinuous) b2Contact::IsContinuous;
 %rename(__GetManifold) b2Contact::GetManifold;
 %rename(__GetWorldManifold_internal) b2Contact::GetWorldManifold;
 %rename(__IsEnabled) b2Contact::IsEnabled;
 %rename(__SetEnabled) b2Contact::SetEnabled;
-%rename(__SetSensor) b2Contact::SetSensor;
 
 /**** Create our own ContactPoint structure ****/
 /* And allow kwargs for it */
@@ -208,4 +197,71 @@ public:
         b2PointState state;
     };
 }
+
+
+/**** Replace b2TimeOfImpact ****/
+%inline %{
+    b2TOIOutput* _b2TimeOfImpact(b2Shape* shapeA, b2Shape* shapeB, b2Sweep& sweepA, b2Sweep& sweepB, float32 tMax) {
+        b2TOIInput input;
+        b2TOIOutput* out=new b2TOIOutput;
+
+        input.proxyA.Set(shapeA);
+        input.proxyB.Set(shapeB);
+        input.sweepA = sweepA;
+        input.sweepB = sweepB;
+        input.tMax = tMax;
+
+        b2TimeOfImpact(out, &input);
+        return out;
+    }
+    b2TOIOutput* _b2TimeOfImpact(b2TOIInput* input) {
+        b2TOIOutput* out=new b2TOIOutput;
+        b2TimeOfImpact(out, input);
+        return out;
+    }
+%}
+
+%pythoncode %{
+    def b2TimeOfImpact(*args, **kwargs):
+        """
+        Compute the upper bound on time before two shapes penetrate. Time is represented as
+        a fraction between [0,tMax]. This uses a swept separating axis and may miss some intermediate,
+        non-tunneling collision. If you change the time interval, you should call this function
+        again.
+        Note: use b2Distance to compute the contact point and normal at the time of impact.
+        
+        Can be called one of several ways:
+        + b2TimeOfImpact(b2TOIInput) # utilizes the b2TOIInput structure, where you define your own proxies
+        + b2TimeOfImpact(shapeA, shapeB, sweepA, sweepB, tMax) # where sweep[A,B] are of type b2Sweep
+
+        Or utilizing kwargs:
+        + b2TimeOfImpact(shapeA=a, shapeB=b, sweepA=sa, sweepB=sb, tMax=t)
+
+        Returns a tuple in the form:
+        (output state, time of impact)
+
+        Where output state is in b2TOIOutput.[
+                e_unknown, 
+                e_failed,
+                e_overlapped,
+                e_touching,
+                e_separated ]
+        """
+        if len(args) == 5 or len(args) == 1:
+            out=_b2TimeOfImpact(*args)
+        elif kwargs: # use kwargs
+            shapeA = kwargs['shapeA']
+            shapeB = kwargs['shapeB']
+            sweepA = kwargs['sweepA']
+            sweepB = kwargs['sweepB']
+            tMax = kwargs['tMax']
+            out=_b2TimeOfImpact(shapeA, shapeB, sweepA, sweepB, tMax)
+        else:
+            raise ValueError('Expected arguments for b2TimeOfImpact or kwargs')
+
+        return (out.state, out.t)
+%}
+
+%newobject b2TimeOfImpact;
+%ignore b2TimeOfImpact;
 

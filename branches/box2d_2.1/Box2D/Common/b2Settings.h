@@ -24,7 +24,6 @@
 
 #define USE_EXCEPTIONS
 
-#define B2_NOT_USED(x) x
 #ifdef USE_EXCEPTIONS
 #include <Python.h>
 class b2AssertException {};
@@ -32,6 +31,7 @@ class b2AssertException {};
 #else
 #define b2Assert(A) assert(A)
 #endif
+#define B2_NOT_USED(x) ((void)(x))
 
 typedef signed char	int8;
 typedef signed short int16;
@@ -55,7 +55,7 @@ typedef float float32;
 #define b2_maxManifoldPoints	2
 
 /// The maximum number of vertices on a convex polygon.
-#define b2_maxPolygonVertices	8
+#define b2_maxPolygonVertices	16
 
 /// This is used to fatten AABBs in the dynamic tree. This allows proxies
 /// to move by a small amount without triggering a tree adjustment.
@@ -76,7 +76,7 @@ typedef float float32;
 #define b2_angularSlop			(2.0f / 180.0f * b2_pi)
 
 /// The radius of the polygon/edge shape skin. This should not be modified. Making
-/// this smaller means polygons will have and insufficient for continuous collision.
+/// this smaller means polygons will have an insufficient buffer for continuous collision.
 /// Making it larger may create artifacts for vertex collision.
 #define b2_polygonRadius		(2.0f * b2_linearSlop)
 
@@ -85,9 +85,6 @@ typedef float float32;
 
 /// Maximum number of contacts to be handled to solve a TOI island.
 #define b2_maxTOIContactsPerIsland	32
-
-/// Maximum number of joints to be handled to solve a TOI island.
-#define b2_maxTOIJointsPerIsland	32
 
 /// A velocity threshold for elastic collisions. Any collision with a relative linear
 /// velocity below this threshold will be treated as inelastic.
@@ -128,9 +125,6 @@ typedef float float32;
 #define b2_angularSleepTolerance	(2.0f / 180.0f * b2_pi)
 
 // Memory Allocation
-
-/// The current number of bytes allocated through b2Alloc.
-extern int32 b2_byteCount;
 
 /// Implement this function to use your own memory allocator.
 void* b2Alloc(int32 size);
