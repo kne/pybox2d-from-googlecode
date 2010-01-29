@@ -72,14 +72,14 @@ class ApplyForce (Framework):
             r = sqrt(2.0 * body.inertia / body.mass)
 
             self.world.CreateJoint(
-                    b2FrictionJointDef(
-                        bodyA = ground,
-                        bodyB = body,
-                        localAnchorA=(0,0), 
-                        localAnchorB=(0,0), 
-                        collideConnected=True,
-                        maxForce = body.mass * gravity,
-                        maxTorque = body.mass * r * gravity)
+                    type=b2FrictionJoint,
+                    bodyA = ground,
+                    bodyB = body,
+                    localAnchorA=(0,0), 
+                    localAnchorB=(0,0), 
+                    collideConnected=True,
+                    maxForce = body.mass * gravity,
+                    maxTorque = body.mass * r * gravity
                     )
 
     def Keyboard(self, key):
@@ -87,8 +87,8 @@ class ApplyForce (Framework):
             return
 
         if key==K_w:
-            f = self.body.GetWorldVector((0.0, -200.0))
-            p = self.body.GetWorldPoint((0.0, 2.0))
+            f = self.body.GetWorldVector(localVector=(0.0, -200.0))
+            p = self.body.GetWorldPoint(localPoint=(0.0, 2.0))
             self.body.ApplyForce(f, p)
         elif key==K_a:
             self.body.ApplyTorque(50.0)

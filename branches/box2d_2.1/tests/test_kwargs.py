@@ -40,21 +40,18 @@ class test_kwargs (unittest.TestCase):
                 ) 
        
         body = world.CreateBody(
-                b2BodyDef(
-                    type=b2_dynamicBody, 
-                    position=(0,4),
-                    fixtures=[
-                        b2FixtureDef(shape=b2CircleShape(radius=1), density=1, friction=0.3),
-                        dict(
-                            shape=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
-                            density=1.0,
-                            )
-                        ]
-                    )
+                type=b2_dynamicBody, 
+                position=(0,4),
+                fixtures=[
+                    b2FixtureDef(shape=b2CircleShape(radius=1), density=1, friction=0.3),
+                    dict(
+                        shape=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
+                        density=1.0,
+                        )
+                    ]
                 ) 
          
         body.CreateFixture(shape=b2CircleShape(radius=1), density=1, friction=0.3)
-         
         timeStep = 1.0 / 60
         vel_iters, pos_iters = 6, 2
 

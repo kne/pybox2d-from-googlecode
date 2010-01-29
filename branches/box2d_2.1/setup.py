@@ -65,6 +65,7 @@ library_name='Box2D'   # the final name that the library should end up being
 library_path=os.path.join(library_base, library_name) # library/Box2D (e.g.)
 source_dir='Box2D' # where all of the C++ and SWIG source resides
 swig_source='Box2D.i' # the main SWIG source file
+use_kwargs=True # whether or not to default creating kwargs for all functions
 
 def write_init(): 
     # read in the license header
@@ -105,9 +106,19 @@ box2d_source_files = [os.path.join(source_dir, swig_source)] + \
     sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 # arguments to pass to SWIG. for old versions of SWIG, -O (optimize) might not be present.
+# Defaults:
+# -O optimize, -includeall follow all include statements, -globals changes cvar->b2Globals
+# -Isource_dir adds source dir to include path, -outdir library_path sets the output directory
+# -small makes the Box2D_wrap.cpp file almost unreadable, but faster to compile. If you want
+# to try to understand it for whatever reason, I'd recommend removing that option.
 swig_arguments = \
-        '-c++ -I%s -O -includeall -ignoremissing -w201 -globals b2Globals -outdir %s' \
-        % (library_name, library_path)
+        '-c++ -I%s -O -small -includeall -ignoremissing -w201 -globals b2Globals -outdir %s' \
+        % (source_dir, library_path)
+
+if use_kwargs:
+    # turn off the warnings about functions that can't use kwargs (-w511)
+    # and let the wrapper know we're using kwargs (-D_SWIG_KWARGS)
+    swig_arguments += " -keyword -w511 -D_SWIG_KWARGS"
 
 # depending on the platform, add extra compilation arguments. hopefully if the platform
 # isn't windows, g++ will be used; -Wno-unused then would suppress some annoying warnings

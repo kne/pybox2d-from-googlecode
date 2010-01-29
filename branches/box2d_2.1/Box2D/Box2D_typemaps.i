@@ -294,7 +294,11 @@
     void* argp=NULL;
     int res3 = SWIG_ConvertPtr($input, &argp, $descriptor(b2Manifold *), 0);
     Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
+#ifdef _SWIG_KWARGS
+    bool upcall_ = (director && (director->swig_get_self()==obj0));
+#else
     bool upcall_ = (director && (director->swig_get_self()==swig_obj[0]));
+#endif
     if (upcall_) {
         /* This conversion fails on py3k when attempting to call the 
            b2_defaultListener.PreSolve() and I cannot quite figure out why.

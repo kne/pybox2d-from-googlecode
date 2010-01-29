@@ -21,34 +21,45 @@
 %feature("shadow") b2World::b2World(const b2Vec2& gravity, bool doSleep) {
     def __init__(self, *args, **kwargs): 
         """__init__(self, *args, **kwargs) -> b2World
-        Non-named arguments:
-         b2World(gravity, doSleep)
+        Arguments:
+        * gravity (default (0, -10))
+        * doSleep (default True)
+        Additional kwargs like contactListener will be passed after the world is created.
 
         Examples:
+         b2World()
          b2World( (0,-10), True)
          b2World( gravity=(0,-10), doSleep=True)
+         b2World(contactListener=myListener)
 
-        Required arguments:
-        * gravity
-        * doSleep
         """
-        required = ('gravity', 'doSleep')
-        if args:
-            for key, value in zip(required, args):
-                if key not in kwargs:
-                    kwargs[key]=value
-        if kwargs:
-            missing=[v for v in required if v not in kwargs]
-            if missing:
-                raise ValueError('Arguments missing: %s' % ','.join(missing) )
-        else:
-            raise ValueError('Arguments required: %s' % ','.join(required) )
+        if len(args) not in (0, 1, 2):
+            raise ValueError("Only 'gravity, doSleep' can be passed as normal parameters.")
 
-        args=( kwargs['gravity'], kwargs['doSleep'] )
-        _Box2D.b2World_swiginit(self,_Box2D.new_b2World(*args))
+        if len(args) >= 1:
+            gravity=args[0]
+        elif 'gravity' in kwargs:
+            gravity=kwargs['gravity']
+            del kwargs['gravity']
+        else:
+            gravity=(0,-10)
+
+        if len(args) == 2:
+            doSleep=args[1]
+        elif 'doSleep' in kwargs:
+            doSleep=kwargs['doSleep']
+            del kwargs['doSleep']
+        else:
+            doSleep=True
+        
+        _Box2D.b2World_swiginit(self,_Box2D.new_b2World(gravity, doSleep))
 
         for key, value in list(kwargs.items()):
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except Exception as ex:
+                raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
+                            % (self.__class__.__name__, key, ex))
 
 }
 
