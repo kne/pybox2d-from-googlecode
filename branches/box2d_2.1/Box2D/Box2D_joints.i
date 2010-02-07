@@ -18,6 +18,24 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+/**** JointDef ****/
+%extend b2JointDef {
+public:
+    %pythoncode %{
+        def to_kwargs(self):
+            """
+            Returns a dictionary representing this joint definition
+            """
+            skip_props = ['anchor', 'anchorA', 'anchorB', 'axis']
+            type_=type(self)
+            variables=[var for var in dir(self) 
+                if isinstance(getattr(type_, var), property)
+                   and var not in skip_props]
+
+            return dict([(variable, getattr(self, variable)) for variable in variables])
+    %}
+}
+
 /**** Joint ****/
 %extend b2Joint {
 public:
@@ -489,12 +507,23 @@ public:
             lengthB_set=True
 
         if 'ratio' in kwargs:
-            assert(self.ratio > b2_epsilon) # Ratio too small
+            assert(self.ratio > globals()['b2_epsilon']) # Ratio too small
             if lengthA_set and lengthB_set and 'maxLengthA' not in kwargs and 'maxLengthB' not in kwargs:
                 C = self.lengthA + self.ratio * self.lengthB
                 self.maxLengthA = C - self.ratio * b2_minPulleyLength
                 self.maxLengthB = (C - b2_minPulleyLength) / self.ratio
 }
+/*
+TODO:
+Note on the above:
+    assert(self.ratio > globals()['b2_epsilon']) # Ratio too small
+Should really just be:
+    assert(self.ratio > b2_epsilon) # Ratio too small 
+But somehow SWIG is renaming b2_epsilon to FLT_EPSILON after it sees the #define,
+but does not export the FLT_EPSILON symbol to Python. It then crashes once it reaches
+this point. So, figure out a way around this, somehow.
+*/
+
 
 /**** RevoluteJointDef ****/
 %extend b2RevoluteJointDef {

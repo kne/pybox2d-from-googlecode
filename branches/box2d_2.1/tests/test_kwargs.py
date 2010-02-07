@@ -13,42 +13,35 @@ class test_kwargs (unittest.TestCase):
         world = b2World(gravity=(0,-10), doSleep=True, contactListener=self.cont_list)
         groundBody = world.CreateBody(b2BodyDef(position=(0,-10)))
 
-        groundBody.CreateFixture(b2PolygonShape(box=(50,10)))
+        groundBody.CreateFixturesFromShapes(b2PolygonShape(box=(50,10)))
 
         body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
                         fixtures=[]))
         try:
             body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
-                            fixtures=[b2PolygonShape(box=(5,1))]))
+                            shapes=b2PolygonShape(box=(5,1))))
         except ValueError:
             pass # good
         
         body = world.CreateBody(
                 type=b2_dynamicBody,
                 position=(0,4),
-                fixtures=dict(shape=b2PolygonShape(box=(2,1)), density=1.0) 
+                fixtures=b2FixtureDef(shape=b2PolygonShape(box=(2,1)), density=1.0) 
                 )
 
         body = world.CreateBody(
-                b2BodyDef(
                     type=b2_dynamicBody, 
                     position=(0,4),
-                    fixtures=dict(
-                        shape=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
-                        density=1.0)
-                    )
+                    shapes=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
+                    shapeFixture=b2FixtureDef(density=1.0),
                 ) 
        
         body = world.CreateBody(
-                type=b2_dynamicBody, 
-                position=(0,4),
-                fixtures=[
-                    b2FixtureDef(shape=b2CircleShape(radius=1), density=1, friction=0.3),
-                    dict(
-                        shape=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
-                        density=1.0,
-                        )
-                    ]
+                    type=b2_dynamicBody, 
+                    position=(0,4),
+                    fixtures=b2FixtureDef(shape=b2CircleShape(radius=1), density=1, friction=0.3),
+                    shapes=(b2PolygonShape(box=(2,1)), b2PolygonShape(box=(2,1))),
+                    shapeFixture=b2FixtureDef(density=1.0),
                 ) 
          
         body.CreateFixture(shape=b2CircleShape(radius=1), density=1, friction=0.3)

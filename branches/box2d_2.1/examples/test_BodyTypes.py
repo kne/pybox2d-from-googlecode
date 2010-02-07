@@ -29,33 +29,29 @@ class BodyTypes (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    fixtures=b2PolygonShape(edge=[(-20,0),(20,0)]) 
+                    shapes=b2PolygonShape(edge=[(-20,0),(20,0)]) 
                 )
 
         # The attachment
-        fixture=dict(shape=b2PolygonShape(box=(0.5,2)), density=2.0)
-        self.attachment=self.world.CreateBody(
-                    type=b2_dynamicBody,
+        self.attachment=self.world.CreateDynamicBody(
                     position=(0,3), 
-                    fixtures=fixture,
+                    fixtures=b2FixtureDef(shape=b2PolygonShape(box=(0.5,2)), density=2.0),
                 )
 
         # The platform
-        fixture=dict(
+        fixture=b2FixtureDef(
                 shape=b2PolygonShape(box=(4,0.5)), 
                 density=2,
                 friction=0.6,
                 )
                
-        self.platform=self.world.CreateBody(
-                    type=b2_dynamicBody,
+        self.platform=self.world.CreateDynamicBody(
                     position=(0,5), 
                     fixtures=fixture,
                 )
         
         # The joints joining the attachment/platform and ground/platform
-        self.world.CreateJoint(
-                type=b2RevoluteJoint,
+        self.world.CreateRevoluteJoint(
                 bodyA=self.attachment,
                 bodyB=self.platform,
                 anchor=(0,5),
@@ -63,8 +59,7 @@ class BodyTypes (Framework):
                 enableMotor=True
             )
 
-        self.world.CreateJoint(
-                type=b2PrismaticJoint,
+        self.world.CreatePrismaticJoint(
                 bodyA=ground,
                 bodyB=self.platform,
                 anchor=(0,5),
@@ -78,9 +73,8 @@ class BodyTypes (Framework):
 
         # And the payload that initially sits upon the platform
         # Reusing the fixture we previously defined above
-        fixture['shape'].box = (0.75, 0.75)
-        self.payload=self.world.CreateBody(
-                    type=b2_dynamicBody,
+        fixture.shape.box = (0.75, 0.75)
+        self.payload=self.world.CreateDynamicBody(
                     position=(0,8), 
                     fixtures=fixture,
                 )

@@ -27,8 +27,8 @@ class Confined (Framework):
         super(Confined, self).__init__()
 
         # The ground
-        ground = self.world.CreateBody(
-                fixtures=[ 
+        ground = self.world.CreateStaticBody(
+                shapes=[ 
                         b2PolygonShape(edge=[(-10,  0),( 10,  0)]),
                         b2PolygonShape(edge=[(-10,  0),(-10, 20)]),
                         b2PolygonShape(edge=[( 10,  0),( 10, 20)]),
@@ -49,9 +49,8 @@ class Confined (Framework):
     
     def CreateCircle(self, pos):
         fixture=b2FixtureDef(shape=b2CircleShape(radius=self.radius, p=(0,0)), density=1, friction=0.1) 
-        self.world.CreateBody(
+        self.world.CreateDynamicBody(
                 position=pos, 
-                type=b2_dynamicBody,
                 fixtures=fixture
                 )
 

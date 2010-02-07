@@ -99,6 +99,8 @@ public:
             self.y=value
         else:
             raise IndexError
+    def __nonzero__(self):
+        return self.x!=0.0 or self.y!=0.0
 
     tuple = property(lambda self: (self.x, self.y), lambda self, value: self.__set(*value))
     length = property(__Length, None)
@@ -220,6 +222,8 @@ public:
             self.z=value
         else:
             raise IndexError
+    def __nonzero__(self):
+        return self.x!=0.0 or self.y!=0.0 or self.z!=0.0
 
     tuple = property(lambda self: (self.x, self.y, self.z), lambda self, value: self.__set(*value))
     length = property(_Box2D.b2Vec3___Length, None)

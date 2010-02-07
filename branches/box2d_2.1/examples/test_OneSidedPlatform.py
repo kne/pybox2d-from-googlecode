@@ -28,7 +28,7 @@ class OneSidedPlatform (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    fixtures=[ b2PolygonShape(edge=[(-20,0),(20, 0)]) ]
+                    shapes=b2PolygonShape(edge=[(-20,0),(20, 0)])
                 )
 
         # The platform
@@ -36,14 +36,13 @@ class OneSidedPlatform (Framework):
         ypos = 10
         body = self.world.CreateBody(
                 position=(0, ypos),
-                fixtures=b2PolygonShape(box=(3, half_height))
+                shapes=b2PolygonShape(box=(3, half_height))
             )
         self.platform = body.fixtures[0]
 
         # The circular character
-        body = self.world.CreateBody(
+        body = self.world.CreateDynamicBody(
                 position=(0, 12), 
-                type=b2_dynamicBody,
                 fixtures=b2FixtureDef(shape=b2CircleShape(radius=0.5), density=1.0),
             )
 

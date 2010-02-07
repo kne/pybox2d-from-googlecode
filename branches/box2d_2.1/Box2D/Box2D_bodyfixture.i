@@ -23,6 +23,8 @@
 public:        
     %pythoncode %{
         fixtures = None
+        shapes = None
+        shapeFixture = None
     %}
 }
 
@@ -109,29 +111,46 @@ public:
             for fixture in self.fixtures:
                 yield fixture
 
-        def CreateFixture(self, *args, **kwargs):
+        def CreateFixturesFromShapes(self, shapes=None, shapeFixture=None):
             """
-            Create fixture(s) on the body.
+            Create fixture(s) on the body from one or more shapes, and optionally a single
+            fixture definition.
 
             Takes kwargs; examples of valid combinations are as follows:
-            CreateFixture(b2FixtureDef())
-            CreateFixture( [b2FixtureDef(), b2FixtureDef(), ...])
-            CreateFixture( [b2Shape(), b2Shape(), ...], density=1.0, friction=0.2, ...)
-            CreateFixture(shape=b2Shape(), friction=0.2, ...)
-            CreateFixture(shape=[b2Shape(), b2Shape()], friction=0.2, ...)
-            
-            The above lists can be any valid combination of b2FixtureDefs and b2Shapes.
-            In the case of a fixture definition with kwargs passed in, the kwargs will be
-            ignored and the fixture definition will be created as it was defined. Any shapes
-            in that list will be created with the specified kwarg values.
+            CreateFixturesFromShapes(shapes=b2CircleShape(radius=0.2))
+            CreateFixturesFromShapes(shapes=b2CircleShape(radius=0.2), shapeFixture=b2FixtureDef(friction=0.2))
+            CreateFixturesFromShapes(shapes=[b2CircleShape(radius=0.2), b2PolygonShape(box=[1,2])])
+            """
+            if shapes==None:
+                raise TypeError('At least one shape required')
 
-            CreateFixture(dict(...)) is a special case that allows the creation of a body
-            with fixtures set: 
-            self.body = self.world.CreateBody(
-                        position=(0, 2), 
-                        fixtures=dict(shape=b2PolygonShape(box=(0.5, 0.5)), density=1, friction=0.3)
-                    )
-            It is the same as passing those arguments as kwargs in the first place.
+            if shapeFixture==None:
+                shapeFixture=b2FixtureDef()
+                oldShape=None
+            else:
+                oldShape = shapeFixture.shape
+
+            ret=None
+            if isinstance(shapes, (list, tuple)):
+                ret=[]
+                for shape in shapes:
+                    shapeFixture.shape=shape
+                    ret.append(self.__CreateFixture(shapeFixture))
+            else:
+                shapeFixture.shape=shapes
+                ret=self.__CreateFixture(shapeFixture)
+
+            shapeFixture.shape=oldShape
+            return ret
+
+        def CreateFixture(self, *args, **kwargs):
+            """
+            Create a fixtures on the body.
+
+            Takes kwargs; examples of valid combinations are as follows:
+            CreateFixture(b2FixtureDef(shape=s, restitution=0.2, ...))
+            CreateFixture(shape=s, restitution=0.2, ...)
+            
             """
             if len(args) > 1:
                 raise TypeError('Takes only one argument or kwargs. See help(b2Body.CreateFixture)')
@@ -139,31 +158,10 @@ public:
                 if isinstance(args[0], b2FixtureDef):
                     defn = args[0]
                     return self.__CreateFixture(defn)
-                elif isinstance(args[0], dict):
-                    return self.CreateFixture(**args[0])
-                elif isinstance(args[0], (list, tuple)):
-                    return [self.CreateFixture(defn, **kwargs) for defn in args[0]]
-                elif isinstance(args[0], b2Shape):
-                    if not kwargs:
-                        # create a fixture from a b2Shape, assuming density of 0
-                        return self.__CreateFixture(args[0], 0)
-                    else:
-                        # create a fixture from a b2Shape, using all of the information
-                        # in the kwargs as fixture specifications
-                        fixture_args = kwargs.copy()
-                        fixture_args['shape']=args[0]
-                        return self.__CreateFixture(b2FixtureDef(**fixture_args))
                 else:
-                    raise ValueError('Expected shape, b2FixtureDef, or sequence; got %s' % args[0])
+                    raise TypeError('Expected b2FixtureDef argument or kwargs')
             else: # no arguments, just kwargs
-                if not kwargs or 'shape' not in kwargs:
-                    raise TypeError('Expected shape kwarg holding the shape to create')
-                if isinstance(kwargs['shape'], (list, tuple)):
-                    shapes = kwargs['shape']
-                    del kwargs['shape']
-                    return [self.CreateFixture(shape, **kwargs) for shape in shapes]
-                else:
-                    return self.__CreateFixture(b2FixtureDef(**kwargs))
+                return self.__CreateFixture(b2FixtureDef(**kwargs))
 
         def CreateEdgeChain(self, edge_list):
             """
@@ -175,14 +173,14 @@ public:
                 raise ValueError('Edge list length >= 2')
 
             shape=b2PolygonShape(edge=[list(i) for i in edge_list[0:2]])
-            self.CreateFixture(shape)
+            self.CreateFixturesFromShapes(shape)
 
             prev = edge_list[1]
             for edge in edge_list[1:]:
                 if len(edge) != 2:
                     raise ValueError('Vertex length != 2, "%s"' % list(edge))
                 shape.edge = [list(prev), list(edge)]
-                self.CreateFixture(shape)
+                self.CreateFixturesFromShapes(shape)
                 prev=edge
 
         # Read-write properties

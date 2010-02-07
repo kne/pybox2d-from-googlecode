@@ -30,15 +30,14 @@ class Web (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    fixtures=b2PolygonShape(edge=[(-40,0),(40, 0)])
+                    shapes=b2PolygonShape(edge=[(-40,0),(40, 0)])
                 )
 
         fixture=b2FixtureDef(shape=b2PolygonShape(box=(0.5,0.5)),
                             density=5, friction=0.2)
 
-        self.bodies = [self.world.CreateBody(
+        self.bodies = [self.world.CreateDynamicBody(
                             position=pos, 
-                            type=b2_dynamicBody, 
                             fixtures=fixture
                             ) for pos in ( (-5,5), (5,5), (5,15), (-5,15) )]
 

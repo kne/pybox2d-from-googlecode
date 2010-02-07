@@ -32,9 +32,7 @@ class CollisionProcessing (Framework):
         # Ground body
         world=self.world
         ground = world.CreateBody(
-                b2BodyDef(
-                    fixtures=[ b2PolygonShape( edge=[(-50,0),(50,0)],) ]
-                    )
+                    shapes=b2PolygonShape( edge=[(-50,0),(50,0)],)
                 )
 
         xlow, xhi = -5, 5

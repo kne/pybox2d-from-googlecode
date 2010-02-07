@@ -77,15 +77,7 @@ class testJoints (unittest.TestCase):
         bodyDef.position = position
         body = self.world.CreateBody(bodyDef)
          
-        circle = self.b2.b2CircleShape()
-        circle.radius = 1.0
-
-        fixtureDef = self.b2.b2FixtureDef()
-        fixtureDef.shape = circle
-        fixtureDef.density = 1
-        fixtureDef.friction = 0.3
-         
-        body.CreateFixture(fixtureDef)
+        body.CreateFixture(shape=self.b2.b2CircleShape(radius=1.0), density=1.0, friction=0.3)
         return body
 
     def step_world(self, steps=10): 
@@ -312,15 +304,23 @@ class testJoints (unittest.TestCase):
     # ---- ----
 
     def do_joint_test(self, name, init_args):
-        create  = getattr(self, "%s_definition"%name)
+        get_dfn = getattr(self, "%s_definition"%name)
         asserts = getattr(self, "%s_asserts"%name)
         checks  = getattr(self, "%s_checks"%name)
+        create_name=getattr(self.world, "Create%sJoint" % (name.capitalize()))
 
         for bodyA, bodyB in itertools.permutations( ( self.sbody1, self.sbody2, self.dbody1, self.dbody2), 2 ):
             try:
-                dfn = create(body1=bodyA, body2=bodyB, **init_args)
+                dfn = get_dfn(body1=bodyA, body2=bodyB, **init_args)
             except Exception as s:
                 self._fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
+
+            try:
+                kw_args=dfn.to_kwargs()
+                joint = create_name(**kw_args)
+                self.world.DestroyJoint(joint)
+            except Exception as s:
+                self._fail("Failed on bodies %s and %s, joint creation by kwargs (%s)" % (bodyA.userData, bodyB.userData, s))
 
             try:
                 joint = self.world.CreateJoint(dfn)
@@ -393,7 +393,7 @@ class testJoints (unittest.TestCase):
         ground=self.world.CreateBody( self.b2.b2BodyDef() )
         shape=self.b2.b2PolygonShape()
         shape.SetAsEdge((50.0, 0.0), (-50.0, 0.0))
-        ground.CreateFixture(shape)
+        ground.CreateFixturesFromShapes(shapes=shape)
 
         body1=self.create_circle_body((-3, 12))
         body2=self.create_circle_body(( 0, 12))

@@ -27,57 +27,53 @@ class Bridge (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    fixtures= b2PolygonShape(edge=[(-40,0),(40,0)]) 
+                    shapes=b2PolygonShape(edge=[(-40,0),(40,0)]) 
                 )
 
-        plank=dict( shape=b2PolygonShape(box=(0.5,0.125)),
+        plank=b2FixtureDef( 
+                    shape=b2PolygonShape(box=(0.5,0.125)),
                     friction=0.2,
                     density=20
                     )
 
         prevBody = ground
         for i in range(self.numPlanks):
-            body = self.world.CreateBody(
-                        type=b2_dynamicBody,
+            body = self.world.CreateDynamicBody(
                         position=(-14.5+i,5), 
                         fixtures=plank,
                     )
 
-            self.world.CreateJoint(
-                b2RevoluteJointDef(
-                        bodyA=prevBody,
-                        bodyB=body,
-                        anchor=(-15+i,5)
-                    )
+            self.world.CreateRevoluteJoint(
+                    bodyA=prevBody,
+                    bodyB=body,
+                    anchor=(-15+i,5)
                 )
 
             prevBody = body
 
-        self.world.CreateJoint(
-            b2RevoluteJointDef(
-                    bodyA=prevBody,
-                    bodyB=ground,
-                    anchor=(-15+self.numPlanks,5)
-                )
+        self.world.CreateRevoluteJoint(
+                bodyA=prevBody,
+                bodyB=ground,
+                anchor=(-15+self.numPlanks,5)
             )
 
-        fixture=dict(shape=b2PolygonShape(vertices=
+        fixture=b2FixtureDef(
+                shape=b2PolygonShape(vertices=
                         [(-0.5,0.0),
                          ( 0.5,0.0),
                          ( 0.0,1.5),
                         ]),
-                    density=1.0 ) 
+                    density=1.0 
+                    ) 
         for i in range(2):
-            self.world.CreateBody(
-                    type=b2_dynamicBody, 
+            self.world.CreateDynamicBody(
                     position=(-8+8*i,12), 
                     fixtures=fixture,
                     )
 
-        fixture=dict(shape=b2CircleShape(radius=0.5), density=1)
+        fixture=b2FixtureDef(shape=b2CircleShape(radius=0.5), density=1)
         for i in range(3):
-            self.world.CreateBody(
-                    type=b2_dynamicBody,
+            self.world.CreateDynamicBody(
                     position=(-6+6*i,10),
                     fixtures=fixture,
                     )

@@ -47,7 +47,7 @@ try:
     from pygame_gui import (fwGUI, gui)
     GUIEnabled = True
 except ImportError:
-    print('Unable to load PGU; GUI disabled.')
+    print('Unable to load PGU; menu disabled (note that it does not work in Python 3.x).')
     GUIEnabled = False
 
 # Use psyco if available
@@ -534,7 +534,6 @@ class Framework(b2ContactListener):
             return
 
         # Create a mouse joint on the selected body (assuming it's dynamic)
-
         # Make a small box.
         aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
 
@@ -545,8 +544,7 @@ class Framework(b2ContactListener):
         if query.fixture:
             body = query.fixture.body
             # A body was selected, create the mouse joint
-            self.mouseJoint = self.world.CreateJoint(
-                    type=b2MouseJointDef,
+            self.mouseJoint = self.world.CreateMouseJoint(
                     bodyA=self.groundbody,
                     bodyB=body, 
                     target=p,
@@ -604,11 +602,10 @@ class Framework(b2ContactListener):
             self.world.DestroyBody(self.bomb)
             self.bomb = None
 
-        self.bomb = self.world.CreateBody(
+        self.bomb = self.world.CreateDynamicBody(
                         allowSleep=True, 
                         position=position, 
                         linearVelocity=velocity,
-                        type=b2_dynamicBody,
                         fixtures=b2FixtureDef( 
                             shape=b2CircleShape(radius=0.3), 
                             density=20, 

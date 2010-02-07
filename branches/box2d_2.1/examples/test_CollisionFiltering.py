@@ -35,7 +35,7 @@ class CollisionFiltering (Framework):
         # Ground body
         world = self.world
         ground = world.CreateBody(
-                    fixtures=b2PolygonShape(edge=[(-40,0),(40,0)]) 
+                    shapes=b2PolygonShape(edge=[(-40,0),(40,0)]) 
                 )
 
         # Define the groups that fixtures can fall into
@@ -89,8 +89,7 @@ class CollisionFiltering (Framework):
                     )
                 )
 
-        world.CreateBody(
-                type=b2_dynamicBody,
+        world.CreateDynamicBody(
                 position=(-5,2),
                 fixtures=triangle,
                 )
@@ -99,8 +98,7 @@ class CollisionFiltering (Framework):
         triangle.shape.vertices = [2.0*b2Vec2(v) for v in triangle.shape.vertices]
         triangle.filter.groupIndex = largeGroup
 
-        trianglebody=world.CreateBody(
-                type=b2_dynamicBody,
+        trianglebody=world.CreateDynamicBody(
                 position=(-5,6),
                 fixtures=triangle,
                 fixedRotation=True, # <-- note that the large triangle will not rotate
@@ -118,8 +116,7 @@ class CollisionFiltering (Framework):
                     )
                 )
 
-        world.CreateBody(
-                type=b2_dynamicBody,
+        world.CreateDynamicBody(
                 position=(0,2),
                 fixtures=box,
                 )
@@ -127,8 +124,7 @@ class CollisionFiltering (Framework):
         # Large box
         box.shape.box = (2, 1)
         box.filter.groupIndex = largeGroup
-        world.CreateBody(
-                type=b2_dynamicBody,
+        world.CreateDynamicBody(
                 position=(0,6),
                 fixtures=box,
             )
@@ -144,8 +140,7 @@ class CollisionFiltering (Framework):
                     )
                 )
 
-        world.CreateBody(
-                    type=b2_dynamicBody,
+        world.CreateDynamicBody(
                     position=(5,2),
                     fixtures=circle,
                 )
@@ -153,8 +148,7 @@ class CollisionFiltering (Framework):
         # Large circle
         circle.shape.radius *= 2
         circle.filter.groupIndex = largeGroup
-        world.CreateBody(
-                    type=b2_dynamicBody,
+        world.CreateDynamicBody(
                     position=(5,6),
                     fixtures=circle,
                 )
@@ -162,15 +156,13 @@ class CollisionFiltering (Framework):
         # Create a joint for fun on the big triangle
         # Note that it does not inherit or have anything to do with the
         # filter settings of the attached triangle. 
-        box=dict(shape=b2PolygonShape(box=(0.5, 1)), density=1)
+        box=b2FixtureDef(shape=b2PolygonShape(box=(0.5, 1)), density=1)
 
-        testbody=world.CreateBody(
-                    type=b2_dynamicBody,
+        testbody=world.CreateDynamicBody(
                     position=(-5,10),
                     fixtures=box,
                 )
-        world.CreateJoint(
-            type=b2PrismaticJointDef,
+        world.CreatePrismaticJoint(
             bodyA=trianglebody,
             bodyB=testbody,
             enableLimit=True,

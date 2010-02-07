@@ -10,6 +10,9 @@ class testWorld (unittest.TestCase):
             world = Box2D.b2World(Box2D.b2Vec2(0.0, -10.0), True)
             world = Box2D.b2World((0.0, -10.0), True)
             world = Box2D.b2World([0.0, -10.0], False)
+            world = Box2D.b2World([0.0, -10.0])
+            world = Box2D.b2World()
+            world = Box2D.b2World(gravity=[0.0, -10.0])
         except Exception as s:
             self.fail("Failed to create world (%s)" % s)
 
@@ -29,7 +32,7 @@ class testWorld (unittest.TestCase):
          
         groundBox.SetAsBox(50, 10)
          
-        groundBody.CreateFixture(groundBox)
+        groundBody.CreateFixturesFromShapes(groundBox)
          
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody

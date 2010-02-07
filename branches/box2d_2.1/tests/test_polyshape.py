@@ -10,8 +10,8 @@ class testPolyshape (unittest.TestCase):
         pass
 
     def dotest(self, world, v):
-        body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,0),
-                        fixtures=b2PolygonShape(vertices=v) ))
+        body = world.CreateDynamicBody(position=(0,0),
+                        shapes=b2PolygonShape(vertices=v) )
         for v1, v2 in zip(v, body.fixtures[0].shape.vertices):
             if v1 != v2:
                 raise Exception('Vertices before and after creation unequal. Before and after zipped=%s'
@@ -25,8 +25,12 @@ class testPolyshape (unittest.TestCase):
 
         try:
             # bad vertices list
-            body = world.CreateBody(b2BodyDef(type=b2_dynamicBody, position=(0,4),
-                            fixtures=[ b2PolygonShape(vertices=(2,1)), b2PolygonShape(box=(2,1)) ]))
+            body = world.CreateDynamicBody(
+                            position=(0,4),
+                            shapes=[b2PolygonShape(vertices=(2,1)),
+                                    b2PolygonShape(box=(2,1)) 
+                                   ]
+                             )
         except ValueError:
             pass # good
         else:

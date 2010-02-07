@@ -48,7 +48,7 @@ class Raycast (Framework):
         self.world.gravity = (0,0)
         # The ground
         ground = self.world.CreateBody(
-                    fixtures=b2PolygonShape(edge=[(-40,  0),( 40,  0)])
+                    shapes=b2PolygonShape(edge=[(-40,  0),( 40,  0)])
                 )
 
         # The various shapes
@@ -79,9 +79,9 @@ class Raycast (Framework):
 
         pos=(10.0*(2.0*random()-1.0), 10.0*(2.0*random()+1.0)) 
         defn = b2BodyDef(
-                    position=pos, 
                     type=b2_dynamicBody,
                     fixtures=b2FixtureDef(shape=shape, friction=0.3),
+                    position=pos, 
                     angle=(b2_pi * (2.0*random() - 1.0)),
                     )
 

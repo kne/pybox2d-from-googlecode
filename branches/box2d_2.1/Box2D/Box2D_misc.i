@@ -64,6 +64,8 @@ public:
             self.b=value
         else:
             raise IndexError
+    def __nonzero__(self):
+        return self.r!=0.0 or self.g!=0.0 or self.b!=0.0
 
     list  = property(lambda self: list(self), __SetTuple)
     bytes = property(lambda self: [int(self.r*255), int(self.g*255), int(self.b*255)], __SetBytes)

@@ -24,7 +24,7 @@ class Pyramid (Framework):
         super(Pyramid, self).__init__()
         # The ground
         ground = self.world.CreateBody(
-                    fixtures=b2PolygonShape(edge=[(-40,0),(40, 0)])
+                    shapes=b2PolygonShape(edge=[(-40,0),(40, 0)])
                 )
 
         box_half_size = (0.5, 0.5)
@@ -42,10 +42,9 @@ class Pyramid (Framework):
                 self.world.CreateBody(
                     position=y,
                     type=b2_dynamicBody,
-                    fixtures=dict(
+                    fixtures=b2FixtureDef(
                         shape=b2PolygonShape(box=box_half_size),
-                        density=box_density
-                        )
+                        density=box_density)
                     )
 
                 y += deltaY

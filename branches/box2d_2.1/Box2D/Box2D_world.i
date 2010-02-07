@@ -73,38 +73,173 @@ public:
             for body in self.bodies:
                 yield body
 
+        def CreateDynamicBody(self, **kwargs):
+            """
+            Create a single dynamic body in the world.
+
+            Accepts only kwargs to a b2BodyDef. For more information, see
+            CreateBody and b2BodyDef.
+            """
+            kwargs['type'] = b2_dynamicBody
+            return self.CreateBody(**kwargs)
+
+        def CreateKinematicBody(self, **kwargs):
+            """
+            Create a single kinematic body in the world.
+
+            Accepts only kwargs to a b2BodyDef. For more information, see
+            CreateBody and b2BodyDef.
+            """
+            kwargs['type'] = b2_kinematicBody
+            return self.CreateBody(**kwargs)
+
+        def CreateStaticBody(self, **kwargs):
+            """
+            Create a single static body in the world.
+
+            Accepts only kwargs to a b2BodyDef. For more information, see
+            CreateBody and b2BodyDef.
+            """
+            kwargs['type'] = b2_staticBody
+            return self.CreateBody(**kwargs)
+
         def CreateBody(self, *args, **kwargs):
             """
             Create a body in the world.
             Takes a single b2BodyDef argument, or kwargs to pass to a temporary b2BodyDef.
-            world.CreateBody(position=(1,2), angle=1) is short for:
+            world.CreateBody(position=(1,2), angle=1) 
+            is short for:
             world.CreateBody(b2BodyDef(position=(1,2), angle=1))
 
             If the definition (or kwargs) sets 'fixtures', they will be created on the 
-            newly created body.
+            newly created body. A single fixture is also accepted.
 
-            CreateBody(..., fixtures=fixture)
+            CreateBody(..., fixtures=[])
             
             This is short for:
-            body = CreateBody(...)
-            body.CreateFixture(fixture)
+                body = CreateBody(...)
+                for fixture in []:
+                    body.CreateFixture(fixture)
 
-            See help(b2Body.CreateFixture) for more information, and note that a dict
-            argument is accepted so you can pass in kwargs with this syntax.
+             'shapes' and 'shapeFixture' are also accepted:
+             CreateBody(..., shapes=[], shapeFixture=b2FixtureDef())
+            
+            This is short for:
+                body = CreateBody(...)
+                body.CreateFixturesFromShapes(shapes=[], shapeFixture=b2FixtureDef())
             """
             if len(args) > 1:
                 raise TypeError('Takes only one argument, or kwargs to b2BodyDef')
-            elif len(args)==1 and isinstance(args[0], b2BodyDef):
-                defn = args[0]
+            elif len(args)==1:
+                if isinstance(args[0], b2BodyDef):
+                    defn = args[0]
+                else:
+                    raise TypeError('Takes only one argument, or kwargs to b2BodyDef')
             else:
                 defn =b2BodyDef(**kwargs) 
 
             body=self.__CreateBody(defn)
                 
             if defn.fixtures:
-                body.CreateFixture(defn.fixtures)
+                if isinstance(defn.fixtures, (list, tuple)):
+                    for fixture in defn.fixtures:
+                        body.CreateFixture(fixture)
+                else:
+                    body.CreateFixture(defn.fixtures)
+            if defn.shapes:
+                body.CreateFixturesFromShapes(shapes=defn.shapes, shapeFixture=defn.shapeFixture)
 
             return body
+
+        def CreateDistanceJoint(self, **kwargs):
+            """
+            Create a single b2DistanceJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2DistanceJointDef(**kwargs))
+
+        def CreateFrictionJoint(self, **kwargs):
+            """
+            Create a single b2FrictionJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2FrictionJointDef(**kwargs))
+
+        def CreateGearJoint(self, **kwargs):
+            """
+            Create a single b2GearJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either joint1 or joint2 is left unset.
+            """
+            if 'joint1' not in kwargs or 'joint2' not in kwargs:
+                raise ValueError('Gear joint requires that both joint1 and joint2 be set')
+            return self.__CreateJoint(b2GearJointDef(**kwargs))
+
+        def CreateLineJoint(self, **kwargs):
+            """
+            Create a single b2LineJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2LineJointDef(**kwargs))
+
+        def CreateMouseJoint(self, **kwargs):
+            """
+            Create a single b2MouseJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2MouseJointDef(**kwargs))
+
+        def CreatePrismaticJoint(self, **kwargs):
+            """
+            Create a single b2PrismaticJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2PrismaticJointDef(**kwargs))
+
+        def CreatePulleyJoint(self, **kwargs):
+            """
+            Create a single b2PulleyJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2PulleyJointDef(**kwargs))
+
+        def CreateRevoluteJoint(self, **kwargs):
+            """
+            Create a single b2RevoluteJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2RevoluteJointDef(**kwargs))
+
+        def CreateWeldJoint(self, **kwargs):
+            """
+            Create a single b2WeldJoint. Only accepts kwargs to the joint definition.
+
+            Raises ValueError if either bodyA or bodyB is left unset.
+            """
+            if 'bodyA' not in kwargs or 'bodyB' not in kwargs:
+                raise ValueError('Requires at least bodyA and bodyB be set')
+            return self.__CreateJoint(b2WeldJointDef(**kwargs))
 
         def CreateJoint(self, *args, **kwargs):
             """
