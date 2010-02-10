@@ -29,9 +29,20 @@ public:
 }
 
 /**** FixtureDef ****/
+/* Special initializer to allow for filter arguments */
 %extend b2FixtureDef {
-public:        
+public:
     %pythoncode %{
+        def __SetCategoryBits(self, value):
+            self.filter.categoryBits=value
+        def __SetGroupIndex(self, value):
+            self.filter.groupIndex=value
+        def __SetMaskBits(self, value):
+            self.filter.maskBits=value
+
+        categoryBits=property(lambda self: self.filter.categoryBits, __SetCategoryBits)
+        groupIndex=property(lambda self: self.filter.groupIndex, __SetGroupIndex)
+        maskBits=property(lambda self: self.filter.maskBits, __SetMaskBits)
     %}
 }
 

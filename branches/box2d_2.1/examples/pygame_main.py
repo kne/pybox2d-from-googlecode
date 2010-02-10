@@ -131,9 +131,9 @@ class fwDebugDraw(b2DebugDrawExtended):
         Draw the transform xf on the screen
         """
         p1 = xf.position
-        k_axisScale = 0.4
-        p2 = self.to_screen(p1 + k_axisScale * xf.R.col1)
-        p3 = self.to_screen(p1 + k_axisScale * xf.R.col2)
+        axisScale = 0.4
+        p2 = self.to_screen(p1 + axisScale * xf.R.col1)
+        p3 = self.to_screen(p1 + axisScale * xf.R.col2)
         p1 = self.to_screen(p1)
 
         pygame.draw.aaline(self.surface, (255,0,0), p1, p2)
@@ -491,10 +491,10 @@ class Framework(b2ContactListener):
                     self.debugDraw.DrawPoint(point['position'], settings.pointSize, b2Color(0.3, 0.3, 0.95), world_coordinates=True)
 
         if settings.drawContactNormals:
-            k_axisScale = 0.3
+            axisScale = 0.3
             for point in self.points:
                 p1 = b2Vec2(point['position'])
-                p2 = p1 + k_axisScale * point['normal']
+                p2 = p1 + axisScale * point['normal']
                 self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
 
     def _Keyboard_Event(self, key):

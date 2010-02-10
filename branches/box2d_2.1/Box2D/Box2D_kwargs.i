@@ -212,7 +212,6 @@
         _init_kwargs(self, **kwargs)
 }
 
-
 %feature("shadow") b2FixtureDef::b2FixtureDef() {
     def __init__(self, **kwargs):
         _Box2D.b2FixtureDef_swiginit(self,_Box2D.new_b2FixtureDef())
