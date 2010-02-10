@@ -216,5 +216,4 @@ protected:
 	uint32 m_drawFlags;
 };
 
-
 #endif

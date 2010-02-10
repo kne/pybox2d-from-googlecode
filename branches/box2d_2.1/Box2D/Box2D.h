@@ -19,7 +19,7 @@
 #ifndef BOX2D_H
 #define BOX2D_H
 
-/**b
+/**
 \mainpage Box2D API Documentation
 
 \section intro_sec Getting Started
