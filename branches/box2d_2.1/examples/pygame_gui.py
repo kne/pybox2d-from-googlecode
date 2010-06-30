@@ -29,6 +29,7 @@ class fwGUI(gui.Table):
     """
     checkboxes =( ("Warm Starting", "enableWarmStarting"), 
                   ("Time of Impact", "enableContinuous"), 
+                  ("Sub-Stepping", "enableSubStepping"),
                   ("Draw", None),
                   ("Shapes", "drawShapes"), 
                   ("Joints", "drawJoints"), 

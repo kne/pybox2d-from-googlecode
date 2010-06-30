@@ -46,8 +46,9 @@ from settings import fwSettings
 try:
     from pygame_gui import (fwGUI, gui)
     GUIEnabled = True
-except ImportError:
+except ImportError as ex:
     print('Unable to load PGU; menu disabled (note that it does not work in Python 3.x).')
+    print('ImportError: %s' % ex)
     GUIEnabled = False
 
 # Use psyco if available
@@ -330,7 +331,9 @@ class Framework(b2ContactListener):
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 return False
             elif event.type == KEYDOWN:
-                self._Keyboard_Event(event.key)
+                self._Keyboard_Event(event.key, down=True)
+            elif event.type == KEYUP:
+                self._Keyboard_Event(event.key, down=False)
             elif event.type == MOUSEBUTTONDOWN:
                 p = self.ConvertScreenToWorld(*event.pos)
                 if event.button == 1: # left
@@ -497,24 +500,27 @@ class Framework(b2ContactListener):
                 p2 = p1 + axisScale * point['normal']
                 self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
 
-    def _Keyboard_Event(self, key):
+    def _Keyboard_Event(self, key, down=True):
         """
         Internal keyboard event, don't override this.
 
         Checks for the initial keydown of the basic testbed keys. Passes the unused
         ones onto the test via the Keyboard() function.
         """
-        if key==K_z:       # Zoom in
-            self.viewZoom = min(1.1 * self.viewZoom, 50.0)
-        elif key==K_x:     # Zoom out
-            self.viewZoom = max(0.9 * self.viewZoom, 0.02)
-        elif key==K_SPACE: # Launch a bomb
-            self.LaunchRandomBomb()
-        elif key==K_F1:    # Toggle drawing the menu
-            self.settings.drawMenu = not self.settings.drawMenu
-        else:              # Inform the test of the key press
-            self.Keyboard(key)
-        
+        if down:
+            if key==K_z:       # Zoom in
+                self.viewZoom = min(1.1 * self.viewZoom, 50.0)
+            elif key==K_x:     # Zoom out
+                self.viewZoom = max(0.9 * self.viewZoom, 0.02)
+            elif key==K_SPACE: # Launch a bomb
+                self.LaunchRandomBomb()
+            elif key==K_F1:    # Toggle drawing the menu
+                self.settings.drawMenu = not self.settings.drawMenu
+            else:              # Inform the test of the key press
+                self.Keyboard(key)
+        else:
+            self.KeyboardUp(key)
+
     def ShiftMouseDown(self, p):
         """
         Indicates that there was a left click at point p (world coordinates) with the
@@ -766,6 +772,12 @@ class Framework(b2ContactListener):
          ...
          if key == K_z:
              pass
+        """
+        pass
+
+    def KeyboardUp(self, key):
+        """
+        Callback indicating 'key' has been released.
         """
         pass
 
