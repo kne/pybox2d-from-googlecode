@@ -43,7 +43,10 @@ class Distance (Framework):
         super(Distance, self).Step(settings)
 
         # Calculate the distance between the two shapes with the specified transforms
-        pointA, pointB, distance, iterations=b2Distance(self.polygonA, self.polygonB, self.transformA, self.transformB)
+        dist_result=b2Distance(shapeA=self.polygonA, shapeB=self.polygonB, transformA=self.transformA, transformB=self.transformB)
+
+        pointA, pointB, distance, iterations=dist_result
+
         self.DrawStringCR('Distance = %g' % distance)
         self.DrawStringCR('Iterations = %d' % iterations)
 

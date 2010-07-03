@@ -94,6 +94,23 @@ public:
     
 }
 
+/**** ContactManager ****/
+%rename(broadPhase) b2ContactManager::m_broadPhase;
+%rename(contactList) b2ContactManager::m_contactList;
+%rename(contactCount) b2ContactManager::m_contactCount;
+%rename(contactFilter) b2ContactManager::m_contactFilter;
+%rename(contactListener) b2ContactManager::m_contactListener;
+%rename(allocator) b2ContactManager::m_allocator;
+
+%extend b2ContactManager {
+public:
+    // TODO contact lists, etc. same as b2World
+    %pythoncode %{
+    %}
+}
+
+
+/* ContactImpulse */
 %extend b2ContactImpulse {
 public:
     //float32 normalImpulses[b2_maxManifoldPoints];

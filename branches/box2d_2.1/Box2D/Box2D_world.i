@@ -315,14 +315,15 @@ public:
                                lambda self, fcn: self.__SetData('subStepping', fcn, self.__SetSubStepping_internal))
 
         # Read-only 
+        contactManager= property(__GetContactManager, None)
         contactCount  = property(__GetContactCount, None)
         bodyCount     = property(__GetBodyCount, None)
         jointCount    = property(__GetJointCount, None)
         proxyCount    = property(__GetProxyCount, None)
-        joints    = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
-        bodies    = property(lambda self: _list_from_linked_list(self.__GetBodyList_internal()), None)
-        contacts  = property(lambda self: _list_from_linked_list(self.__GetContactList_internal()), None)
-        locked    = property(__IsLocked, None)
+        joints  = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
+        bodies  = property(lambda self: _list_from_linked_list(self.__GetBodyList_internal()), None)
+        contacts= property(lambda self: _list_from_linked_list(self.__GetContactList_internal()), None)
+        locked  = property(__IsLocked, None)
 
         # other functions:
         # DestroyBody, DestroyJoint
@@ -349,4 +350,5 @@ public:
 %rename (__SetSubStepping_internal) b2World::SetSubStepping;
 %rename (__SetAutoClearForces) b2World::SetAutoClearForces;
 %rename (__GetAutoClearForces) b2World::GetAutoClearForces;
+%rename (__GetContactManager) b2World::GetContactManager;
 

@@ -99,8 +99,8 @@
     /*Most of these are just internal structures, so there is no need to have them
       accessible by Python. You can safely comment out any %ignore if you for some reason
       do need them. Ignoring shrinks the library by a small amount. */
-    %ignore b2BroadPhase;
-    %ignore b2ContactManager;
+    //%ignore b2BroadPhase; // TODO
+    //%ignore b2ContactManager; // TODO
     %ignore b2Chunk;
     %ignore b2DynamicTree;
     %ignore b2DynamicTreeNode;
