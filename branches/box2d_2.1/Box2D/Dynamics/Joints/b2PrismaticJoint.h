@@ -27,6 +27,7 @@
 /// can violate the constraint slightly. The joint translation is zero
 /// when the local anchor points coincide in world space. Using local
 /// anchors and a local axis helps when saving and loading a game.
+/// @warning at least one body should by dynamic with a non-fixed rotation.
 struct b2PrismaticJointDef : public b2JointDef
 {
 	b2PrismaticJointDef()
@@ -127,10 +128,10 @@ public:
 
 	/// Set the maximum motor force, usually in N.
 	void SetMaxMotorForce(float32 force);
-	float32 GetMaxMotorForce() const;
 
 	/// Get the current motor force, usually in N.
 	float32 GetMotorForce() const;
+	float32 GetMaxMotorForce() const;
 
 protected:
 	friend class b2Joint;
@@ -172,4 +173,8 @@ inline float32 b2PrismaticJoint::GetMotorSpeed() const
 	return m_motorSpeed;
 }
 
+inline float32 b2PrismaticJoint::GetMaxMotorForce() const
+{
+	return m_maxMotorForce;
+}
 #endif

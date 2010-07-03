@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2010 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,16 +16,21 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef B2_CIRCLE_SHAPE_H
-#define B2_CIRCLE_SHAPE_H
+#ifndef B2_LOOP_SHAPE_H
+#define B2_LOOP_SHAPE_H
 
 #include <Box2D/Collision/Shapes/b2Shape.h>
 
-/// A circle shape.
-class b2CircleShape : public b2Shape
+class b2EdgeShape;
+
+/// A loop shape is a free form sequence of line segments that form a circular list.
+/// The loop may cross upon itself, but this is not recommended for smooth collision.
+/// The loop has double sided collision, so you can use inside and outside collision.
+/// Therefore, you may use any winding order.
+class b2LoopShape : public b2Shape
 {
 public:
-	b2CircleShape();
+	b2LoopShape();
 
 	/// Implement b2Shape.
 	b2Shape* Clone(b2BlockAllocator* allocator) const;
@@ -33,59 +38,37 @@ public:
 	/// @see b2Shape::GetChildCount
 	int32 GetChildCount() const;
 
-	/// Implement b2Shape.
+	/// Get a child edge.
+	void GetChildEdge(b2EdgeShape* edge, int32 index) const;
+
+	/// This always return false.
+	/// @see b2Shape::TestPoint
 	bool TestPoint(const b2Transform& transform, const b2Vec2& p) const;
 
 	/// Implement b2Shape.
 	bool RayCast(b2RayCastOutput* output, const b2RayCastInput& input,
-				const b2Transform& transform, int32 childIndex) const;
+					const b2Transform& transform, int32 childIndex) const;
 
 	/// @see b2Shape::ComputeAABB
 	void ComputeAABB(b2AABB* aabb, const b2Transform& transform, int32 childIndex) const;
 
+	/// Chains have zero mass.
 	/// @see b2Shape::ComputeMass
 	void ComputeMass(b2MassData* massData, float32 density) const;
 
-	/// Get the supporting vertex index in the given direction.
-	int32 GetSupport(const b2Vec2& d) const;
+	/// The vertices. These are not owned/freed by the loop shape.
+	b2Vec2* m_vertices;
 
-	/// Get the supporting vertex in the given direction.
-	const b2Vec2& GetSupportVertex(const b2Vec2& d) const;
-
-	/// Get the vertex count.
-	int32 GetVertexCount() const { return 1; }
-
-	/// Get a vertex by index. Used by b2Distance.
-	const b2Vec2& GetVertex(int32 index) const;
-
-	/// Position
-	b2Vec2 m_p;
+	/// The vertex count.
+	int32 m_count;
 };
 
-inline b2CircleShape::b2CircleShape()
+inline b2LoopShape::b2LoopShape()
 {
-	m_type = e_circle;
-	m_radius = 0.0f;
-	m_p.SetZero();
-}
-
-inline int32 b2CircleShape::GetSupport(const b2Vec2 &d) const
-{
-	B2_NOT_USED(d);
-	return 0;
-}
-
-inline const b2Vec2& b2CircleShape::GetSupportVertex(const b2Vec2 &d) const
-{
-	B2_NOT_USED(d);
-	return m_p;
-}
-
-inline const b2Vec2& b2CircleShape::GetVertex(int32 index) const
-{
-	B2_NOT_USED(index);
-	b2Assert(index == 0);
-	return m_p;
+	m_type = e_loop;
+	m_radius = b2_polygonRadius;
+	m_vertices = NULL;
+	m_count = 0;
 }
 
 #endif

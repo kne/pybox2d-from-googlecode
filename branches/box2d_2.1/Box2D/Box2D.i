@@ -175,7 +175,7 @@
     /* All joints and definitions. Defines b2JointTypes dict. */
     %include "Box2D/Box2D_joints.i"
 
-    /* All joints and definitions. Defines b2JointTypes dict. */
+    /* Extending the debug draw class. */
     %include "Box2D/Box2D_debugdraw.i"
 
     /* Include everything from the C++ library now */

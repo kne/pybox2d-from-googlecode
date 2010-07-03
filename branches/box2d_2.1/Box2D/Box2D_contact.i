@@ -201,12 +201,12 @@ public:
 
 /**** Replace b2TimeOfImpact ****/
 %inline %{
-    b2TOIOutput* _b2TimeOfImpact(b2Shape* shapeA, b2Shape* shapeB, b2Sweep& sweepA, b2Sweep& sweepB, float32 tMax) {
+    b2TOIOutput* _b2TimeOfImpact(b2Shape* shapeA, int idxA, b2Shape* shapeB, int idxB, b2Sweep& sweepA, b2Sweep& sweepB, float32 tMax) {
         b2TOIInput input;
         b2TOIOutput* out=new b2TOIOutput;
 
-        input.proxyA.Set(shapeA);
-        input.proxyB.Set(shapeB);
+        input.proxyA.Set(shapeA, idxA);
+        input.proxyB.Set(shapeB, idxB);
         input.sweepA = sweepA;
         input.sweepB = sweepB;
         input.tMax = tMax;
@@ -232,10 +232,11 @@ public:
         
         Can be called one of several ways:
         + b2TimeOfImpact(b2TOIInput) # utilizes the b2TOIInput structure, where you define your own proxies
-        + b2TimeOfImpact(shapeA, shapeB, sweepA, sweepB, tMax) # where sweep[A,B] are of type b2Sweep
 
         Or utilizing kwargs:
-        + b2TimeOfImpact(shapeA=a, shapeB=b, sweepA=sa, sweepB=sb, tMax=t)
+        + b2TimeOfImpact(shapeA=a, shapeB=b, idxA=0, idxB=0, sweepA=sa, sweepB=sb, tMax=t)
+        Where idxA and idxB are optional and used only if the shapes are loops (they indicate which section to use.)
+        sweep[A,B] are of type b2Sweep.
 
         Returns a tuple in the form:
         (output state, time of impact)
@@ -255,13 +256,21 @@ public:
             sweepA = kwargs['sweepA']
             sweepB = kwargs['sweepB']
             tMax = kwargs['tMax']
-            out=_b2TimeOfImpact(shapeA, shapeB, sweepA, sweepB, tMax)
+            if 'idxA' in kwargs:
+                idxA = kwargs['idxA']
+            else:
+                idxA=0
+            if 'idxB' in kwargs:
+                idxB = kwargs['idxB']
+            else:
+                idxB=0
+            out=_b2TimeOfImpact(shapeA, idxA, shapeB, idxB, sweepA, sweepB, tMax)
         else:
             raise ValueError('Expected arguments for b2TimeOfImpact or kwargs')
 
         return (out.state, out.t)
 %}
 
-%newobject b2TimeOfImpact;
+%newobject _b2TimeOfImpact;
 %ignore b2TimeOfImpact;
 

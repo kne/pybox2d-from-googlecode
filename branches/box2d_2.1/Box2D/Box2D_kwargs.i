@@ -197,7 +197,11 @@
         _init_kwargs(self, **kwargs)
 }
 
-
+%feature("shadow") b2EdgeShape::b2EdgeShape() {
+    def __init__(self, **kwargs):
+        _Box2D.b2EdgeShape_swiginit(self,_Box2D.new_b2EdgeShape())
+        _init_kwargs(self, **kwargs)
+}
 
 %feature("shadow") b2Filter::b2Filter() {
     def __init__(self, **kwargs):
@@ -268,6 +272,12 @@
         _init_kwargs(self, **kwargs)
 }
 
+
+%feature("shadow") b2LoopShape::b2LoopShape() {
+    def __init__(self, **kwargs):
+        _Box2D.b2LoopShape_swiginit(self,_Box2D.new_b2LoopShape())
+        _init_kwargs(self, **kwargs)
+}
 
 %feature("shadow") b2Manifold::b2Manifold() {
     def __init__(self, **kwargs):

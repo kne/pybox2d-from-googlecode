@@ -20,6 +20,10 @@
 #include <Box2D/Dynamics/Contacts/b2CircleContact.h>
 #include <Box2D/Dynamics/Contacts/b2PolygonAndCircleContact.h>
 #include <Box2D/Dynamics/Contacts/b2PolygonContact.h>
+#include <Box2D/Dynamics/Contacts/b2EdgeAndCircleContact.h>
+#include <Box2D/Dynamics/Contacts/b2EdgeAndPolygonContact.h>
+#include <Box2D/Dynamics/Contacts/b2LoopAndCircleContact.h>
+#include <Box2D/Dynamics/Contacts/b2LoopAndPolygonContact.h>
 #include <Box2D/Dynamics/Contacts/b2ContactSolver.h>
 
 #include <Box2D/Collision/b2Collision.h>
@@ -38,6 +42,10 @@ void b2Contact::InitializeRegisters()
 	AddType(b2CircleContact::Create, b2CircleContact::Destroy, b2Shape::e_circle, b2Shape::e_circle);
 	AddType(b2PolygonAndCircleContact::Create, b2PolygonAndCircleContact::Destroy, b2Shape::e_polygon, b2Shape::e_circle);
 	AddType(b2PolygonContact::Create, b2PolygonContact::Destroy, b2Shape::e_polygon, b2Shape::e_polygon);
+	AddType(b2EdgeAndCircleContact::Create, b2EdgeAndCircleContact::Destroy, b2Shape::e_edge, b2Shape::e_circle);
+	AddType(b2EdgeAndPolygonContact::Create, b2EdgeAndPolygonContact::Destroy, b2Shape::e_edge, b2Shape::e_polygon);
+	AddType(b2LoopAndCircleContact::Create, b2LoopAndCircleContact::Destroy, b2Shape::e_loop, b2Shape::e_circle);
+	AddType(b2LoopAndPolygonContact::Create, b2LoopAndPolygonContact::Destroy, b2Shape::e_loop, b2Shape::e_polygon);
 }
 
 void b2Contact::AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destoryFcn,
@@ -58,7 +66,7 @@ void b2Contact::AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* dest
 	}
 }
 
-b2Contact* b2Contact::Create(b2Fixture* fixtureA, b2Fixture* fixtureB, b2BlockAllocator* allocator)
+b2Contact* b2Contact::Create(b2Fixture* fixtureA, int32 indexA, b2Fixture* fixtureB, int32 indexB, b2BlockAllocator* allocator)
 {
 	if (s_initialized == false)
 	{
@@ -77,11 +85,11 @@ b2Contact* b2Contact::Create(b2Fixture* fixtureA, b2Fixture* fixtureB, b2BlockAl
 	{
 		if (s_registers[type1][type2].primary)
 		{
-			return createFcn(fixtureA, fixtureB, allocator);
+			return createFcn(fixtureA, indexA, fixtureB, indexB, allocator);
 		}
 		else
 		{
-			return createFcn(fixtureB, fixtureA, allocator);
+			return createFcn(fixtureB, indexB, fixtureA, indexA, allocator);
 		}
 	}
 	else
@@ -110,12 +118,15 @@ void b2Contact::Destroy(b2Contact* contact, b2BlockAllocator* allocator)
 	destroyFcn(contact, allocator);
 }
 
-b2Contact::b2Contact(b2Fixture* fA, b2Fixture* fB)
+b2Contact::b2Contact(b2Fixture* fA, int32 indexA, b2Fixture* fB, int32 indexB)
 {
 	m_flags = e_enabledFlag;
 
 	m_fixtureA = fA;
 	m_fixtureB = fB;
+
+	m_indexA = indexA;
+	m_indexB = indexB;
 
 	m_manifold.pointCount = 0;
 
@@ -161,7 +172,7 @@ void b2Contact::Update(b2ContactListener* listener)
 	{
 		const b2Shape* shapeA = m_fixtureA->GetShape();
 		const b2Shape* shapeB = m_fixtureB->GetShape();
-		touching = b2TestOverlap(shapeA, shapeB, xfA, xfB);
+		touching = b2TestOverlap(shapeA, m_indexA, shapeB, m_indexB, xfA, xfB);
 
 		// Sensors don't generate manifolds.
 		m_manifold.pointCount = 0;
@@ -179,6 +190,7 @@ void b2Contact::Update(b2ContactListener* listener)
 			mp2->normalImpulse = 0.0f;
 			mp2->tangentImpulse = 0.0f;
 			b2ContactID id2 = mp2->id;
+			bool found = false;
 
 			for (int32 j = 0; j < oldManifold.pointCount; ++j)
 			{
@@ -188,8 +200,15 @@ void b2Contact::Update(b2ContactListener* listener)
 				{
 					mp2->normalImpulse = mp1->normalImpulse;
 					mp2->tangentImpulse = mp1->tangentImpulse;
+					found = true;
 					break;
 				}
+			}
+
+			if (found == false)
+			{
+				mp2->normalImpulse = 0.0f;
+				mp2->tangentImpulse = 0.0f;
 			}
 		}
 
@@ -209,17 +228,17 @@ void b2Contact::Update(b2ContactListener* listener)
 		m_flags &= ~e_touchingFlag;
 	}
 
-	if (wasTouching == false && touching == true)
+	if (wasTouching == false && touching == true && listener)
 	{
 		listener->BeginContact(this);
 	}
 
-	if (wasTouching == true && touching == false)
+	if (wasTouching == true && touching == false && listener)
 	{
 		listener->EndContact(this);
 	}
 
-	if (sensor == false)
+	if (sensor == false && touching && listener)
 	{
 		listener->PreSolve(this, &oldManifold);
 	}

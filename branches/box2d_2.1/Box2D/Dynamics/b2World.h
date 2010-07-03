@@ -47,19 +47,22 @@ public:
 	/// Destruct the world. All physics entities are destroyed and all heap memory is released.
 	~b2World();
 
-	/// Register a destruction listener.
+	/// Register a destruction listener. The listener is owned by you and must
+	/// remain in scope.
 	void SetDestructionListener(b2DestructionListener* listener);
 
 	/// Register a contact filter to provide specific control over collision.
-	/// Otherwise the default filter is used (b2_defaultFilter).
+	/// Otherwise the default filter is used (b2_defaultFilter). The listener is
+	/// owned by you and must remain in scope. 
 	void SetContactFilter(b2ContactFilter* filter);
 
-	/// Register a contact event listener
+	/// Register a contact event listener. The listener is owned by you and must
+	/// remain in scope.
 	void SetContactListener(b2ContactListener* listener);
 
 	/// Register a routine for debug drawing. The debug draw functions are called
-	/// inside the b2World::Step method, so make sure your renderer is ready to
-	/// consume draw commands when you call Step().
+	/// inside with b2World::DrawDebugData method. The debug draw object is owned
+	/// by you and must remain in scope.
 	void SetDebugDraw(b2DebugDraw* debugDraw);
 
 	/// Create a rigid body given a definition. No reference to the definition
@@ -136,6 +139,9 @@ public:
 	/// Enable/disable continuous physics. For testing.
 	void SetContinuousPhysics(bool flag) { m_continuousPhysics = flag; }
 
+	/// Enable/disable single stepped continuous physics. For testing.
+	void SetSubStepping(bool flag) { m_subStepping = flag; }
+
 	/// Get the number of broad-phase proxies.
 	int32 GetProxyCount() const;
 
@@ -163,6 +169,9 @@ public:
 	/// Get the flag that controls automatic clearing of forces after each time step.
 	bool GetAutoClearForces() const;
 
+	/// Get the contact manager for testing.
+	const b2ContactManager& GetContactManager() const;
+
 private:
 
 	// m_flags
@@ -178,8 +187,7 @@ private:
 	friend class b2Controller;
 
 	void Solve(const b2TimeStep& step);
-	void SolveTOI();
-	void SolveTOI(b2Body* body);
+	void SolveTOI(const b2TimeStep& step);
 
 	void DrawJoint(b2Joint* joint);
 	void DrawShape(b2Fixture* shape, const b2Transform& xf, const b2Color& color);
@@ -209,11 +217,12 @@ private:
 	// support a variable time step.
 	float32 m_inv_dt0;
 
-	// This is for debugging the solver.
+	// These are for debugging the solver.
 	bool m_warmStarting;
-
-	// This is for debugging the solver.
 	bool m_continuousPhysics;
+	bool m_subStepping;
+
+	bool m_stepComplete;
 };
 
 inline b2Body* b2World::GetBodyList()
@@ -277,6 +286,11 @@ inline void b2World::SetAutoClearForces(bool flag)
 inline bool b2World::GetAutoClearForces() const
 {
 	return (m_flags & e_clearForces) == e_clearForces;
+}
+
+inline const b2ContactManager& b2World::GetContactManager() const
+{
+	return m_contactManager;
 }
 
 #endif

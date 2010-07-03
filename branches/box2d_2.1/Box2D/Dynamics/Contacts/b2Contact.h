@@ -22,7 +22,6 @@
 #include <Box2D/Common/b2Math.h>
 #include <Box2D/Collision/b2Collision.h>
 #include <Box2D/Collision/Shapes/b2Shape.h>
-#include <Box2D/Dynamics/Contacts/b2Contact.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 
 class b2Body;
@@ -33,7 +32,9 @@ class b2BlockAllocator;
 class b2StackAllocator;
 class b2ContactListener;
 
-typedef b2Contact* b2ContactCreateFcn(b2Fixture* fixtureA, b2Fixture* fixtureB, b2BlockAllocator* allocator);
+typedef b2Contact* b2ContactCreateFcn(	b2Fixture* fixtureA, int32 indexA,
+										b2Fixture* fixtureB, int32 indexB,
+										b2BlockAllocator* allocator);
 typedef void b2ContactDestroyFcn(b2Contact* contact, b2BlockAllocator* allocator);
 
 struct b2ContactRegister
@@ -86,16 +87,19 @@ public:
 	b2Contact* GetNext();
 	const b2Contact* GetNext() const;
 
-	/// Get the first fixture in this contact.
+	/// Get fixture A in this contact.
 	b2Fixture* GetFixtureA();
 	const b2Fixture* GetFixtureA() const;
 
-	/// Get the second fixture in this contact.
+	/// Get the child primitive index for fixture A.
+	int32 GetChildIndexA() const;
+
+	/// Get fixture B in this contact.
 	b2Fixture* GetFixtureB();
 	const b2Fixture* GetFixtureB() const;
 
-	/// Flag this contact for filtering. Filtering will occur the next time step.
-	void FlagForFiltering();
+	/// Get the child primitive index for fixture B.
+	int32 GetChildIndexB() const;
 
 	/// Evaluate this contact with your own manifold and transforms.
 	virtual void Evaluate(b2Manifold* manifold, const b2Transform& xfA, const b2Transform& xfB) = 0;
@@ -104,6 +108,8 @@ protected:
 	friend class b2ContactManager;
 	friend class b2World;
 	friend class b2ContactSolver;
+	friend class b2Body;
+	friend class b2Fixture;
 
 	// Flags stored in m_flags
 	enum
@@ -119,17 +125,26 @@ protected:
 
 		// This contact needs filtering because a fixture filter was changed.
 		e_filterFlag		= 0x0008,
+
+		// This bullet contact had a TOI event
+		e_bulletHitFlag		= 0x0010,
+
+		// This contact has a valid TOI in m_toi
+		e_toiFlag			= 0x0020,
 	};
+
+	/// Flag this contact for filtering. Filtering will occur the next time step.
+	void FlagForFiltering();
 
 	static void AddType(b2ContactCreateFcn* createFcn, b2ContactDestroyFcn* destroyFcn,
 						b2Shape::Type typeA, b2Shape::Type typeB);
 	static void InitializeRegisters();
-	static b2Contact* Create(b2Fixture* fixtureA, b2Fixture* fixtureB, b2BlockAllocator* allocator);
+	static b2Contact* Create(b2Fixture* fixtureA, int32 indexA, b2Fixture* fixtureB, int32 indexB, b2BlockAllocator* allocator);
 	static void Destroy(b2Contact* contact, b2Shape::Type typeA, b2Shape::Type typeB, b2BlockAllocator* allocator);
 	static void Destroy(b2Contact* contact, b2BlockAllocator* allocator);
 
 	b2Contact() : m_fixtureA(NULL), m_fixtureB(NULL) {}
-	b2Contact(b2Fixture* fixtureA, b2Fixture* fixtureB);
+	b2Contact(b2Fixture* fixtureA, int32 indexA, b2Fixture* fixtureB, int32 indexB);
 	virtual ~b2Contact() {}
 
 	void Update(b2ContactListener* listener);
@@ -150,10 +165,13 @@ protected:
 	b2Fixture* m_fixtureA;
 	b2Fixture* m_fixtureB;
 
+	int32 m_indexA;
+	int32 m_indexB;
+
 	b2Manifold m_manifold;
 
 	int32 m_toiCount;
-//	float32 m_toi;
+	float32 m_toi;
 };
 
 inline b2Manifold* b2Contact::GetManifold()
@@ -223,9 +241,19 @@ inline b2Fixture* b2Contact::GetFixtureB()
 	return m_fixtureB;
 }
 
+inline int32 b2Contact::GetChildIndexA() const
+{
+	return m_indexA;
+}
+
 inline const b2Fixture* b2Contact::GetFixtureB() const
 {
 	return m_fixtureB;
+}
+
+inline int32 b2Contact::GetChildIndexB() const
+{
+	return m_indexB;
 }
 
 inline void b2Contact::FlagForFiltering()

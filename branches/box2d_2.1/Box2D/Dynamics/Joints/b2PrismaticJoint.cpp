@@ -584,8 +584,3 @@ float32 b2PrismaticJoint::GetMotorForce() const
 {
 	return m_motorImpulse;
 }
-
-float32 b2PrismaticJoint::GetMaxMotorForce() const
-{
-	return m_maxMotorForce;
-}

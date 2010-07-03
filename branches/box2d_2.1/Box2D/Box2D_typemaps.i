@@ -379,6 +379,10 @@
             $result=SWIG_NewPointerObj($1, $descriptor(b2CircleShape*), 0); break;
         case b2Shape::e_polygon:
             $result=SWIG_NewPointerObj($1, $descriptor(b2PolygonShape*), 0); break;
+        case b2Shape::e_edge:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2EdgeShape*), 0); break;
+        case b2Shape::e_loop:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2LoopShape*), 0); break;
         case b2Shape::e_unknown:
         default:
             $result=Py_None; 

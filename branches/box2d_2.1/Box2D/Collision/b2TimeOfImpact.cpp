@@ -27,8 +27,6 @@
 int32 b2_toiCalls, b2_toiIters, b2_toiMaxIters;
 int32 b2_toiRootIters, b2_toiMaxRootIters;
 
-int32 b2_toiMaxOptIters;
-
 struct b2SeparationFunction
 {
 	enum Type
@@ -42,7 +40,8 @@ struct b2SeparationFunction
 
 	float32 Initialize(const b2SimplexCache* cache,
 		const b2DistanceProxy* proxyA, const b2Sweep& sweepA,
-		const b2DistanceProxy* proxyB, const b2Sweep& sweepB)
+		const b2DistanceProxy* proxyB, const b2Sweep& sweepB,
+		float32 t1)
 	{
 		m_proxyA = proxyA;
 		m_proxyB = proxyB;
@@ -53,8 +52,8 @@ struct b2SeparationFunction
 		m_sweepB = sweepB;
 
 		b2Transform xfA, xfB;
-		m_sweepA.GetTransform(&xfA, 0.0f);
-		m_sweepB.GetTransform(&xfB, 0.0f);
+		m_sweepA.GetTransform(&xfA, t1);
+		m_sweepB.GetTransform(&xfB, t1);
 
 		if (count == 1)
 		{
@@ -266,14 +265,21 @@ void b2TimeOfImpact(b2TOIOutput* output, const b2TOIInput* input)
 
 	b2Sweep sweepA = input->sweepA;
 	b2Sweep sweepB = input->sweepB;
+
+	// Large rotations can make the root finder fail, so we normalize the
+	// sweep angles.
+	sweepA.Normalize();
+	sweepB.Normalize();
+
 	float32 tMax = input->tMax;
 
-	float32 target = b2_linearSlop;
+	float32 totalRadius = proxyA->m_radius + proxyB->m_radius;
+	float32 target = b2Max(b2_linearSlop, totalRadius - 3.0f * b2_linearSlop);
 	float32 tolerance = 0.25f * b2_linearSlop;
 	b2Assert(target > tolerance);
 
 	float32 t1 = 0.0f;
-	const int32 k_maxIterations = 1000;	// TODO_ERIN b2Settings
+	const int32 k_maxIterations = 20;	// TODO_ERIN b2Settings
 	int32 iter = 0;
 
 	// Prepare input for distance query.
@@ -308,10 +314,17 @@ void b2TimeOfImpact(b2TOIOutput* output, const b2TOIInput* input)
 			break;
 		}
 
+		if (distanceOutput.distance < target + tolerance)
+		{
+			// Victory!
+			output->state = b2TOIOutput::e_touching;
+			output->t = t1;
+			break;
+		}
+
 		// Initialize the separating axis.
 		b2SeparationFunction fcn;
-		fcn.Initialize(&cache, proxyA, sweepA, proxyB, sweepB);
-
+		fcn.Initialize(&cache, proxyA, sweepA, proxyB, sweepB, t1);
 #if 0
 		// Dump the curve seen by the root finder
 		{
@@ -342,6 +355,7 @@ void b2TimeOfImpact(b2TOIOutput* output, const b2TOIInput* input)
 		// resolving the deepest point. This loop is bounded by the number of vertices.
 		bool done = false;
 		float32 t2 = tMax;
+		int32 pushBackIter = 0;
 		for (;;)
 		{
 			// Find the deepest point at t2. Store the witness point indices.
@@ -358,13 +372,11 @@ void b2TimeOfImpact(b2TOIOutput* output, const b2TOIInput* input)
 				break;
 			}
 
-			// Is the final configuration touching?
+			// Has the separation reached tolerance?
 			if (s2 > target - tolerance)
 			{
-				// Victory!
-				output->state = b2TOIOutput::e_touching;
-				output->t = t2;
-				done = true;
+				// Advance the sweeps
+				t1 = t2;
 				break;
 			}
 
@@ -440,6 +452,13 @@ void b2TimeOfImpact(b2TOIOutput* output, const b2TOIInput* input)
 			}
 
 			b2_toiMaxRootIters = b2Max(b2_toiMaxRootIters, rootIterCount);
+
+			++pushBackIter;
+
+			if (pushBackIter == b2_maxPolygonVertices)
+			{
+				break;
+			}
 		}
 
 		++iter;

@@ -41,6 +41,9 @@ enum b2BodyType
 	b2_staticBody = 0,
 	b2_kinematicBody,
 	b2_dynamicBody,
+
+	// TODO_ERIN
+	//b2_bulletBody,
 };
 
 /// A body definition holds all the data needed to construct a rigid body.
@@ -139,7 +142,7 @@ public:
 	/// @param shape the shape to be cloned.
 	/// @param density the shape density (set to zero for static bodies).
 	/// @warning This function is locked during callbacks.
-	b2Fixture* CreateFixture(const b2Shape* shape, float32 density = 0.0f);
+	b2Fixture* CreateFixture(const b2Shape* shape, float32 density);
 
 	/// Destroy a fixture. This removes the fixture from the broad-phase and
 	/// destroys all contacts associated with this fixture. This will
@@ -152,6 +155,7 @@ public:
 
 	/// Set the position of the body's origin and rotation.
 	/// This breaks any contacts and wakes the other bodies.
+	/// Manipulating a body's transform may cause non-physical behavior.
 	/// @param position the world position of the body's local origin.
 	/// @param angle the world rotation in radians.
 	void SetTransform(const b2Vec2& position, float32 angle);
@@ -208,18 +212,21 @@ public:
 	/// is not at the center of mass. This wakes up the body.
 	/// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
 	/// @param point the world position of the point of application.
-	void ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point);
+	void ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point);
+
+	/// Apply an angular impulse.
+	/// @param impulse the angular impulse in units of kg*m*m/s
+	void ApplyAngularImpulse(float32 impulse);
 
 	/// Get the total mass of the body.
 	/// @return the mass, usually in kilograms (kg).
 	float32 GetMass() const;
 
-	/// Get the central rotational inertia of the body.
+	/// Get the rotational inertia of the body about the local origin.
 	/// @return the rotational inertia, usually in kg-m^2.
 	float32 GetInertia() const;
 
-	/// Get the mass data of the body. The rotational inertia is relative
-	/// to the center of mass.
+	/// Get the mass data of the body.
 	/// @return a struct containing the mass, inertia and center of the body.
 	void GetMassData(b2MassData* data) const;
 
@@ -227,7 +234,6 @@ public:
 	/// Note that this changes the center of mass position.
 	/// Note that creating or destroying fixtures can also alter the mass.
 	/// This function has no effect if the body isn't dynamic.
-	/// @warning The supplied rotational inertia is assumed to be relative to the center of mass.
 	/// @param massData the mass properties.
 	void SetMassData(const b2MassData* data);
 
@@ -362,10 +368,10 @@ public:
 private:
 
 	friend class b2World;
+	friend class b2TOISolver;
 	friend class b2Island;
 	friend class b2ContactManager;
 	friend class b2ContactSolver;
-	friend class b2TOISolver;
 	
 	friend class b2DistanceJoint;
 	friend class b2GearJoint;
@@ -427,9 +433,9 @@ private:
 	b2ContactEdge* m_contactList;
 
 	float32 m_mass, m_invMass;
-	float32 m_I, m_invI;
 
-	float32 m_inertiaScale;
+	// Rotational inertia about the center of mass.
+	float32 m_I, m_invI;
 
 	float32 m_linearDamping;
 	float32 m_angularDamping;
@@ -516,13 +522,13 @@ inline float32 b2Body::GetMass() const
 
 inline float32 b2Body::GetInertia() const
 {
-	return m_I;
+	return m_I + m_mass * b2Dot(m_sweep.localCenter, m_sweep.localCenter);
 }
 
 inline void b2Body::GetMassData(b2MassData* data) const
 {
 	data->mass = m_mass;
-	data->I = m_I;
+	data->I = m_I + m_mass * b2Dot(m_sweep.localCenter, m_sweep.localCenter);
 	data->center = m_sweep.localCenter;
 }
 
@@ -742,7 +748,7 @@ inline void b2Body::ApplyTorque(float32 torque)
 	m_torque += torque;
 }
 
-inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
+inline void b2Body::ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point)
 {
 	if (m_type != b2_dynamicBody)
 	{
@@ -757,16 +763,30 @@ inline void b2Body::ApplyImpulse(const b2Vec2& impulse, const b2Vec2& point)
 	m_angularVelocity += m_invI * b2Cross(point - m_sweep.c, impulse);
 }
 
+inline void b2Body::ApplyAngularImpulse(float32 impulse)
+{
+	if (m_type != b2_dynamicBody)
+	{
+		return;
+	}
+
+	if (IsAwake() == false)
+	{
+		SetAwake(true);
+	}
+	m_angularVelocity += m_invI * impulse;
+}
+
 inline void b2Body::SynchronizeTransform()
 {
 	m_xf.R.Set(m_sweep.a);
 	m_xf.position = m_sweep.c - b2Mul(m_xf.R, m_sweep.localCenter);
 }
 
-inline void b2Body::Advance(float32 t)
+inline void b2Body::Advance(float32 alpha)
 {
 	// Advance to the new safe time.
-	m_sweep.Advance(t);
+	m_sweep.Advance(alpha);
 	m_sweep.c = m_sweep.c0;
 	m_sweep.a = m_sweep.a0;
 	SynchronizeTransform();

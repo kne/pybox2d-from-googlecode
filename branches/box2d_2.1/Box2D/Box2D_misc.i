@@ -205,7 +205,7 @@ public:
 
 /*** Replace b2Distance ***/
 %inline %{
-    b2DistanceOutput* _b2Distance(b2Shape* shapeA, b2Shape* shapeB, b2Transform& transformA, b2Transform& transformB, bool useRadii=true) {
+    b2DistanceOutput* _b2Distance(b2Shape* shapeA, int idxA, b2Shape* shapeB, int idxB, b2Transform& transformA, b2Transform& transformB, bool useRadii=true) {
         if (!shapeA || !shapeB)
             return NULL;
 
@@ -213,8 +213,8 @@ public:
         b2DistanceOutput* out=new b2DistanceOutput;
         b2SimplexCache cache;
 
-        input.proxyA.Set(shapeA);
-        input.proxyB.Set(shapeB);
+        input.proxyA.Set(shapeA, idxA);
+        input.proxyB.Set(shapeB, idxB);
         input.transformA = transformA;
         input.transformB = transformB;
         input.useRadii = useRadii;
@@ -240,9 +240,8 @@ public:
         """
         Compute the closest points between two shapes.
 
-        Can be called one of several ways:
+        Can be called one of two ways:
         + b2Distance(b2DistanceInput) # utilizes the b2DistanceInput structure, where you define your own proxies
-        + b2Distance(shapeA, shapeB, transformA, transformB, useRadii) # where transform[A,B] are of type b2Transform
 
         Or utilizing kwargs:
         + b2Distance(shapeA=a, shapeB=b, transformA=sa, transformB=sb [, useRadii=True])
@@ -250,7 +249,7 @@ public:
         Returns a tuple in the form:
          ((pointAx, pointAy), (pointBx, pointBy), distance, iterations)
         """
-        if len(args) in (1, 4, 5):
+        if len(args) in (1, 7):
             out=_b2Distance(*args)
         elif kwargs: # use kwargs
             shapeA = kwargs['shapeA']
@@ -261,14 +260,22 @@ public:
                 useRadii = kwargs['useRadii']
             else:
                 useRadii=True
-            out=_b2Distance(shapeA, shapeB, transformA, transformB, useRadii)
+            if 'idxA' in kwargs:
+                idxA = kwargs['idxA']
+            else:
+                idxA=0
+            if 'idxB' in kwargs:
+                idxB = kwargs['idxB']
+            else:
+                idxB=0
+            out=_b2Distance(shapeA, idxA, shapeB, idxB, transformA, transformB, useRadii)
         else:
             raise ValueError('Expected arguments for b2Distance or kwargs')
 
         return (tuple(out.pointA), tuple(out.pointB), out.distance, out.iterations)
 %}
 
-%newobject b2Distance;
+%newobject _b2Distance;
 %ignore b2Distance;
 
 /**** Sweep ****/

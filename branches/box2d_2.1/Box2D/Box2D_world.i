@@ -297,19 +297,22 @@ public:
 
         # Read-write properties
         gravity   = property(__GetGravity, __SetGravity)
+        autoClearForces = property(__GetAutoClearForces, __SetAutoClearForces)
         __data = {} # holds the listeners so they can be properly destroyed, and buffer other data
         destructionListener = property(lambda self: self.__GetData('destruction'), 
-                                            lambda self, fcn: self.__SetData('destruction', fcn, self.__SetDestructionListener_internal))
-        contactListener     = property(lambda self: self.__GetData('contact'), 
-                                            lambda self, fcn: self.__SetData('contact', fcn, self.__SetContactListener_internal))
-        contactFilter       = property(lambda self: self.__GetData('contactfilter'),
-                                            lambda self, fcn: self.__SetData('contactfilter', fcn, self.__SetContactFilter_internal))
-        debugDraw           = property(lambda self: self.__GetData('debugdraw'),
-                                            lambda self, fcn: self.__SetData('debugdraw', fcn, self.__SetDebugDraw_internal))
+                                       lambda self, fcn: self.__SetData('destruction', fcn, self.__SetDestructionListener_internal))
+        contactListener= property(lambda self: self.__GetData('contact'), 
+                                  lambda self, fcn: self.__SetData('contact', fcn, self.__SetContactListener_internal))
+        contactFilter= property(lambda self: self.__GetData('contactfilter'),
+                                lambda self, fcn: self.__SetData('contactfilter', fcn, self.__SetContactFilter_internal))
+        debugDraw= property(lambda self: self.__GetData('debugdraw'),
+                            lambda self, fcn: self.__SetData('debugdraw', fcn, self.__SetDebugDraw_internal))
         continuousPhysics = property(lambda self: self.__GetData('continuousphysics'), 
-                                lambda self, fcn: self.__SetData('continuousphysics', fcn, self.__SetContinuousPhysics_internal))
+                                     lambda self, fcn: self.__SetData('continuousphysics', fcn, self.__SetContinuousPhysics_internal))
         warmStarting = property(lambda self: self.__GetData('warmstarting'), 
                                 lambda self, fcn: self.__SetData('warmstarting', fcn, self.__SetWarmStarting_internal))
+        subStepping = property(lambda self: self.__GetData('subStepping'), 
+                               lambda self, fcn: self.__SetData('subStepping', fcn, self.__SetSubStepping_internal))
 
         # Read-only 
         contactCount  = property(__GetContactCount, None)
@@ -343,4 +346,7 @@ public:
 %rename (__IsLocked) b2World::IsLocked;
 %rename (__SetContinuousPhysics_internal) b2World::SetContinuousPhysics;
 %rename (__SetWarmStarting_internal) b2World::SetWarmStarting;
+%rename (__SetSubStepping_internal) b2World::SetSubStepping;
+%rename (__SetAutoClearForces) b2World::SetAutoClearForces;
+%rename (__GetAutoClearForces) b2World::GetAutoClearForces;
 

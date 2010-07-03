@@ -131,3 +131,121 @@ public:
 %ignore b2PolygonShape::GetVertices;
 %ignore b2PolygonShape::GetNormals;
 
+
+/**** LoopShape ****/
+%extend b2LoopShape {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2LoopShape(vertices: %s)" % (self.vertices)
+
+    @property
+    def vertices(self):
+        """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
+        return [ (self.__get_vertex(i).x, self.__get_vertex(i).y )
+                         for i in range(0, self.vertexCount)]
+    @property
+    def vertexCount(self):
+        return self.__count()
+
+    @property
+    def edges(self):
+        raise Exception('TODO')
+
+    def __iter__(self):
+        """
+        Iterates over the vertices in the Loop
+        """
+        for v in self.vertices:
+            yield v
+
+    %}
+
+    const int32 __count() {
+        return $self->m_count;
+    }
+
+    const b2Vec2* __get_vertex(uint16 vnum) {
+        if (vnum >= $self->m_count) return NULL;
+        return &( $self->m_vertices[vnum] );
+    }
+}
+%ignore b2LoopShape::m_normals;
+%ignore b2LoopShape::m_count;
+
+/**** EdgeShape ****/
+%extend b2EdgeShape {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2EdgeShape(vertices: %s)" % (self.vertices)
+
+    @property
+    def all_vertices(self):
+        """Returns all of the vertices as a list of tuples [ (x0,y0), (x1,y1), (x2,y2) (x3,y3) ]
+        Note that the validity of vertices 0 and 4 depend on whether or not
+        hasVertex0 and hasVertex3 are set.
+        """
+        return [tuple(self.vertex0), tuple(self.vertex1), tuple(self.vertex2), tuple(self.vertex3)]
+
+    def __get_vertices(self):
+        """Returns the basic vertices as a list of tuples [ (x1,y1), (x2,y2) ]
+        To include the supporting vertices, see 'all_vertices'
+
+        If you want to set vertex3 but not vertex0, pass in None for vertex0.
+        """
+        return [tuple(self.vertex1), tuple(self.vertex2)]
+
+    def __set_vertices(self, vertices):
+        if len(vertices)==2:
+            self.vertex1, self.vertex2=vertices
+            self.hasVertex0=False
+            self.hasVertex3=False
+        elif len(vertices)==3:
+            self.vertex0, self.vertex1, self.vertex2=vertices
+            self.hasVertex0=(vertices[0] != None)
+            self.hasVertex3=False
+        elif len(vertices)==4:
+            self.vertex0, self.vertex1, self.vertex2, self.vertex3=vertices
+            self.hasVertex0=(vertices[0] != None)
+            self.hasVertex3=True
+        else:
+            raise ValueError('Expected from 2 to 4 vertices.')
+
+    @property
+    def vertexCount(self):
+        """
+        Returns the number of valid vertices (as in, it counts whether or not 
+        hasVertex0 or hasVertex3 are set)
+        """
+        if self.hasVertex0 and self.hasVertex3:
+            return 4
+        elif self.hasVertex0 or self.hasVertex3:
+            return 3
+        else:
+            return 2
+
+    @property
+    def childCount(self):
+        return self.__GetChildCount()
+
+    def __iter__(self):
+        """
+        Iterates over the vertices in the Edge
+        """
+        for v in self.vertices:
+            yield v
+
+    vertices=property(__get_vertices, __set_vertices)
+    %}
+}
+%rename(radius) b2EdgeShape::m_radius;
+%rename(vertex0) b2EdgeShape::m_vertex0;
+%rename(vertex1) b2EdgeShape::m_vertex1;
+%rename(vertex2) b2EdgeShape::m_vertex2;
+%rename(vertex3) b2EdgeShape::m_vertex3;
+%rename(hasVertex0) b2EdgeShape::m_hasVertex0;
+%rename(hasVertex3) b2EdgeShape::m_hasVertex3;
+%rename(__GetChildCount) b2EdgeShape::GetChildCount;
+%rename(__Set) b2EdgeShape::Set;
+
