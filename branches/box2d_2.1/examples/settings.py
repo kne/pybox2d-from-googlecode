@@ -28,6 +28,7 @@ class fwSettings(object):
     positionIterations=3
     enableWarmStarting=True   # Makes physics results more accurate (see Box2D wiki)
     enableContinuous=True     # Calculate time of impact (was: enableTOI)
+    enableSubStepping=True
     
     # Drawing
     drawStats=False

@@ -32,7 +32,7 @@ Other keys can be set by the individual test
 Mouse:
     Left click  - select/drag body (creates mouse joint)
     Right click - pan
-    Shift+Left  - drag to create a directional projectile
+    Shift+Left  - drag to create a directed projectile
     Scroll      - zoom
 
 You can easily add your own tests based on test_empty.
@@ -443,6 +443,7 @@ class Framework(b2ContactListener):
         # Set the other settings that aren't contained in the flags
         self.world.warmStarting=settings.enableWarmStarting
         self.world.continuousPhysics=settings.enableContinuous
+        self.world.subStepping=settings.enableSubStepping
 
         # Reset the collision points
         self.points = []
