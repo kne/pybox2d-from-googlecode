@@ -23,7 +23,7 @@ class Pyramid (Framework):
     def __init__(self):
         super(Pyramid, self).__init__()
         # The ground
-        ground = self.world.CreateBody(
+        ground = self.world.CreateStaticBody(
                     shapes=b2PolygonShape(edge=[(-40,0),(40, 0)])
                 )
 
@@ -39,12 +39,11 @@ class Pyramid (Framework):
             y = x.copy()
 
             for j in range(i, box_rows):
-                self.world.CreateBody(
+                self.world.CreateDynamicBody(
                     position=y,
-                    type=b2_dynamicBody,
                     fixtures=b2FixtureDef(
-                        shape=b2PolygonShape(box=box_half_size),
-                        density=box_density)
+                            shape=b2PolygonShape(box=box_half_size),
+                            density=box_density)
                     )
 
                 y += deltaY

@@ -250,8 +250,9 @@ class Framework(b2ContactListener):
         self.fps                = 0
 
         # GUI-related (PGU)
-        self.gui_app   = None
-        self.gui_table = None
+        self.gui_app  =None
+        self.gui_table=None
+        self.stepCount=0
 
     def __init__(self):
         super(Framework, self).__init__()
@@ -410,6 +411,7 @@ class Framework(b2ContactListener):
         and drawing additional information.
         """
 
+        self.stepCount+=1
         # Don't do anything if the setting's Hz are <= 0
         if settings.hz > 0.0:
             timeStep = 1.0 / settings.hz
@@ -427,11 +429,11 @@ class Framework(b2ContactListener):
 
         # Set the flags based on what the settings show
         self.debugDraw.SetFlags(
-            drawShapes=settings.drawShapes,
-            drawJoints=settings.drawJoints,
-            drawAABBs=settings.drawAABBs,
-            drawPairs=settings.drawPairs,
-            drawCOMs=settings.drawCOMs
+                drawShapes=settings.drawShapes,
+                drawJoints=settings.drawJoints,
+                drawAABBs =settings.drawAABBs,
+                drawPairs =settings.drawPairs,
+                drawCOMs  =settings.drawCOMs
                 )
 
         # Update the debug draw settings so that the vertices will be properly
