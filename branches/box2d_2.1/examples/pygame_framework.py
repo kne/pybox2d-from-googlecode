@@ -18,16 +18,13 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
-Keys:
+Global Keys:
     F1     - toggle menu (can greatly improve fps)
-    F5     - save state
-    F7     - load state
-
     Space  - shoot projectile
     Z/X    - zoom
     Escape - quit
 
-Other keys can be set by the individual test
+Other keys can be set by the individual test.
 
 Mouse:
     Left click  - select/drag body (creates mouse joint)
@@ -51,14 +48,6 @@ except ImportError as ex:
     print('ImportError: %s' % ex)
     GUIEnabled = False
 
-def setup_keys():
-    keys = [s for s in dir(pygame.locals) if s.startswith('K_')]
-    for key in keys:
-        value=getattr(pygame.locals, key)
-        setattr(Keys, key, value)
-
-setup_keys()
-
 class PygameDebugDraw(b2DebugDrawExtended):
     """
     This debug draw class accepts callbacks from Box2D (which specifies what to draw)
@@ -79,6 +68,8 @@ class PygameDebugDraw(b2DebugDrawExtended):
         self.center=self.test.viewCenter
         self.offset=self.test.viewOffset
         self.screenSize=self.test.screenSize
+
+    def EndDraw(self): pass
 
     def DrawPoint(self, p, size, color, world_coordinates=False):
         """
@@ -173,6 +164,12 @@ class PygameDebugDraw(b2DebugDrawExtended):
             pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
 
 class PygameFramework(FrameworkBase):
+    def setup_keys(self):
+        keys = [s for s in dir(pygame.locals) if s.startswith('K_')]
+        for key in keys:
+            value=getattr(pygame.locals, key)
+            setattr(Keys, key, value)
+
     def __reset(self):
         # Screen/rendering-related
         self._viewZoom          = 10.0
@@ -187,7 +184,7 @@ class PygameFramework(FrameworkBase):
         # GUI-related (PGU)
         self.gui_app  =None
         self.gui_table=None
-        self.stepCount=0
+        self.setup_keys()
         
     def __init__(self):
         super(PygameFramework, self).__init__()

@@ -20,7 +20,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 class fwSettings(object):
-    backend='pygame'        # The default backend to use in ('pyglet', 'pygame')
+    backend='pygame'        # The default backend to use in (can be: pyglet, pygame, etc.)
 
     # Physics options
     hz=60.0

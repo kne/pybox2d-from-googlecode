@@ -99,6 +99,7 @@ class FrameworkBase(b2ContactListener):
         self.bombSpawnPoint     = None
         self.mouseWorld         = None
         self.using_contacts     = False
+        self.stepCount          = 0
 
         # Box2D-callbacks
         self.destructionListener= None
@@ -213,6 +214,8 @@ class FrameworkBase(b2ContactListener):
                 p1 = b2Vec2(point['position'])
                 p2 = p1 + axisScale * point['normal']
                 self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
+
+        self.debugDraw.EndDraw()
 
     def ShiftMouseDown(self, p):
         """
@@ -448,7 +451,15 @@ def main(test_class):
     test.run()
 
 
-from pygame_framework import PygameFramework
+try:
+    from pygame_framework import PygameFramework
+except ImportError as ex:
+    print('Unable to import Pygame framework: %s' % ex)
+
+try:
+    from pyglet_framework import PygletFramework
+except Exception as ex: #ImportError as ex:
+    print('Unable to import Pyglet framework: %s' % ex)
 
 Framework=None
 def find_framework():
@@ -462,7 +473,9 @@ def find_framework():
             Framework=globals()[class_name]
             return
 
-    print('Backend "%s" not found. Falling back on PygameFramework' % (fwSettings.backend))
+    if 'PygameFramework' in globals() and PygameFramework:
+        Framework=PygameFramework
+    print('Backend "%s" not found. Falling back on %s' % (fwSettings.backend, Framework.__name__))
 
 find_framework()
 
