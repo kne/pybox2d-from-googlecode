@@ -18,7 +18,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from __future__ import print_function
-from test_main import *
+from framework import *
 
 class CollisionProcessing (Framework):
     name="CollisionProcessing"

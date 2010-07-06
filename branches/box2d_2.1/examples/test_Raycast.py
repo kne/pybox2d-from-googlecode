@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from random import random
 from math import sqrt, sin, cos
 
@@ -97,9 +97,9 @@ class Raycast (Framework):
             break
 
     def Keyboard(self, key):
-         if key in (K_1, K_2, K_3, K_4, K_5):
-            self.CreateShape(key - K_1)
-         elif key == K_d:
+         if key in (Keys.K_1, Keys.K_2, Keys.K_3, Keys.K_4, Keys.K_5):
+            self.CreateShape(key - Keys.K_1)
+         elif key == Keys.K_d:
              self.DestroyBody()
 
     def Step(self, settings):

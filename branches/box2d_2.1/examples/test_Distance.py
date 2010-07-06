@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 
 class Distance (Framework):
     name="Distance"
@@ -59,17 +59,17 @@ class Distance (Framework):
         self.debugDraw.DrawPoint(pointB, 4, b2Color(1,1,0), world_coordinates=True)
 
     def Keyboard(self, key):
-        if key==K_a:
+        if key==Keys.K_a:
             self.positionB -= (0.1, 0)
-        elif key==K_d:
+        elif key==Keys.K_d:
             self.positionB += (0.1, 0)
-        elif key==K_w:
+        elif key==Keys.K_w:
             self.positionB += (0, 0.1)
-        elif key==K_s:
+        elif key==Keys.K_s:
             self.positionB -= (0, 0.1)
-        elif key==K_q:
+        elif key==Keys.K_q:
             self.angleB += 0.1 * b2_pi
-        elif key==K_e:
+        elif key==Keys.K_e:
             self.angleB -= 0.1 * b2_pi
         self.transformB.Set(self.positionB, self.angleB)
 

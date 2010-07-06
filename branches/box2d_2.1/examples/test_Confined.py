@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from random import random
 
 class Confined (Framework):
@@ -55,7 +55,7 @@ class Confined (Framework):
                 )
 
     def Keyboard(self, key):
-         if key == K_c:
+         if key == Keys.K_c:
             self.CreateCircle( (2.0*random()-1.0, self.radius*(1+random())) )
 
 if __name__=="__main__":

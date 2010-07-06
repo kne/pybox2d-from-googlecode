@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 
 class BodyTypes (Framework):
     name="Body Types"
@@ -79,13 +79,12 @@ class BodyTypes (Framework):
                     fixtures=fixture,
                 )
 
-
     def Keyboard(self, key):
-        if key==K_d:
+        if key==Keys.K_d:
             self.platform.type=b2_dynamicBody
-        elif key==K_s:
+        elif key==Keys.K_s:
             self.platform.type=b2_staticBody
-        elif key==K_k:
+        elif key==Keys.K_k:
             self.platform.type=b2_kinematicBody
             self.platform.linearVelocity=(-self.speed, 0)
             self.platform.angularVelocity=0

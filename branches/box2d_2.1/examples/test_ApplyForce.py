@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from math import sqrt
 
 class ApplyForce (Framework):
@@ -26,9 +26,6 @@ class ApplyForce (Framework):
     def __init__(self):
         super(ApplyForce, self).__init__()
         self.world.gravity = (0.0, 0.0)
-
-        k_restitution = 0.4
-        angle=0.5*b2_pi
 
         # The boundaries
         ground = self.world.CreateBody(position=(0, 20))
@@ -80,13 +77,13 @@ class ApplyForce (Framework):
         if not self.body:
             return
 
-        if key==K_w:
+        if key==Keys.K_w:
             f = self.body.GetWorldVector(localVector=(0.0, -200.0))
             p = self.body.GetWorldPoint(localPoint=(0.0, 2.0))
             self.body.ApplyForce(f, p)
-        elif key==K_a:
+        elif key==Keys.K_a:
             self.body.ApplyTorque(50.0)
-        elif key==K_d:
+        elif key==Keys.K_d:
             self.body.ApplyTorque(-50.0)
 
 if __name__=="__main__":

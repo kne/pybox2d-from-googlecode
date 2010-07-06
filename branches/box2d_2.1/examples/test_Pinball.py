@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from math import sqrt
 
 class Pinball (Framework):
@@ -88,11 +88,11 @@ class Pinball (Framework):
         self.pressed=False
 
     def Keyboard(self, key):
-        if key==K_a:
+        if key==Keys.K_a:
             self.pressed=True
 
     def KeyboardUp(self, key):
-        if key==K_a:
+        if key==Keys.K_a:
             self.pressed=False
 
     def Step(self, settings):

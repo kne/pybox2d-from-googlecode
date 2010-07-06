@@ -39,11 +39,8 @@ class Empty(Framework):
 
     def Keyboard(self, key):
         """
-        The key is from pygame.locals.K_*
-        (e.g., if key == K_z: ... )
-
-        If you are using the pyglet backend, you should be able to use the same
-        K_[a-z], see pyglet_keymapper.py
+        The key is from Keys.K_*
+        (e.g., if key == Keys.K_z: ... )
         """
         pass
 

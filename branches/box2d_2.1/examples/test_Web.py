@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from math import sqrt
 
 class Web (Framework):
@@ -70,13 +70,13 @@ class Web (Framework):
             self.joints.append( self.world.CreateJoint(dfn) )
      
     def Keyboard(self, key):
-        if key==K_b:
+        if key==Keys.K_b:
             for body in self.bodies:
                 # Gets both FixtureDestroyed and JointDestroyed callbacks.
                 self.world.DestroyBody(body)
                 break
 
-        elif key==K_j:
+        elif key==Keys.K_j:
             for joint in self.joints:
                 # Does not get a JointDestroyed callback!
                 self.world.DestroyJoint(joint)

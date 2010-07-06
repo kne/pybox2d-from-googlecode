@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 
 # Original inspired by a contribution by roman_m
 # Dimensions scooped from APE (http://www.cove.org/ape/index.htm)
@@ -178,13 +178,13 @@ class TheoJansen (Framework):
                 )
 
     def Keyboard(self, key):
-        if key==K_a:
+        if key==Keys.K_a:
             self.motorJoint.motorSpeed=-self.motorSpeed
-        elif key==K_d:
+        elif key==Keys.K_d:
             self.motorJoint.motorSpeed=self.motorSpeed
-        elif key==K_s:
+        elif key==Keys.K_s:
             self.motorJoint.motorSpeed=0
-        elif key==K_m:
+        elif key==Keys.K_m:
             self.motorJoint.motorEnabled=not self.motorJoint.motorEnabled
 
 if __name__=="__main__":

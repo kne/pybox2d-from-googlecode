@@ -18,38 +18,12 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 """
-Keys:
-    F1     - toggle menu (can greatly improve fps)
-    F5     - save state
-    F7     - load state
-
-    Space  - shoot projectile
-    Z/X    - zoom
-    Escape - quit
-
-Other keys can be set by the individual test
-
-Mouse:
-    Left click  - select/drag body (creates mouse joint)
-    Right click - pan
-    Shift+Left  - drag to create a directed projectile
-    Scroll      - zoom
-
-You can easily add your own tests based on test_empty.
+The framework's base is FrameworkBase. See its help for more information.
 """
-from __future__ import print_function
-import pygame
-from Box2D import *
-from pygame.locals import *
-from settings import fwSettings
 
-try:
-    from pygame_gui import (fwGUI, gui)
-    GUIEnabled = True
-except ImportError as ex:
-    print('Unable to load PGU; menu disabled (note that it does not work in Python 3.x).')
-    print('ImportError: %s' % ex)
-    GUIEnabled = False
+from __future__ import print_function
+from Box2D import *
+from settings import fwSettings
 
 # Use psyco if available
 try:
@@ -76,119 +50,6 @@ class fwDestructionListener(b2DestructionListener):
         elif isinstance(object, b2Fixture):
             self.test.FixtureDestroyed(object)
 
-class fwDebugDraw(b2DebugDrawExtended):
-    """
-    This debug draw class accepts callbacks from Box2D (which specifies what to draw)
-    and handles all of the rendering.
-
-    If you are writing your own game, you likely will not want to use debug drawing.
-    Debug drawing, as its name implies, is for debugging.
-    """
-    surface = None
-    def __init__(self, **kwargs): 
-        super(fwDebugDraw, self).__init__(**kwargs)
-        self.flipX = False
-        self.flipY = True
-        self.convertVertices = True
-
-    def StartDraw(self):
-        self.zoom=self.test.viewZoom
-        self.center=self.test.viewCenter
-        self.offset=self.test.viewOffset
-        self.screenSize=self.test.screenSize
-
-    def DrawPoint(self, p, size, color, world_coordinates=False):
-        """
-        Draw a single point at point p given a pixel size and color.
-        """
-        if world_coordinates:
-            p=self.to_screen(p)
-        self.DrawCircle(p, size/self.zoom, color, drawwidth=0)
-        
-    def DrawAABB(self, aabb, color, world_coordinates=False):
-        """
-        Draw a wireframe around the AABB with the given color.
-        """
-        points = [  (aabb.lowerBound.x, aabb.lowerBound.y ),
-                    (aabb.upperBound.x, aabb.lowerBound.y ),
-                    (aabb.upperBound.x, aabb.upperBound.y ),
-                    (aabb.lowerBound.x, aabb.upperBound.y ) ]
-        
-        if world_coordinates:
-            points=[self.to_screen(p) for p in points]
-        pygame.draw.aalines(self.surface, color, True, points)
-
-    def DrawSegment(self, p1, p2, color, world_coordinates=False):
-        """
-        Draw the line segment from p1-p2 with the specified color.
-        """
-        if world_coordinates:
-            p1, p2 = self.to_screen(p1), self.to_screen(p2)
-
-        pygame.draw.aaline(self.surface, color.bytes, p1, p2)
-
-    def DrawTransform(self, xf):
-        """
-        Draw the transform xf on the screen
-        """
-        p1 = xf.position
-        axisScale = 0.4
-        p2 = self.to_screen(p1 + axisScale * xf.R.col1)
-        p3 = self.to_screen(p1 + axisScale * xf.R.col2)
-        p1 = self.to_screen(p1)
-
-        pygame.draw.aaline(self.surface, (255,0,0), p1, p2)
-        pygame.draw.aaline(self.surface, (0,255,0), p1, p3)
-
-    def DrawCircle(self, center, radius, color, drawwidth=1, world_coordinates=False):
-        """
-        Draw a wireframe circle given the center, radius, axis of orientation and color.
-        """
-        radius *= self.zoom
-        if radius < 1: radius = 1
-        else: radius = int(radius)
-        if world_coordinates:
-            p1, p2 = self.to_screen(p1), self.to_screen(p2)
-
-        pygame.draw.circle(self.surface, color.bytes, center, radius, drawwidth)
-
-    def DrawSolidCircle(self, center, radius, axis, color, world_coordinates=False):
-        """
-        Draw a solid circle given the center, radius, axis of orientation and color.
-        """
-        radius *= self.zoom
-        if radius < 1: radius = 1
-        else: radius = int(radius)
-        if world_coordinates:
-            center = self.to_screen(center)
-        pygame.draw.circle(self.surface, (color/2).bytes+[127], center, radius, 0)
-        pygame.draw.circle(self.surface, color.bytes, center, radius, 1)
-        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - radius*axis[0], center[1] + radius*axis[1])) 
-
-    def DrawPolygon(self, vertices, color, world_coordinates=False):
-        """
-        Draw a wireframe polygon given the world vertices vertices (tuples) with the specified color.
-        """
-        if world_coordinates:
-            vertices = [self.to_screen(v) for v in vertices]
-
-        if len(vertices) == 2:
-            pygame.draw.aaline(self.surface, color.bytes, vertices[0], vertices)
-        else:
-            pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
-        
-    def DrawSolidPolygon(self, vertices, color, world_coordinates=False):
-        """
-        Draw a filled polygon given the world vertices vertices (tuples) with the specified color.
-        """
-        if world_coordinates:
-            vertices = [self.to_screen(v) for v in vertices]
-        if len(vertices) == 2:
-            pygame.draw.aaline(self.surface, color.bytes, vertices[0], vertices[1])
-        else:
-            pygame.draw.polygon(self.surface, (color/2).bytes+[127], vertices, 0)
-            pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
-
 class fwQueryCallback(b2QueryCallback):
     def __init__(self, p): 
         super(fwQueryCallback, self).__init__()
@@ -206,16 +67,21 @@ class fwQueryCallback(b2QueryCallback):
         # Continue the query
         return True
 
-class Framework(b2ContactListener):
-    """
-    The main testbed framework.
-    It handles basically everything:
-    * The initialization of pygame, Box2D
-    * Contains the main loop
-    * Handles all user input.
+class Keys(object):
+    pass
 
-    You should derive your class from this one to implement your own tests.
-    See test_Empty.py or any of the other tests for more information.
+class FrameworkBase(b2ContactListener):
+    """
+    The base of the main testbed framework.
+    
+    If you are planning on using the testbed framework and:
+    * Want to implement your own renderer (other than Pygame, etc.):
+      You should derive your class from this one to implement your own tests.
+      See test_Empty.py or any of the other tests for more information.
+    * Do NOT want to implement your own renderer:
+      You should derive your class from Framework. The renderer chosen in
+      fwSettings (see settings.py) or on the command line will automatically 
+      be used for your test.
     """
     name = "None"
     description = None
@@ -232,176 +98,26 @@ class Framework(b2ContactListener):
         self.bombSpawning       = False
         self.bombSpawnPoint     = None
         self.mouseWorld         = None
-        self.destroyList        = []
         self.using_contacts     = False
 
         # Box2D-callbacks
         self.destructionListener= None
         self.debugDraw          = None
 
-        # Screen/rendering-related
-        self._viewZoom          = 10.0
-        self._viewCenter        = None
-        self._viewOffset        = None
-        self.screenSize         = None
-        self.rMouseDown         = False
-        self.textLine           = 30
-        self.font               = None
-        self.fps                = 0
-
-        # GUI-related (PGU)
-        self.gui_app  =None
-        self.gui_table=None
-        self.stepCount=0
-
     def __init__(self):
-        super(Framework, self).__init__()
+        super(FrameworkBase, self).__init__()
 
         self.__reset()
 
         # Box2D Initialization
-        gravity = (0.0, -10.0)
-        doSleep = True
-        self.world = b2World(gravity, doSleep)
+        self.world = b2World(gravity=(0,-10), doSleep=True)
 
         self.destructionListener = fwDestructionListener(test=self)
         self.world.destructionListener=self.destructionListener
         self.world.contactListener=self
 
-        if fwSettings.onlyInit: # testing mode doesn't initialize pygame
-            return
-
-        # Pygame Initialization
-        pygame.init()
-        caption= "Python Box2D Testbed - " + self.name
-        pygame.display.set_caption(caption)
-
-        # Screen and debug draw
-        self.screen = pygame.display.set_mode( (640,480) )
-        self.screenSize = b2Vec2(*self.screen.get_size())
-
-        self.debugDraw = fwDebugDraw(surface=self.screen, test=self)
-        self.world.debugDraw=self.debugDraw
-        
-        try:
-            self.font = pygame.font.Font(None, 15)
-        except IOError:
-            try:
-                self.font = pygame.font.Font("freesansbold.ttf", 15)
-            except IOError:
-                print("Unable to load default font or 'freesansbold.ttf'")
-                print("Disabling text drawing.")
-                self.DrawString = lambda x,y,z: 0
-
-        # GUI Initialization
-        if GUIEnabled:
-            self.gui_app = gui.App()
-            self.gui_table=fwGUI(self.settings)
-            container = gui.Container(align=1,valign=-1)
-            container.add(self.gui_table,0,0)
-            self.gui_app.init(container)
-
-        self.viewCenter = (0,10.0*20.0)
-        self.groundbody = self.world.CreateBody()
-
-    def setCenter(self, value):
-        """
-        Updates the view offset based on the center of the screen.
-        
-        Tells the debug draw to update its values also.
-        """
-        self._viewCenter = b2Vec2( *value )
-        self._viewOffset = self._viewCenter - self.screenSize/2
-    
-    def setZoom(self, zoom):
-        self._viewZoom = zoom
-
-    viewZoom   = property(lambda self: self._viewZoom, setZoom,
-                           doc='Zoom factor for the display')
-    viewCenter = property(lambda self: self._viewCenter, setCenter, 
-                           doc='Screen center in camera coordinates')
-    viewOffset = property(lambda self: self._viewOffset,
-                           doc='The offset of the top-left corner of the screen')
-        
-    def checkEvents(self):
-        """
-        Check for pygame events (mainly keyboard/mouse events).
-        Passes the events onto the GUI also.
-        """
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                return False
-            elif event.type == KEYDOWN:
-                self._Keyboard_Event(event.key, down=True)
-            elif event.type == KEYUP:
-                self._Keyboard_Event(event.key, down=False)
-            elif event.type == MOUSEBUTTONDOWN:
-                p = self.ConvertScreenToWorld(*event.pos)
-                if event.button == 1: # left
-                    mods = pygame.key.get_mods()
-                    if mods & KMOD_LSHIFT:
-                        self.ShiftMouseDown( p )
-                    else:
-                        self.MouseDown( p )
-                elif event.button == 2: #middle
-                    pass
-                elif event.button == 3: #right
-                    self.rMouseDown = True
-                elif event.button == 4:
-                    self.viewZoom *= 1.1
-                elif event.button == 5:
-                    self.viewZoom /= 1.1
-            elif event.type == MOUSEBUTTONUP:
-                p = self.ConvertScreenToWorld(*event.pos)
-                if event.button == 3: #right
-                    self.rMouseDown = False
-                else:
-                    self.MouseUp(p)
-            elif event.type == MOUSEMOTION:
-                p = self.ConvertScreenToWorld(*event.pos)
-
-                self.MouseMove(p)
-
-                if self.rMouseDown:
-                    self.viewCenter -= (event.rel[0], -event.rel[1])
-
-            if GUIEnabled:
-                self.gui_app.event(event) #Pass the event to the GUI
-
-        return True
-
-    def run(self):
-        """
-        Main loop.
-
-        Continues to run while checkEvents indicates the user has 
-        requested to quit.
-
-        Updates the screen and tells the GUI to paint itself.
-        """
-        running = True
-        clock = pygame.time.Clock()
-
-        while running:
-            running = self.checkEvents()
-            self.screen.fill( (0,0,0) )
-
-            # Check keys that should be checked every loop (not only on initial keydown)
-            self.CheckKeys()
-
-            # Run the simulation loop 
-            self.SimulationLoop()
-
-            if GUIEnabled and self.settings.drawMenu:
-                self.gui_app.paint(self.screen)
-
-            pygame.display.flip()
-            clock.tick(self.settings.hz)
-            self.fps = clock.get_fps()
-
-        self.world.contactListener = None
-        self.world.destructionListener=None
-        self.world.debugDraw=None
+    def __del__(self):
+        pass
 
     def Step(self, settings):
         """
@@ -453,11 +169,6 @@ class Framework(b2ContactListener):
         self.world.ClearForces()
         self.world.DrawDebugData()
 
-        # Destroy bodies that have left the world AABB (can be removed if not using pickling)
-        for obj in self.destroyList:
-            self.world.DestroyBody(obj)
-        self.destroyList = []
-
         # If the bomb is frozen, get rid of it.
         if self.bomb and not self.bomb.awake:
             self.world.DestroyBody(self.bomb)
@@ -502,27 +213,6 @@ class Framework(b2ContactListener):
                 p1 = b2Vec2(point['position'])
                 p2 = p1 + axisScale * point['normal']
                 self.debugDraw.DrawSegment(p1, p2, b2Color(0.4, 0.9, 0.4), world_coordinates=True)
-
-    def _Keyboard_Event(self, key, down=True):
-        """
-        Internal keyboard event, don't override this.
-
-        Checks for the initial keydown of the basic testbed keys. Passes the unused
-        ones onto the test via the Keyboard() function.
-        """
-        if down:
-            if key==K_z:       # Zoom in
-                self.viewZoom = min(1.1 * self.viewZoom, 50.0)
-            elif key==K_x:     # Zoom out
-                self.viewZoom = max(0.9 * self.viewZoom, 0.02)
-            elif key==K_SPACE: # Launch a bomb
-                self.LaunchRandomBomb()
-            elif key==K_F1:    # Toggle drawing the menu
-                self.settings.drawMenu = not self.settings.drawMenu
-            else:              # Inform the test of the key press
-                self.Keyboard(key)
-        else:
-            self.KeyboardUp(key)
 
     def ShiftMouseDown(self, p):
         """
@@ -630,28 +320,6 @@ class Framework(b2ContactListener):
         v = -5.0 * p
         self.LaunchBomb(p, v)
      
-    def CheckKeys(self):
-        """
-        Check the keys that are evaluated on every main loop iteration.
-        I.e., they aren't just evaluated when first pressed down
-        """
-
-        pygame.event.pump()
-        self.keys = keys = pygame.key.get_pressed()
-        if keys[K_LEFT]:
-            self.viewCenter -= (0.5, 0)
-        elif keys[K_RIGHT]:
-            self.viewCenter += (0.5, 0)
-
-        if keys[K_UP]:
-            self.viewCenter += (0, 0.5)
-        elif keys[K_DOWN]:
-            self.viewCenter -= (0, 0.5)
-
-        if keys[K_HOME]:
-            self.viewZoom = 1.0
-            self.viewCenter = (0.0, 20.0)
-
     def SimulationLoop(self):
         """
         The main simulation loop. Don't override this, override Step instead.
@@ -668,45 +336,36 @@ class Framework(b2ContactListener):
             for s in self.description.split('\n'):
                 self.DrawStringCR(s, (127,255,127))
 
-        if GUIEnabled:
-            # Update the settings based on the GUI
-            self.gui_table.updateSettings(self.settings)
-
         # Do the main physics step
         self.Step(self.settings)
-
-        if GUIEnabled:
-            # In case during the step the settings changed, update the GUI reflecting
-            # those settings.
-            self.gui_table.updateGUI(self.settings)
 
     def ConvertScreenToWorld(self, x, y):
         """
         Return a b2Vec2 in world coordinates of the passed in screen coordinates x, y
+        NOTE: Renderer subclasses must implement this
         """
-        return b2Vec2((x + self.viewOffset.x) / self.viewZoom, 
-                           ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
+        raise NotImplementedError()
 
     def DrawString(self, x, y, str, color=(229,153,153,255)):
         """
         Draw some text, str, at screen coordinates (x, y).
+        NOTE: Renderer subclasses must implement this
         """
-        self.screen.blit(self.font.render(str, True, color), (x,y))
+        raise NotImplementedError()
 
     def DrawStringCR(self, str, color=(229,153,153,255)):
         """
         Draw some text at the top status lines
         and advance to the next line.
+        NOTE: Renderer subclasses must implement this
         """
-        self.screen.blit(self.font.render(str, True, color), (5,self.textLine))
-        self.textLine += 15
-
-    def __del__(self):
-        pass
+        raise NotImplementedError()
 
     def PreSolve(self, contact, old_manifold):
-        # This is a critical function when there are many contacts in the world.
-        # It should be optimized as much as possible.
+        """
+        This is a critical function when there are many contacts in the world.
+        It should be optimized as much as possible.
+        """
         if not (self.settings.drawContactPoints or self.settings.drawContactNormals or self.using_contacts):
             return
         elif len(self.points) > self.settings.maxContactPoints:
@@ -745,7 +404,7 @@ class Framework(b2ContactListener):
                         ) 
                     )
 
-    # These can/should be implemented in the subclass: (Step() also if necessary)
+    # These can/should be implemented in the test subclass: (Step() also if necessary)
     # See test_Empty.py for a simple example.
     def BeginContact(self, contact):
         pass
@@ -769,12 +428,6 @@ class Framework(b2ContactListener):
     def Keyboard(self, key):
         """
         Callback indicating 'key' has been pressed down.
-        The key is from pygame.locals.K_*:
-
-         from pygame.locals import *
-         ...
-         if key == K_z:
-             pass
         """
         pass
 
@@ -793,6 +446,25 @@ def main(test_class):
     if fwSettings.onlyInit:
         return
     test.run()
+
+
+from pygame_framework import PygameFramework
+
+Framework=None
+def find_framework():
+    global Framework
+    try_names = [fwSettings.backend, fwSettings.backend.capitalize()]
+
+    for name in try_names:
+        class_name='%sFramework' % name
+        if class_name in globals():
+            print('Found framework: %s (%s)' % (name, class_name))
+            Framework=globals()[class_name]
+            return
+
+    print('Backend "%s" not found. Falling back on PygameFramework' % (fwSettings.backend))
+
+find_framework()
 
 if __name__=="__main__":
     from test_empty import Empty

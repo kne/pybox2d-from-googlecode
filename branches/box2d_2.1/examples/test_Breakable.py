@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 from random import random
 
 class Breakable (Framework):
@@ -91,7 +91,7 @@ class Breakable (Framework):
             self.angularVelocity = self.body.angularVelocity
 
     def Keyboard(self, key):
-         if key == K_b and not self.broke:
+         if key == Keys.K_b and not self.broke:
              self._break=True
 
 if __name__=="__main__":

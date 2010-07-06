@@ -17,7 +17,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from pygame_main import *
+from framework import *
 
 class VerticalStack (Framework):
     name="Vertical Stack"
@@ -66,7 +66,7 @@ Press B to launch a horizontal bullet"""
         super(VerticalStack, self).Step(settings)
 
     def Keyboard(self, key):
-        if key==K_b:
+        if key==Keys.K_b:
             if self.bullet:
                 self.world.DestroyBody(self.bullet)
                 self.bullet=None
