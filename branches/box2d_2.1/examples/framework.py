@@ -461,6 +461,11 @@ try:
 except Exception as ex: #ImportError as ex:
     print('Unable to import Pyglet framework: %s' % ex)
 
+try:
+    from pyqt4_framework import Pyqt4Framework
+except Exception as ex: #ImportError as ex:
+    print('Unable to import PyQt4 framework: %s' % ex)
+
 Framework=None
 def find_framework():
     global Framework

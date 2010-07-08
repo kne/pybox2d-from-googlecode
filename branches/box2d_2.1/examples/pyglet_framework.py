@@ -41,6 +41,7 @@ import framework
 from framework import *
 from pyglet import gl
 import string
+import math
 
 class grBlended (pyglet.graphics.Group):
     """
@@ -208,9 +209,9 @@ class PygletDebugDraw(b2DebugDraw):
         ret_tf, ret_ll = [], []
 
         for x, y in self.circle_cache_tf[radius]:
-            ret_tf.extend( (x+center.x, y+center.y) )
+            ret_tf.extend( (x+center[0], y+center[1]) )
         for x, y in self.circle_cache_ll[radius]:
-            ret_ll.extend( (x+center.x, y+center.y) )
+            ret_ll.extend( (x+center[0], y+center[1]) )
         return ret_tf, ret_ll
 
     def DrawCircle(self, center, radius, color, world_coordinates=True):
@@ -239,37 +240,50 @@ class PygletDebugDraw(b2DebugDraw):
             ('v2f', ll_vertices),
             ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-        p = center + radius * axis
+        p = b2Vec2(center) + radius * b2Vec2(axis)
         self.batch.add(2, gl.GL_LINES, None,
-            ('v2f', (center.x, center.y, p.x, p.y)),
+            ('v2f', (center[0], center[1], p[0], p[1])),
             ('c3f', [1.0, 0.0, 0.0] * 2))
 
     def DrawPolygon(self, vertices, vertexCount, color, world_coordinates=True):
         """
         Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
-        ll_count, ll_vertices = self.line_loop(vertices)
+        if len(vertices)==2:
+            p1, p2=vertices
+            self.batch.add(2, gl.GL_LINES, None,
+                ('v2f', (p1[0], p1[1], p2[0], p2[1])),
+                ('c3f', [color.r, color.g, color.b]*2))
+        else:
+            ll_count, ll_vertices = self.line_loop(vertices)
 
-        self.batch.add(ll_count, gl.GL_LINES, None,
-            ('v2f', ll_vertices),
-            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+            self.batch.add(ll_count, gl.GL_LINES, None,
+                ('v2f', ll_vertices),
+                ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
     def DrawSolidPolygon(self, vertices, vertexCount, color, world_coordinates=True):
         """
-        Draw a wireframe polygon given the world vertices (tuples) with the specified color.
+        Draw a filled polygon given the world vertices (tuples) with the specified color.
         """
-        tf_count, tf_vertices = self.triangle_fan(vertices)
-        if tf_count==0:
-            return
-        self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
-            ('v2f', tf_vertices),
-            ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
+        if len(vertices)==2:
+            p1, p2=vertices
+            self.batch.add(2, gl.GL_LINES, None,
+                ('v2f', (p1[0], p1[1], p2[0], p2[1])),
+                ('c3f', [color.r, color.g, color.b]*2))
+        else:
+            tf_count, tf_vertices = self.triangle_fan(vertices)
+            if tf_count==0:
+                return
 
-        ll_count, ll_vertices = self.line_loop(vertices)
+            self.batch.add(tf_count, gl.GL_TRIANGLES, self.blended,
+                ('v2f', tf_vertices),
+                ('c4f', [0.5 * color.r, 0.5 * color.g, 0.5 * color.b, 0.5] * (tf_count)))
 
-        self.batch.add(ll_count, gl.GL_LINES, None,
-            ('v2f', ll_vertices),
-            ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
+            ll_count, ll_vertices = self.line_loop(vertices)
+
+            self.batch.add(ll_count, gl.GL_LINES, None,
+                ('v2f', ll_vertices),
+                ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
     def DrawSegment(self, p1, p2, color, world_coordinates=True):
         """
@@ -329,9 +343,8 @@ class PygletWindow(pyglet.window.Window):
         """
         self.test.updateProjection()
 
-    #def on_key_press(self, key, modifiers):
-    #    print('press', key)
-    #    self.test._Keyboard_Event(key, down=True)
+    def on_key_press(self, key, modifiers):
+        self.test._Keyboard_Event(key, down=True)
 
     def on_key_release(self, key, modifiers):
         self.test._Keyboard_Event(key, down=False)
@@ -415,7 +428,6 @@ class PygletFramework(FrameworkBase):
         self.fontsize           = 10
         self.font               = None
         self.textGroup          = None
-        self.keys               = pyglet.window.key.KeyStateHandler()
 
         # Screen-related
         self._viewZoom          = 1.0
@@ -438,9 +450,6 @@ class PygletFramework(FrameworkBase):
         self.__reset()
         self.window=PygletWindow(self)
 
-        @self.window.event
-        def on_key_press(self, key, mod):
-            print('key')
         # Initialize the text display group
         self.textGroup = grText(self.window)
 
@@ -503,9 +512,9 @@ class PygletFramework(FrameworkBase):
             pyglet.clock.schedule_interval(self.SimulationLoop, 1.0 / self.settings.hz)
 
         #self.window.push_handlers(pyglet.window.event.WindowEventLogger()) 
+        self.window._enable_event_queue=False # TODO: figure out why this is required
         pyglet.app.run()
 
-        print('done')
         self.world.contactListener = None
         self.world.destructionListener=None
         self.world.debugDraw=None
@@ -627,11 +636,6 @@ class PygletFramework(FrameworkBase):
     def Keyboard(self, key):
         """
         Callback indicating 'key' has been pressed down.
-        The keys are mapped after Pyglet's style.
-
-         from framework import Keys
-         if key == Keys.K_z:
-             ...
         """
         pass
 
