@@ -32,6 +32,7 @@ Some WIP projects to keep an eye on:
  * [http://elemel.se/games.html elemel]'s games: Nucleus (fast-paced puzzle game), Cannonball, Void (retro space shooter), Mortified (2D platform RPG)
  * [http://github.com/ddunwoody/adastra adastra], by ddunwoody
  * [http://www.gamecreation.org/~quadropus/ Quadropus], a puzzle-platformer where the player must balance the use of four tentacles to solve a variety of environmental puzzles
+* [http://code.google.com/p/littlepyballgame/ littlepyballgame] It's a little game...
 
 === Physics Jam Results 2008 ===
 
