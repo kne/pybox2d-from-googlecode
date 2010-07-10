@@ -19,7 +19,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from test_main import *
+from framework import *
 
 class Empty(Framework):
     """You can use this class as an outline for your tests.

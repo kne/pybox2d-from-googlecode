@@ -104,7 +104,10 @@ class PygletDebugDraw(b2DebugDraw):
     surface = None
     circle_cache_tf = {} # triangle fan (inside)
     circle_cache_ll = {} # line loop (border)
-    def __init__(self): super(PygletDebugDraw, self).__init__()
+    def __init__(self, test): 
+        super(PygletDebugDraw, self).__init__()
+        self.test=test
+
     def StartDraw(self): pass
     def EndDraw(self): pass
     def triangle_fan(self, vertices):
@@ -437,7 +440,6 @@ class PygletFramework(FrameworkBase):
         self.font               = None
         self.fps                = 0
 
-
         self.setup_keys()
         
     def __init__(self):
@@ -457,7 +459,7 @@ class PygletFramework(FrameworkBase):
         self.font = pyglet.font.load(self.fontname, self.fontsize)
         self.screenSize = b2Vec2(self.window.width, self.window.height)
 
-        self.debugDraw = PygletDebugDraw()
+        self.debugDraw = PygletDebugDraw(self)
         self.debugDraw.surface = self.window.screen
         self.world.debugDraw=self.debugDraw
         self._viewCenter = b2Vec2(0,10.0)

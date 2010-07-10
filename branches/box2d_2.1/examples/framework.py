@@ -450,42 +450,19 @@ def main(test_class):
         return
     test.run()
 
-
+if __name__=='__main__':
+    print('Please run one of the examples directly. This is just the base for all of the frameworks.')
+    exit(0)
+# Your framework classes should follow this format. If it is the 'foobar'
+# framework, then your file should be 'foobar_framework.py' and you should
+# have a class 'FoobarFramework' that derives FrameworkBase. Ensure proper
+# capitalization for portability.
 try:
-    from pygame_framework import PygameFramework
-except ImportError as ex:
-    print('Unable to import Pygame framework: %s' % ex)
+    framework_module=__import__('%s_framework' % (fwSettings.backend.lower()), fromlist=['%sFramework' % fwSettings.backend.capitalize()])
+    Framework=getattr(framework_module, '%sFramework' % fwSettings.backend.capitalize())
+except Exception as ex:
+    print('Unable to import the back-end %s: %s' % (fwSettings.backend, ex))
+    print('Attempting to fall back on the pygame back-end.')
 
-try:
-    from pyglet_framework import PygletFramework
-except Exception as ex: #ImportError as ex:
-    print('Unable to import Pyglet framework: %s' % ex)
-
-try:
-    from pyqt4_framework import Pyqt4Framework
-except Exception as ex: #ImportError as ex:
-    print('Unable to import PyQt4 framework: %s' % ex)
-
-Framework=None
-def find_framework():
-    global Framework
-    try_names = [fwSettings.backend, fwSettings.backend.capitalize()]
-
-    for name in try_names:
-        class_name='%sFramework' % name
-        if class_name in globals():
-            print('Found framework: %s (%s)' % (name, class_name))
-            Framework=globals()[class_name]
-            return
-
-    if 'PygameFramework' in globals() and PygameFramework:
-        Framework=PygameFramework
-    print('Backend "%s" not found. Falling back on %s' % (fwSettings.backend, Framework.__name__))
-
-find_framework()
-
-if __name__=="__main__":
-    from test_empty import Empty
-    main(Empty)
-
+    from pygame_framework import PygameFramework as Framework
 #s/\.Get\(.\)\(.\{-\}\)()/.\L\1\l\2/g

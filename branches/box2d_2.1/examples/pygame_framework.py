@@ -163,6 +163,7 @@ class PygameDebugDraw(b2DebugDrawExtended):
             pygame.draw.polygon(self.surface, (color/2).bytes+[127], vertices, 0)
             pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
 
+
 class PygameFramework(FrameworkBase):
     def setup_keys(self):
         keys = [s for s in dir(pygame.locals) if s.startswith('K_')]
