@@ -122,6 +122,81 @@ public:
             for fixture in self.fixtures:
                 yield fixture
 
+        def __CreateShapeFixture(self, type_, **kwargs):
+            """
+            Internal function to handle creating circles, polygons, etc.
+            without first creating a fixture. type_ is b2Shape.
+            """
+            shape=type_()
+            fixture=b2FixtureDef(shape=shape)
+            
+            for key, value in list(kwargs.items()):
+                # Note that these hasattrs use the types to get around
+                # the fact that some properties are write-only (like 'box' in
+                # polygon shapes), and as such do not show up with 'hasattr'.
+                if hasattr(type_, key):
+                    to_set=shape
+                elif hasattr(b2FixtureDef, key):
+                    to_set=fixture
+                else:
+                    raise AttributeError('Property %s not found in either %s or b2FixtureDef' % (key, type_.__name__))
+
+                try:
+                    setattr(to_set, key, value)
+                except Exception as ex:
+                    raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
+                                % (to_set.__class__.__name__, key, ex))
+
+            self.CreateFixture(fixture)
+
+        def CreatePolygonFixture(self, **kwargs):
+            """
+            Create a polygon shape without an explicit fixture definition.
+
+            Takes kwargs; you can pass in properties for either the polygon
+            or the fixture to this function. For example:
+            CreatePolygonFixture(box=(1, 1), friction=0.2, density=1.0)
+            where 'box' is a property from the polygon shape, and 
+            'friction' and 'density' are from the fixture definition.
+            """
+            return self.__CreateShapeFixture(b2PolygonShape, **kwargs)
+
+        def CreateCircleFixture(self, **kwargs):
+            """
+            Create a circle shape without an explicit fixture definition.
+
+            Takes kwargs; you can pass in properties for either the circle
+            or the fixture to this function. For example:
+            CreateCircleFixture(radius=0.2, friction=0.2, density=1.0)
+            where 'radius' is a property from the circle shape, and 
+            'friction' and 'density' are from the fixture definition.
+            """
+            return self.__CreateShapeFixture(b2CircleShape, **kwargs)
+
+        def CreateEdgeFixture(self, **kwargs):
+            """
+            Create a edge shape without an explicit fixture definition.
+
+            Takes kwargs; you can pass in properties for either the edge
+            or the fixture to this function. For example:
+            CreateEdgeFixture(vertices=[(0,0),(1,0)], friction=0.2, density=1.0)
+            where 'vertices' is a property from the edge shape, and 
+            'friction' and 'density' are from the fixture definition.
+            """
+            return self.__CreateShapeFixture(b2EdgeShape, **kwargs)
+
+        def CreateLoopFixture(self, **kwargs):
+            """
+            Create a loop shape without an explicit fixture definition.
+
+            Takes kwargs; you can pass in properties for either the loop
+            or the fixture to this function. For example:
+            CreateLoopFixture(vertices=[...], friction=0.2, density=1.0)
+            where 'vertices' is a property from the loop shape, and 
+            'friction' and 'density' are from the fixture definition.
+            """
+            return self.__CreateShapeFixture(b2LoopShape, **kwargs)
+
         def CreateFixturesFromShapes(self, shapes=None, shapeFixture=None):
             """
             Create fixture(s) on the body from one or more shapes, and optionally a single

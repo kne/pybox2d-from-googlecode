@@ -53,6 +53,33 @@ class test_body (unittest.TestCase):
             world.Step(timeStep, vel_iters, pos_iters)
             world.ClearForces()
 
+    def test_new_createfixture(self):
+        world = b2World(gravity=(0,-10), doSleep=True)
+        body=world.CreateDynamicBody(position=(0,0))
+        body.CreateCircleFixture(radius=0.2, friction=0.2, density=1.0)
+        body.fixtures[0]
+        body.fixtures[0].friction
+        body.fixtures[0].density
+        body.fixtures[0].shape.radius
+
+        body.CreatePolygonFixture(box=(1,1), friction=0.2, density=1.0)
+        body.fixtures[1]
+        body.fixtures[1].friction
+        body.fixtures[1].density
+        body.fixtures[1].shape.vertices
+
+        v1=(-10, 0)
+        v2=(-7, -1)
+        v3=(-4, 0)
+        v4=(0, 0)
+        body.CreateEdgeFixture(vertices=[v1,v2,v3,v4], friction=0.3, density=1.0)
+        body.fixtures[2]
+        body.fixtures[2].friction
+        body.fixtures[2].density
+        body.fixtures[2].shape.vertices
+        
+        #TODO Loop shapes
+
 if __name__ == '__main__':
     unittest.main()
 
