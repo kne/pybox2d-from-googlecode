@@ -58,12 +58,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QTreeWidget" name="twProperties">
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
+      <widget class="QTableWidget" name="twProperties">
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>

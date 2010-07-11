@@ -85,6 +85,7 @@ class FrameworkBase(b2ContactListener):
     """
     name = "None"
     description = None
+    TEXTLINE_START=30
 
     def __reset(self):
         """ Reset all of the variables to their starting values.
@@ -329,7 +330,7 @@ class FrameworkBase(b2ContactListener):
         """
 
         # Reset the text line to start the text from the top
-        self.textLine = 15
+        self.textLine = self.TEXTLINE_START
 
         # Draw the name of the test running
         self.DrawStringCR(self.name, (127,127,255))

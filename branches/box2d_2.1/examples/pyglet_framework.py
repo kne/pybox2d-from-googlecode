@@ -402,9 +402,9 @@ class PygletFramework(FrameworkBase):
 
         for letter in string.uppercase:
             setattr(Keys, 'K_'+letter.lower(), getattr(key, letter))
-        for i in range(0,9):
+        for i in range(0,10):
             setattr(Keys, 'K_%d'%i, getattr(key, '_%d' % i))
-        for i in range(1,12):
+        for i in range(1,13):
             setattr(Keys, 'K_F%d'%i, getattr(key, 'F%d' % i))
         Keys.K_LEFT=key.LEFT
         Keys.K_RIGHT=key.RIGHT

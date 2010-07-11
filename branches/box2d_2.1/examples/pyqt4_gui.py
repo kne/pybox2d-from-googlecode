@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pyqt4_gui.ui'
 #
-# Created: Sat Jul 10 13:17:18 2010
+# Created: Sun Jul 11 16:38:37 2010
 #      by: PyQt4 UI code generator 4.7.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,9 +40,10 @@ class Ui_MainWindow(object):
         self.gbOptions = QtGui.QGroupBox(self.dwcProperties)
         self.gbOptions.setObjectName("gbOptions")
         self.verticalLayout.addWidget(self.gbOptions)
-        self.twProperties = QtGui.QTreeWidget(self.dwcProperties)
+        self.twProperties = QtGui.QTableWidget(self.dwcProperties)
         self.twProperties.setObjectName("twProperties")
-        self.twProperties.headerItem().setText(0, "1")
+        self.twProperties.setColumnCount(0)
+        self.twProperties.setRowCount(0)
         self.verticalLayout.addWidget(self.twProperties)
         self.dwProperties.setWidget(self.dwcProperties)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dwProperties)
@@ -59,5 +60,6 @@ class Ui_MainWindow(object):
         self.mnuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.dwProperties.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.gbOptions.setTitle(QtGui.QApplication.translate("MainWindow", "Options", None, QtGui.QApplication.UnicodeUTF8))
+        self.twProperties.setSortingEnabled(True)
         self.mnuExit.setText(QtGui.QApplication.translate("MainWindow", "E&xit", None, QtGui.QApplication.UnicodeUTF8))
 

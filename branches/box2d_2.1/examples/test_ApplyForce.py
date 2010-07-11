@@ -36,7 +36,6 @@ class ApplyForce (Framework):
                               ( 20,-20),
                               (-20,-20) ]
                             )
-
         xf1 = b2Transform()
         xf1.R.set(0.3524 * b2_pi)
         xf1.position = b2Mul(xf1.R, (1.0, 0.0))

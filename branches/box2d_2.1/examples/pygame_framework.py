@@ -165,6 +165,7 @@ class PygameDebugDraw(b2DebugDrawExtended):
 
 
 class PygameFramework(FrameworkBase):
+    TEXTLINE_START=30
     def setup_keys(self):
         keys = [s for s in dir(pygame.locals) if s.startswith('K_')]
         for key in keys:
