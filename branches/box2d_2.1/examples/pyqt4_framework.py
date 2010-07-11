@@ -93,7 +93,7 @@ class Pyqt4DebugDraw(object):
         
         average_time=sum(self.render_times) / len(self.render_times)
         if average_time > 1e-10:
-            status_text=('average frame render time %.2g, potential fps: %.5g' % (average_time, 1./average_time))
+            status_text=('average frame render time %.2gms, potential fps: %.5g' % (average_time*1000, 1./average_time))
             pen=QtGui.QPen(QColor(255,255,255))
             self.test.fps=1./average_time
             self.DrawString(0, 0, status_text, (255,255,255))
@@ -207,7 +207,7 @@ class Pyqt4DebugDraw(object):
         item=self.scene.addPolygon(poly, brush=brush, pen=pen)
         self.temp_items.append(item)
 
-    def DrawCircleShape(self, shape, transform, color):
+    def DrawCircleShape(self, shape, transform, color, temporary=False):
         center=b2Mul(transform, shape.pos)
         radius=shape.radius
         axis=transform.R.col1
@@ -220,9 +220,13 @@ class Pyqt4DebugDraw(object):
         line=self.scene.addLine(center[0], center[1], (center[0]-radius*axis[0]), (center[1]-radius*axis[1]), pen=QtGui.QPen(QColor(255,0,0)))
         ellipse.setPos(*center)
 
-        self.item_cache[hash(shape)]=[ellipse, line]
+        if temporary:
+            self.temp_items.append(ellipse)
+            self.temp_items.append(line)
+        else:
+            self.item_cache[hash(shape)]=[ellipse, line]
         
-    def DrawPolygonShape(self, shape, transform, color):
+    def DrawPolygonShape(self, shape, transform, color, temporary=False):
         poly=QtGui.QPolygonF()
         border_color=color.bytes + [255]
         inside_color=(color / 2).bytes + [127]
@@ -230,15 +234,18 @@ class Pyqt4DebugDraw(object):
         pen  =QtGui.QPen(QtGui.QColor(*border_color))
 
         for v in shape.vertices:
-            #poly+=QtCore.QPointF(v[0], -v[1])
             poly+=QtCore.QPointF(*v)
 
         item=self.scene.addPolygon(poly, brush=brush, pen=pen)
         item.setRotation(transform.angle * 180.0 / b2_pi)
         item.setPos(*transform.position)
-        self.item_cache[hash(shape)]=[item]
 
-    def DrawShape(self, shape, transform, color):
+        if temporary:
+            self.temp_items.append(item)
+        else:
+            self.item_cache[hash(shape)]=[item]
+
+    def DrawShape(self, shape, transform, color, selected=False):
         """
         Draw any type of shape
         """
@@ -254,23 +261,31 @@ class Pyqt4DebugDraw(object):
                 line.setLine(center[0], center[1], (center[0]-radius*axis[0]), (center[1]-radius*axis[1]))
             else:
                 items[0].setPos(*transform.position)
+
+            if not selected:
+                return
+
+        if selected:
+            color=b2Color(1,1,1)
+            temporary=True
         else:
-            if isinstance(shape, b2PolygonShape):
-                self.DrawPolygonShape(shape, transform, color)
-            elif isinstance(shape, b2EdgeShape):
-                v1=b2Mul(transform, shape.vertex1)
-                v2=b2Mul(transform, shape.vertex2)
+            temporary=False
+
+        if isinstance(shape, b2PolygonShape):
+            self.DrawPolygonShape(shape, transform, color, temporary)
+        elif isinstance(shape, b2EdgeShape):
+            v1=b2Mul(transform, shape.vertex1)
+            v2=b2Mul(transform, shape.vertex2)
+            self.DrawSegment(v1, v2, color)
+        elif isinstance(shape, b2CircleShape):
+            self.DrawCircleShape(shape, transform, color, temporary)
+        elif isinstance(shape, b2LoopShape):
+            vertices=shape.vertices
+            v1=b2Mul(transform, vertices[-1])
+            for v2 in vertices:
+                v2=b2Mul(transform, v2)
                 self.DrawSegment(v1, v2, color)
-            elif isinstance(shape, b2CircleShape):
-                #self.DrawSolidCircle(b2Mul(transform, shape.pos), shape.radius, transform.R.col1, color, shape)
-                self.DrawCircleShape(shape, transform, color)
-            elif isinstance(shape, b2LoopShape):
-                vertices=shape.vertices
-                v1=b2Mul(transform, vertices[-1])
-                for v2 in vertices:
-                    v2=b2Mul(transform, v2)
-                    self.DrawSegment(v1, v2, color)
-                    v1=v2
+                v1=v2
 
     def DrawJoint(self, joint):
         """
@@ -312,22 +327,29 @@ class Pyqt4DebugDraw(object):
             'kinematic' : b2Color(0.5, 0.5, 0.9), 
             'asleep'    : b2Color(0.6, 0.6, 0.6), 
             'default'   : b2Color(0.9, 0.7, 0.7), 
-        
         }
+
         settings=self.test.settings
         world=self.test.world
+        if self.test.selected_shape:
+            sel_shape, sel_body=self.test.selected_shape
+        else:
+            sel_shape=None
+
         if settings.drawShapes:
             for body in world.bodies:
                 transform=body.transform
                 for fixture in body.fixtures:
-                    
+                    shape=fixture.shape
+
                     if not body.active: color=colors['active']
                     elif body.type==b2_staticBody: color=colors['static']
                     elif body.type==b2_kinematicBody: color=colors['kinematic']
                     elif not body.awake: color=colors['asleep']
                     else: color=colors['default']
+                    
+                    self.DrawShape(fixture.shape, transform, color, (sel_shape==shape))
 
-                    self.DrawShape(fixture.shape, transform, color)
 
         if settings.drawJoints:
             for joint in world.joints:
@@ -435,6 +457,7 @@ class Pyqt4Framework(FrameworkBase):
         self.textLine           = 0
         self.font               = None
         self.fps                = 0
+        self.selected_shape     = None
 
         # GUI-related
         self.window=None
@@ -586,6 +609,7 @@ class Pyqt4Framework(FrameworkBase):
             self._ShowProperties(body)
 
             shape=fixture.shape
+            self.selected_shape=(shape, body)
             self._ShowProperties(shape)
 
     def Step(self, settings):
@@ -626,6 +650,8 @@ class Pyqt4Framework(FrameworkBase):
 
     def FixtureDestroyed(self, fixture):
         shape=fixture.shape
+        if shape==self.selected_shape[0]:
+            self.selected_shape=None
         if hash(shape) in self.debugDraw.item_cache:
             scene_items=self.debugDraw.item_cache[hash(shape)]
             for item in scene_items:
