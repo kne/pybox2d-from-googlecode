@@ -358,15 +358,17 @@ class Pyqt4DebugDraw(object):
         # if settings.drawPairs
         #   pass
 
-        # TODO: requires access to proxies and broadphase stuff
-        #if settings.drawAABBs:
-        #    color=(0.9, 0.3, 0.9)
-        #    cm=world.contactManager
-        #    for body in world.bodies:
-        #        if not b.active:
-        #            continue
-        #        for fixture in body.fixtures:
-        #            pass
+        if settings.drawAABBs:
+            color=b2Color(0.9, 0.3, 0.9)
+            cm=world.contactManager
+            for body in world.bodies:
+                if not body.active:
+                    continue
+                transform=body.transform
+                for fixture in body.fixtures:
+                    shape=fixture.shape
+                    for childIndex in range(shape.childCount):
+                        self.DrawAABB(shape.getAABB(transform, childIndex), color)
 
 
 class GraphicsScene (QtGui.QGraphicsScene):

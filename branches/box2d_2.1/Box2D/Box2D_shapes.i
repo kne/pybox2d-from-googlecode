@@ -27,14 +27,43 @@ public:
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
         # Read-only
         type = property(__GetType, None)
-        
+
+        @property
+        def childCount(self):
+            """
+            Get the number of child primitives.
+            """
+            return self.__GetChildCount()
+       
+        def getAABB(self, transform, childIndex):
+            """
+            Given a transform, compute the associated axis aligned bounding box for a child shape.
+            """
+            if childIndex >= self.childCount:
+                raise ValueError('Child index should be at most childCount=%d' % self.childCount)
+            aabb=b2AABB()
+            self.__ComputeAABB(aabb, transform, childIndex)
+            return aabb
+
+        def getMass(self, density):
+            """
+            Compute the mass properties of this shape using its dimensions and density.
+            The inertia tensor is computed about the local origin.
+            """
+            m=b2MassData()
+            self.__ComputeMass(m, density)
+            return m
+    
     %}
 }
 
 %ignore b2Shape::m_type;
 %ignore b2Shape::Clone;
 %rename(radius) b2Shape::m_radius;
+%rename(__GetChildCount) b2Shape::GetChildCount;
 %rename(__GetType) b2Shape::GetType;
+%rename(__ComputeAABB) b2Shape::ComputeAABB;
+%rename(__ComputeMass) b2Shape::ComputeMass;
 
 /**** CircleShape ****/
 %extend b2CircleShape {
@@ -62,7 +91,7 @@ public:
     def __clear_vertices(self):
         self.vertexCount=0
         for i in range(0, b2_maxPolygonVertices):
-            self.__set_vertex(i, 0, 0)
+            self.set_vertex(i, 0, 0)
     def __set_vertices(self, values):
         if not values:
             self.__clear_vertices()
@@ -74,9 +103,9 @@ public:
                 if isinstance(value, (tuple, list)):
                     if len(value) != 2:
                         raise ValueError('Expected tuple or list of length 2, got length %d' % len(value))
-                    self.__set_vertex(i, *value)
+                    self.set_vertex(i, *value)
                 elif isinstance(value, b2Vec2):
-                    self.__set_vertex(i, value)
+                    self.set_vertex(i, value)
                 else:
                     raise ValueError('Expected tuple, list, or b2Vec2, got %s' % type(value))
                 self.vertexCount=i+1 # follow along in case of an exception to indicate valid number set
@@ -108,11 +137,11 @@ public:
         if (vnum >= b2_maxPolygonVertices) return NULL;
         return &( $self->m_normals[vnum] );
     }
-    void __set_vertex(uint16 vnum, b2Vec2& value) {
+    void set_vertex(uint16 vnum, b2Vec2& value) {
         if (vnum < b2_maxPolygonVertices)
             $self->m_vertices[vnum].Set(value.x, value.y);
     }
-    void __set_vertex(uint16 vnum, float32 x, float32 y) {
+    void set_vertex(uint16 vnum, float32 x, float32 y) {
         if (vnum < b2_maxPolygonVertices)
             $self->m_vertices[vnum].Set(x, y);
     }
@@ -139,18 +168,28 @@ public:
     def __repr__(self):
         return "b2LoopShape(vertices: %s)" % (self.vertices)
 
+    def getChildEdge(self, index):
+        if childIndex >= self.childCount:
+            raise ValueError('Child index should be at most childCount=%d' % self.childCount)
+
+        edge=b2EdgeShape()
+        self.__GetChildEdge(edge, index)
+        return edge
+
+    @property
+    def edges(self):
+        for i in range(self.childCount):
+            yield self.getChildEdge(i) 
+
     @property
     def vertices(self):
         """Returns all of the vertices as a list of tuples [ (x1,y1), (x2,y2) ... (xN,yN) ]"""
         return [ (self.__get_vertex(i).x, self.__get_vertex(i).y )
                          for i in range(0, self.vertexCount)]
+
     @property
     def vertexCount(self):
         return self.__count()
-
-    @property
-    def edges(self):
-        raise Exception('TODO')
 
     def __iter__(self):
         """
@@ -159,10 +198,68 @@ public:
         for v in self.vertices:
             yield v
 
+    def __set_vertices(self, values):
+        raise Exception('TODO')
+
+        if not values or not isinstance(values, (list, tuple)) or (len(values) < 2 or len(values) > b2_maxPolygonVertices):
+            raise ValueError('Expected tuple or list of length >= 2.')
+
+        for i,value in enumerate(values):
+            if isinstance(value, (tuple, list)):
+                if len(value) != 2:
+                    raise ValueError('Expected tuple or list of length 2, got length %d' % len(value))
+                for j in value:
+                     if not isinstance(j, (int, float)):
+                        raise ValueError('Expected int or float values, got %s' % (type(j)))
+            elif isinstance(value, b2Vec2):
+                pass
+            else:
+                raise ValueError('Expected tuple, list, or b2Vec2, got %s' % type(value))
+            
+        self.__allocate_vertices(len(values))
+        
+        for i,value in enumerate(values):
+            if isinstance(value, (tuple, list)):
+                self.__set_vertex(i, *value)
+            elif isinstance(value, b2Vec2):
+                self.__set_vertex(i, value)
+
+    # TODO: come up with a workaround...
+    #def __del__(self):
+    #    """Cleans up by freeing the allocated vertex array"""
+    #    super(b2LoopShape, self).__del__()
+    #    self._cleanUp()
+
     %}
 
     const int32 __count() {
         return $self->m_count;
+    }
+
+    void set_vertex(uint16 vnum, b2Vec2& value) {
+        if (vnum < $self->m_count) {
+            $self->m_vertices[vnum].Set(value.x, value.y);
+        }
+    }
+
+    void __allocate_vertices(uint16 _count) {
+        if ($self->m_vertices)
+            delete [] $self->m_vertices;
+        $self->m_vertices = new b2Vec2 [_count];
+        if (!$self->m_vertices) {
+            $self->m_count = 0;
+            PyErr_SetString(PyExc_MemoryError, "Insufficient memory");
+            return;
+        }
+        $self->m_count = _count;
+    }
+
+    void __clean_up() {
+        if ($self->m_vertices)
+            delete [] $self->m_vertices;
+
+        $self->m_vertices = NULL;
+        $self->m_count = 0;
     }
 
     const b2Vec2* __get_vertex(uint16 vnum) {
@@ -170,7 +267,8 @@ public:
         return &( $self->m_vertices[vnum] );
     }
 }
-%ignore b2LoopShape::m_normals;
+%rename (__GetChildEdge) b2LoopShape::GetChildEdge;
+%ignore b2LoopShape::m_vertices;
 %ignore b2LoopShape::m_count;
 
 /**** EdgeShape ****/
@@ -225,10 +323,6 @@ public:
         else:
             return 2
 
-    @property
-    def childCount(self):
-        return self.__GetChildCount()
-
     def __iter__(self):
         """
         Iterates over the vertices in the Edge
@@ -246,6 +340,5 @@ public:
 %rename(vertex3) b2EdgeShape::m_vertex3;
 %rename(hasVertex0) b2EdgeShape::m_hasVertex0;
 %rename(hasVertex3) b2EdgeShape::m_hasVertex3;
-%rename(__GetChildCount) b2EdgeShape::GetChildCount;
 %rename(__Set) b2EdgeShape::Set;
 
