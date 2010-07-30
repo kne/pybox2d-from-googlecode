@@ -304,6 +304,12 @@ class PygameFramework(FrameworkBase):
 
         Updates the screen and tells the GUI to paint itself.
         """
+
+        # If any of the test constructors update the settings, reflect
+        # those changes on the GUI before running
+        if GUIEnabled:
+            self.gui_table.updateGUI(self.settings)
+
         running = True
         clock = pygame.time.Clock()
 

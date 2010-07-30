@@ -114,7 +114,31 @@ public:
             ret.I    = self.inertia
             ret.mass = self.mass
             return ret
-        
+
+        def __SetInertia(self, inertia):
+            """
+            Set the body's inertia
+            """
+            md = self.massData
+            md.I = inertia
+            self.massData=md
+
+        def __SetMass(self, mass):
+            """
+            Set the body's mass
+            """
+            md = self.massData
+            md.mass = mass
+            self.massData=md
+
+        def __SetLocalCenter(self, lcenter):
+            """
+            Set the body's local center
+            """
+            md = self.massData
+            md.center = lcenter
+            self.massData=md
+
         def __iter__(self):
             """
             Iterates over the fixtures in the body
@@ -283,18 +307,18 @@ public:
         angle = property(__GetAngle, lambda self, angle: self.__SetTransform(self.position, angle))
         transform = property(__GetTransform, lambda self, value: self.__SetTransform(*value))
         massData = property(__GetMassData, __SetMassData)
+        mass = property(__GetMass, __SetMass)
+        localCenter = property(__GetLocalCenter, __SetLocalCenter)
+        inertia = property(__GetInertia, __SetInertia)
+        position = property(__GetPosition, lambda self, pos: self.__SetTransform(pos, self.angle))
 
         # Read-only
         joints = property(lambda self: _list_from_linked_list(self.__GetJointList_internal()), None)
         contacts = property(lambda self: _list_from_linked_list(self.__GetContactList_internal()), None)
         fixtures = property(lambda self: _list_from_linked_list(self.__GetFixtureList_internal()), None)
         next = property(__GetNext, None)
-        position = property(__GetPosition, lambda self, pos: self.__SetTransform(pos, self.angle))
-        mass = property(__GetMass, None)
         worldCenter = property(__GetWorldCenter, None)
         world = property(__GetWorld, None)
-        localCenter = property(__GetLocalCenter, None)
-        inertia = property(__GetInertia, None)
        
     %}
 }

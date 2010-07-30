@@ -149,6 +149,15 @@ public:
             if defn.shapes:
                 body.CreateFixturesFromShapes(shapes=defn.shapes, shapeFixture=defn.shapeFixture)
 
+            if 'massData' in kwargs:
+                body.massData=kwargs['massData']
+            if 'localCenter' in kwargs:
+                body.localCenter=kwargs['localCenter']
+            if 'inertia' in kwargs:
+                body.inertia=kwargs['inertia']
+            if 'mass' in kwargs:
+                body.mass=kwargs['mass']
+
             return body
 
         def CreateDistanceJoint(self, **kwargs):
