@@ -171,7 +171,7 @@ public:
                     raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
                                 % (to_set.__class__.__name__, key, ex))
 
-            self.CreateFixture(fixture)
+            return self.CreateFixture(fixture)
 
         def CreatePolygonFixture(self, **kwargs):
             """
