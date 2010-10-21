@@ -73,7 +73,6 @@ public:
         type = property(__GetType, None)
         massData = property(__GetMassData, None)
         shape = property(__GetShape, None)
-        aABB = property(__GetAABB, None)
         body = property(__GetBody, None)
 
     %}
@@ -87,7 +86,6 @@ public:
 %rename(__GetType) b2Fixture::GetType;
 %rename(__GetMassData) b2Fixture::GetMassData;
 %rename(__GetShape) b2Fixture::GetShape;
-%rename(__GetAABB) b2Fixture::GetAABB;
 %rename(__GetDensity) b2Fixture::GetDensity;
 %rename(__GetBody) b2Fixture::GetBody;
 %rename(__SetSensor) b2Fixture::SetSensor;
