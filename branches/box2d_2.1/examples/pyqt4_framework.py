@@ -459,7 +459,7 @@ class Pyqt4Framework(FrameworkBase):
         self.textLine           = 0
         self.font               = None
         self.fps                = 0
-        self.selected_shape     = None
+        self.selected_shape     = None, None
 
         # GUI-related
         self.window=None

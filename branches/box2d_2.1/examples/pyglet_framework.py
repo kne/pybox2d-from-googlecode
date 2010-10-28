@@ -248,7 +248,7 @@ class PygletDebugDraw(b2DebugDraw):
             ('v2f', (center[0], center[1], p[0], p[1])),
             ('c3f', [1.0, 0.0, 0.0] * 2))
 
-    def DrawPolygon(self, vertices, vertexCount, color, world_coordinates=True):
+    def DrawPolygon(self, vertices, color, world_coordinates=True):
         """
         Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
@@ -264,7 +264,7 @@ class PygletDebugDraw(b2DebugDraw):
                 ('v2f', ll_vertices),
                 ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-    def DrawSolidPolygon(self, vertices, vertexCount, color, world_coordinates=True):
+    def DrawSolidPolygon(self, vertices, color, world_coordinates=True):
         """
         Draw a filled polygon given the world vertices (tuples) with the specified color.
         """
