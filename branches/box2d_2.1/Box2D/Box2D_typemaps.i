@@ -316,7 +316,7 @@
     $1 = reinterpret_cast<b2Manifold*>(argp);
 }
 
-%typemap(directorin) b2Vec2* vertices {
+%typemap(directorin) (const b2Vec2* vertices, int32 vertexCount) {
     $input = PyTuple_New(vertexCount);
     PyObject* vertex;
     for (int i=0; i < vertexCount; i++) {
@@ -358,6 +358,8 @@
             $result=SWIG_NewPointerObj($1, $descriptor(b2WeldJoint*), 0); break;
         case e_frictionJoint:
             $result=SWIG_NewPointerObj($1, $descriptor(b2FrictionJoint*), 0); break;
+        case e_ropeJoint:
+            $result=SWIG_NewPointerObj($1, $descriptor(b2RopeJoint*), 0); break;
         case e_unknownJoint:
         default:
             $result=Py_None; 

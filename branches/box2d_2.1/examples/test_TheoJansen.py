@@ -38,9 +38,9 @@ class TheoJansen (Framework):
         # The ground
         ground = self.world.CreateStaticBody(
                 shapes=[ 
-                        b2PolygonShape(edge=[(-50,0),(50,0)]),
-                        b2PolygonShape(edge=[(-50,0),(-50,10)]),
-                        b2PolygonShape(edge=[(50,0),(50,10)]),
+                        b2EdgeShape(vertices=[(-50,0),(50,0)]),
+                        b2EdgeShape(vertices=[(-50,0),(-50,10)]),
+                        b2EdgeShape(vertices=[(50,0),(50,10)]),
                     ]
                 ) 
 

@@ -35,7 +35,7 @@ class CollisionFiltering (Framework):
         # Ground body
         world = self.world
         ground = world.CreateBody(
-                    shapes=b2PolygonShape(edge=[(-40,0),(40,0)]) 
+                    shapes=b2EdgeShape(vertices=[(-40,0),(40,0)]) 
                 )
 
         # Define the groups that fixtures can fall into

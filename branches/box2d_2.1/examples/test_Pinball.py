@@ -30,16 +30,8 @@ class Pinball (Framework):
         super(Pinball, self).__init__()
 
         # The ground
-        # TODO: port and utilize b2LoopShape
         ground = self.world.CreateBody(
-                    shapes=[
-                            b2PolygonShape(edge=[( 0,-2),( 8, 6)]),
-                            b2PolygonShape(edge=[( 8, 6),( 8,20)]),
-                            b2PolygonShape(edge=[( 8,20),(-8,20)]),
-                            b2PolygonShape(edge=[(-8,20),(-8, 6)]),
-                            b2PolygonShape(edge=[(-8, 6),( 0,-2)]),
-                            #( 0,-2), ( 8, 6), ( 8,20), (-8,20), (-8, 6), ( 0,-2)
-                             ]
+                    shapes=b2LoopShape(vertices=[(0,-2),(8,6),(8,20),(-8,20),(-8,6)]),
                      )
 
         # Flippers

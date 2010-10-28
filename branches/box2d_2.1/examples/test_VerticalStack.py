@@ -33,8 +33,8 @@ Press B to launch a horizontal bullet"""
 
         ground = self.world.CreateStaticBody(
                 shapes=[ 
-                        b2PolygonShape(edge=[(-40,0),(40,0)]),
-                        b2PolygonShape(edge=[(20,0),(20,20)]),
+                        b2EdgeShape(vertices=[(-40,0),(40,0)]),
+                        b2EdgeShape(vertices=[(20,0),(20,20)]),
                     ]
                 ) 
 

@@ -27,7 +27,7 @@ class Bridge (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    shapes=b2PolygonShape(edge=[(-40,0),(40,0)]) 
+                    shapes=b2EdgeShape(vertices=[(-40,0),(40,0)]) 
                 )
 
         plank=b2FixtureDef( 

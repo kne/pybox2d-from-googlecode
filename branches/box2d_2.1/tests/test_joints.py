@@ -121,17 +121,14 @@ class testJoints (unittest.TestCase):
         # check to make sure they are at least accessible 
         joint.GetReactionForce(1.0)
         joint.GetReactionTorque(1.0)
+        joint.GetMotorTorque(1.0)
         i = joint.angle
-        i = joint.motorTorque
         i = joint.speed
         i = joint.anchorA
         i = joint.anchorB
         joint.upperLimit = 2
         joint.maxMotorTorque = 10.0
-        try:
-            joint.foobar = 2
-        except TypeError:
-            pass # good
+        joint.foobar = 2
 
     # ---- prismatic joint ----
     def prismatic_definition(self, body1, body2, anchor, axis):
@@ -157,7 +154,7 @@ class testJoints (unittest.TestCase):
 
     def prismatic_checks(self, dfn, joint):
         # check to make sure they are at least accessible 
-        i = joint.motorForce
+        i = joint.GetMotorForce(1.0)
         i = joint.anchorA
         i = joint.anchorB
         i = joint.speed
@@ -260,7 +257,7 @@ class testJoints (unittest.TestCase):
 
     def line_checks(self, dfn, joint):
         # check to make sure they are at least accessible 
-        i = joint.motorForce
+        i = joint.GetMotorForce(1.0)
         i = joint.anchorA
         i = joint.anchorB
         i = joint.speed
@@ -313,31 +310,31 @@ class testJoints (unittest.TestCase):
             try:
                 dfn = get_dfn(body1=bodyA, body2=bodyB, **init_args)
             except Exception as s:
-                self._fail("Failed on bodies %s and %s, joint definition (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s, joint definition (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 kw_args=dfn.to_kwargs()
                 joint = create_name(**kw_args)
                 self.world.DestroyJoint(joint)
             except Exception as s:
-                self._fail("Failed on bodies %s and %s, joint creation by kwargs (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s, joint creation by kwargs (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 joint = self.world.CreateJoint(dfn)
             except Exception as s:
-                self._fail("Failed on bodies %s and %s, joint creation (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s, joint creation (%s)" % (name, bodyA.userData, bodyB.userData, s))
                 
             try:
                 asserts(dfn, joint)
             except Exception as s:
                 self.world.DestroyJoint(joint)
-                self._fail("Failed on bodies %s and %s, joint assertions (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s, joint assertions (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 checks(dfn, joint)
             except Exception as s:
                 self.world.DestroyJoint(joint)
-                self._fail("Failed on bodies %s and %s, joint checks (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s, joint checks (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 self.step_world(5)
@@ -348,12 +345,12 @@ class testJoints (unittest.TestCase):
                     # so do it once, catch that, and then fail finally
                     self.fail() 
                 except AssertionError:
-                    self._fail("Failed on bodies %s and %s, joint simulation (%s)" % (bodyA.userData, bodyB.userData, s))
+                    self._fail("%s: Failed on bodies %s and %s, joint simulation (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 self.world.DestroyJoint(joint)
             except Exception as s:
-                self._fail("Failed on bodies %s and %s joint deletion (%s)" % (bodyA.userData, bodyB.userData, s))
+                self._fail("%s: Failed on bodies %s and %s joint deletion (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
     # --- the actual tests ---
     def test_revolute(self):
@@ -391,8 +388,7 @@ class testJoints (unittest.TestCase):
     def test_gear(self):
         # creates 2 revolute joints and then joins them, so it's done separately
         ground=self.world.CreateBody( self.b2.b2BodyDef() )
-        shape=self.b2.b2PolygonShape()
-        shape.SetAsEdge((50.0, 0.0), (-50.0, 0.0))
+        shape=self.b2.b2EdgeShape(vertices=((50.0, 0.0), (-50.0, 0.0)))
         ground.CreateFixturesFromShapes(shapes=shape)
 
         body1=self.create_circle_body((-3, 12))

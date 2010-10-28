@@ -28,7 +28,7 @@ class Cantilever (Framework):
         super(Cantilever, self).__init__()
 
         # The ground
-        ground = self.world.CreateBody(shapes=b2PolygonShape(edge=[(-40,0),(40,0)]) )
+        ground = self.world.CreateBody(shapes=b2EdgeShape(vertices=[(-40,0),(40,0)]) )
 
         plank=b2FixtureDef(
                     shape=b2PolygonShape(box=(0.5,0.125)),

@@ -28,14 +28,14 @@ class CharacterCollision (Framework):
 
         ground = self.world.CreateStaticBody(
                     position=(0,0),
-                    shapes=b2PolygonShape(edge=[(-20,0), (20,0)])
+                    shapes=b2EdgeShape(vertices=[(-20,0), (20,0)])
                 )
         
         # Collinear edges
         self.world.CreateStaticBody(
-                    shapes=[b2PolygonShape(edge=[(-8,1), (-6,1)]),
-                            b2PolygonShape(edge=[(-6,1), (-4,1)]),
-                            b2PolygonShape(edge=[(-4,1), (-2,1)]),
+                    shapes=[b2EdgeShape(vertices=[(-8,1), (-6,1)]),
+                            b2EdgeShape(vertices=[(-6,1), (-4,1)]),
+                            b2EdgeShape(vertices=[(-4,1), (-2,1)]),
                             ]
                 )
         

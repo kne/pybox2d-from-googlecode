@@ -280,14 +280,14 @@ public:
             if len(edge_list) < 2:
                 raise ValueError('Edge list length >= 2')
 
-            shape=b2PolygonShape(edge=[list(i) for i in edge_list[0:2]])
+            shape=b2EdgeShape(vertices=[list(i) for i in edge_list[0:2]])
             self.CreateFixturesFromShapes(shape)
 
             prev = edge_list[1]
             for edge in edge_list[1:]:
                 if len(edge) != 2:
                     raise ValueError('Vertex length != 2, "%s"' % list(edge))
-                shape.edge = [list(prev), list(edge)]
+                shape.vertices = [list(prev), list(edge)]
                 self.CreateFixturesFromShapes(shape)
                 prev=edge
 

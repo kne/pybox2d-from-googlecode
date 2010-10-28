@@ -80,7 +80,6 @@ public:
 
         # Read-only
         angle = property(__GetJointAngle, None)
-        motorTorque = property(__GetMotorTorque, None)
         speed = property(__GetJointSpeed, None)
 
         # Write-only
@@ -94,7 +93,6 @@ public:
 %rename(__GetLowerLimit) b2RevoluteJoint::GetLowerLimit;
 %rename(__GetJointAngle) b2RevoluteJoint::GetJointAngle;
 %rename(__GetMotorSpeed) b2RevoluteJoint::GetMotorSpeed;
-%rename(__GetMotorTorque) b2RevoluteJoint::GetMotorTorque;
 %rename(__GetJointSpeed) b2RevoluteJoint::GetJointSpeed;
 %rename(__IsLimitEnabled) b2RevoluteJoint::IsLimitEnabled;
 %rename(__SetMotorSpeed) b2RevoluteJoint::SetMotorSpeed;
@@ -117,7 +115,6 @@ public:
         limits = property(lambda self: (self.lowerLimit, self.upperLimit), lambda self, v: self.__SetLimits(*v) )
 
         # Read-only
-        motorForce = property(__GetMotorForce, None)
         speed = property(__GetJointSpeed, None)
         translation = property(__GetJointTranslation, None)
 
@@ -127,7 +124,6 @@ public:
 %rename(__SetLimits) b2LineJoint::SetLimits;
 %rename(__IsMotorEnabled) b2LineJoint::IsMotorEnabled;
 %rename(__GetMotorSpeed) b2LineJoint::GetMotorSpeed;
-%rename(__GetMotorForce) b2LineJoint::GetMotorForce;
 %rename(__GetMaxMotorForce) b2LineJoint::GetMaxMotorForce;
 %rename(__GetUpperLimit) b2LineJoint::GetUpperLimit;
 %rename(__GetJointSpeed) b2LineJoint::GetJointSpeed;
@@ -154,7 +150,6 @@ public:
         maxMotorForce = property(__GetMaxMotorForce, __SetMaxMotorForce)
 
         # Read-only
-        motorForce = property(__GetMotorForce, None)
         translation = property(__GetJointTranslation, None)
         speed = property(__GetJointSpeed, None)
 
@@ -163,7 +158,6 @@ public:
 
 %rename(__IsMotorEnabled) b2PrismaticJoint::IsMotorEnabled;
 %rename(__GetMotorSpeed) b2PrismaticJoint::GetMotorSpeed;
-%rename(__GetMotorForce) b2PrismaticJoint::GetMotorForce;
 %rename(__GetJointTranslation) b2PrismaticJoint::GetJointTranslation;
 %rename(__GetUpperLimit) b2PrismaticJoint::GetUpperLimit;
 %rename(__GetJointSpeed) b2PrismaticJoint::GetJointSpeed;

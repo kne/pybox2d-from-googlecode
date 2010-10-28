@@ -94,9 +94,12 @@ public:
 				int32 velocityIterations,
 				int32 positionIterations);
 
-	/// Call this after you are done with time steps to clear the forces. You normally
-	/// call this after each call to Step, unless you are performing sub-steps. By default,
-	/// forces will be automatically cleared, so you don't need to call this function.
+	/// Manually clear the force buffer on all bodies. By default, forces are cleared automatically
+	/// after each call to Step. The default behavior is modified by calling SetAutoClearForces.
+	/// The purpose of this function is to support sub-stepping. Sub-stepping is often used to maintain
+	/// a fixed sized time step under a variable frame-rate.
+	/// When you perform sub-stepping you will disable auto clearing of forces and instead call
+	/// ClearForces after all sub-steps are complete in one pass of your game loop.
 	/// @see SetAutoClearForces
 	void ClearForces();
 
@@ -121,17 +124,20 @@ public:
 	/// the next body in the world list. A NULL body indicates the end of the list.
 	/// @return the head of the world body list.
 	b2Body* GetBodyList();
+	const b2Body* GetBodyList() const;
 
 	/// Get the world joint list. With the returned joint, use b2Joint::GetNext to get
 	/// the next joint in the world list. A NULL joint indicates the end of the list.
 	/// @return the head of the world joint list.
 	b2Joint* GetJointList();
+	const b2Joint* GetJointList() const;
 
 	/// Get the world contact list. With the returned contact, use b2Contact::GetNext to get
 	/// the next contact in the world list. A NULL contact indicates the end of the list.
 	/// @return the head of the world contact list.
 	/// @warning contacts are 
 	b2Contact* GetContactList();
+	const b2Contact* GetContactList() const;
 
 	/// Enable/disable warm starting. For testing.
 	void SetWarmStarting(bool flag) { m_warmStarting = flag; }
@@ -208,8 +214,6 @@ private:
 	b2Vec2 m_gravity;
 	bool m_allowSleep;
 
-	b2Body* m_groundBody;
-
 	b2DestructionListener* m_destructionListener;
 	b2DebugDraw* m_debugDraw;
 
@@ -230,12 +234,27 @@ inline b2Body* b2World::GetBodyList()
 	return m_bodyList;
 }
 
+inline const b2Body* b2World::GetBodyList() const
+{
+	return m_bodyList;
+}
+
 inline b2Joint* b2World::GetJointList()
 {
 	return m_jointList;
 }
 
+inline const b2Joint* b2World::GetJointList() const
+{
+	return m_jointList;
+}
+
 inline b2Contact* b2World::GetContactList()
+{
+	return m_contactManager.m_contactList;
+}
+
+inline const b2Contact* b2World::GetContactList() const
 {
 	return m_contactManager.m_contactList;
 }

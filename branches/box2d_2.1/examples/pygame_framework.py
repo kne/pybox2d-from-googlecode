@@ -143,6 +143,9 @@ class PygameDebugDraw(b2DebugDrawExtended):
         """
         Draw a wireframe polygon given the world vertices vertices (tuples) with the specified color.
         """
+        if not vertices:
+            return
+
         if world_coordinates:
             vertices = [self.to_screen(v) for v in vertices]
 
@@ -155,6 +158,9 @@ class PygameDebugDraw(b2DebugDrawExtended):
         """
         Draw a filled polygon given the world vertices vertices (tuples) with the specified color.
         """
+        if not vertices:
+            return
+
         if world_coordinates:
             vertices = [self.to_screen(v) for v in vertices]
         if len(vertices) == 2:

@@ -38,6 +38,7 @@ enum b2JointType
 	e_lineJoint,
     e_weldJoint,
 	e_frictionJoint,
+	e_ropeJoint
 };
 
 enum b2LimitState
@@ -130,6 +131,7 @@ public:
 
 	/// Get the next joint the world joint list.
 	b2Joint* GetNext();
+	const b2Joint* GetNext() const;
 
 	/// Get the user data pointer.
 	void* GetUserData() const;
@@ -171,6 +173,7 @@ protected:
 	void* m_userData;
 
 	// Cache here per time step to reduce cache misses.
+	// TODO_ERIN will be wrong if the mass changes.
 	b2Vec2 m_localCenterA, m_localCenterB;
 	float32 m_invMassA, m_invIA;
 	float32 m_invMassB, m_invIB;
@@ -209,6 +212,11 @@ inline b2Body* b2Joint::GetBodyB()
 }
 
 inline b2Joint* b2Joint::GetNext()
+{
+	return m_next;
+}
+
+inline const b2Joint* b2Joint::GetNext() const
 {
 	return m_next;
 }

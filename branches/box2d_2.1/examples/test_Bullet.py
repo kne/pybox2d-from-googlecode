@@ -27,7 +27,7 @@ class Bullet (Framework):
 
         ground = self.world.CreateStaticBody(
                     position=(0,0),
-                    shapes=[b2PolygonShape(edge=[(-10,0), (10,0)]),
+                    shapes=[b2EdgeShape(vertices=[(-10,0), (10,0)]),
                             b2PolygonShape(box=(0.2, 1, (0.5, 1), 0))]
                 )
         

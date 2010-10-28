@@ -31,7 +31,7 @@ class Chain (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    shapes=polygonShape(edge=[(-40,0),(40,0)]) 
+                    shapes=edgeShape(vertices=[(-40,0),(40,0)]) 
                 )
 
         plank=fixtureDef(

@@ -172,96 +172,92 @@ struct b2EPAxis
 	float32 separation;
 };
 
-static b2EPAxis b2EPEdgeSeparation(const b2Vec2& v1, const b2Vec2& v2, const b2Vec2& n, const b2PolygonShape* polygonB, float32 radius)
+// Edge shape plus more stuff.
+struct b2FatEdge
 {
-	// EdgeA separation
-	b2EPAxis axis;
-	axis.type = b2EPAxis::e_edgeA;
-	axis.index = 0;
-	axis.separation = b2Dot(n, polygonB->m_vertices[0] - v1);
-	for (int32 i = 1; i < polygonB->m_vertexCount; ++i)
-	{
-		float32 s = b2Dot(n, polygonB->m_vertices[i] - v1);
-		if (s < axis.separation)
-		{
-			axis.separation = s;
-		}
-	}
+	b2Vec2 v0, v1, v2, v3;
+	b2Vec2 normal;
+	bool hasVertex0, hasVertex3;
+};
 
-	return axis;
-}
-
-static b2EPAxis b2EPPolygonSeparation(const b2Vec2& v1, const b2Vec2& v2, const b2Vec2& n, const b2PolygonShape* polygonB, float32 radius)
+// This lets us treate and edge shape and a polygon in the same
+// way in the SAT collider.
+struct b2EPProxy
 {
-	// PolygonB separation
-	b2EPAxis axis;
-	axis.type = b2EPAxis::e_edgeB;
-	axis.index = 0;
-	axis.separation = -FLT_MAX;
+	b2Vec2 vertices[b2_maxPolygonVertices];
+	b2Vec2 normals[b2_maxPolygonVertices];
+	b2Vec2 centroid;
+	int32 count;
+};
+
+// This class collides and edge and a polygon, taking into account edge adjacency.
+struct b2EPCollider
+{
+	b2EPCollider(const b2EdgeShape* edgeA, const b2Transform& xfA,
+				const b2PolygonShape* polygonB_in, const b2Transform& xfB);
+
+	void Collide(b2Manifold* manifold);
+
+	void ComputeAdjacency();
+	b2EPAxis ComputeEdgeSeparation();
+	b2EPAxis ComputePolygonSeparation();
+	void FindIncidentEdge(b2ClipVertex c[2], const b2EPProxy* proxy1, int32 edge1, const b2EPProxy* proxy2);
+
+	b2FatEdge m_edgeA;
+
+	b2EPProxy m_proxyA, m_proxyB;
+
+	b2Transform m_xf;
+	b2Vec2 m_normal0, m_normal2;
+	b2Vec2 m_limit11, m_limit12;
+	b2Vec2 m_limit21, m_limit22;
+	float32 m_radius;
+};
+
+b2EPCollider::b2EPCollider(const b2EdgeShape* edgeA, const b2Transform& xfA,
+				const b2PolygonShape* polygonB, const b2Transform& xfB)
+{
+	m_xf = b2MulT(xfA, xfB);
+
+	// Edge geometry
+	m_edgeA.v0 = edgeA->m_vertex0;
+	m_edgeA.v1 = edgeA->m_vertex1;
+	m_edgeA.v2 = edgeA->m_vertex2;
+	m_edgeA.v3 = edgeA->m_vertex3;
+	b2Vec2 e = m_edgeA.v2 - m_edgeA.v1;
+
+	// Normal points outwards in CCW order.
+	m_edgeA.normal.Set(e.y, -e.x);
+	m_edgeA.normal.Normalize();
+	m_edgeA.hasVertex0 = edgeA->m_hasVertex0;
+	m_edgeA.hasVertex3 = edgeA->m_hasVertex3;
+
+	// Proxy for edge
+	m_proxyA.vertices[0] = m_edgeA.v1;
+	m_proxyA.vertices[1] = m_edgeA.v2;
+	m_proxyA.normals[0] = m_edgeA.normal;
+	m_proxyA.normals[1] = -m_edgeA.normal;
+	m_proxyA.centroid = 0.5f * (m_edgeA.v1 + m_edgeA.v2);
+	m_proxyA.count = 2;
+
+	// Proxy for polygon
+	m_proxyB.count = polygonB->m_vertexCount;
+	m_proxyB.centroid = b2Mul(m_xf, polygonB->m_centroid);
 	for (int32 i = 0; i < polygonB->m_vertexCount; ++i)
 	{
-		float32 s1 = b2Dot(polygonB->m_normals[i], v1 - polygonB->m_vertices[i]);	
-		float32 s2 = b2Dot(polygonB->m_normals[i], v2 - polygonB->m_vertices[i]);
-		float32 s = b2Min(s1, s2);
-		if (s > axis.separation)
-		{
-			axis.index = i;
-			axis.separation = s;
-			if (s > radius)
-			{
-				return axis;
-			}
-		}
+		m_proxyB.vertices[i] = b2Mul(m_xf, polygonB->m_vertices[i]);
+		m_proxyB.normals[i] = b2Mul(m_xf.R, polygonB->m_normals[i]);
 	}
 
-	return axis;
+	m_radius = 2.0f * b2_polygonRadius;
+
+	m_limit11.SetZero();
+	m_limit12.SetZero();
+	m_limit21.SetZero();
+	m_limit22.SetZero();
 }
 
-static void b2FindIncidentEdge(b2ClipVertex c[2], const b2PolygonShape* poly1, int32 edge1, const b2PolygonShape* poly2)
-{
-	int32 count1 = poly1->m_vertexCount;
-	const b2Vec2* normals1 = poly1->m_normals;
-
-	int32 count2 = poly2->m_vertexCount;
-	const b2Vec2* vertices2 = poly2->m_vertices;
-	const b2Vec2* normals2 = poly2->m_normals;
-
-	b2Assert(0 <= edge1 && edge1 < count1);
-
-	// Get the normal of the reference edge in poly2's frame.
-	b2Vec2 normal1 = normals1[edge1];
-
-	// Find the incident edge on poly2.
-	int32 index = 0;
-	float32 minDot = b2_maxFloat;
-	for (int32 i = 0; i < count2; ++i)
-	{
-		float32 dot = b2Dot(normal1, normals2[i]);
-		if (dot < minDot)
-		{
-			minDot = dot;
-			index = i;
-		}
-	}
-
-	// Build the clip vertices for the incident edge.
-	int32 i1 = index;
-	int32 i2 = i1 + 1 < count2 ? i1 + 1 : 0;
-
-	c[0].v = vertices2[i1];
-	c[0].id.cf.indexA = (uint8)edge1;
-	c[0].id.cf.indexB = (uint8)i1;
-	c[0].id.cf.typeA = b2ContactFeature::e_face;
-	c[0].id.cf.typeB = b2ContactFeature::e_vertex;
-
-	c[1].v = vertices2[i2];
-	c[1].id.cf.indexA = (uint8)edge1;
-	c[1].id.cf.indexB = (uint8)i2;
-	c[1].id.cf.typeA = b2ContactFeature::e_face;
-	c[1].id.cf.typeB = b2ContactFeature::e_vertex;
-}
-
-// Collide and edge and polygon. This uses the SAT and clipping to produce up to 2 contact points.
+// Collide an edge and polygon. This uses the SAT and clipping to produce up to 2 contact points.
 // Edge adjacency is handle to produce locally valid contact points and normals. This is intended
 // to allow the polygon to slide smoothly over an edge chain.
 //
@@ -276,136 +272,28 @@ static void b2FindIncidentEdge(b2ClipVertex c[2], const b2PolygonShape* poly1, i
 // 8. Use the minimum separation of up to three edges. If the minimum separation
 //    is not the primary edge, return.
 // 9. If the minimum separation is the primary edge, compute the contact points and return.
-void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
-								const b2EdgeShape* edgeA, const b2Transform& xfA,
-								const b2PolygonShape* polygonB_in, const b2Transform& xfB)
+void b2EPCollider::Collide(b2Manifold* manifold)
 {
 	manifold->pointCount = 0;
 
-	b2Transform xf = b2MulT(xfA, xfB);
+	ComputeAdjacency();
 
-	// Create a polygon for edge shape A
-	b2PolygonShape polygonA;
-	polygonA.SetAsEdge(edgeA->m_vertex1, edgeA->m_vertex2);
+	b2EPAxis edgeAxis = ComputeEdgeSeparation();
 
-	// Build polygonB in frame A
-	b2PolygonShape polygonB;
-	polygonB.m_radius = polygonB_in->m_radius;
-	polygonB.m_vertexCount = polygonB_in->m_vertexCount;
-	polygonB.m_centroid = b2Mul(xf, polygonB_in->m_centroid);
-	for (int32 i = 0; i < polygonB.m_vertexCount; ++i)
+	// If no valid normal can be found than this edge should not collide.
+	// This can happen on the middle edge of a 3-edge zig-zag chain.
+	if (edgeAxis.type == b2EPAxis::e_unknown)
 	{
-		polygonB.m_vertices[i] = b2Mul(xf, polygonB_in->m_vertices[i]);
-		polygonB.m_normals[i] = b2Mul(xf.R, polygonB_in->m_normals[i]);
-	}
-
-	float32 totalRadius = polygonA.m_radius + polygonB.m_radius;
-
-	// Edge geometry
-	b2Vec2 v1 = edgeA->m_vertex1;
-	b2Vec2 v2 = edgeA->m_vertex2;
-	b2Vec2 e = v2 - v1;
-	b2Vec2 edgeNormal(e.y, -e.x);
-	edgeNormal.Normalize();
-
-	// Determine side
-	bool isFrontSide = b2Dot(edgeNormal, polygonB.m_centroid - v1) >= 0.0f;
-	if (isFrontSide == false)
-	{
-		edgeNormal = -edgeNormal;
-	}
-
-	// Compute primary separating axis
-	b2EPAxis edgeAxis = b2EPEdgeSeparation(v1, v2, edgeNormal, &polygonB, totalRadius);
-	if (edgeAxis.separation > totalRadius)
-	{
-		// Shapes are separated
 		return;
 	}
 
-	// Classify adjacent edges
-	b2EdgeType types[2] = {b2_isolated, b2_isolated};
-	if (edgeA->m_hasVertex0)
+	if (edgeAxis.separation > m_radius)
 	{
-		b2Vec2 v0 = edgeA->m_vertex0;
-		float32 s = b2Dot(edgeNormal, v0 - v1);
-
-		if (s > 0.1f * b2_linearSlop)
-		{
-			types[0] = b2_concave;
-		}
-		else if (s >= -0.1f * b2_linearSlop)
-		{
-			types[0] = b2_flat;
-		}
-		else
-		{
-			types[0] = b2_convex;
-		}
+		return;
 	}
 
-	if (edgeA->m_hasVertex3)
-	{
-		b2Vec2 v3 = edgeA->m_vertex3;
-		float32 s = b2Dot(edgeNormal, v3 - v2);
-		if (s > 0.1f * b2_linearSlop)
-		{
-			types[1] = b2_concave;
-		}
-		else if (s >= -0.1f * b2_linearSlop)
-		{
-			types[1] = b2_flat;
-		}
-		else
-		{
-			types[1] = b2_convex;
-		}
-	}
-
-	if (types[0] == b2_convex)
-	{
-		// Check separation on previous edge.
-		b2Vec2 v0 = edgeA->m_vertex0;
-		b2Vec2 e0 = v1 - v0;
-
-		b2Vec2 n0(e0.y, -e0.x);
-		n0.Normalize();
-		if (isFrontSide == false)
-		{
-			n0 = -n0;
-		}
-
-		b2EPAxis axis1 = b2EPEdgeSeparation(v0, v1, n0, &polygonB, totalRadius);
-		if (axis1.separation > edgeAxis.separation)
-		{
-			// The polygon should collide with previous edge
-			return;
-		}
-	}
-
-	if (types[1] == b2_convex)
-	{
-		// Check separation on next edge.
-		b2Vec2 v3 = edgeA->m_vertex3;
-		b2Vec2 e2 = v3 - v2;
-
-		b2Vec2 n2(e2.y, -e2.x);
-		n2.Normalize();
-		if (isFrontSide == false)
-		{
-			n2 = -n2;
-		}
-
-		b2EPAxis axis2 = b2EPEdgeSeparation(v2, v3, n2, &polygonB, totalRadius);
-		if (axis2.separation > edgeAxis.separation)
-		{
-			// The polygon should collide with the next edge
-			return;
-		}
-	}
-
-	b2EPAxis polygonAxis = b2EPPolygonSeparation(v1, v2, edgeNormal, &polygonB, totalRadius);
-	if (polygonAxis.separation > totalRadius)
+	b2EPAxis polygonAxis = ComputePolygonSeparation();
+	if (polygonAxis.type != b2EPAxis::e_unknown && polygonAxis.separation > m_radius)
 	{
 		return;
 	}
@@ -415,7 +303,11 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 	const float32 k_absoluteTol = 0.001f;
 
 	b2EPAxis primaryAxis;
-	if (polygonAxis.separation > k_relativeTol * edgeAxis.separation + k_absoluteTol)
+	if (polygonAxis.type == b2EPAxis::e_unknown)
+	{
+		primaryAxis = edgeAxis;
+	}
+	else if (polygonAxis.separation > k_relativeTol * edgeAxis.separation + k_absoluteTol)
 	{
 		primaryAxis = polygonAxis;
 	}
@@ -424,31 +316,27 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 		primaryAxis = edgeAxis;
 	}
 
-	b2PolygonShape* poly1;
-	b2PolygonShape* poly2;
+	b2EPProxy* proxy1;
+	b2EPProxy* proxy2;
 	b2ClipVertex incidentEdge[2];
 	if (primaryAxis.type == b2EPAxis::e_edgeA)
 	{
-		poly1 = &polygonA;
-		poly2 = &polygonB;
-		if (isFrontSide == false)
-		{
-			primaryAxis.index = 1;
-		}
+		proxy1 = &m_proxyA;
+		proxy2 = &m_proxyB;
 		manifold->type = b2Manifold::e_faceA;
 	}
 	else
 	{
-		poly1 = &polygonB;
-		poly2 = &polygonA;
+		proxy1 = &m_proxyB;
+		proxy2 = &m_proxyA;
 		manifold->type = b2Manifold::e_faceB;
 	}
 
 	int32 edge1 = primaryAxis.index;
 
-	b2FindIncidentEdge(incidentEdge, poly1, primaryAxis.index, poly2);
-	int32 count1 = poly1->m_vertexCount;
-	const b2Vec2* vertices1 = poly1->m_vertices;
+	FindIncidentEdge(incidentEdge, proxy1, primaryAxis.index, proxy2);
+	int32 count1 = proxy1->count;
+	const b2Vec2* vertices1 = proxy1->vertices;
 
 	int32 iv1 = edge1;
 	int32 iv2 = edge1 + 1 < count1 ? edge1 + 1 : 0;
@@ -466,8 +354,8 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 	float32 frontOffset = b2Dot(normal, v11);
 
 	// Side offsets, extended by polytope skin thickness.
-	float32 sideOffset1 = -b2Dot(tangent, v11) + totalRadius;
-	float32 sideOffset2 = b2Dot(tangent, v12) + totalRadius;
+	float32 sideOffset1 = -b2Dot(tangent, v11) + m_radius;
+	float32 sideOffset2 = b2Dot(tangent, v12) + m_radius;
 
 	// Clip incident edge against extruded edge1 side edges.
 	b2ClipVertex clipPoints1[2];
@@ -498,8 +386,8 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 	}
 	else
 	{
-		manifold->localNormal = b2MulT(xf.R, normal);
-		manifold->localPoint = b2MulT(xf, planePoint);
+		manifold->localNormal = b2MulT(m_xf.R, normal);
+		manifold->localPoint = b2MulT(m_xf, planePoint);
 	}
 
 	int32 pointCount = 0;
@@ -509,13 +397,13 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 		
 		separation = b2Dot(normal, clipPoints2[i].v) - frontOffset;
 
-		if (separation <= totalRadius)
+		if (separation <= m_radius)
 		{
 			b2ManifoldPoint* cp = manifold->points + pointCount;
 
 			if (primaryAxis.type == b2EPAxis::e_edgeA)
 			{
-				cp->localPoint = b2MulT(xf, clipPoints2[i].v);
+				cp->localPoint = b2MulT(m_xf, clipPoints2[i].v);
 				cp->id = clipPoints2[i].id;
 			}
 			else
@@ -527,14 +415,259 @@ void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
 				cp->id.cf.indexB = clipPoints2[i].id.cf.indexA;
 			}
 
-			if (cp->id.cf.typeA == b2ContactFeature::e_vertex && types[cp->id.cf.indexA] == b2_flat)
-			{
-				continue;
-			}
-
 			++pointCount;
 		}
 	}
 
 	manifold->pointCount = pointCount;
+}
+
+// Compute allowable normal ranges based on adjacency.
+// A normal n is allowable iff:
+// cross(n, n1) >= 0.0f && cross(n2, n) >= 0.0f
+// n points from A to B (edge to polygon)
+void b2EPCollider::ComputeAdjacency()
+{
+	b2Vec2 v0 = m_edgeA.v0;
+	b2Vec2 v1 = m_edgeA.v1;
+	b2Vec2 v2 = m_edgeA.v2;
+	b2Vec2 v3 = m_edgeA.v3;
+
+	// Determine allowable the normal regions based on adjacency.
+	// Note: it may be possible that no normal is admissable.
+	b2Vec2 centerB = m_proxyB.centroid;
+	if (m_edgeA.hasVertex0)
+	{
+		b2Vec2 e0 = v1 - v0;
+		b2Vec2 e1 = v2 - v1;
+		b2Vec2 n0(e0.y, -e0.x);
+		b2Vec2 n1(e1.y, -e1.x);
+		n0.Normalize();
+		n1.Normalize();
+
+		bool convex = b2Cross(n0, n1) >= 0.0f;
+		bool front0 = b2Dot(n0, centerB - v0) >= 0.0f;
+		bool front1 = b2Dot(n1, centerB - v1) >= 0.0f;
+
+		if (convex)
+		{
+			if (front0 || front1)
+			{
+				m_limit11 = n1;
+				m_limit12 = n0;
+			}
+			else
+			{
+				m_limit11 = -n1;
+				m_limit12 = -n0;
+			}
+		}
+		else
+		{
+			if (front0 && front1)
+			{
+				m_limit11 = n0;
+				m_limit12 = n1;
+			}
+			else
+			{
+				m_limit11 = -n0;
+				m_limit12 = -n1;
+			}
+		}
+	}
+	else
+	{
+		m_limit11.SetZero();
+		m_limit12.SetZero();
+	}
+
+	if (m_edgeA.hasVertex3)
+	{
+		b2Vec2 e1 = v2 - v1;
+		b2Vec2 e2 = v3 - v2;
+		b2Vec2 n1(e1.y, -e1.x);
+		b2Vec2 n2(e2.y, -e2.x);
+		n1.Normalize();
+		n2.Normalize();
+
+		bool convex = b2Cross(n1, n2) >= 0.0f;
+		bool front1 = b2Dot(n1, centerB - v1) >= 0.0f;
+		bool front2 = b2Dot(n2, centerB - v2) >= 0.0f;
+
+		if (convex)
+		{
+			if (front1 || front2)
+			{
+				m_limit21 = n2;
+				m_limit22 = n1;
+			}
+			else
+			{
+				m_limit21 = -n2;
+				m_limit22 = -n1;
+			}
+		}
+		else
+		{
+			if (front1 && front2)
+			{
+				m_limit21 = n1;
+				m_limit22 = n2;
+			}
+			else
+			{
+				m_limit21 = -n1;
+				m_limit22 = -n2;
+			}
+		}
+	}
+	else
+	{
+		m_limit21.SetZero();
+		m_limit22.SetZero();
+	}
+}
+
+b2EPAxis b2EPCollider::ComputeEdgeSeparation()
+{
+	// EdgeA separation
+	b2EPAxis bestAxis;
+	bestAxis.type = b2EPAxis::e_unknown;
+	bestAxis.index = -1;
+	bestAxis.separation = -FLT_MAX;
+	b2Vec2 normals[2] = {m_edgeA.normal, -m_edgeA.normal};
+	
+	for (int32 i = 0; i < 2; ++i)
+	{
+		b2Vec2 n = normals[i];
+
+		// Adjacency
+		bool valid1 = b2Cross(n, m_limit11) >= -b2_angularSlop && b2Cross(m_limit12, n) >= -b2_angularSlop;
+		bool valid2 = b2Cross(n, m_limit21) >= -b2_angularSlop && b2Cross(m_limit22, n) >= -b2_angularSlop;
+
+		if (valid1 == false || valid2 == false)
+		{
+			continue;
+		}
+		
+		b2EPAxis axis;
+		axis.type = b2EPAxis::e_edgeA;
+		axis.index = i;
+		axis.separation = FLT_MAX;
+
+		for (int32 j = 0; j < m_proxyB.count; ++j)
+		{
+			float32 s = b2Dot(n, m_proxyB.vertices[j] - m_edgeA.v1);
+			if (s < axis.separation)
+			{
+				axis.separation = s;
+			}
+		}
+
+		if (axis.separation > m_radius)
+		{
+			return axis;
+		}
+
+		if (axis.separation > bestAxis.separation)
+		{
+			bestAxis = axis;
+		}
+	}
+
+	return bestAxis;
+}
+
+b2EPAxis b2EPCollider::ComputePolygonSeparation()
+{
+	b2EPAxis axis;
+	axis.type = b2EPAxis::e_unknown;
+	axis.index = -1;
+	axis.separation = -FLT_MAX;
+	for (int32 i = 0; i < m_proxyB.count; ++i)
+	{
+		b2Vec2 n = -m_proxyB.normals[i];
+
+		// Adjacency
+		bool valid1 = b2Cross(n, m_limit11) >= -b2_angularSlop && b2Cross(m_limit12, n) >= -b2_angularSlop;
+		bool valid2 = b2Cross(n, m_limit21) >= -b2_angularSlop && b2Cross(m_limit22, n) >= -b2_angularSlop;
+
+		if (valid1 == false && valid2 == false)
+		{
+			continue;
+		}
+
+		float32 s1 = b2Dot(n, m_proxyB.vertices[i] - m_edgeA.v1);
+		float32 s2 = b2Dot(n, m_proxyB.vertices[i] - m_edgeA.v2);
+		float32 s = b2Min(s1, s2);
+
+		if (s > m_radius)
+		{
+			axis.type = b2EPAxis::e_edgeB;
+			axis.index = i;
+			axis.separation = s;
+		}
+
+		if (s > axis.separation)
+		{
+			axis.type = b2EPAxis::e_edgeB;
+			axis.index = i;
+			axis.separation = s;
+		}
+	}
+
+	return axis;
+}
+
+void b2EPCollider::FindIncidentEdge(b2ClipVertex c[2], const b2EPProxy* proxy1, int32 edge1, const b2EPProxy* proxy2)
+{
+	int32 count1 = proxy1->count;
+	const b2Vec2* normals1 = proxy1->normals;
+
+	int32 count2 = proxy2->count;
+	const b2Vec2* vertices2 = proxy2->vertices;
+	const b2Vec2* normals2 = proxy2->normals;
+
+	b2Assert(0 <= edge1 && edge1 < count1);
+
+	// Get the normal of the reference edge in proxy2's frame.
+	b2Vec2 normal1 = normals1[edge1];
+
+	// Find the incident edge on proxy2.
+	int32 index = 0;
+	float32 minDot = b2_maxFloat;
+	for (int32 i = 0; i < count2; ++i)
+	{
+		float32 dot = b2Dot(normal1, normals2[i]);
+		if (dot < minDot)
+		{
+			minDot = dot;
+			index = i;
+		}
+	}
+
+	// Build the clip vertices for the incident edge.
+	int32 i1 = index;
+	int32 i2 = i1 + 1 < count2 ? i1 + 1 : 0;
+
+	c[0].v = vertices2[i1];
+	c[0].id.cf.indexA = (uint8)edge1;
+	c[0].id.cf.indexB = (uint8)i1;
+	c[0].id.cf.typeA = b2ContactFeature::e_face;
+	c[0].id.cf.typeB = b2ContactFeature::e_vertex;
+
+	c[1].v = vertices2[i2];
+	c[1].id.cf.indexA = (uint8)edge1;
+	c[1].id.cf.indexB = (uint8)i2;
+	c[1].id.cf.typeA = b2ContactFeature::e_face;
+	c[1].id.cf.typeB = b2ContactFeature::e_vertex;
+}
+
+void b2CollideEdgeAndPolygon(	b2Manifold* manifold,
+								const b2EdgeShape* edgeA, const b2Transform& xfA,
+								const b2PolygonShape* polygonB, const b2Transform& xfB)
+{
+	b2EPCollider collider(edgeA, xfA, polygonB, xfB);
+	collider.Collide(manifold);
 }

@@ -54,7 +54,8 @@ typedef float float32;
 /// The maximum number of contact points between two convex shapes.
 #define b2_maxManifoldPoints	2
 
-/// The maximum number of vertices on a convex polygon.
+/// The maximum number of vertices on a convex polygon. You cannot increase
+/// this too much because b2BlockAllocator has a maximum object size.
 #define b2_maxPolygonVertices	16
 
 /// This is used to fatten AABBs in the dynamic tree. This allows proxies
@@ -79,6 +80,9 @@ typedef float float32;
 /// this smaller means polygons will have an insufficient buffer for continuous collision.
 /// Making it larger may create artifacts for vertex collision.
 #define b2_polygonRadius		(2.0f * b2_linearSlop)
+
+/// Maximum number of sub-steps per contact in continuous physics simulation.
+#define b2_maxSubSteps			8
 
 
 // Dynamics
@@ -112,6 +116,7 @@ typedef float float32;
 /// that overlap is removed in one time step. However using values close to 1 often lead
 /// to overshoot.
 #define b2_contactBaumgarte			0.2f
+
 
 // Sleep
 
@@ -147,7 +152,7 @@ extern b2Version b2_version;
 /// Friction mixing law. Feel free to customize this.
 inline float32 b2MixFriction(float32 friction1, float32 friction2)
 {
-	return sqrtf(friction1 * friction2);
+	return std::sqrt(friction1 * friction2);
 }
 
 /// Restitution mixing law. Feel free to customize this.

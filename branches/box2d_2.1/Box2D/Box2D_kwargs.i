@@ -24,7 +24,7 @@
             try:
                 setattr(self, key, value)
             except Exception as ex:
-                raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
+                raise ex.__class__('Failed on kwargs for %s.%s: %s' \
                             % (self.__class__.__name__, key, ex))
     def _init_jointdef_kwargs(self, **kwargs):
         keys = list(kwargs.items()) 

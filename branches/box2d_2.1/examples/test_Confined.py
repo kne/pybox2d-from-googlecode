@@ -29,10 +29,10 @@ class Confined (Framework):
         # The ground
         ground = self.world.CreateStaticBody(
                 shapes=[ 
-                        b2PolygonShape(edge=[(-10,  0),( 10,  0)]),
-                        b2PolygonShape(edge=[(-10,  0),(-10, 20)]),
-                        b2PolygonShape(edge=[( 10,  0),( 10, 20)]),
-                        b2PolygonShape(edge=[(-10, 20),( 10, 20)]),
+                        b2EdgeShape(vertices=[(-10,  0),( 10,  0)]),
+                        b2EdgeShape(vertices=[(-10,  0),(-10, 20)]),
+                        b2EdgeShape(vertices=[( 10,  0),( 10, 20)]),
+                        b2EdgeShape(vertices=[(-10, 20),( 10, 20)]),
                     ]
                 ) 
 

@@ -24,7 +24,7 @@ class Pyramid (Framework):
         super(Pyramid, self).__init__()
         # The ground
         ground = self.world.CreateStaticBody(
-                    shapes=b2PolygonShape(edge=[(-40,0),(40, 0)])
+                    shapes=b2EdgeShape(vertices=[(-40,0),(40, 0)])
                 )
 
         box_half_size = (0.5, 0.5)

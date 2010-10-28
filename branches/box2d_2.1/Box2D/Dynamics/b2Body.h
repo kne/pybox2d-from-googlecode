@@ -368,7 +368,6 @@ public:
 private:
 
 	friend class b2World;
-	friend class b2TOISolver;
 	friend class b2Island;
 	friend class b2ContactManager;
 	friend class b2ContactSolver;
@@ -382,6 +381,7 @@ private:
 	friend class b2RevoluteJoint;
 	friend class b2WeldJoint;
 	friend class b2FrictionJoint;
+	friend class b2RopeJoint;
 
 	// m_flags
 	enum

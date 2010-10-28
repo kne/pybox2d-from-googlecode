@@ -29,7 +29,7 @@ class BodyTypes (Framework):
 
         # The ground
         ground = self.world.CreateBody(
-                    shapes=b2PolygonShape(edge=[(-20,0),(20,0)]) 
+                    shapes=b2EdgeShape(vertices=[(-20,0),(20,0)]) 
                 )
 
         # The attachment
