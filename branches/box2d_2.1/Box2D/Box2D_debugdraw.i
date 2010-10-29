@@ -19,6 +19,7 @@
 
 /**** DebugDraw ****/
 %extend b2DebugDraw {
+public:
     %pythoncode %{
         def SetFlags(self, **kwargs):
             flags = 0
@@ -57,6 +58,7 @@
 */
 
 %extend b2DebugDrawExtended {
+public:
     %pythoncode %{
         def SetFlags(self, **kwargs):
             flags = 0
@@ -87,7 +89,7 @@
 
 %include "Box2D/Dynamics/b2WorldCallbacks.h"
 %inline {
-    class b2DebugDrawExtended : b2DebugDraw {
+    class b2DebugDrawExtended : public b2DebugDraw {
     public:
         bool convertVertices;
         b2Vec2 center;

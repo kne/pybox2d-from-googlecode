@@ -169,31 +169,6 @@ public:
 %ignore b2DistanceProxy::m_vertices;
 %ignore b2DistanceProxy::m_radius;
 
-/**** Segment ****/
-%extend b2Segment {
-public:
-    %pythoncode %{
-    %}
-
-    PyObject* TestSegment(const b2Segment& segment, float32 maxLambda) {
-        bool hit;
-        float32 lambda=0.0f;
-        b2Vec2 normal(0.0f ,0.0f);
-
-        hit=$self->TestSegment(&lambda, &normal, segment, maxLambda);
-
-        PyObject* normal_tuple=PyTuple_New(2);
-        PyTuple_SetItem(normal_tuple, 0, SWIG_From_float(normal.x));
-        PyTuple_SetItem(normal_tuple, 1, SWIG_From_float(normal.y));
-
-        PyObject* ret=PyTuple_New(3);
-        PyTuple_SetItem(ret, 0, SWIG_From_bool(hit));
-        PyTuple_SetItem(ret, 1, SWIG_From_float(lambda));
-        PyTuple_SetItem(ret, 2, normal_tuple);
-        return ret;
-    }
-}
-
 /**** Version ****/
 %extend b2Version {
 public:

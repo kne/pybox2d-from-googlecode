@@ -29,8 +29,8 @@
         # __x bad
         # _classname bad
         def check(s):
-            if s[:2]=='__':
-                if s[-2:]=='__':
+            if s.startswith('__'):
+                if s.endswith('__'):
                     return True
                 else:
                     return False
@@ -41,7 +41,7 @@
                 return True
         
         keys=sum([list(c.__dict__.keys()) for c in type(self).__mro__], [])
-        typenames = ["_%s" % c.__name__ for c in type(self).__mro__]
+        typenames=["_%s" % c.__name__ for c in type(self).__mro__]
         ret=[s for s in list(set(keys)) if check(s)]
         ret.sort()
         return ret
@@ -405,8 +405,14 @@
     %}
 }
 
+%extend b2RopeJoint {
+    %pythoncode %{
+        __dir__ = _dir_filter
+    %}
+}
 
-%extend b2Segment {
+
+%extend b2RopeJointDef {
     %pythoncode %{
         __dir__ = _dir_filter
     %}

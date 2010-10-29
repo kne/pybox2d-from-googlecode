@@ -182,6 +182,22 @@ class testJoints (unittest.TestCase):
         joint.GetReactionForce(1.0)
         joint.GetReactionTorque(1.0)
 
+    # ---- Rope joint ----
+    def rope_definition(self, body1, body2, anchorA, anchorB, maxLength):
+        dfn=self.b2.b2RopeJointDef(bodyA=body1, bodyB=body2, anchorA=anchorA, \
+                        anchorB=anchorB, maxLength=maxLength)
+        return dfn
+
+    def rope_asserts(self, dfn, joint):
+        self.check(dfn, joint, "bodyA")
+        self.check(dfn, joint, "bodyB")
+        self.check(dfn, joint, "maxLength")
+
+    def rope_checks(self, dfn, joint):
+        joint.GetReactionForce(1.0)
+        joint.GetReactionTorque(1.0)
+        joint.limitState
+
     # ---- pulley joint ----
     def pulley_definition(self, body1, body2):
         if body2.mass == 0 or body1.mass == 0:
@@ -361,6 +377,9 @@ class testJoints (unittest.TestCase):
 
     def test_distance(self):
         self.do_joint_test("distance", { 'anchorA' : (-10, 0), 'anchorB' : (-0.5,-0.5) })
+
+    def test_rope(self):
+        self.do_joint_test("rope", { 'anchorA' : (-10, 0), 'anchorB' : (-0.5,-0.5), 'maxLength' : 5.0 })
 
     def test_pulley(self):
         self.do_joint_test("pulley", {} )

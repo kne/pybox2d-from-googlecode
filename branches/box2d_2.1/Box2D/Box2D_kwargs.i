@@ -244,6 +244,18 @@
         _init_kwargs(self, **kwargs)
 }
 
+%feature("shadow") b2RopeJoint::b2RopeJoint() {
+    def __init__(self, **kwargs):
+        _Box2D.b2RopeJoint_swiginit(self,_Box2D.new_b2RopeJoint())
+        _init_kwargs(self, **kwargs)
+}
+
+%feature("shadow") b2RopeJointDef::b2RopeJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2RopeJointDef_swiginit(self,_Box2D.new_b2RopeJointDef())
+        _init_kwargs(self, **kwargs)
+}
+
 
 %feature("shadow") b2Jacobian::b2Jacobian() {
     def __init__(self, **kwargs):

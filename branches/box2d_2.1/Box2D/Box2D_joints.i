@@ -189,6 +189,22 @@ public:
 %rename(__SetLength) b2DistanceJoint::SetLength;
 %rename(__SetFrequency) b2DistanceJoint::SetFrequency;
 
+/**** RopeJoint ****/
+%extend b2RopeJoint {
+public:
+    %pythoncode %{
+
+        # Read-only properties
+        maxLength = property(__GetMaxLength, None)
+        limitState = property(__GetLimitState, None)
+
+        # Read-write properties
+
+    %}
+}
+%rename(__GetLimitState) b2RopeJoint::GetLimitState;
+%rename(__GetMaxLength) b2RopeJoint::GetMaxLength;
+
 /**** PulleyJoint ****/
 %extend b2PulleyJoint {
 public:
@@ -581,6 +597,44 @@ this point. So, figure out a way around this, somehow.
         _init_jointdef_kwargs(self, **kwargs)
         if self.bodyA and self.bodyB and 'referenceAngle' not in kwargs:
             self.referenceAngle = self.bodyB.angle - self.bodyA.angle
+}
+
+/**** Add some of the functionality that Initialize() offers for joint definitions ****/
+/**** RopeJointDef ****/
+%extend b2RopeJointDef {
+    %pythoncode %{
+        def __set_anchorA(self, value):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            self.localAnchorA=self.bodyA.GetLocalPoint(value)
+        def __set_anchorB(self, value):
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            self.localAnchorB=self.bodyB.GetLocalPoint(value)
+        def __get_anchorA(self):
+            if not self.bodyA:
+                raise Exception('bodyA not set.')
+            return self.bodyA.GetWorldPoint(self.localAnchorA)
+        def __get_anchorB(self):
+            if not self.bodyB:
+                raise Exception('bodyB not set.')
+            return self.bodyB.GetWorldPoint(self.localAnchorB)
+
+        anchorA = property(__get_anchorA, __set_anchorA, 
+                doc="""Body A's anchor in world coordinates.
+                    Getting the property depends on both bodyA and localAnchorA.
+                    Setting the property requires that bodyA be set.""")
+        anchorB = property(__get_anchorB, __set_anchorB, 
+                doc="""Body B's anchor in world coordinates.
+                    Getting the property depends on both bodyB and localAnchorB.
+                    Setting the property requires that bodyB be set.""")
+    %}
+}
+
+%feature("shadow") b2RopeJointDef::b2RopeJointDef() {
+    def __init__(self, **kwargs):
+        _Box2D.b2RopeJointDef_swiginit(self,_Box2D.new_b2RopeJointDef())
+        _init_jointdef_kwargs(self, **kwargs)
 }
 
 /**** Hide the now useless enums ****/
