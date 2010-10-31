@@ -362,8 +362,7 @@
             $result=SWIG_NewPointerObj($1, $descriptor(b2RopeJoint*), 0); break;
         case e_unknownJoint:
         default:
-            $result=Py_None; 
-            Py_INCREF($result);
+            $result=SWIG_NewPointerObj($1, $descriptor(b2Joint*), 0); break;
             break;
         }
     } else {
@@ -387,8 +386,7 @@
             $result=SWIG_NewPointerObj($1, $descriptor(b2LoopShape*), 0); break;
         case b2Shape::e_unknown:
         default:
-            $result=Py_None; 
-            Py_INCREF($result);
+            $result=SWIG_NewPointerObj($1, $descriptor(b2Shape*), 0); break;
         }
     } else {
         $result=Py_None; 

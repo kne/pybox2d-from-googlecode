@@ -21,8 +21,10 @@ from framework import *
 from math import cos, sin
 
 class CharacterCollision (Framework):
-    name="CharacterCollision"
-    description='This is a test of typical character collision scenarios. This does not\n show how you should implement a character in your application.'
+    name="Character Collision"
+    description="""This tests various character collision shapes.
+    Limitation: Square and hexagon can snag on aligned boxes.
+    Feature: Loops have smooth collision, inside and out."""
     def __init__(self):
         super(CharacterCollision, self).__init__()
 
@@ -47,27 +49,41 @@ class CharacterCollision (Framework):
                             ]
                 )
 
-        # Square made from edges. Notice how the edges are shrunk to account
-        # for the polygon radius. This makes it so the square character does
-        # not get snagged. However, ray casts can now go through the cracks.
-        self.world.CreateStaticBody(
-                    shapes=[ b2PolygonShape(vertices=[(-1,3), (1,3), (1,5), (-1,5)]) ]
-                )
+        # Square made from an edge loop. Collision should be smooth.
+        body=self.world.CreateStaticBody()
+        body.CreateLoopFixture(vertices=[(-1,3), (1,3), (1,5), (-1,5)])
+        
+        # Edge loop.
+        body=self.world.CreateStaticBody()
+        body.CreateLoopFixture(vertices=[
+                        (0.0, 0.0), (6.0, 0.0),
+                        (6.0, 2.0), (4.0, 1.0),
+                        (2.0, 2.0), (0.0, 2.0),
+                        (-2.0, 2.0), (-4.0, 3.0),
+                        (-6.0, 2.0), (-6.0, 0.0),]
+                        )
 
-
-        # Square character
+        # Square character 1
         self.world.CreateDynamicBody(
-                    position=(-3, 5),
+                    position=(-3, 8),
                     fixedRotation=True,
                     allowSleep=False,
                     fixtures=b2FixtureDef(shape=b2PolygonShape(box=(0.5, 0.5)), density=20.0),
-                    linearVelocity=(0,-50)
+                )
+
+        # Square character 2
+        body=self.world.CreateDynamicBody(
+                    position=(-5, 5),
+                    fixedRotation=True,
+                    allowSleep=False,
                 )
         
+        body.CreatePolygonFixture(box=(0.25, 0.25), density=20.0)
+
         # Hexagon character
         a=b2_pi/3.0
         self.world.CreateDynamicBody(
-                    position=(-5, 5),
+                    position=(-5, 8),
                     fixedRotation=True,
                     allowSleep=False,
                     fixtures=b2FixtureDef(
