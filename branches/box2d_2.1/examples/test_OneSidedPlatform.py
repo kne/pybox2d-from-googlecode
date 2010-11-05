@@ -41,9 +41,10 @@ class OneSidedPlatform (Framework):
         self.platform = body.fixtures[0]
 
         # The circular character
+        self.character_radius=0.5
         body = self.world.CreateDynamicBody(
                 position=(0, 12), 
-                fixtures=b2FixtureDef(shape=b2CircleShape(radius=0.5), density=1.0),
+                fixtures=b2FixtureDef(shape=b2CircleShape(radius=self.character_radius), density=1.0),
             )
 
         self.character = body.fixtures[0]
@@ -63,7 +64,7 @@ class OneSidedPlatform (Framework):
             return
 
         # If below the top of the platform, disable the collision response
-        if self.character.body.position.y < self.top:
+        if (self.character.body.position.y - (self.character_radius-0.01)) < self.top:
             contact.enabled = False
 
 if __name__=="__main__":
