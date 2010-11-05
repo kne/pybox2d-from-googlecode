@@ -38,7 +38,21 @@
     </property>
     <addaction name="mnuExit"/>
    </widget>
+   <widget class="QMenu" name="menu_Options">
+    <property name="title">
+     <string>&amp;Options</string>
+    </property>
+    <widget class="QMenu" name="menu_Font_size">
+     <property name="title">
+      <string>&amp;Font size</string>
+     </property>
+     <addaction name="mnuIncreaseFontSize"/>
+     <addaction name="mnuDecreaseFontSize"/>
+    </widget>
+    <addaction name="menu_Font_size"/>
+   </widget>
    <addaction name="mnuFile"/>
+   <addaction name="menu_Options"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dwProperties">
@@ -55,10 +69,23 @@
        <property name="title">
         <string>Options</string>
        </property>
+       <zorder>twProperties</zorder>
       </widget>
      </item>
      <item>
       <widget class="QTableWidget" name="twProperties">
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="verticalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
+       </property>
+       <property name="horizontalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
+       </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
@@ -70,6 +97,16 @@
   <action name="mnuExit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="mnuIncreaseFontSize">
+   <property name="text">
+    <string>&amp;Increase</string>
+   </property>
+  </action>
+  <action name="mnuDecreaseFontSize">
+   <property name="text">
+    <string>&amp;Decrease</string>
    </property>
   </action>
  </widget>

@@ -84,6 +84,7 @@ class Web (Framework):
                 break
 
     def FixtureDestroyed(self, fixture):
+        super(Web, self).FixtureDestroyed(fixture)
         body = fixture.body
         if body in self.bodies:
             self.bodies.remove(body)

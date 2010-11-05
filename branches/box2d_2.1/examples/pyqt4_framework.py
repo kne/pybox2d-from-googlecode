@@ -45,6 +45,7 @@ from framework import *
 from time import time
 import string
 import sys
+import re
 
 class Pyqt4DebugDraw(object):
     """
@@ -219,6 +220,7 @@ class Pyqt4DebugDraw(object):
         ellipse=self.scene.addEllipse(-radius, -radius, radius*2, radius*2, brush=brush, pen=pen)
         line=self.scene.addLine(center[0], center[1], (center[0]-radius*axis[0]), (center[1]-radius*axis[1]), pen=QtGui.QPen(QColor(255,0,0)))
         ellipse.setPos(*center)
+        ellipse.radius=radius
 
         if temporary:
             self.temp_items.append(ellipse)
@@ -245,24 +247,37 @@ class Pyqt4DebugDraw(object):
         else:
             self.item_cache[hash(shape)]=[item]
 
+    def _remove_from_cache(self, shape):
+        items=self.item_cache[hash(shape)]
+
+        del self.item_cache[hash(shape)]
+        for item in items:
+            self.scene.removeItem(item)
+    
     def DrawShape(self, shape, transform, color, selected=False):
         """
         Draw any type of shape
         """
+        cache_hit=False
         if hash(shape) in self.item_cache:
+            cache_hit=True
             items=self.item_cache[hash(shape)]
             items[0].setRotation(transform.angle * 180.0 / b2_pi)
             if isinstance(shape, b2CircleShape):
-                center=b2Mul(transform, shape.pos)
-                items[0].setPos(*center)
-                line=items[1]
                 radius=shape.radius
-                axis=transform.R.col1
-                line.setLine(center[0], center[1], (center[0]-radius*axis[0]), (center[1]-radius*axis[1]))
+                if items[0].radius == radius:
+                    center=b2Mul(transform, shape.pos)
+                    items[0].setPos(*center)
+                    line=items[1]
+                    axis=transform.R.col1
+                    line.setLine(center[0], center[1], (center[0]-radius*axis[0]), (center[1]-radius*axis[1]))
+                else:
+                    self._remove_from_cache(shape)
+                    cache_hit=False
             else:
                 items[0].setPos(*transform.position)
 
-            if not selected:
+            if not selected or cache_hit:
                 return
 
         if selected:
@@ -331,8 +346,8 @@ class Pyqt4DebugDraw(object):
 
         settings=self.test.settings
         world=self.test.world
-        if self.test.selected_shape:
-            sel_shape, sel_body=self.test.selected_shape
+        if self.test.selected_shapebody:
+            sel_shape, sel_body=self.test.selected_shapebody
         else:
             sel_shape=None
 
@@ -414,6 +429,10 @@ class MainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.graphicsView.setScene(self.scene)
         self.graphicsView.scale(self.test.viewZoom, -self.test.viewZoom)
         self.reset_properties_list()
+        self.restoreLayout()
+        QObject.connect(self.mnuExit, SIGNAL("triggered()"), self.close)
+        QObject.connect(self.mnuIncreaseFontSize, SIGNAL("triggered()"), lambda amount= 1.0 : self.setFontSize(app.font().pointSize()+amount))
+        QObject.connect(self.mnuDecreaseFontSize, SIGNAL("triggered()"), lambda amount=-1.0 : self.setFontSize(app.font().pointSize()+amount))
 
     def reset_properties_list(self):
         self.twProperties.clear()
@@ -427,6 +446,48 @@ class MainWindow(QtGui.QMainWindow,Ui_MainWindow):
 
     def keyReleaseEvent(self, event):
         self.test._Keyboard_Event(event.key(), down=False)
+
+    @property
+    def settings(self):
+        return QtCore.QSettings("pybox2d", "Framework") 
+
+    def setFontSize(self, size):
+        """
+        Update the global font size
+        """
+        if size <= 0.0:
+            return
+
+        global app
+        font=app.font()
+        font.setPointSize(size)
+        app.setFont(font)
+
+    def restoreLayout(self):
+        """
+        Restore the layout of each widget
+        """
+        settings=self.settings
+        try:
+            self.restoreGeometry(settings.value("geometry").toByteArray())
+            self.restoreState(settings.value("windowState").toByteArray())
+            size=settings.value('fontSize').toFloat()[0]
+            self.setFontSize(size)
+        except:
+            pass
+
+    def saveLayout(self):
+        """
+        Save the layout of each widget
+        """
+        settings=self.settings
+        settings.setValue("geometry", self.saveGeometry())
+        settings.setValue("windowState", self.saveState())
+        settings.setValue("fontSize", app.font().pointSize())
+
+    def closeEvent(self, event):
+        QtGui.QMainWindow.closeEvent(self, event)
+        self.saveLayout()
 
 app=None
 class Pyqt4Framework(FrameworkBase):
@@ -459,7 +520,7 @@ class Pyqt4Framework(FrameworkBase):
         self.textLine           = 0
         self.font               = None
         self.fps                = 0
-        self.selected_shape     = None, None
+        self.selected_shapebody     = None, None
 
         # GUI-related
         self.window=None
@@ -522,6 +583,7 @@ class Pyqt4Framework(FrameworkBase):
         global app
         self.step_timer = QtCore.QTimer()
         QObject.connect(self.step_timer, SIGNAL("timeout()"), lambda : self.SimulationLoop())
+        QObject.connect(self.window.twProperties, SIGNAL('itemChanged(QTableWidgetItem*)'), self.prop_cell_changed)
         self.step_timer.start(int((1000.0/self.settings.hz)))
 
         app.exec_()
@@ -556,45 +618,126 @@ class Pyqt4Framework(FrameworkBase):
         pass
 
     def _ShowProperties(self, obj):
+        self.selected_shapebody=None, None
+
         class_=obj.__class__
         ignore_list=('thisown',)
 
         i=0
+        twProperties=self.window.twProperties
+        # Get all of the members of the class
         for prop in dir(class_):
+            # If they're properties and not to be ignored, add them to the table widget
             if isinstance(getattr(class_, prop), property) and prop not in ignore_list:
                 try:
                     value=getattr(obj, prop)
                 except:
+                    # Write-only?
                     continue
 
                 widget=None
-                self.window.twProperties.setRowCount(self.window.twProperties.rowCount()+1)
-                i=self.window.twProperties.rowCount()-1
-                self.item=QTableWidgetItem(class_.__name__)
-                self.window.twProperties.setItem(i, 0, QTableWidgetItem(class_.__name__))
-                self.window.twProperties.setItem(i, 1, QtGui.QTableWidgetItem(prop))
 
-                if isinstance(value, b2Vec2):
-                    value=tuple(value)
-                elif isinstance(value, bool):
+                # Attempt to determine whether it's read-only or not
+                try:
+                    setattr(obj, prop, value)
+                except Exception as ex:
+                    editable=False
+                else:
+                    editable=True
+
+                # Increase the row count and insert the new item                
+                twProperties.setRowCount(twProperties.rowCount()+1)
+                i=twProperties.rowCount()-1
+                self.item=QTableWidgetItem(class_.__name__)
+                twProperties.setItem(i, 0, QTableWidgetItem(class_.__name__)) # class name
+                twProperties.item(i, 0).setFlags(Qt.ItemIsEnabled)
+
+                twProperties.setItem(i, 1, QtGui.QTableWidgetItem(prop))      # prop name
+                twProperties.item(i, 1).setFlags(Qt.ItemIsEnabled)
+
+                # and finally, the property values
+                # booleans are checkboxes
+                if isinstance(value, bool):
                     widget=QtGui.QCheckBox('')
-                    QtCore.QObject.connect(widget, SIGNAL('stateChanged(int)'), self.property_changed)
+                    QObject.connect(widget, SIGNAL('stateChanged(int)'), 
+                                    lambda value, prop=prop: self.property_changed(prop, value==Qt.Checked))
+                    if value:
+                        widget.setCheckState(Qt.Checked)
+                # ints, floats are spinboxes
                 elif isinstance(value, (int, float)):
                     widget=QtGui.QDoubleSpinBox()
-                    QtCore.QObject.connect(widget, SIGNAL('valueChanged(double)'), self.property_changed)
+                    QObject.connect(widget, SIGNAL('valueChanged(double)'), 
+                                    lambda value, prop=prop: self.property_changed(prop, value))
                     widget.setValue(value)
+                # lists turn into -- lists
+                elif isinstance(value, (list, )):
+                    widget=QtGui.QListWidget()
+                    for entry in value:
+                        widget.addItem(str(entry))
+                    if value:
+                        #sz=widget.item(0).sizeHint()
+                        #print(sz, sz.width(), sz.height())
+                        #sz.setHeight(sz.height()*2)
+                        #widget.setMinimumSize(sz)
+                        #widget.setMinimumSize(QtCore.QSize(1,60))
+                        pass # TODO
+                # vec2s will be shown as a textbox
+                elif isinstance(value, b2Vec2):
+                    value='(%.2f, %.2f)' % (tuple(value))
                 else:
                     pass
 
                 if widget:
-                    self.window.twProperties.setCellWidget(i, 2, widget)
+                    twProperties.setCellWidget(i, 2, widget)
+                    if hasattr(widget, 'setReadOnly'):
+                        widget.setReadOnly(not editable)
+                    elif hasattr(widget, 'setEnabled'):
+                        widget.setEnabled(editable)
                 else:
-                    value=QtGui.QTableWidgetItem(str(value))
-                    self.window.twProperties.setItem(i, 2, value)
+                    # Just using the table widget, set the cell text
+                    cell=QtGui.QTableWidgetItem(str(value))
+                    if editable:
+                        cell.setFlags(Qt.ItemIsEditable | Qt.ItemIsEnabled)
+                    else:
+                        cell.setFlags(Qt.ItemIsEnabled)
+                    twProperties.setItem(i, 2, cell)
+
                 i+=1
 
-    def property_changed(self, value=None):
-        print('property changed', value)
+    
+    # callback indicating a cell in the table widget was changed
+    def prop_cell_changed(self, twi):
+        if twi.column() != 2: # the data column
+            return
+
+        row=twi.row()
+        prop=str(self.window.twProperties.item(row, 1).text())
+        self.property_changed(prop, str(twi.text()))
+
+    # callback indicating one of the property widgets was modified
+    def property_changed(self, prop, value=None):
+        if not self.selected_shapebody[0]:
+            return
+
+        print('Trying to change %s to %s...' % (prop, value))
+        shape, body=self.selected_shapebody
+        for inst in (shape, body):
+            if hasattr(inst, prop):
+                try:
+                    cur_value=getattr(inst, prop)
+                    if isinstance(cur_value, b2Vec2):
+                        m=re.search('\(?([\d\.]*)\s*,\s*([\d\.]*)\)?', value)
+                        if m:
+                            x, y=m.groups()
+                            value=(float(x), float(y))
+                except:
+                    raise
+                    pass
+
+                try:
+                    setattr(inst, prop, value)
+                except Exception as ex:
+                    print('Failed - %s' % ex)
 
     def ShowProperties(self, p):
         aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
@@ -611,8 +754,9 @@ class Pyqt4Framework(FrameworkBase):
             self._ShowProperties(body)
 
             shape=fixture.shape
-            self.selected_shape=(shape, body)
             self._ShowProperties(shape)
+
+            self.selected_shapebody=(shape, body)
 
     def Step(self, settings):
         super(Pyqt4Framework, self).Step(settings)
@@ -622,7 +766,6 @@ class Pyqt4Framework(FrameworkBase):
         PyQt4 gives us transformed positions, so no need to convert
         """
         return b2Vec2(x, y)
-
     
     DrawString=lambda self, *args: self.debugDraw.DrawString(*args)
     def DrawStringCR(self, str, color=(229,153,153,255)):
@@ -652,8 +795,9 @@ class Pyqt4Framework(FrameworkBase):
 
     def FixtureDestroyed(self, fixture):
         shape=fixture.shape
-        if shape==self.selected_shape[0]:
-            self.selected_shape=None
+        if shape==self.selected_shapebody[0]:
+            self.selected_shapebody=None, None
+            self.window.reset_properties_list()
         if hash(shape) in self.debugDraw.item_cache:
             scene_items=self.debugDraw.item_cache[hash(shape)]
             for item in scene_items:
