@@ -84,8 +84,6 @@ class Rope (Framework):
                             localAnchorB=(0,0)
                             )
         self.rope=self.world.CreateJoint(rd)
-        print(dir(rd))
-        print(dir(self.rope))
 
     def Step(self, settings):
         super(Rope, self).Step(settings)

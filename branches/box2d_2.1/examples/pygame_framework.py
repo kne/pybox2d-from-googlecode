@@ -169,7 +169,6 @@ class PygameDebugDraw(b2DebugDrawExtended):
             pygame.draw.polygon(self.surface, (color/2).bytes+[127], vertices, 0)
             pygame.draw.polygon(self.surface, color.bytes, vertices, 1)
 
-
 class PygameFramework(FrameworkBase):
     TEXTLINE_START=30
     def setup_keys(self):

@@ -43,6 +43,7 @@ from pyqt4_gui import Ui_MainWindow
 from framework import *
 #from Box2D.b2 import *
 from time import time
+import settings
 import string
 import sys
 import re
@@ -430,9 +431,65 @@ class MainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.graphicsView.scale(self.test.viewZoom, -self.test.viewZoom)
         self.reset_properties_list()
         self.restoreLayout()
+
         QObject.connect(self.mnuExit, SIGNAL("triggered()"), self.close)
         QObject.connect(self.mnuIncreaseFontSize, SIGNAL("triggered()"), lambda amount= 1.0 : self.setFontSize(app.font().pointSize()+amount))
         QObject.connect(self.mnuDecreaseFontSize, SIGNAL("triggered()"), lambda amount=-1.0 : self.setFontSize(app.font().pointSize()+amount))
+
+        self.add_settings_widgets()
+
+    def add_settings_widgets(self):
+        self.settings_widgets={}
+
+        gb=self.gbOptions # the options groupbox
+        layout=QtGui.QVBoxLayout()
+        gb.setLayout(layout)
+
+        for text, variable in settings.checkboxes:
+            if variable:
+                widget=QtGui.QCheckBox('&' + text)
+                QObject.connect(widget, SIGNAL("stateChanged(int)"),
+                        lambda _, var=variable, widget=widget : setattr(self.test.settings, var, widget.isChecked()) )
+                widget.setChecked(getattr(self.test.settings, variable))
+                self.settings_widgets[variable]=widget
+            else:
+                widget=QtGui.QLabel(text)
+                widget.setAlignment(Qt.AlignHCenter)
+
+            layout.addWidget(widget)
+
+        def update_slider(var, value, text, label):
+            setattr(self.test.settings, var, value)
+            label.setText('%s (%d)' % (text, value))
+
+        for slider in settings.sliders:
+            label=QtGui.QLabel(slider['text'])
+            label.setAlignment(Qt.AlignHCenter)
+            layout.addWidget(label)
+
+            widget=QtGui.QScrollBar(Qt.Horizontal)
+            widget.setRange(slider['min'], slider['max'])
+            var=slider['name']
+            QObject.connect(widget, SIGNAL("valueChanged(int)"), 
+                lambda value, var=var, text=slider['text'], label=label: update_slider(var, value, text, label) )
+            self.settings_widgets[var]=widget
+            layout.addWidget(widget)
+
+        self.update_widgets_from_settings()
+
+    def update_widgets_from_settings(self, step_settings=None):
+        if step_settings is None:
+            step_settings=self.test.settings
+        
+        for var, widget in self.settings_widgets.items():
+            if isinstance(widget, QtGui.QCheckBox):
+                widget.setChecked(getattr(step_settings, var))
+            else:
+                widget.setValue(getattr(step_settings, var))
+
+        for slider in settings.sliders:
+            var=slider['name']
+            self.settings_widgets[var].setValue(getattr(step_settings, var))
 
     def reset_properties_list(self):
         self.twProperties.clear()
@@ -513,14 +570,14 @@ class Pyqt4Framework(FrameworkBase):
 
     def __reset(self):
         # Screen/rendering-related
-        self._viewZoom          = 10.0
-        self._viewCenter        = None
-        self._viewOffset        = None
-        self.screenSize         = None
-        self.textLine           = 0
-        self.font               = None
-        self.fps                = 0
-        self.selected_shapebody     = None, None
+        self._viewZoom         =10.0
+        self._viewCenter       =None
+        self._viewOffset       =None
+        self.screenSize        =None
+        self.textLine          =0
+        self.font              =None
+        self.fps               =0
+        self.selected_shapebody=None, None
 
         # GUI-related
         self.window=None

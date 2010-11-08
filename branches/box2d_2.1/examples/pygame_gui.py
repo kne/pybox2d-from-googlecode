@@ -21,28 +21,15 @@ try:
 except:
     raise ImportError('Unable to load PGU')
 
+from settings import checkboxes
+from settings import sliders
+
 class fwGUI(gui.Table):
     """
     Deals with the initialization and changing the settings based on the GUI 
     controls. Callbacks are not used, but the checkboxes and sliders are polled
     by the main loop.
     """
-    checkboxes =( ("Warm Starting", "enableWarmStarting"), 
-                  ("Time of Impact", "enableContinuous"), 
-                  ("Sub-Stepping", "enableSubStepping"),
-                  ("Draw", None),
-                  ("Shapes", "drawShapes"), 
-                  ("Joints", "drawJoints"), 
-                  ("AABBs", "drawAABBs"), 
-                  ("Pairs", "drawPairs"), 
-                  ("Contact Points", "drawContactPoints"), 
-                  ("Contact Normals", "drawContactNormals"), 
-                  ("Center of Masses", "drawCOMs"), 
-                  ("Statistics", "drawStats"),
-                  ("FPS", "drawFPS"),
-                  ("Control", None),
-                  ("Pause", "pause"),
-                  ("Single Step", "singleStep") )
     form = None
 
     def __init__(self,settings, **params):
@@ -53,38 +40,22 @@ class fwGUI(gui.Table):
 
         fg = (255,255,255)
 
-        # "Hertz"
+        # "Toggle menu"
         self.tr()
         self.td(gui.Label("F1: Toggle Menu",color=(255,0,0)),align=1,colspan=2)
 
-        self.tr()
-        self.td(gui.Label("Hertz",color=fg),align=1,colspan=2)
+        for slider in sliders:
+            # "Slider title"
+            self.tr()
+            self.td(gui.Label(slider['text'],color=fg),align=1,colspan=2)
 
-        # Hertz slider
-        self.tr()
-        e = gui.HSlider(settings.hz,5,200,size=20,width=100,height=16,name='hz')
-        self.td(e,colspan=2,align=1)
-
-        # "Vel Iters"
-        self.tr()
-        self.td(gui.Label("Vel Iters",color=fg),align=1,colspan=2)
-
-        # Velocity Iterations slider (min 1, max 500)
-        self.tr()
-        e = gui.HSlider(settings.velocityIterations,1,500,size=20,width=100,height=16,name='velIters')
-        self.td(e,colspan=2,align=1)
-
-        # "Pos Iters"
-        self.tr()
-        self.td(gui.Label("Pos Iters",color=fg),align=1,colspan=2)
-
-        # Position Iterations slider (min 0, max 100)
-        self.tr()
-        e = gui.HSlider(settings.positionIterations,0,100,size=20,width=100,height=16,name='posIters')
-        self.td(e,colspan=2,align=1)
+            # Create the slider
+            self.tr()
+            e = gui.HSlider(getattr(settings, slider['name']),slider['min'],slider['max'],size=20,width=100,height=16,name=slider['name'])
+            self.td(e,colspan=2,align=1)
 
         # Add each of the checkboxes.
-        for text, variable in self.checkboxes:
+        for text, variable in checkboxes:
             self.tr()
             if variable == None:
                 # Checkboxes that have no variable (i.e., None) are just labels.
@@ -98,28 +69,28 @@ class fwGUI(gui.Table):
         """
         Change all of the GUI elements based on the current settings
         """
-        for text, variable in self.checkboxes:
+        for text, variable in checkboxes:
             if not variable: continue
             if hasattr(settings, variable):
                 self.form[variable].value = getattr(settings, variable)
 
         # Now do the sliders
-        self.form['hz'].value       = settings.hz
-        self.form['posIters'].value = settings.positionIterations
-        self.form['velIters'].value = settings.velocityIterations
+        for slider in sliders:
+            name=slider['name']
+            self.form[name].value=getattr(settings, name)
 
     def updateSettings(self, settings):
         """
         Change all of the settings based on the current state of the GUI.
         """
-        for text, variable in self.checkboxes:
-            if variable == None: continue
-            setattr(settings, variable, self.form[variable].value)
+        for text, variable in checkboxes:
+            if variable:
+                setattr(settings, variable, self.form[variable].value)
 
         # Now do the sliders
-        settings.hz = int(self.form['hz'].value)
-        settings.positionIterations = int(self.form['posIters'].value)
-        settings.velocityIterations = int(self.form['velIters'].value)
+        for slider in sliders:
+            name=slider['name']
+            setattr(settings, name, int(self.form[name].value))
 
         # If we're in single-step mode, update the GUI to reflect that.
         if settings.singleStep:
