@@ -377,6 +377,7 @@ public:
 %rename(__IsValid) b2AABB::IsValid;
 %rename(__GetExtents) b2AABB::GetExtents;
 %rename(__GetCenter) b2AABB::GetCenter;
+%rename(__GetPerimeter) b2AABB::GetPerimeter;
 
 %include "Box2D/Collision/b2Collision.h"
 
@@ -387,6 +388,7 @@ public:
         valid = property(__IsValid, None)
         extents = property(__GetExtents, None)
         center = property(__GetCenter, None)
+        perimeter = property(__GetPerimeter, None)
 
     %}
 

@@ -181,7 +181,10 @@ public:
         fixtureB = property(__GetFixtureB, None)
         fixtureA = property(__GetFixtureA, None)
         manifold = property(__GetManifold, None)
+        childIndexA = property(__GetChildIndexA, None)
+        childIndexB = property(__GetChildIndexB, None)
         worldManifold = property(__GetWorldManifold, None)
+        touching = property(__IsTouching, None)
 
     %}
 }
@@ -189,10 +192,13 @@ public:
 %rename(__GetNext) b2Contact::GetNext;
 %rename(__GetFixtureB) b2Contact::GetFixtureB;
 %rename(__GetFixtureA) b2Contact::GetFixtureA;
+%rename(__GetChildIndexA) b2Contact::GetChildIndexA;
+%rename(__GetChildIndexB) b2Contact::GetChildIndexB;
 %rename(__GetManifold) b2Contact::GetManifold;
 %rename(__GetWorldManifold_internal) b2Contact::GetWorldManifold;
 %rename(__IsEnabled) b2Contact::IsEnabled;
 %rename(__SetEnabled) b2Contact::SetEnabled;
+%rename(__IsTouching) b2Contact::IsTouching;
 
 /**** Create our own ContactPoint structure ****/
 /* And allow kwargs for it */

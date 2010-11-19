@@ -87,6 +87,7 @@ class Web (Framework):
         super(Web, self).FixtureDestroyed(fixture)
         body = fixture.body
         if body in self.bodies:
+            print(body)
             self.bodies.remove(body)
             print("Fixture destroyed, removing its body from the list. Bodies left: %d" \
                     % len(self.bodies))

@@ -21,23 +21,32 @@
 %extend b2DebugDraw {
 public:
     %pythoncode %{
-        def SetFlags(self, **kwargs):
+        _flag_entries = [
+            ['drawShapes', e_shapeBit],
+            ['drawJoints', e_jointBit ],
+            ['drawAABBs', e_aabbBit ],
+            ['drawPairs', e_pairBit ],
+            ['drawCOMs', e_centerOfMassBit ],
+        ]
+        def _SetFlags(self, **kwargs):
             flags = 0
-            if 'drawShapes' in kwargs and kwargs['drawShapes']:
-                flags |= b2DebugDraw.e_shapeBit
-            if 'drawJoints' in kwargs and kwargs['drawJoints']:
-                flags |= b2DebugDraw.e_jointBit
-            if 'drawAABBs' in kwargs and kwargs['drawAABBs']:
-                flags |= b2DebugDraw.e_aabbBit
-            if 'drawPairs' in kwargs and kwargs['drawPairs']:
-                flags |= b2DebugDraw.e_pairBit
-            if 'drawCOMs' in kwargs and kwargs['drawCOMs']:
-                flags |= b2DebugDraw.e_centerOfMassBit
+            for name_, mask in self._flag_entries:
+                if name_ in kwargs and kwargs[name_]:
+                    flags |= mask
             self.__SetFlags(flags)
+        def _GetFlags(self):
+            flags = self.__GetFlags()
+            ret={}
+            for name_, mask in self._flag_entries:
+                ret[name_]=((flags & mask)==mask)
+            return ret
+            
+        flags=property(_GetFlags, _SetFlags, doc='Sets whether or not shapes, joints, etc. will be drawn.')
         %}
 }
 
 %rename (__SetFlags) b2DebugDraw::SetFlags;
+%rename (__GetFlags) b2DebugDraw::GetFlags;
 
 /* 
  DebugDrawExtended

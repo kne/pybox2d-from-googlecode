@@ -71,10 +71,14 @@ public:
         # Read-only
         next = property(__GetNext, None)
         type = property(__GetType, None)
-        massData = property(__GetMassData, None)
         shape = property(__GetShape, None)
         body = property(__GetBody, None)
-
+        
+        @property
+        def massData(self):
+            md=b2MassData()
+            self.__GetMassData(md)
+            return md
     %}
 }
 

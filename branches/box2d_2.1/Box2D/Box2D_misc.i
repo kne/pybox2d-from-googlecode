@@ -264,3 +264,14 @@ public:
 }
 
 %newobject b2Sweep::GetTransform;
+
+/**** BroadPhase ****/
+//TODO: this needs to be fixed up
+%extend b2BroadPhase {
+public:
+    %pythoncode %{
+        proxyCount=property(__GetProxyCount, None)
+    %}
+}
+
+%rename (__GetProxyCount) b2BroadPhase::GetProxyCount;

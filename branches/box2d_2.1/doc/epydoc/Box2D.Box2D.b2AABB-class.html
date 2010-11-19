@@ -61,10 +61,10 @@
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#center" title="__GetCenter(self) &#45;&gt; b2Vec2" alt="" coords="17,31,153,49"/>
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#extents" title="__GetExtents(self) &#45;&gt; b2Vec2" alt="" coords="17,49,153,68"/>
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#lowerBound" title="b2AABB_lowerBound_get(b2AABB self) &#45;&gt; b2Vec2" alt="" coords="17,68,153,87"/>
-<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#upperBound" title="b2AABB_upperBound_get(b2AABB self) &#45;&gt; b2Vec2" alt="" coords="17,87,153,105"/>
-<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#valid" title="__IsValid(self) &#45;&gt; bool" alt="" coords="17,105,153,124"/>
-<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#Combine" title="Combine(b2AABB aabb) b2AABB_Combine(b2AABB self, b2AABB aabb1, b2AABB &#160;aabb2)" alt="" coords="17,127,153,145"/>
-<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#GetPerimeter" title="b2AABB_GetPerimeter(b2AABB self) &#45;&gt; float32" alt="" coords="17,145,153,164"/>
+<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#perimeter" title="__GetPerimeter(self) &#45;&gt; float32" alt="" coords="17,87,153,105"/>
+<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#upperBound" title="b2AABB_upperBound_get(b2AABB self) &#45;&gt; b2Vec2" alt="" coords="17,105,153,124"/>
+<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#valid" title="__IsValid(self) &#45;&gt; bool" alt="" coords="17,124,153,143"/>
+<area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#Combine" title="Combine(b2AABB aabb) b2AABB_Combine(b2AABB self, b2AABB aabb1, b2AABB &#160;aabb2)" alt="" coords="17,145,153,164"/>
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#RayCast" title="b2AABB_RayCast(b2AABB self, b2RayCastOutput output, b2RayCastInput input) &#160;&#45;&gt; bool" alt="" coords="17,164,153,183"/>
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#__contains__" title="__contains__(b2AABB aabb) &#45;&gt; bool b2AABB___contains__(b2AABB self, b2Vec2 &#160;point) &#45;&gt; bool" alt="" coords="17,183,153,201"/>
 <area shape="rect" id="node0" href="Box2D.Box2D.b2AABB-class.html#__dir__" title="Box2D.Box2D.b2AABB.__dir__" alt="" coords="17,201,153,220"/>
@@ -99,23 +99,6 @@
       aabb2)</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2AABB.Combine">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="Box2D.Box2D.b2AABB-class.html#GetPerimeter" class="summary-sig-name">GetPerimeter</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      b2AABB_GetPerimeter(b2AABB self) -&gt; float32</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2AABB.GetPerimeter">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -202,7 +185,7 @@
           <td><span class="summary-sig"><a href="Box2D.Box2D.b2AABB-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       repr(x)</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>
+            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2AABB.__repr__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -298,6 +281,14 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="Box2D.Box2D.b2AABB-class.html#perimeter" class="summary-name">perimeter</a><br />
+      __GetPerimeter(self) -&gt; float32
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="Box2D.Box2D.b2AABB-class.html#upperBound" class="summary-name">upperBound</a><br />
       b2AABB_upperBound_get(b2AABB self) -&gt; b2Vec2
     </td>
@@ -344,26 +335,6 @@
   <p>Combine(b2AABB aabb) b2AABB_Combine(b2AABB self, b2AABB aabb1, b2AABB 
   aabb2)</p>
   <p>Combine two AABBs into this one.</p>
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
-<a name="GetPerimeter"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">GetPerimeter</span>(<span class="sig-arg">...</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2AABB.GetPerimeter">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>b2AABB_GetPerimeter(b2AABB self) -&gt; float32</p>
-  <p>Get the perimeter length.</p>
   <dl class="fields">
   </dl>
 </td></tr></table>
@@ -427,7 +398,7 @@
     <br /><em class="fname">(Representation operator)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2AABB.__repr__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -501,6 +472,22 @@
   </dl>
 </td></tr></table>
 </div>
+<a name="perimeter"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">perimeter</h3>
+  <p>__GetPerimeter(self) -&gt; float32</p>
+  <p>Get the perimeter length.</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><a href="Box2D.Box2D.b2AABB-class.html#__GetPerimeter" class="summary-sig-name" onclick="show_private();">__GetPerimeter</a>(<span class="summary-sig-arg">self</span>)</span>
+        - Get the perimeter length.
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="upperBound"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -568,7 +555,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sat Oct 30 22:43:06 2010
+    Generated by Epydoc 3.0.1 on Thu Nov 18 22:51:42 2010
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

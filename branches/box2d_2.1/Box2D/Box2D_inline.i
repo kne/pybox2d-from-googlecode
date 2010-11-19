@@ -187,6 +187,9 @@ def _list_from_linked_list(first):
     lst = []
     one = first
 
+    if not one:
+        return []
+
     if hasattr(one, "GetNext"):
         while one:
             lst.append(one)

@@ -73,6 +73,10 @@ public:
 }
 
 %rename (pos) b2CircleShape::m_p;
+%ignore b2CircleShape::GetVertexCount;
+%ignore b2CircleShape::GetVertex;
+%ignore b2CircleShape::GetSupport;
+%ignore b2CircleShape::GetSupportVertex;
 
 /**** PolygonShape ****/
 %extend b2PolygonShape {
@@ -235,6 +239,7 @@ public:
         return &($self->GetVertex(vnum));
     }
 }
+%rename (__GetVertices) b2LoopShape::GetVertices;
 %rename (__GetVertex) b2LoopShape::GetVertex;
 %rename (__GetCount) b2LoopShape::GetCount;
 %rename (__GetChildEdge) b2LoopShape::GetChildEdge;

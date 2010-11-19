@@ -59,11 +59,11 @@
 <center>
 <center>  <map id="uml_class_diagram_for_box2d_bo_5" name="uml_class_diagram_for_box2d_bo_5">
 <area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#e_nullProxy" title="Box2D.Box2D.b2BroadPhase.e_nullProxy" alt="" coords="17,31,137,49"/>
-<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#ComputeHeight" title="b2BroadPhase_ComputeHeight(b2BroadPhase self) &#45;&gt; int32" alt="" coords="17,52,137,71"/>
-<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#CreateProxy" title="b2BroadPhase_CreateProxy(b2BroadPhase self, b2AABB aabb, void $ignore) &#45;&gt; &#160;int32" alt="" coords="17,71,137,89"/>
-<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#DestroyProxy" title="b2BroadPhase_DestroyProxy(b2BroadPhase self, int32 proxyId)" alt="" coords="17,89,137,108"/>
-<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#GetFatAABB" title="b2BroadPhase_GetFatAABB(b2BroadPhase self, int32 proxyId) &#45;&gt; b2AABB" alt="" coords="17,108,137,127"/>
-<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#GetProxyCount" title="b2BroadPhase_GetProxyCount(b2BroadPhase self) &#45;&gt; int32" alt="" coords="17,127,137,145"/>
+<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#proxyCount" title="__GetProxyCount(self) &#45;&gt; int32" alt="" coords="17,49,137,68"/>
+<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#ComputeHeight" title="b2BroadPhase_ComputeHeight(b2BroadPhase self) &#45;&gt; int32" alt="" coords="17,71,137,89"/>
+<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#CreateProxy" title="b2BroadPhase_CreateProxy(b2BroadPhase self, b2AABB aabb, void $ignore) &#45;&gt; &#160;int32" alt="" coords="17,89,137,108"/>
+<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#DestroyProxy" title="b2BroadPhase_DestroyProxy(b2BroadPhase self, int32 proxyId)" alt="" coords="17,108,137,127"/>
+<area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#GetFatAABB" title="b2BroadPhase_GetFatAABB(b2BroadPhase self, int32 proxyId) &#45;&gt; b2AABB" alt="" coords="17,127,137,145"/>
 <area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#MoveProxy" title="b2BroadPhase_MoveProxy(b2BroadPhase self, int32 proxyId, b2AABB aabb, &#160;b2Vec2 displacement)" alt="" coords="17,145,137,164"/>
 <area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#TestOverlap" title="b2BroadPhase_TestOverlap(b2BroadPhase self, int32 proxyIdA, int32 proxyIdB) &#45;&gt; bool" alt="" coords="17,164,137,183"/>
 <area shape="rect" id="node4" href="Box2D.Box2D.b2BroadPhase-class.html#__init__" title="The broad&#45;phase is used for computing pairs and performing volume queries &#160;and ray casts." alt="" coords="17,183,137,201"/>
@@ -164,23 +164,6 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="Box2D.Box2D.b2BroadPhase-class.html#GetProxyCount" class="summary-sig-name">GetProxyCount</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      b2BroadPhase_GetProxyCount(b2BroadPhase self) -&gt; int32</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2BroadPhase.GetProxyCount">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
           <td><span class="summary-sig"><a href="Box2D.Box2D.b2BroadPhase-class.html#MoveProxy" class="summary-sig-name">MoveProxy</a>(<span class="summary-sig-arg">...</span>)</span><br />
       b2BroadPhase_MoveProxy(b2BroadPhase self, int32 proxyId, b2AABB aabb,
       b2Vec2 displacement)</td>
@@ -238,7 +221,7 @@
           <td><span class="summary-sig"><a href="Box2D.Box2D.b2BroadPhase-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       repr(x)</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>
+            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2BroadPhase.__repr__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -305,6 +288,14 @@
   <td align="left" colspan="2" class="table-header">
     <span class="table-header">Properties</span></td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="Box2D.Box2D.b2BroadPhase-class.html#proxyCount" class="summary-name">proxyCount</a><br />
+      __GetProxyCount(self) -&gt; int32
+    </td>
+  </tr>
   <tr>
     <td colspan="2" class="summary">
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
@@ -405,26 +396,6 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="GetProxyCount"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">GetProxyCount</span>(<span class="sig-arg">...</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2BroadPhase.GetProxyCount">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>b2BroadPhase_GetProxyCount(b2BroadPhase self) -&gt; int32</p>
-  <p>Get the number of proxies.</p>
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
 <a name="MoveProxy"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -506,7 +477,7 @@
     <br /><em class="fname">(Representation operator)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2BroadPhase.__repr__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -516,6 +487,32 @@
         object.__repr__
         <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== PROPERTY DETAILS ==================== -->
+<a name="section-PropertyDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Property Details</span></td>
+</tr>
+</table>
+<a name="proxyCount"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">proxyCount</h3>
+  <p>__GetProxyCount(self) -&gt; int32</p>
+  <p>Get the number of proxies.</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><a href="Box2D.Box2D.b2BroadPhase-class.html#__GetProxyCount" class="summary-sig-name" onclick="show_private();">__GetProxyCount</a>(<span class="summary-sig-arg">self</span>)</span>
+        - Get the number of proxies.
+    </dd>
   </dl>
 </td></tr></table>
 </div>
@@ -551,7 +548,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sat Oct 30 22:43:07 2010
+    Generated by Epydoc 3.0.1 on Thu Nov 18 22:51:43 2010
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

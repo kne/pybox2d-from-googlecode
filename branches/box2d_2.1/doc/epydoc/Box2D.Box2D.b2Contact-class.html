@@ -58,16 +58,16 @@
 <h1 class="epydoc">Class b2Contact</h1><p class="nomargin-top"><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact">source&nbsp;code</a></span></p>
 <center>
 <center>  <map id="uml_class_diagram_for_box2d_bo_9" name="uml_class_diagram_for_box2d_bo_9">
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#enabled" title="__IsEnabled(self) &#45;&gt; bool" alt="" coords="17,31,189,49"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#fixtureA" title="__GetFixtureA(self) &#45;&gt; b2Fixture __GetFixtureA(self) &#45;&gt; b2Fixture" alt="" coords="17,49,189,68"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#fixtureB" title="__GetFixtureB(self) &#45;&gt; b2Fixture __GetFixtureB(self) &#45;&gt; b2Fixture" alt="" coords="17,68,189,87"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#manifold" title="__GetManifold(self) &#45;&gt; b2Manifold __GetManifold(self) &#45;&gt; b2Manifold" alt="" coords="17,87,189,105"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#next" title="__GetNext(self) &#45;&gt; b2Contact __GetNext(self) &#45;&gt; b2Contact" alt="" coords="17,105,189,124"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#worldManifold" title="Box2D.Box2D.b2Contact.worldManifold" alt="" coords="17,124,189,143"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#Evaluate" title="b2Contact_Evaluate(b2Contact self, b2Manifold manifold, b2Transform xfA, &#160;&#160;&#160;&#160;&#160;b2Transform xfB)" alt="" coords="17,145,189,164"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#GetChildIndexA" title="b2Contact_GetChildIndexA(b2Contact self) &#45;&gt; int32" alt="" coords="17,164,189,183"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#GetChildIndexB" title="b2Contact_GetChildIndexB(b2Contact self) &#45;&gt; int32" alt="" coords="17,183,189,201"/>
-<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#IsTouching" title="b2Contact_IsTouching(b2Contact self) &#45;&gt; bool" alt="" coords="17,201,189,220"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#childIndexA" title="__GetChildIndexA(self) &#45;&gt; int32" alt="" coords="17,31,189,49"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#childIndexB" title="__GetChildIndexB(self) &#45;&gt; int32" alt="" coords="17,49,189,68"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#enabled" title="__IsEnabled(self) &#45;&gt; bool" alt="" coords="17,68,189,87"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#fixtureA" title="__GetFixtureA(self) &#45;&gt; b2Fixture __GetFixtureA(self) &#45;&gt; b2Fixture" alt="" coords="17,87,189,105"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#fixtureB" title="__GetFixtureB(self) &#45;&gt; b2Fixture __GetFixtureB(self) &#45;&gt; b2Fixture" alt="" coords="17,105,189,124"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#manifold" title="__GetManifold(self) &#45;&gt; b2Manifold __GetManifold(self) &#45;&gt; b2Manifold" alt="" coords="17,124,189,143"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#next" title="__GetNext(self) &#45;&gt; b2Contact __GetNext(self) &#45;&gt; b2Contact" alt="" coords="17,143,189,161"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#touching" title="__IsTouching(self) &#45;&gt; bool" alt="" coords="17,161,189,180"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#worldManifold" title="Box2D.Box2D.b2Contact.worldManifold" alt="" coords="17,180,189,199"/>
+<area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#Evaluate" title="b2Contact_Evaluate(b2Contact self, b2Manifold manifold, b2Transform xfA, &#160;&#160;&#160;&#160;&#160;b2Transform xfB)" alt="" coords="17,201,189,220"/>
 <area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#__dir__" title="Box2D.Box2D.b2Contact.__dir__" alt="" coords="17,220,189,239"/>
 <area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#__init__" title="x.__init__(...) initializes x; see x.__class__.__doc__ for signature" alt="" coords="17,239,189,257"/>
 <area shape="rect" id="node9" href="Box2D.Box2D.b2Contact-class.html#__repr__" title="repr(x)" alt="" coords="17,257,189,276"/>
@@ -100,57 +100,6 @@
     b2Transform xfB)</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.Evaluate">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="Box2D.Box2D.b2Contact-class.html#GetChildIndexA" class="summary-sig-name">GetChildIndexA</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      b2Contact_GetChildIndexA(b2Contact self) -&gt; int32</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.GetChildIndexA">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="Box2D.Box2D.b2Contact-class.html#GetChildIndexB" class="summary-sig-name">GetChildIndexB</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      b2Contact_GetChildIndexB(b2Contact self) -&gt; int32</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.GetChildIndexB">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="Box2D.Box2D.b2Contact-class.html#IsTouching" class="summary-sig-name">IsTouching</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      b2Contact_IsTouching(b2Contact self) -&gt; bool</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.IsTouching">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -202,7 +151,7 @@
           <td><span class="summary-sig"><a href="Box2D.Box2D.b2Contact-class.html#__repr__" class="summary-sig-name">__repr__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       repr(x)</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>
+            <span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.__repr__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -236,6 +185,22 @@
   <td align="left" colspan="2" class="table-header">
     <span class="table-header">Properties</span></td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="Box2D.Box2D.b2Contact-class.html#childIndexA" class="summary-name">childIndexA</a><br />
+      __GetChildIndexA(self) -&gt; int32
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="Box2D.Box2D.b2Contact-class.html#childIndexB" class="summary-name">childIndexB</a><br />
+      __GetChildIndexB(self) -&gt; int32
+    </td>
+  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
@@ -277,6 +242,14 @@
     </td><td class="summary">
         <a href="Box2D.Box2D.b2Contact-class.html#next" class="summary-name">next</a><br />
       __GetNext(self) -&gt; b2Contact __GetNext(self) -&gt; b2Contact
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="Box2D.Box2D.b2Contact-class.html#touching" class="summary-name">touching</a><br />
+      __IsTouching(self) -&gt; bool
     </td>
   </tr>
 <tr>
@@ -329,66 +302,6 @@ Evaluate this contact with your own manifold and transforms.
   </dl>
 </td></tr></table>
 </div>
-<a name="GetChildIndexA"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">GetChildIndexA</span>(<span class="sig-arg">...</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.GetChildIndexA">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>b2Contact_GetChildIndexA(b2Contact self) -&gt; int32</p>
-  <p>Get the child primitive index for fixture A.</p>
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
-<a name="GetChildIndexB"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">GetChildIndexB</span>(<span class="sig-arg">...</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.GetChildIndexB">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>b2Contact_GetChildIndexB(b2Contact self) -&gt; int32</p>
-  <p>Get the child primitive index for fixture B.</p>
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
-<a name="IsTouching"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">IsTouching</span>(<span class="sig-arg">...</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.IsTouching">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>b2Contact_IsTouching(b2Contact self) -&gt; bool</p>
-  <p>Is this contact touching?</p>
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
 <a name="__init__"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -427,7 +340,7 @@ Evaluate this contact with your own manifold and transforms.
     <br /><em class="fname">(Representation operator)</em>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#_swig_repr">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="Box2D.Box2D-pysrc.html#b2Contact.__repr__">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
@@ -450,6 +363,38 @@ Evaluate this contact with your own manifold and transforms.
     <span class="table-header">Property Details</span></td>
 </tr>
 </table>
+<a name="childIndexA"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">childIndexA</h3>
+  <p>__GetChildIndexA(self) -&gt; int32</p>
+  <p>Get the child primitive index for fixture A.</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><i>unreachable</i>.__GetChildIndexA(<span class="summary-sig-arg">self</span>)</span>
+        - Get the child primitive index for fixture A.
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="childIndexB"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">childIndexB</h3>
+  <p>__GetChildIndexB(self) -&gt; int32</p>
+  <p>Get the child primitive index for fixture B.</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><i>unreachable</i>.__GetChildIndexB(<span class="summary-sig-arg">self</span>)</span>
+        - Get the child primitive index for fixture B.
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="enabled"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -540,6 +485,22 @@ Evaluate this contact with your own manifold and transforms.
   </dl>
 </td></tr></table>
 </div>
+<a name="touching"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">touching</h3>
+  <p>__IsTouching(self) -&gt; bool</p>
+  <p>Is this contact touching?</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><a href="Box2D.Box2D.b2Contact-class.html#__IsTouching" class="summary-sig-name" onclick="show_private();">__IsTouching</a>(<span class="summary-sig-arg">self</span>)</span>
+        - Is this contact touching?
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
 <a name="worldManifold"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -586,7 +547,7 @@ Evaluate this contact with your own manifold and transforms.
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sat Oct 30 22:43:07 2010
+    Generated by Epydoc 3.0.1 on Thu Nov 18 22:51:43 2010
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

@@ -93,7 +93,7 @@ class testJoints (unittest.TestCase):
             b = getattr(joint, joint_prop)
         else:
             b = getattr(joint, prop)
-        self.assertEquals(a, b, "(%s) %s != %s" % (prop, a, b) )
+        self.assertEquals(a, b, "Property not equal from definition to joint: %s" % (prop) )
 
     # ---- revolute joint ----
     def revolute_definition(self, body1, body2, anchor):
@@ -344,6 +344,7 @@ class testJoints (unittest.TestCase):
                 asserts(dfn, joint)
             except Exception as s:
                 self.world.DestroyJoint(joint)
+                raise
                 self._fail("%s: Failed on bodies %s and %s, joint assertions (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
