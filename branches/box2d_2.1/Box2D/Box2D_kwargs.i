@@ -312,20 +312,6 @@
 }
 
 
-%feature("shadow") b2Mat22::b2Mat22() {
-    def __init__(self, **kwargs):
-        _Box2D.b2Mat22_swiginit(self,_Box2D.new_b2Mat22())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2Mat33::b2Mat33() {
-    def __init__(self, **kwargs):
-        _Box2D.b2Mat33_swiginit(self,_Box2D.new_b2Mat33())
-        _init_kwargs(self, **kwargs)
-}
-
-
 %feature("shadow") b2MouseJoint::b2MouseJoint() {
     def __init__(self, **kwargs):
         _Box2D.b2MouseJoint_swiginit(self,_Box2D.new_b2MouseJoint())
@@ -412,20 +398,6 @@
 %feature("shadow") b2Transform::b2Transform() {
     def __init__(self, **kwargs):
         _Box2D.b2Transform_swiginit(self,_Box2D.new_b2Transform())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2Vec2::b2Vec2() {
-    def __init__(self, **kwargs):
-        _Box2D.b2Vec2_swiginit(self,_Box2D.new_b2Vec2())
-        _init_kwargs(self, **kwargs)
-}
-
-
-%feature("shadow") b2Vec3::b2Vec3() {
-    def __init__(self, **kwargs):
-        _Box2D.b2Vec3_swiginit(self,_Box2D.new_b2Vec3())
         _init_kwargs(self, **kwargs)
 }
 

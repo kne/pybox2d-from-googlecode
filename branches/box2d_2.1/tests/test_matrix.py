@@ -13,6 +13,9 @@ class testMatrix (unittest.TestCase):
         v3 = b2Vec3(x, y, z)
 
         m2 = b2Mat22((x, y), (y, x))
+        # Note that you can't do:
+        # m2 = b2Mat22(col1=(x, y), col2=(y, x))
+        # as SWIG will not allow the kwargs option to be used when there are multiple constructors
         m3 = b2Mat33((x, y, z), (z, y, x), (y, x, z))
 
         m = m2 + m2

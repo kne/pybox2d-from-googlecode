@@ -65,7 +65,7 @@ class Tiles (Framework):
         super(Tiles, self).Step(settings)
         cm=self.world.contactManager
         height=cm.broadPhase.ComputeHeight()
-        leafCount=cm.broadPhase.GetProxyCount() # TODO: broadphase
+        leafCount=cm.broadPhase.proxyCount
         minNodeCount=2*leafCount-1
         minHeight=ceil(log(float(minNodeCount)) / log(2))
         self.DrawStringCR('Dynamic tree height=%d, min=%d' % (height, minHeight))
