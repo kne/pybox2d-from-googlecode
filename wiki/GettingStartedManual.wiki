@@ -11,41 +11,39 @@ Converted for pybox2d by Ken Lauer
 
 == About ==
 
-Box2D is a 2D rigid body simulation library for games. Programmers can use it in their games to make objects move in believable ways and make the game world more interactive. From the game's point of view a physics engine is just a system for procedural animation.
+pybox2d is a 2D rigid body simulation library for games. Programmers can use it in their games to make objects move in believable ways and make the game world more interactive. From the game's point of view a physics engine is just a system for procedural animation.
 
-Box2D is written in portable C++. Most of the types defined in the engine begin with the b2 prefix. Hopefully this is sufficient to avoid name clashing with your game engine.
+Box2D, the library behind pybox2d, is written in portable C++ and bound to Python by [http://www.swig.org SWIG]. Most of the types defined in the engine begin with the '''b2''' prefix. Hopefully this is sufficient to avoid name clashing with your game engine if you choose to import it to your global namespace. It also has a separate namespace that does away with these prefixes, if this fits your coding style more (see Box2D.b2).
 
 == Prerequisites ==
 
-In this manual I'll assume you are familiar with basic physics concepts, such as mass, force, torque, and impulses. If not, please first consult the many tutorials provided by Chris Hecker and David Baraff (Google these names). You do not need to understand their tutorials in great detail, but they do a good job of laying out the basic concepts that will help you use Box2D.
+In this manual I'll assume you are familiar with basic physics concepts, such as mass, force, torque, and impulses. If not, please first consult the many tutorials provided by Chris Hecker and David Baraff (Google these names). You do not need to understand their tutorials in great detail, but they do a good job of laying out the basic concepts that will help you use pybox2d.
 
 Wikipedia is also an excellent source of physics and mathematics knowledge. In some ways it is more useful than Google, because it has carefully crafted content.
 
 Box2D was created as part of a physics tutorial at the Game Developer Conference. You can get these tutorials from the download section of box2d.org.
 
-Since Box2D is written in C++, you are expected to be experienced in C++ programming. Box2D should not be your first C++ programming project. You should be comfortable with compiling, linking, and debugging.
-
-*Caution*
-
-Box2D should not be your first C++ project. Please learn C++ programming, compiling, linking, and debugging before working with Box2D. There are many resources for this on the net.
+The 
 
 == About this Manual ==
 
-This manual covers the majority of the Box2D API. However, not every aspect is covered. You are encouraged to look at the testbed included with Box2D to learn more. Also, the Box2D code base has comments formatted for Doxygen, so it is easy to create a hyper-linked API document.
+This manual covers the majority of the pybox2d API. However, not every aspect is covered. You are encouraged to look at the testbed included with pybox2d to learn more. 
 
 == Feedback and Reporting Bugs ==
 
-If you have feedback about anything related to Box2D, please leave a comment in the forum. This is also a great place for community discussion.
+If you have feedback about anything related to pybox2d, please leave a comment in the [http://www.box2d.org/forum/viewforum.php?f=10 forum]. This is also a great place for community discussion.
 
-Box2D issues are tracked using a Google code project. This is a great way to track issues and ensures that your issue will not be lost in the depths of the forums.
+pybox2d issues are tracked using a Google code project. This is a great way to track issues and ensures that your issue will not be lost in the depths of the forums.
 
-File issues here: http://code.google.com/p/box2d/
+File issues here: [http://code.google.com/p/pybox2d/ pybox2d] issues
 
-You can help to ensure your issue gets fixed if you provide sufficient detail. A testbed example that reproduces the problem is ideal.
+You can help to ensure your issue gets fixed if you provide sufficient detail. A testbed example that reproduces the problem is ideal. If you feel that the issue lies within the Box2D library itself, please instead post an issue on the Box2D page:
+
+File issues here: [http://code.google.com/p/box2d/ Box2D] issues
 
 == Core Concepts ==
 
-Box2D works with several fundamental objects. We briefly define these objects here and more details are given later in this document.
+pybox2d works with several fundamental objects. We briefly define these objects here and more details are given later in this document.
 
 ==== shape ====
 
@@ -69,7 +67,7 @@ A special constraint designed to prevent penetration of rigid bodies and to simu
 
 ==== joint ====
 
-This is a constraint used to hold two or more bodies together. Box2D supports several joint types: revolute, prismatic, distance, and more. Some joints may have limits and motors.
+This is a constraint used to hold two or more bodies together. pybox2d supports several joint types: revolute, prismatic, distance, and more. Some joints may have limits and motors.
 
 ==== joint limit ====
 
@@ -81,104 +79,189 @@ A joint motor drives the motion of the connected bodies according to the joint's
 
 ==== world ====
 
-A physics world is a collection of bodies, fixtures, and constraints that interact together. Box2D supports the creation of multiple worlds, but this is usually not necessary or desirable.
+A physics world is a collection of bodies, fixtures, and constraints that interact together. pybox2d supports the creation of multiple worlds, but this is usually not necessary or desirable.
 
 == Modules ==
 
-Box2D is composed of three modules: Common, Collision, and Dynamics. The Common module has code for allocation, math, and settings. The Collision module defines shapes, a broad-phase, and collision functions/queries. Finally the Dynamics module provides the simulation world, bodies, fixtures, and joints.
+Box2D is composed of three modules: Common, Collision, and Dynamics. The Common module has code for allocation, math, and settings. The Collision module defines shapes, a broad-phase, and collision functions/queries. Finally the Dynamics module provides the simulation world, bodies, fixtures, and joints. As a pybox2d user, you do not need to worry about this for the most part, unless you are delving into the C++ source.
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image001.png]
 
 == Units ==
 
-Box2D works with floating point numbers, so some tolerances have to be used to make Box2D perform well. These tolerances have been tuned to work well with meters-kilogram-second (MKS) units. In particular, Box2D has been tuned to work well with moving objects between 0.1 and 10 meters. So this means objects between soup cans and buses in size should work well. Static objects may be up to 50 meters without too much trouble.
+pybox2d works with floating point numbers, so some tolerances have to be used to make pybox2d perform well. These tolerances have been tuned to work well with meters-kilogram-second (MKS) units. In particular, Box2D has been tuned to work well with moving objects between 0.1 and 10 meters. So this means objects between soup cans and buses in size should work well. Static objects may be up to 50 meters without too much trouble.
 
 Being a 2D physics engine, it is tempting to use pixels as your units. Unfortunately this will lead to a poor simulation and possibly weird behavior. An object of length 200 pixels would be seen by Box2D as the size of a 45 story building. Imagine trying to simulate the movement of a high-rise building with an engine that is tuned to simulate ragdolls and barrels. It isn't pretty.
 
 *Caution*
 
 {{{
-Box2D is tuned for MKS units. Keep the size of moving objects roughly between 0.1 and 10 meters. You'll need to use some scaling system when you render your environment and actors. The Box2D testbed does this by using an OpenGL viewport transform.
+Box2D is tuned for MKS units. Keep the size of moving objects roughly between 0.1 and 10 meters. You'll need to use some scaling system when you render your environment and actors. The pybox2d testbed does this by using a viewport transform (pyglet/pyqt) or simple coordinate conversions (pygame).
 }}}
 
-It is best to think of Box2D bodies as moving billboards upon which you attach your artwork. The billboard may move in a unit system of meters, but you can convert that to pixel coordinates with a simple scaling factor. You can then use those pixel coordinates to place your sprites, etc.
+It is best to think of pybox2d bodies as moving billboards upon which you attach your artwork. The billboard may move in a unit system of meters, but you can convert that to pixel coordinates with a simple scaling factor. You can then use those pixel coordinates to place your sprites, etc.
 
-Box2D uses radians for angles. The body rotation is stored in radians and may grow unbounded. Consider normalizing the angle of your bodies if the magnitude of the angle becomes too large (use b2Body::SetAngle).
+pybox2d uses radians for angles. The body rotation is stored in radians and may grow unbounded. Consider normalizing the angle of your bodies if the magnitude of the angle becomes too large (use b2Body.SetAngle).
 
 == Factories and Definitions ==
 
-Memory management plays a central role in the design of the Box2D API. So when you create a b2Bodyor a b2Joint, you need to call the factory functions on b2World. You should never try to allocate these types in another manner.
-
-There are creation functions:
+Memory management plays a central role in the design of the pybox2d API. So when you create a b2Body or a b2Joint, you need to call the factory functions on b2World. There are creation functions:
 
 {{{
-b2Body* b2World::CreateBody(const b2BodyDef* def)
-b2Joint* b2World::CreateJoint(const b2JointDef* def)
+world=b2World()
+body=world.CreateBody(b2BodyDef(...))
+joint=world.CreateJoint(b2JointDef(...))
+}}}
 And there are corresponding destruction functions:
-void b2World::DestroyBody(b2Body* body)
-void b2World::DestroyJoint(b2Joint* joint)
+{{{
+world.DestroyBody(body)
+world.DestroyJoint(joint)
 }}}
 
-When you create a body or joint, you need to provide a definition. These definitions contain all the information needed to build the body or joint. By using this approach we can prevent construction errors, keep the number of function parameters small, provide sensible defaults, and reduce the number of accessors.
+When you create a body or joint, you have the option of providing a definition or using some of pybox2d's convenient kwarg support. These definitions contain all the information needed to build the body or joint. I'll provide further examples of possible usage shortly.
 
 Since fixtures must be parented to a body, they are created and destroyed using a factory method on b2Body:
 
 {{{
-b2Fixture* b2Body::CreateFixture(const b2FixtureDef* def)
-void b2Body::DestroyFixture(b2Fixture* fixture)
+fixture=body.CreateFixture(b2FixtureDef(...))
+body.DestroyFixture(fixture)
 }}}
 
 There is also shortcut to create a fixture directly from the shape and density.
 
 {{{
-b2Fixture* b2Body::CreateFixture(const b2Shape* shape, float32 density)
+fixture=body.CreateFixture(b2FixtureDef(...), density)
 }}}
 
-Factories do not retain references to the definitions. So you can create definitions on the stack and keep them in temporary resources.
+Factories do not retain references to the definitions. So you can create and reuse definitions, but you do not need to store them.
+
+== pybox2d niceties ==
+
+The most efficient way to create many bodies or fixtures is using CreateBody() or CreateFixture() on b2BodyDef and b2FixtureDef. A slower but significantly more convenient pybox2d shorthand exists allowing you to forego these definitions.
+
+The following are equivalent:
+{{{
+    shape=b2EdgeShape()
+    shape.vertices=[(-40,0),(40,0)]
+    body=world.CreateBody(type=b2_staticBody)
+    body.position=(1,0)
+}}}
+and
+{{{
+    body = world.CreateStaticBody(
+                shapes=b2EdgeShape(vertices=[(-40,0),(40,0)]),
+                position=(1,0)
+            )
+}}}
+
+b2World has the following creation functions available. Be sure to read their docstrings (i.e., help(b2World.CreateDynamicBody) ) for further information.
+
+[GettingStartedManual#Bodies Bodies]
+{{{
+world.CreateBody(*args, **kwargs)
+world.CreateDynamicBody(**kwargs)
+world.CreateKinematicBody(**kwargs)
+world.CreateStaticBody(**kwargs)
+}}}
+
+[GettingStartedManual#Joints Joints]
+{{{
+world.CreateJoint(*args, **kwargs)
+world.CreateDistanceJoint(**kwargs)
+world.CreateRopeJoint(**kwargs)
+world.CreateFrictionJoint(**kwargs)
+world.CreateGearJoint(**kwargs)
+world.CreateLineJoint(**kwargs)
+world.CreateMouseJoint(**kwargs)
+world.CreatePrismaticJoint(**kwargs)
+world.CreatePulleyJoint(**kwargs)
+world.CreateRevoluteJoint(**kwargs)
+world.CreateWeldJoint(**kwargs)
+}}}
+
+Bodies have similar methods for fixture creation, described in later sections.
+
+b2Vec2 is pybox2d's 2d vector class. In most cases, it is not necessary to specifically pass a b2Vec2 into a function. As you can see in the b2EdgeShape example above, the two vertices were passed as tuples. Similarly, properly sized (i.e., 2 element) lists can also be used.
+
+If you intend to do calculations on 2d vectors, you will want to use this class -- or substitute your own, should you so choose.
+
+The following are all equivalent:
+{{{
+pos = body.position + b2Vec2(1, 0)
+pos = body.position + (1, 0)
+pos = body.position + [1, 0]
+}}}
+
+
+Note that you cannot just make a tuple and expect it to behave as a b2Vec2. This works because the above properties/methods return b2Vec2. Should you want to use a vector for something else, first you would need to define one:
+
+{{{
+myvec = b2Vec2(0,5) # myvec = (0, 5)
+myvec *= 3          # myvec = (0,15)
+myvec += (1,1)      # myvec = (1,16)
+}}}
 
 == User Data ==
 
-The b2Fixture, b2Body, and b2Joint classes allow you to attach user data as a void pointer. This is handy when you are examining Box2D data structures and you want to determine how they relate to the data structures in your game engine.
+The b2Fixture, b2Body, and b2Joint classes allow you to attach your own custom user data. This is handy when you are examining pybox2d data structures and you want to determine how they relate to the data structures in your game engine.
 
 For example, it is typical to attach an actor pointer to the rigid body on that actor. This sets up a circular reference. If you have the actor, you can get the body. If you have the body, you can get the actor.
 
 {{{
-GameActor* actor = GameCreateActor();
-b2BodyDef bodyDef;
-bodyDef.userData = actor;
-actor->body = box2Dworld->CreateBody(&bodyDef);
+class GameActor:
+    pass
+
+actor=GameActor()
+
+bodyDef=b2BodyDef(userData=actor)
+actor.body=world.CreateBody(bodyDef)
+
+# in pybox2d, this can be shortened to:
+# actor.body=world.CreateBody(userData=actor)
 }}}
 
 Here are some examples of cases where you would need the user data:
 
  * Applying damage to an actor using a collision result.
  * Playing a scripted event if the player is inside an axis-aligned box.
- * Accessing a game structure when Box2D notifies you that a joint is going to be destroyed.
+ * Accessing a game structure when pybox2d notifies you that a joint is going to be destroyed.
 
-Keep in mind that user data is optional and you can put anything in it. However, you should be consistent. For example, if you want to store an actor pointer on one body, you should keep an actor pointer on all bodies. Don't store an actor pointer on one body, and a foo pointer on another body. Casting an actor pointer to a foo pointer may lead to a crash.
+Keep in mind that user data is optional and you can put anything in it. However, you should be consistent. For example, an integer in one userData, a dict in another, will lead to confusion when you are searching for a specific body.
 
-= Hello Box2D =
+= Hello pybox2d =
 
-In the distribution of Box2D is a Hello World project. The program creates a large ground box and a small dynamic box. This code does not contain any graphics. All you will see is text output in the console of the box's position over time.
+In the distribution of pybox2d is a Hello World example. The program creates a large ground box and a small dynamic box. This code does not contain any graphics. All you will see is text output in the console of the box's position over time.
 
-This is a good example of how to get up and running with Box2D.
+This is a good example of the absolute basics of pybox2d, without letting graphics and GUIs get in the way.
 
 == Creating a World ==
 
-Every Box2D program begins with the creation of a b2World object. b2World is the physics hub that manages memory, objects, and simulation. You can allocate the physics world on the stack, heap, or data section. The decision is up to you.
-
-It is easy to create a Box2D world. First, we define the gravity vector. Also we tell the world to allow bodies to sleep when they come to rest. A sleeping body doesn't require any simulation.
+Every pybox2d program begins with the creation of a b2World object. b2World is the physics hub that manages memory, objects, and simulation. It is easy to create a pybox2d world. A quick check with help(b2World) shows:
 
 {{{
-b2Vec2 gravity(0.0f, -10.0f);
-bool doSleep = true;
+|  __init__(self, *args, **kwargs)
+|      __init__(self, *args, **kwargs) -> b2World
+|      Arguments:
+|      * gravity (default (0, -10))
+|      * doSleep (default True)
+|      Additional kwargs like contactListener will be passed after the world is created.
+|
+|      Examples:
+|       b2World()
+|       b2World( (0,-10), True)
+|       b2World( gravity=(0,-10), doSleep=True)
+|       b2World(contactListener=myListener)
 }}}
 
-Now we create the world object. Note that we are creating the world on the stack, so the world must remain in scope.
+Let's use the kwargs notation to make the functionality clearest.
 
 {{{
-b2World world(gravity, doSleep);
+world=b2World(gravity=(0,-10), doSleep=True)
 }}}
+
+doSleep being True indicates that the world should allow bodies to sleep when they come to rest. A sleeping body doesn't require any simulation.
+
+If you have a class-based game, be sure to keep a reference to your world while it's still in use.
 
 So now we have our physics world, let's start adding some stuff to it.
 
@@ -186,83 +269,97 @@ So now we have our physics world, let's start adding some stuff to it.
 
 Bodies are built using the following steps:
 
-# Define a body with a position, damping, etc.
-# Use the world object to create the body.
-# Define fixtures with a shape, friction, density, etc.
-# Create fixtures on the body.
+ # Define a body with a position, damping, etc.
+ # Use the world object to create the body.
+ # Define fixtures with a shape, friction, density, etc.
+ # Create fixtures on the body.
 
-For step 1 we create the ground body. For this we need a body definition. With the body definition we specify the initial position of the ground body.
+For step 1, we create the ground body. To illustrate what goes on behind the scenes of pybox2d, let's create it the long way. This means that we need to specifically create a body definition. *Don't* get discouraged -- I'll show how much easier it can be later. With the body definition we specify the initial position of the ground body.
 
 {{{
-b2BodyDef groundBodyDef;
-groundBodyDef.position.Set(0.0f, -10.0f);
+# Define the ground body.
+groundBodyDef = b2BodyDef()
+groundBodyDef.position = (0, -10)
 }}}
 
 For step 2 the body definition is passed to the world object to create the ground body. The world object does not keep a reference to the body definition. The ground body is created as a static body. Static bodies don't collide with other static bodies and are immovable. Box2D determines that a body is static when it has zero mass. Bodies have zero mass by default; therefore they are static by default.
 
 {{{
-b2Body* groundBody = world.CreateBody(&groundBodyDef);
+# Make a body fitting this definition in the world.
+groundBody = world.CreateBody(groundBodyDef)
 }}}
 
-For step 3 we create a ground polygon. We use the SetAsBox shortcut to form the ground polygon into a box shape, with the box centered on the origin of the parent body.
+For step 3 we create a ground polygon. We use the box property to form the ground polygon into a box shape, with the box centered on the origin of the parent body.
 
 {{{
-b2PolygonShape groundBox;
-groundBox.SetAsBox(50.0f, 10.0f);
+groundBox=b2PolygonShape(box=(50,10))
 }}}
 
-The SetAsBox function takes the half-width and half-height (extents). So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. Box2D generally works best when objects are the size of typical real world objects. For example, a barrel is about 1 meter tall. Due to the limitations of floating point arithmetic, using Box2D to model the movement of glaciers or dust particles is not a good idea.
+Setting it as a box takes the half-width and half-height (extents). So in this case the ground box is 100 units wide (x-axis) and 20 units tall (y-axis). Box2D is tuned for meters, kilograms, and seconds. So you can consider the extents to be in meters. Box2D generally works best when objects are the size of typical real world objects. For example, a barrel is about 1 meter tall. Due to the limitations of floating point arithmetic, using Box2D to model the movement of glaciers or dust particles is *not* a good idea.
 
-We finish the ground body in step 4 by creating the shape fixture. For this step we have a shortcut. We do not have a need to alter the default fixture material properties, so can pass the shape directly to the body without creating a fixture definition. Later we will see how to use a fixture definition for customized material properties.
-
+We finish the ground body by creating the shape fixture. (If you create a shape in the above way, and wish to add it without creating a fixture definition, see b2Body.CreateFixturesFromShapes )
 {{{
-groundBody->CreateFixture(&groundBox);
+# And create a fixture definition to hold the shape
+groundBoxFixture=b2FixtureDef(shape=groundBox)
+
+# Add the ground shape to the ground body.
+groundBody.CreateFixture(groundBoxFixture)
 }}}
 
 Box2D does not keep a reference to the shape. It clones the data into a new b2Shape object.
 
 Note that every fixture must have a parent body, even fixtures that are static. However, you can attach all static fixtures to a single static body. This need for static bodies is done to make the Box2D code more uniform internally, reducing the number of potential bugs.
 
-You might notice a pattern here. Most Box2D types are prefixed with b2. This is done to reduce the chance for naming conflicts with your code.
+Here's a big shortcut to all of the above. The following few lines are equivalent to all of the steps of this example so far:
+{{{
+from Box2D import *
+world=b2World()
+groundBody=world.CreateStaticBody(
+    position=(0,-10),
+    shapes=b2PolygonShape(box=(50,10)),
+    )
+}}}
+
+You might notice a pattern here. Most pybox2d types are prefixed with b2. This is done to reduce the chance for naming conflicts with your code. As mentioned before, there is an alternative namespace that can be used. 
+
+{{{
+import Box2D
+from Box2D.b2 import *
+
+w=world()
+b=bodyDef()
+w.CreateBody(b)
+v=vec2()
+
+# and so on. The names are the same as the original library, with 'b2' stripped and the first character made lower-case.
+# b2World -> world
+# b2BodyDef -> bodyDef
+# b2Vec2 -> vec2
+
+}}}
 
 == Creating a Dynamic Body ==
 
 So now we have a ground body. We can use the same technique to create a dynamic body. The main difference, besides dimensions, is that we must establish the dynamic body's mass properties.
 
-First we create the body using CreateBody. By default bodies are static, so we should set the b2BodyType at construction time to make the body dynamic.
+First we create the body using CreateBody. By default bodies are static, so we should set the b2BodyType at construction time to make the body dynamic. Let's do this with the new kwargs methods.
 
 {{{
-b2BodyDef bodyDef;
-bodyDef.type = b2_dynamicBody;
-bodyDef.position.Set(0.0f, 4.0f);
-b2Body* body = world.CreateBody(&bodyDef);
+body=world.CreateDynamicBody(position=(0,4))
 }}}
 
 *Caution*
 
-You must set the body type to b2_dynamicBody if you want the body to move in response to forces.
-
-Next we create and attach a polygon shape using a fixture definition. First we create a box shape:
-
 {{{
-b2PolygonShape dynamicBox;
-dynamicBox.SetAsBox(1.0f, 1.0f);
+You must set the body type to b2_dynamicBody (by using CreateDynamicBody or ensuring that your b2BodyDef.type is b2_dynamicBody) if you want the body to move in response to forces.
 }}}
 
-Next we create a fixture definition using the box. Notice that we set density to 1. The default density is zero. Also, the friction on the shape is set to 0.3.
-
+Next we create and attach a polygon fixture:
 {{{
-b2FixtureDef fixtureDef;
-fixtureDef.shape = &dynamicBox;
-fixtureDef.density = 1.0f;
-fixtureDef.friction = 0.3f;
+box=body.CreatePolygonFixture(box=(1,1), density=1, friction=0.3)
 }}}
 
-Using the fixture definition we can now create the fixture. This automatically updates the mass of the body. You can add as many fixtures as you like to a body. Each one contributes to the total mass.
-
-{{{
-body->CreateFixture(&fixtureDef);
-}}}
+otice that we set density to 1. The default density is zero. Also, the friction on the shape is set to 0.3. Both of these are from the fixture definition and not the shape definition. This is all taken care of behind the scenes using this method with pybox2d. You could very well create your own b2FixtureDef with those parameters and it would have the same effect. This would require at least 5x more code on your part.
 
 That's it for initialization. We are now ready to begin simulating.
 
@@ -270,59 +367,64 @@ That's it for initialization. We are now ready to begin simulating.
 
 So we have initialized the ground box and a dynamic box. Now we are ready to set Newton loose to do his thing. We just have a couple more issues to consider.
 
-Box2D uses a computational algorithm called an integrator. Integrators simulate the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for Box2D. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don't like the time step to change much. A variable time step produces variable results, which makes it difficult to debug. So don't tie the time step to your frame rate (unless you really, really have to). Without further ado, here is the time step.
+Box2D uses a computational algorithm called an integrator. Integrators simulate the physics equations at discrete points of time. This goes along with the traditional game loop where we essentially have a flip book of movement on the screen. So we need to pick a time step for pybox2d. Generally physics engines for games like a time step at least as fast as 60Hz or 1/60 seconds. You can get away with larger time steps, but you will have to be more careful about setting up the definitions for your world. We also don't like the time step to change much. A variable time step produces variable results, which makes it difficult to debug. So don't tie the time step to your frame rate (unless you really, really have to). Without further ado, here is the time step.
 
 {{{
-float32 timeStep = 1.0f / 60.0f;
+# Prepare for simulation. Typically we use a time step of 1/60 of a
+# second (60Hz) and 6 velocity/2 position iterations. This provides a 
+# high quality simulation in most game scenarios.
+timeStep = 1.0 / 60
 }}}
 
 In addition to the integrator, Box2D also uses a larger bit of code called a constraint solver. The constraint solver solves all the constraints in the simulation, one at a time. A single constraint can be solved perfectly. However, when we solve one constraint, we slightly disrupt other constraints. To get a good solution, we need to iterate over all constraints a number of times.
 
 There are two phases in the constraint solver: a velocity phase and a position phase. In the velocity phase the solver computes the impulses necessary for the bodies to move correctly. In the position phase the solver adjusts the positions of the bodies to reduce overlap and joint detachment. Each phase has its own iteration count. In addition, the position phase may exit iterations early if the errors are small.
 
-The suggested iteration count for Box2D is 10 for both velocity and position. You can tune this number to your liking, just keep in mind that this has a trade-off between speed and accuracy. Using fewer iterations increases performance but accuracy suffers. Likewise, using more iterations decreases performance but improves the quality of your simulation. For this simple example, we don't need much iteration. Here are our chosen iteration counts.
+The suggested iteration count for pybox2d is 10 for both velocity and position. You can tune this number to your liking, just keep in mind that this has a trade-off between speed and accuracy. Using fewer iterations increases performance but accuracy suffers. Likewise, using more iterations decreases performance but improves the quality of your simulation. For this simple example, we don't need much iteration. Here are our chosen iteration counts.
 
 {{{
-int32 velocityIterations = 6;
-int32 positionIterations = 2;
+vel_iters, pos_iters = 6, 2
 }}}
 
-Note that the time step and the iteration count are completely unrelated. An iteration is not a sub-step. One iteration is a single pass over all the constraints within a time step. You can have multiple passes over the constraints within a single time step.
+Note that the time step and the iteration count are completely unrelated. An iteration is not a sub-step. One iteration is a single pass over all the constraints within a time step. You can have multiple passes over the constraints within a single time step. Don't worry if this is too confusing. Often, setting both iterations to 10 will give you the results you desire without having to worry about much else.
 
-We are now ready to begin the simulation loop. In your game the simulation loop can be merged with your game loop. In each pass through your game loop you call b2World::Step. Just one call is usually enough, depending on your frame rate and your physics time step. After stepping, you should call b2World::ClearForces to clear any forces you applied to the bodies.
+We are now ready to begin the simulation loop. In your game the simulation loop can be merged with your game loop. In each pass through your game loop you call b2World.Step(). Just one call is usually enough, depending on your frame rate and your physics time step. After stepping, you should call b2World.ClearForces() to clear any forces you applied to the bodies.
 
 The Hello World program was designed to be dead simple, so it has no graphical output. Rather than being utterly boring by producing no output, the code prints out the position and rotation of the dynamic body. Here is the simulation loop that simulates 60 time steps for a total of 1 second of simulated time.
 
 {{{
-for (int32 i = 0; i < 60; ++i)
-{
-    world.Step(timeStep, velocityIterations, positionIterations);
-    world.ClearForces();
-    b2Vec2 position = body->GetPosition();
-    float32 angle = body->GetAngle();
-    printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
-}
+# This is our little game loop.
+for i in range(60):
+    # Instruct the world to perform a single step of simulation. It is
+    # generally best to keep the time step and iterations fixed.
+    world.Step(timeStep, vel_iters, pos_iters)
+
+    # Clear applied body forces. We didn't apply any forces, but you
+    # should know about this function.
+    world.ClearForces()
+ 
+    # Now print the position and angle of the body.
+    print body.position, body.angle
 }}}
 
 The output shows the box falling and landing on the ground box. Your output should look like this:
 
 {{{
-0.00 4.00 0.00
-0.00 3.99 0.00
-0.00 3.98 0.00
+b2Vec2(0,3.99722) 0.0
+b2Vec2(0,3.99167) 0.0
+b2Vec2(0,3.98333) 0.0
+b2Vec2(0,3.97222) 0.0
+b2Vec2(0,3.95833) 0.0
+b2Vec2(0,3.94167) 0.0
+b2Vec2(0,3.92222) 0.0
 ...
-0.00 1.25 0.00
-0.00 1.13 0.00
-0.00 1.01 0.00
 }}}
 
-== Cleanup ==
-
-When a world leaves scope or is deleted by calling delete on a pointer, all the memory reserved for bodies, fixtures, and joints is freed. This is done to make your life easier. However, you will need to nullify any body, fixture, or joint pointers you have because they will become invalid.
+This indicates that the body is slowly falling (in the y-axis, since this is how gravity is defined). Its angle is not changing during the beginning.
 
 == The Testbed ==
 
-Once you have conquered the HelloWorld example, you should start looking at Box2D's testbed. The testbed is a unit-testing framework and demo environment. Here are some of the features:
+Once you have conquered the HelloWorld example, you should start looking at pybox2d's testbed. The testbed is a unit-testing framework and demo environment. Here are some of the features:
 
  * Camera with pan and zoom.
  * Mouse picking of shapes attached to dynamic bodies.
@@ -333,65 +435,7 @@ Once you have conquered the HelloWorld example, you should start looking at Box2
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image002.png]
 
-The testbed has many examples of Box2D usage in the test cases and the framework itself. I encourage you to explore and tinker with the testbed as you learn Box2D.
-
-Note: the testbed is written using freeglut and GLUI. The testbed is not part of the Box2D library. The Box2D library is agnostic about rendering. As shown by the HelloWorld example, you don't need a renderer to use Box2D.
-
-= Common =
-
-== About ==
-
-The Common module contains settings, memory management, and vector math.
-
-== Settings ==
-
-The header b2Settings.h contains:
-
- * Types such as int32 and float32
- * Constants
- * Allocation wrappers
- * The version number
- * Friction and restitution mixing functions
-
-=== Types ===
-
-Box2D defines various types such as float32, int8, etc. to make it easy to determine the size of structures.
-
-=== Constants ===
-
-Box2D defines several constants. These are all documented in b2Settings.h. Normally you do not need to adjust these constants.
-
-Box2D uses floating point math for collision and simulation. Due to round-off error some numerical tolerances are defined. Some tolerances are absolute and some are relative. Absolute tolerances use MKS units.
-
-=== Allocation wrappers ===
-
-The settings file defines b2Alloc and b2Free for large allocations. You may forward these calls to your own memory management system.
-
-=== Version ===
-
-The b2Version structure holds the current version so you can query this at run-time.
-
-=== Friction and Restitution Mixing ===
-
-These are placed in the settings file in case you need to customize them for your application.
-
-== Memory Management ==
-
-A large number of the decisions about the design of Box2D were based on the need for quick and efficient use of memory. In this section I will discuss how and why Box2D allocates memory.
-
-Box2D tends to allocate a large number of small objects (around 50-300 bytes). Using the system heap through malloc or new for small objects is inefficient and can cause fragmentation. Many of these small objects may have a short life span, such as contacts, but can persist for several time steps. So we need an allocator that can efficiently provide heap memory for these objects.
-
-Box2D's solution is to use a small object allocator (SOA) called b2BlockAllocator. The SOA keeps a number of growable pools of varying sizes. When a request is made for memory, the SOA returns a block of memory that best fits the requested size. When a block is freed, it is returned to the pool. Both of these operations are fast and cause little heap traffic.
-
-Since Box2D uses a SOA, you should never new or malloc a body, fixture, or joint. You do have to allocate a b2World. The b2World class provides factories for you to create bodies, fixtures, and joints. This allows Box2D to use the SOA and hide the gory details from you. Never, ever, call delete or free on a body, fixture, or joint.
-
-While executing a time step, Box2D needs some temporary workspace memory. For this, it uses a stack allocator called b2StackAllocator to avoid per-step heap allocations. You don't need to interact with the stack allocator, but it's good to know it's there.
-
-== Math ==
-
-Box2D includes a simple small vector and matrix module. This has been designed to suit the internal needs of Box2D and the API. All the members are exposed, so you may use them freely in your application.
-
-The math library is kept simple to make Box2D easy to port and maintain.
+The testbed has many examples of pybox2d usage in the test cases and the framework itself. I encourage you to explore and tinker with the testbed as you learn pybox2d.
 
 = Collision Module =
 
@@ -403,7 +447,7 @@ The Collision module contains shapes and functions that operate on them. The mod
 
 Shapes describe collision geometry and may be used independently of physics simulation. You may perform several operations with shapes.
 
-Box2D shapes implement the b2Shape base class. The base class defines functions to:
+pybox2d shapes implement the b2Shape base class. The base class defines functions to:
 
  * Test a point for overlap with the shape.
  * Perform a ray cast against the shape.
@@ -419,9 +463,7 @@ Circle shapes have a position and radius.
 Circles are solid. You cannot make a hollow circle. However, you can create chains of line segments using polygon shapes.
 
 {{{
-b2CircleShape circle;
-circle.m_p.Set(1.0f, 2.0f, 3.0f);
-circle.m_radius = 0.5f;
+circle=b2CircleShape(pos=(1, 2), radius=0.5)
 }}}
 
 == Polygon Shapes ==
@@ -434,27 +476,18 @@ You must create polygons with a counter clockwise winding (CCW). We must be care
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image004.png]
 
-The polygon members are public, but you should use initialization functions to create a polygon. The initialization functions create normal vectors and perform validation.
-
-You can create a polygon shape by passing in a vertex array. The maximal size of the array is controlled by b2_maxPolygonVertices which has a default value of 8. This is sufficient to describe most convex polygons.
+You can create a polygon shape by passing in a vertex array. The maximal size of the array is controlled by b2_maxPolygonVertices which has a default value of 16. This is more than sufficient to describe most convex polygons.
 
 {{{
-// This defines a triangle in CCW order.
-b2Vec2 vertices[3];
-vertices[0].Set(0.0f, 0.0f);
-vertices[1].Set(1.0f, 0.0f);
-vertices[2].Set(0.0f, 1.0f);
-int32 count = 3;
-b2PolygonShape polygon;
-polygon.Set(vertices, count);
+# This defines a triangle in CCW order.
+triangle=b2PolygonShape(vertices=[(0,0),(1,0),(0,1)])
 }}}
 
-The polygon shape has some custom initialization functions to create boxes and edges (line segments).
+The polygon shape has some custom initialization functions to create boxes.
 
 {{{
-void SetAsBox(float32 hx, float32 hy);
-void SetAsBox(float32 hx, float32 hy, const b2Vec2& center, float32 angle);
-void SetAsEdge(const b2Vec2& v1, const b2Vec2& v2);
+box=b2PolygonShape(box=(half_width, half_height))
+box=b2PolygonShape(box=(half_width, half_height, (center_x, center_y), angle))
 }}}
 
 Polygons inherit a radius from b2Shape. The radius creates a skin around the polygon. The skin is used in stacking scenarios to keep polygons slightly separated. This allows continuous collision to work against the core polygon.
@@ -463,11 +496,45 @@ Polygons inherit a radius from b2Shape. The radius creates a skin around the pol
 
 You can test a point for overlap with a shape. You provide a transform for the shape and a world point.
 
+A b2Transform is not initialized to any values in specific, so you must set it after creation. R is a b2Mat22, a 2x2 matrix indicating the transform to perform. Additional translation via angle and position is also possible.
+
 {{{
-b2Transfrom transform;
-transform.SetIdentity();
-b2Vec2 point(5.0f, 2.0f);
-bool hit = shape->TestPoint(transform, point);
+>>> b2Transform()
+b2Transform(
+    R=b2Mat22(
+            angle=1.5707963705062866,
+            col1=b2Vec2(8.31549e-21,4.74258e+30),
+            col2=b2Vec2(8.19131e-33,2.35171e-38),
+            inverse=b2Mat22(
+                        angle=1.5707963705062866,(...) )
+    angle=1.5707963705062866,
+    position=b2Vec2(1.21959e-37,8.31549e-21),
+    )
+>>> transform=b2Transform()
+>>> transform.SetIdentity()
+>>> transform
+b2Transform(
+    R=b2Mat22(
+            angle=0.0,
+            col1=b2Vec2(1,0),
+            col2=b2Vec2(0,1),
+            inverse=b2Mat22(
+                        angle=-0.0,
+                        col1=b2Vec2(1,-0),
+                        col2=b2Vec2(-0,1),
+                        inverse=b2Mat22((...) )
+    angle=0.0,
+    position=b2Vec2(0,0),
+    )
+}}}
+
+So, to use a transform to test a point:
+
+{{{
+transform=b2Transform()
+transform.SetIdentity()
+
+hit=shape.TestPoint(transform, (5, 2))
 }}}
 
 == Shape Ray Cast ==
@@ -475,18 +542,11 @@ bool hit = shape->TestPoint(transform, point);
 You can cast a ray at a shape to get the point of first intersection and normal vector. No hit will register if the ray starts inside the shape.
 
 {{{
-b2Transfrom transform;
-transform.SetIdentity();
-b2RayCastInput input;
-input.p1.Set(0.0f, 0.0f, 0.0f);
-input.p2.Set(1.0f, 0.0f, 0.0f);
-input.maxFraction = 1.0f;
-b2RayCastOutput output;
-bool hit = shape->RayCast(&output, input, transform);
-if (hit)
-{
-  b2Vec2 hitPoint = input.p1 + output.fraction * (input.p2 - input.p1);
-}
+input=b2RayCastInput(p1=(0,0), p2=(1,0), maxFraction=1)
+output=b2RayCastOutput()
+hit = shape.RayCast(output, input, transform, 0)
+if hit:
+    hit_point = input.p1 + output.fraction * (input.p2 - input.p1)
 }}}
 
 == Bilateral Functions ==
@@ -499,6 +559,8 @@ The Collision module contains bilateral functions that take a pair of shapes and
 
 == Contact Manifolds ==
 
+* TODO: This might not function perfectly in pybox2d *
+
 Box2D has functions to compute contact points for overlapping shapes. If we consider circle-circle or circle-polygon, we can only get one contact point and normal. In the case of polygon-polygon we can get two points. These points share the same normal vector so Box2D groups them into a manifold structure. The contact solver takes advantage of this to improve stacking stability.
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image005.png]
@@ -510,23 +572,24 @@ The b2Manifold structure holds a normal vector and up to two contact points. The
 The b2WorldManifold structure can be used to generate the world coordinates of the contact normal and points. You need to provide a b2Manifold and the shape transforms and radii.
 
 {{{
-b2WorldManifold worldManifold;
-worldManifold.Initialize(&manifold, transformA, shapeA.m_radius, transformB, shapeB.m_radius);
-for (int32 i = 0; i < manifold.pointCount; ++i)
-{
-  b2Vec2 point = worldManifold.points[i];
-}
+worldManifold=b2WorldManifold()
+worldManifold.Initialize(manifold, transformA, shapeA.radius, transformB, shapeB.radius)
+points=[worldManifold.points[i] for i in range(manifold.pointCount)]
+
+# TODO: test/wrap b2WorldManifold
 }}}
 
 During simulation shapes may move and the manifolds may change. Points may be added or removed. You can detect this using b2GetPointStates.
 
 {{{
-b2PointState state1[2], state2[2];
-b2GetPointStates(state1, state2, &manifold1, &manifold2);
-if (state1[0] == b2_removeState)
-{
-  // process event
-}
+state1=[b2PointState(), b2PointState()]
+state2=[b2PointState(), b2PointState()]
+b2GetPointStates(state1, state2, manifold1, manifold2)
+if state1[0] == b2_removeState:
+    pass
+    # process event
+
+# TODO: test/wrap b2GetPointStates / b2PointState
 }}}
 
 == Distance ==
@@ -559,6 +622,8 @@ You can use fixed rotations to perform a _shape cast_. In this case, the time of
 
 == Dynamic Tree ==
 
+* TODO: This might not function at all in pybox2d *
+
 The b2DynamicTree class is used by Box2D to organize large numbers of shapes efficiently. The class does not know about shapes. Instead it operates on axis-aligned bounding boxes (AABBs) with user data pointers.
 
 The dynamic tree is a hierarchical AABB tree. Each internal node in the tree can has two children. A leaf node is a single user AABB.
@@ -571,7 +636,7 @@ A region query uses the tree to find all leaf AABBs that overlap a query AABB. T
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image011.png]
 
-Normally you will not use the dynamic tree directly. Rather you will go through the b2World class for ray casts and region queries. If you do plan to create your own dynamic tree, you can learn how to use it by looking at how Box2D uses it.
+Normally you will not use the dynamic tree directly. Rather you will go through the b2World class for ray casts and region queries. If you do plan to create your own dynamic tree, you can learn how to use it by looking at how Box2D uses it (in C++, there are no Python examples *TODO*).
 
 == Broad-phase ==
 
@@ -579,7 +644,7 @@ Collision processing in a physics step can be divided into narrow-phase and broa
 
 The b2BroadPhase class reduces this load by using a dynamic tree for pair management. This greatly reduces the number of narrow-phase calls.
 
-Normally you do not interact with the broad-phase directly. Instead, Box2D creates and manages a broad-phase internally. Also, b2BroadPhase is designed with Box2D's simulation loop in mind, so it is likely not suited for other use cases.
+Normally you do not interact with the broad-phase directly. Instead, Box2D creates and manages a broad-phase internally. Also, b2BroadPhase is designed with Box2D's simulation loop in mind, so it is likely not suited for other use cases. This means you, as a pybox2d user, also do not have to worry about this.
 
 = Dynamics Module =
 
@@ -604,7 +669,7 @@ The dynamics module is covered in the following chapters.
 
 == About ==
 
-Recall that shapes don't know about bodies and may be used independently. Therefore Box2D provides the b2Fixture class to attach shapes to bodies. Fixtures hold the following:
+Recall that shapes don't know about bodies and may be used independently. Therefore pybox2d provides the b2Fixture class to attach shapes to bodies. Fixtures hold the following:
 
  * a single shape
  * density, friction, and restitution
@@ -620,10 +685,14 @@ These are described in the following sections.
 Fixtures are created by initializing a fixture definition and then passing the definition to the parent body.
 
 {{{
-b2FixtureDef fixtureDef;
-fixtureDef.shape = &myShape;
-fixtureDef.density = 1.0f;
-b2Fixture* myFixture = myBody->CreateFixture(&fixtureDef);
+fixtureDef=b2FixtureDef(shape=myShape, density=1)
+myFixture=myBody.CreateFixture(fixtureDef)
+}}}
+
+or equivalently,
+
+{{{
+myFixture=myBody.CreateFixture(shape=myShape, density=1)
 }}}
 
 This creates the fixture and attaches it to the body. You do not need to store the fixture pointer since the fixture will automatically be destroyed when the parent body is destroyed. You can create multiple fixtures on a single body.
@@ -631,22 +700,22 @@ This creates the fixture and attaches it to the body. You do not need to store t
 You can destroy a fixture on the parent body. You may do this to model a breakable object. Otherwise you can just leave the fixture alone and let the body destruction take care of destroying the attached fixtures.
 
 {{{
-myBody->DestroyFixture(myFixture);
+myBody.DestroyFixture(myFixture)
 }}}
 
 === Density ===
 
- The fixture density is used to compute the mass properties of the parent body. The density can be zero or positive. You should generally use similar densities for all your fixtures. This will improve stacking stability.
+The fixture density is used to compute the mass properties of the parent body. The density can be zero or positive. You should generally use similar densities for all your fixtures. This will improve stacking stability.
 
-The mass of a body is automatically adjusted when you
+The mass of a body is automatically adjusted when you create a fixture.
 
 === Friction ===
 
 Friction is used to make objects slide along each other realistically. Box2D supports static and dynamic friction, but uses the same parameter for both. Friction is simulated accurately in Box2D and the friction strength is proportional to the normal force (this is called Coulomb friction). The friction parameter is usually set between 0 and 1, but can be any non-negative value. A friction value of 0 turns off friction and a value of 1 makes the friction strong. When the friction force is computed between two shapes, Box2D must combine the friction parameters of the two parent fixtures. This is done with the geometric mean:
 
 {{{
-float32 friction;
-friction = sqrtf(shape1->friction * shape2->friction);
+from math import sqrt
+friction = sqrtf(shape1.friction*shape2.friction)
 }}}
 
 So if one fixture has zero friction then the contact will have zero friction.
@@ -656,8 +725,7 @@ So if one fixture has zero friction then the contact will have zero friction.
 Restitution is used to make objects bounce. The restitution value is usually set to be between 0 and 1. Consider dropping a ball on a table. A value of zero means the ball won't bounce. This is called an inelastic collision. A value of one means the ball's velocity will be exactly reflected. This is called a perfectly elastic collision. Restitution is combined using the following formula.
 
 {{{
-float32 restitution;
-restitution = b2Max(shape1->restitution, shape2->restitution);
+restitution = max(shape1.restitution, shape2.restitution)
 }}}
 
 Fixtures carry collision filtering information to let you prevent collisions between certain game objects.
@@ -666,24 +734,22 @@ When a shape develops multiple contacts, restitution is simulated approximately.
 
 === Filtering ===
 
-Collision filtering is a system for preventing collision between fixtures. For example, say you make a character that rides a bicycle. You want the bicycle to collide with the terrain and the character to collide with the terrain, but you don't want the character to collide with the bicycle (because they must overlap). Box2D supports such collision filtering using categories and groups.
+Collision filtering is a system for preventing collision between fixtures. For example, say you make a character that rides a bicycle. You want the bicycle to collide with the terrain and the character to collide with the terrain, but you don't want the character to collide with the bicycle (because they must overlap). pybox2d supports such collision filtering using categories and groups.
 
-Box2D supports 16 collision categories. For each fixture you can specify which category it belongs to. You also specify what other categories this fixture can collide with. For example, you could specify in a multiplayer game that all players don't collide with each other and monsters don't collide with each other, but players and monsters should collide. This is done with masking bits. For example:
+pybox2d supports 16 collision categories. For each fixture you can specify which category it belongs to. You also specify what other categories this fixture can collide with. For example, you could specify in a multiplayer game that all players don't collide with each other and monsters don't collide with each other, but players and monsters should collide. This is done with masking bits. For example:
 
 {{{
-playerFixtureDef.filter.categoryBits = 0x0002;
-monsterFixtureDef.filter.categoryBits = 0x0004;
-playerFixtureDef.filter.maskBits = 0x0004;
-monsterFixtureDef.filter.maskBits = 0x0002;
+playerDef =b2FixtureDef(categoryBits=0x0002, maskBits=0x0004, ...)
+monsterDef=b2FixtureDef(categoryBits=0x0004, maskBits=0x0002, ...)
 }}}
 
 Collision groups let you specify an integral group index. You can have all fixtures with the same group index always collide (positive index) or never collide (negative index). Group indices are usually used for things that are somehow related, like the parts of a bicycle. In the following example, fixture1 and fixture2 always collide, but fixture3 and fixture4 never collide.
 
 {{{
-fixture1Def.filter.groupIndex = 2;
-fixture2Def.filter.groupIndex = 2;
-fixture3Def.filter.groupIndex = -8;
-fixture4Def.filter.groupIndex = -8;
+fixture1Def.filter.groupIndex= 2
+fixture2Def.filter.groupIndex= 2
+fixture3Def.filter.groupIndex=-8
+fixture4Def.filter.groupIndex=-8
 }}}
 
 Collisions between fixtures of different group indices are filtered according the category and mask bits. In other words, group filtering has higher precedence than category filtering.
@@ -694,7 +760,7 @@ Note that additional collision filtering occurs in Box2D. Here is a list:
  * Fixtures on the same body never collide with each other.
  * You can optionally enable/disable collision between fixtures on bodies connected by a joint.
 
-Sometimes you might need to change collision filtering after a fixture has already been created. You can get and set the b2Filter structure on an existing fixture using b2Fixture::GetFilterData and b2Fixture::SetFilterData. Note that changing the filter data will not add or remove contacts until the next time step (see the World class).
+Sometimes you might need to change collision filtering after a fixture has already been created. You can get and set the b2Filter structure on an existing fixture using the filterData property. Note that changing the filter data will not add or remove contacts until the next time step (see the World class in the C++ source code).
 
 == Sensors ==
 
@@ -702,10 +768,7 @@ Sometimes game logic needs to know when two fixtures overlap yet there should be
 
 You can flag any fixture as being a sensor. Sensors may be static or dynamic. Remember that you may have multiple fixtures per body and you can have any mix of sensors and solid fixtures.
 
-Sensors do not generate contact points. There are two ways to get the state of a sensor:
-
- # b2Contact::IsTouching
- # b2ContactListener::BeginContact and EndContact
+Sensors do not generate contact points. There are two ways to get the state of a sensor, {{{ b2Contact.touching }}}, and during the b2ContactListener callbacks, BeginContact and EndContact.
 
 = Bodies =
 
@@ -713,15 +776,15 @@ Sensors do not generate contact points. There are two ways to get the state of a
 
 Bodies have position and velocity. You can apply forces, torques, and impulses to bodies. Bodies can be static, kinematic, or dynamic. Here are the body type definitions:
 
-==== b2_staticBody ====
+==== b2_staticBody (world.CreateStaticBody) ====
 
 A static body has does not move under simulation and behaves as if it has infinite mass. Internally, Box2D stores zero for the mass and the inverse mass. Static bodies can be moved manually by the user. A static body has zero velocity. Static bodies do not collide with other static or kinematic bodies.
 
-==== b2_kinematicBody ====
+==== b2_kinematicBody (world.CreateKinematicBody) ====
 
 A kinematic body moves under simulation according to its velocity. Kinematic bodies do not respond to forces. They can be moved manually by the user, but normally a kinematic body is moved by setting its velocity. A kinematic body behaves as if it has infinite mass, however, Box2D stores zero for the mass and the inverse mass. Kinematic bodies do not collide with other static or kinematic bodies.
 
-==== b2_dynamicBody ====
+==== b2_dynamicBody (world.CreateDynamicBody) ====
 
 A dynamic body is fully simulated. They can be moved manually by the user, but normally they move according to forces. A dynamic body can collide with all body types. A dynamic body always has finite, non-zero mass. If you try to set the mass of a dynamic body to zero, it will automatically acquire a mass of one kilogram.
 
@@ -733,19 +796,21 @@ You usually keep pointers to all the bodies you create. This way you can query t
 
 == Body Definition ==
 
-Before a body is created you must create a body definition (b2BodyDef). The body definition holds the data needed to create and initialize a body.
+As mentioned before, before a body is created you have the option of using the kwargs to simplify creation, or manually create a body definition (b2BodyDef). Regardless of what method you choose, a body definition has to exist to create and initialize a body.
 
 Box2D copies the data out of the body definition; it does not keep a pointer to the body definition. This means you can recycle a body definition to create multiple bodies.
 
-Let's go over some of the key members of the body definition.
+Let's go over some of the key members of the body definition. Please note that all of these can be passed via the kwargs of the Create*Body() functions.
 
 === Body Type ===
 
 As discussed at the beginning of this chapter, there are three different body types: static, kinematic, and dynamic. You should establish the body type at creation because changing the body type later is expensive.
 
-bodyDef.type = b2_dynamicBody;
+{{{
+bodyDef.type=b2_dynamicBody
+}}}
 
-Setting the body type is mandatory.
+Setting the body type is mandatory. This is done for you by using the special b2World.Create*Body(), or when you specify a type to b2World.CreateBody().
 
 === Position and Angle ===
 
@@ -761,9 +826,10 @@ A body has two main points of interest. The first point is the body's origin. Fi
 
 When you are building the body definition, you may not know where the center of mass is located. Therefore you specify the position of the body's origin. You may also specify the body's angle in radians, which is not affected by the position of the center of mass. If you later change the mass properties of the body, then the center of mass may move on the body, but the origin position does not change and the attached shapes and joints do not move.
 
-bodyDef.position.Set(0.0f, 2.0f); // the body's origin position.
-
-bodyDef.angle = 0.25f * b2_pi; // the body's angle in radians.
+{{{
+bodyDef.position=(0, 2)      # the body's origin position.
+bodyDef.angle = 0.25 * b2_pi # the body's angle in radians.
+}}}
 
 === Damping ===
 
@@ -771,9 +837,10 @@ Damping is used to reduce the world velocity of bodies. Damping is different tha
 
 Damping parameters should be between 0 and infinity, with 0 meaning no damping, and infinity meaning full damping. Normally you will use a damping value between 0 and 0.1. I generally do not use linear damping because it makes bodies look floaty.
 
-bodyDef.linearDamping = 0.0f;
-
-bodyDef.angularDamping = 0.01f;
+{{{
+bodyDef.linearDamping = 0.0
+bodyDef.angularDamping = 0.01
+}}}
 
 Damping is approximated for stability and performance. At small damping values the damping effect is mostly independent of the time step. At larger damping values, the damping effect will vary with the time step. This is not an issue if you use a fixed time step (recommended).
 
@@ -785,15 +852,16 @@ When Box2D determines that a body (or group of bodies) has come to rest, the bod
 
 The body definition lets you specify whether a body can sleep and whether a body is created sleeping.
 
-bodyDef.allowSleep = true;
-
-bodyDef.awake = true;
+{{{
+bodyDef.allowSleep = True
+bodyDef.awake = True
+}}}
 
 === Fixed Rotation ===
 
 You may want a rigid body, such as a character, to have a fixed rotation. Such a body should not rotate, even under load. You can use the fixed rotation setting to achieve this:
 
-bodyDef.fixedRotation = true;
+bodyDef.fixedRotation = True
 
 The fixed rotation flag causes the rotational inertia and its inverse to be set to zero.
 
@@ -807,7 +875,7 @@ Normally CCD is not used between dynamic bodies. This is done to keep performanc
 
 Fast moving objects in Box2D can be labeled as bullets. Bullets will perform CCD with both static and dynamic bodies. You should decide what bodies should be bullets based on your game design. If you decide a body should be treated as a bullet, use the following setting.
 
-bodyDef.bullet = true;
+bodyDef.bullet = True
 
 The bullet flag only affects dynamic bodies.
 
@@ -819,7 +887,7 @@ You may wish a body to be created but not participate in collision or dynamics. 
 
 You can create a body in an inactive state and later re-activate it.
 
-bodyDef.active = true;
+bodyDef.active = True
 
 Joints may be connected to inactive bodies. These joints will not be simulated. You should be careful when you activate a body that its joints are not distorted.
 
@@ -827,9 +895,9 @@ Joints may be connected to inactive bodies. These joints will not be simulated. 
 
 User data is a void pointer. This gives you a hook to link your application objects to bodies. You should be consistent to use the same object type for all body user data.
 
-b2BodyDef bodyDef;
+b2BodyDef bodyDef
 
-bodyDef.userData = &myActor;
+bodyDef.userData = &myActor
 
 == Body Factory ==
 
@@ -838,10 +906,10 @@ Bodies are created and destroyed using a body factory provided by the world clas
 Bodies can be dynamic or static depending on the mass properties. Both body types use the same creation and destruction methods.
 
 {{{
-b2Body* dynamicBody = myWorld->CreateBody(&bodyDef);
+b2Body* dynamicBody = myWorld->CreateBody(&bodyDef)
 ... do stuff ...
-myWorld->DestroyBody(dynamicBody);
-dynamicBody = NULL;
+myWorld->DestroyBody(dynamicBody)
+dynamicBody = NULL
 }}}
 
 *Caution*
@@ -853,8 +921,6 @@ You should never use new or malloc to create a body. The world won't know about 
 Static bodies do not move under the influence of other bodies. You may manually move static bodies, but you should be careful so that you don't squash dynamic bodies between two or more static bodies. Friction will not work correctly if you move a static body. Static bodies never collide with static or kinematic bodies. It is faster to attach several shapes to a static body than to create several static bodies with a single shape on each one. Internally, Box2D sets the mass and inverse mass of static bodies to zero. This makes the math work out so that most algorithms don't need to treat static bodies as a special case.
 
 Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers). So you can create temporary body definitions and reuse the same body definitions.
-
-Box2D allows you to avoid destroying bodies by deleting your b2World object, which does all the cleanup work for you. However, you should be mindful to nullify body pointers that you keep in your game engine.
 
 When you destroy a body, the attached fixtures and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers.
 
@@ -869,22 +935,22 @@ Every body has a mass (scalar), center of mass (2-vector), and rotational inerti
 Normally the mass properties of a body are established automatically when fixtures are added to the body. You can also adjust the mass of a body at run-time. This is usually done when you have special game scenarios that require altering the mass.
 
 {{{
-void SetMassData(const b2MassData* data);
+void SetMassData(const b2MassData* data)
 }}}
 
 After setting a body's mass directly, you may wish to revert to the natural mass dictated by the fixtures. You can do this with:
 
 {{{
-void ResetMassData();
+void ResetMassData()
 }}}
 
 The body's mass data is available through the following functions:
 
 {{{
-float32 GetMass() const;
-float32 GetInertia() const;
-const b2Vec2& GetLocalCenter() const;
-void GetMassData(b2MassData* data) const;
+float32 GetMass() const
+float32 GetInertia() const
+const b2Vec2& GetLocalCenter() const
+void GetMassData(b2MassData* data) const
 }}}
 
 === State Information ===
@@ -892,36 +958,36 @@ void GetMassData(b2MassData* data) const;
 There are many aspects to the body's state. You can access this state data efficiently through the following functions:
 
 {{{
-void SetType(b2BodyType type);
-b2BodyType GetType();
-void SetBullet(bool flag);
-bool IsBullet() const;
-void SetSleepingAllowed(bool flag);
-bool IsSleepingAllowed() const;
-void SetAwake(bool flag);
-bool IsAwake() const;
-void SetActive(bool flag);
-bool IsActive() const;
-void SetFixedRotation(bool flag);
-bool IsFixedRotation() const;
+void SetType(b2BodyType type)
+b2BodyType GetType()
+void SetBullet(bool flag)
+bool IsBullet() const
+void SetSleepingAllowed(bool flag)
+bool IsSleepingAllowed() const
+void SetAwake(bool flag)
+bool IsAwake() const
+void SetActive(bool flag)
+bool IsActive() const
+void SetFixedRotation(bool flag)
+bool IsFixedRotation() const
 }}}
 
 === Position and Velocity ===
 
-You can access the position and rotation of a body. This is common when rendering your associated game actor. You can also set the position, although this is less common since you will normally use Box2D to simulate movement.
+You can access the position and rotation of a body. This is common when rendering your associated game actor. You can also set the position, although this is less common since you will normally use pybox2d to simulate movement.
 
 {{{
-bool SetTransform(const b2Vec2& position, float32 angle);
-const b2Transform& GetTransform() const;
-const b2Vec2& GetPosition() const;
-float32 GetAngle() const;
+bool SetTransform(const b2Vec2& position, float32 angle)
+const b2Transform& GetTransform() const
+const b2Vec2& GetPosition() const
+float32 GetAngle() const
 }}}
 
 You can access the center of mass position in local and world coordinates. Much of the internal simulation in Box2D uses the center of mass. However, you should normally not need to access it. Instead you will usually work with the body transform. For example, you may have a body that is square. The body origin might be a corner of the square, while the center of mass is located at the center of the square.
 
 {{{
-const b2Vec2& GetWorldCenter() const;
-const b2Vec2& GetLocalCenter() const;
+const b2Vec2& GetWorldCenter() const
+const b2Vec2& GetLocalCenter() const
 }}}
 
 You can access the linear and angular velocity. The linear velocity is for the center of mass. Therefore, the linear velocity may change if the mass properties change.
@@ -942,7 +1008,7 @@ Each joint type has a definition that derives from b2JointDef. All joints are co
 
 You can specify user data for any joint type and you can provide a flag to prevent the attached bodies from colliding with each other. This is actually the default behavior and you must set the collideConnected Boolean to allow collision between to connected bodies.
 
-Many joint definitions require that you provide some geometric data. Often a joint will be defined by anchor points. These are points fixed in the attached bodies. Box2D requires these points to be specified in local coordinates. This way the joint can be specified even when the current body transforms violate the joint constraint --- a common occurrence when a game is saved and reloaded. Additionally, some joint definitions need to know the default relative angle between the bodies. This is necessary to constrain rotation correctly.
+Many joint definitions require that you provide some geometric data. Often a joint will be defined by anchor points. These are points fixed in the attached bodies. pybox2d requires these points to be specified in local coordinates. This way the joint can be specified even when the current body transforms violate the joint constraint --- a common occurrence when a game is saved and reloaded. Additionally, some joint definitions need to know the default relative angle between the bodies. This is necessary to constrain rotation correctly.
 
 Initializing the geometric data can be tedious, so many joints have initialization functions that use the current body transforms to remove much of the work. However, these initialization functions should usually only be used for prototyping. Production code should define the geometry directly. This will make joint behavior more robust.
 
@@ -959,14 +1025,14 @@ Don't try to create a joint on the stack or on the heap using new or malloc. You
 Here's an example of the lifetime of a revolute joint:
 
 {{{
-b2RevoluteJointDef jointDef;
-jointDef.body1 = myBody1;
-jointDef.body2 = myBody2;
-jointDef.anchorPoint = myBody1->GetCenterPosition();
-b2RevoluteJoint* joint = myWorld->CreateJoint(&jointDef);
+b2RevoluteJointDef jointDef
+jointDef.body1 = myBody1
+jointDef.body2 = myBody2
+jointDef.anchorPoint = myBody1->GetCenterPosition()
+b2RevoluteJoint* joint = myWorld->CreateJoint(&jointDef)
 ... do stuff ...
-myWorld->DestroyJoint(joint);
-joint = NULL;
+myWorld->DestroyJoint(joint)
+joint = NULL
 }}}
 
 It is always good to nullify your pointer after they are destroyed. This will make the program crash in a controlled manner if you try to reuse the pointer.
@@ -986,18 +1052,18 @@ Many simulations create the joints and don't access them again until they are de
 First of all, you can get the bodies, anchor points, and user data from a joint.
 
 {{{
-b2Body* GetBody1();
-b2Body* GetBody2();
-b2Vec2 GetAnchor1();
-b2Vec2 GetAnchor2();
-void* GetUserData();
+b2Body* GetBody1()
+b2Body* GetBody2()
+b2Vec2 GetAnchor1()
+b2Vec2 GetAnchor2()
+void* GetUserData()
 }}}
 
 All joints have a reaction force and torque. This the reaction force applied to body 2 at the anchor point. You can use reaction forces to break joints or trigger other game events. These functions may do some computations, so don't call them if you don't need the result.
 
 {{{
-b2Vec2 GetReactionForce();
-float32 GetReactionTorque();
+b2Vec2 GetReactionForce()
+float32 GetReactionTorque()
 }}}
 
 == Distance Joint ==
@@ -1009,9 +1075,9 @@ One of the simplest joint is a distance joint which says that the distance betwe
 Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide.
 
 {{{
-b2DistanceJointDef jointDef;
-jointDef.Initialize(myBody1, myBody2, worldAnchorOnBody1, worldAnchorOnBody2);
-jointDef.collideConnected = true;
+b2DistanceJointDef jointDef
+jointDef.Initialize(myBody1, myBody2, worldAnchorOnBody1, worldAnchorOnBody2)
+jointDef.collideConnected = True
 }}}
 
 The distance joint can also be made soft, like a spring-damper connection. See the Web example in the testbed to see how this behaves.
@@ -1021,8 +1087,8 @@ Softness is achieved by tuning two constants in the definition: frequency and da
 The damping ratio is non-dimensional and is typically between 0 and 1, but can be larger. At 1, the damping is critical (all oscillations should vanish).
 
 {{{
-jointDef.frequencyHz = 4.0f;
-jointDef.dampingRatio = 0.5f;
+jointDef.frequencyHz = 4.0f
+jointDef.dampingRatio = 0.5f
 }}}
 
 == Revolute Joint ==
@@ -1036,11 +1102,11 @@ To specify a revolute you need to provide two bodies and a single anchor point i
 In this example, two bodies are connected by a revolute joint at the first body's center of mass.
 
 {{{
-b2RevoluteJointDef jointDef;
-jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter());
+b2RevoluteJointDef jointDef
+jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter())
 }}}
 
-The revolute joint angle is positive when body2 rotates CCW about the angle point. Like all angles in Box2D, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created using Initialize(), regardless of the current rotation of the two bodies.
+The revolute joint angle is positive when body2 rotates CCW about the angle point. Like all angles in pybox2d, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created using Initialize(), regardless of the current rotation of the two bodies.
 
 In some cases you might wish to control the joint angle. For this, the revolute joint can optionally simulate a joint limit and/or a motor.
 
@@ -1057,42 +1123,42 @@ You can use a joint motor to simulate joint friction. Just set the joint speed t
 Here's a revision of the revolute joint definition above; this time the joint has a limit and a motor enabled. The motor is setup to simulate joint friction.
 
 {{{
-b2RevoluteJointDef jointDef;
-jointDef.Initialize(body1, body2, myBody1->GetWorldCenter());
+b2RevoluteJointDef jointDef
+jointDef.Initialize(body1, body2, myBody1->GetWorldCenter())
 jointDef.lowerAngle = -0.5f * b2_pi; // -90 degrees
 jointDef.upperAngle = 0.25f * b2_pi; // 45 degrees
-jointDef.enableLimit = true;
-jointDef.maxMotorTorque = 10.0f;
-jointDef.motorSpeed = 0.0f;
-jointDef.enableMotor = true;
+jointDef.enableLimit = True
+jointDef.maxMotorTorque = 10.0f
+jointDef.motorSpeed = 0.0f
+jointDef.enableMotor = True
 }}}
 
 You can access a revolute joint's angle, speed, and motor torque.
 
 {{{
-float32 GetJointAngle() const;
-float32 GetJointSpeed() const;
-float32 GetMotorTorque() const;
+float32 GetJointAngle() const
+float32 GetJointSpeed() const
+float32 GetMotorTorque() const
 }}}
 
 You also update the motor parameters each step.
 
 {{{
-void SetMotorSpeed(float32 speed);
-void SetMaxMotorTorque(float32 torque);
+void SetMotorSpeed(float32 speed)
+void SetMaxMotorTorque(float32 torque)
 }}}
 
 Joint motors have some interesting abilities. You can update the joint speed every time step so you can make the joint move back-and-forth like a sine-wave or according to whatever function you want.
 
 {{{
 ... Game Loop Begin ...
-myJoint->SetMotorSpeed(cosf(0.5f * time));
+myJoint->SetMotorSpeed(cosf(0.5f * time))
 ... Game Loop End ...
 You can also use joint motors to track a desired joint angle. For example:
 ... Game Loop Begin ...
-float32 angleError = myJoint->GetJointAngle() - angleTarget;
-float32 gain = 0.1f;
-myJoint->SetMotorSpeed(-gain * angleError);
+float32 angleError = myJoint->GetJointAngle() - angleTarget
+float32 gain = 0.1f
+myJoint->SetMotorSpeed(-gain * angleError)
 ... Game Loop End ...
 }}}
 
@@ -1107,15 +1173,15 @@ A prismatic joint allows for relative translation of two bodies along a specifie
 The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy provides an example prismatic joint definition with a joint limit and a friction motor:
 
 {{{
-b2PrismaticJointDef jointDef;
-b2Vec2 worldAxis(1.0f, 0.0f);
-jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter(), worldAxis);
-jointDef.lowerTranslation = -5.0f;
-jointDef.upperTranslation = 2.5f;
-jointDef.enableLimit = true;
-jointDef.motorForce = 1.0f;
-jointDef.motorSpeed = 0.0f;
-jointDef.enableMotor = true;
+b2PrismaticJointDef jointDef
+b2Vec2 worldAxis(1.0f, 0.0f)
+jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter(), worldAxis)
+jointDef.lowerTranslation = -5.0f
+jointDef.upperTranslation = 2.5f
+jointDef.enableLimit = True
+jointDef.motorForce = 1.0f
+jointDef.motorSpeed = 0.0f
+jointDef.enableMotor = True
 }}}
 
 The revolute joint has an implicit axis coming out of the screen. The prismatic joint needs an explicit axis parallel to the screen. This axis is fixed in the two bodies and follows their motion.
@@ -1125,11 +1191,11 @@ Like the revolute joint, the prismatic joint translation is zero when the joint 
 Using a prismatic joint is similar to using a revolute joint. Here are the relevant member functions:
 
 {{{
-float32 GetJointTranslation() const;
-float32 GetJointSpeed() const;
-float32 GetMotorForce() const;
-void SetMotorSpeed(float32 speed);
-void SetMotorForce(float32 force);
+float32 GetJointTranslation() const
+float32 GetJointSpeed() const
+float32 GetMotorForce() const
+void SetMotorSpeed(float32 speed)
+void SetMotorForce(float32 force)
 }}}
 
 == Pulley Joint ==
@@ -1155,23 +1221,23 @@ Pulleys can be troublesome when one side is fully extended. The rope on the othe
 Here is an example pulley definition:
 
 {{{
-b2Vec2 anchor1 = myBody1->GetWorldCenter();
-b2Vec2 anchor2 = myBody2->GetWorldCenter();
-b2Vec2 groundAnchor1(p1.x, p1.y + 10.0f);
-b2Vec2 groundAnchor2(p2.x, p2.y + 12.0f);
-float32 ratio = 1.0f;
-b2PulleyJointDef jointDef;
-jointDef.Initialize(myBody1, myBody2, groundAnchor1, groundAnchor2, anchor1, anchor2, ratio);
-jointDef.maxLength1 = 18.0f;
-jointDef.maxLength2 = 20.0f;
+b2Vec2 anchor1 = myBody1->GetWorldCenter()
+b2Vec2 anchor2 = myBody2->GetWorldCenter()
+b2Vec2 groundAnchor1(p1.x, p1.y + 10.0f)
+b2Vec2 groundAnchor2(p2.x, p2.y + 12.0f)
+float32 ratio = 1.0f
+b2PulleyJointDef jointDef
+jointDef.Initialize(myBody1, myBody2, groundAnchor1, groundAnchor2, anchor1, anchor2, ratio)
+jointDef.maxLength1 = 18.0f
+jointDef.maxLength2 = 20.0f
 Pulley joints provide the current lengths.
-float32 GetLength1() const;
-float32 GetLength2() const;
+float32 GetLength1() const
+float32 GetLength2() const
 }}}
 
 == Gear Joint ==
 
-If you want to create a sophisticated mechanical contraption you might want to use gears. In principle you can create gears in Box2D by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. Box2D has a simpler method of creating gears: the gear joint.
+If you want to create a sophisticated mechanical contraption you might want to use gears. In principle you can create gears in pybox2d by using compound shapes to model gear teeth. This is not very efficient and might be tedious to author. You also have to be careful to line up the gears so the teeth mesh smoothly. pybox2d has a simpler method of creating gears: the gear joint.
 
 [http://pybox2d.googlecode.com/svn/doc/manual/images/image016.gif]
 
@@ -1186,12 +1252,12 @@ coordinate1 + ratio * coordinate2 == constant
 Here is an example gear joint:
 
 {{{
-b2GearJointDef jointDef;
-jointDef.body1 = myBody1;
-jointDef.body2 = myBody2;
-jointDef.joint1 = myRevoluteJoint;
-jointDef.joint2 = myPrismaticJoint;
-jointDef.ratio = 2.0f * b2_pi / myLength;
+b2GearJointDef jointDef
+jointDef.body1 = myBody1
+jointDef.body2 = myBody2
+jointDef.joint1 = myRevoluteJoint
+jointDef.joint2 = myPrismaticJoint
+jointDef.ratio = 2.0f * b2_pi / myLength
 Note that the gear joint depends on two other joints. This creates a fragile situation. What happens if those joints are deleted?
 }}}
 
@@ -1266,8 +1332,8 @@ As mentioned before, the contact class is created and destroyed by Box2D. Contac
 You can access the raw contact manifold:
 
 {{{
-b2Manifold* GetManifold();
-const b2Manifold* GetManifold() const;
+b2Manifold* GetManifold()
+const b2Manifold* GetManifold() const
 }}}
 
 You can potentially modify the manifold, but this is generally not supported and is for advanced usage.
@@ -1275,7 +1341,7 @@ You can potentially modify the manifold, but this is generally not supported and
 There is a helper function to get the b2WorldManifold:
 
 {{{
-void GetWorldManifold(b2WorldManifold* worldManifold) const;
+void GetWorldManifold(b2WorldManifold* worldManifold) const
 }}}
 
 This uses the current positions of the bodies to compute world positions of the contact points.
@@ -1283,7 +1349,7 @@ This uses the current positions of the bodies to compute world positions of the 
 Sensors do not create manifolds, so for them use:
 
 {{{
-bool touching = sensorContact->IsTouching();
+bool touching = sensorContact->IsTouching()
 }}}
 
 This function also works for non-sensors.
@@ -1291,12 +1357,12 @@ This function also works for non-sensors.
 You can get the fixtures from a contact. From those you can get the bodies.
 
 {{{
-b2Fixture* fixtureA = myContact->GetFixtureA();
-b2Body* bodyA = fixtureA->GetBody();
-MyActor* actorA = (MyActor*)bodyA->GetUserData();
+b2Fixture* fixtureA = myContact->GetFixtureA()
+b2Body* bodyA = fixtureA->GetBody()
+MyActor* actorA = (MyActor*)bodyA->GetUserData()
 }}}
 
-You can disable a contact. This only works inside the b2ContactListener::PreSolve event, discussed below.
+You can disable a contact. This only works inside the b2ContactListener.PreSolve event, discussed below.
 
 == Accessing Contacts ==
 
@@ -1312,7 +1378,7 @@ for (b2Contact* c = myWorld->GetContactList(); c; c = c->GetNext())
 You can also iterate over all the contacts on a body. These are stored in a graph using a contact edge structure.
 for (b2ContactEdge* ce = myBody->GetContactList(); ce; ce = ce->next)
 {
-  b2Contact* c = ce->contact;
+  b2Contact* c = ce->contact
   // process c
 }
 }}}
@@ -1341,14 +1407,14 @@ public:
   { // handle pre-solve event }
   void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
   { // handle post-solve event }
-};
+}
 }}}
 
 *Caution*
 
 Do not keep a reference to the pointers sent to b2ContactListener. Instead make a deep copy of the contact point data into your own buffer. The example below shows one way of doing this.
 
-At run-time you can create an instance of the listener and register it with b2World::SetContactListener. Be sure your listener remains in scope while the world object exists.
+At run-time you can create an instance of the listener and register it with b2World.SetContactListener. Be sure your listener remains in scope while the world object exists.
 
 === Begin Contact Event ===
 
@@ -1360,16 +1426,16 @@ This is called when two fixtures cease to overlap. This is called for sensors an
 
 === Pre-Solve Event ===
 
-This is called after collision detection, but before collision resolution. This gives you a chance to disable the contact based on the current configuration. For example, you can implement a one-sided platform using this callback and calling b2Contact::SetEnabled(false). The contact will be re-enabled each time through collision processing, so you will need to disable the contact every time-step. The pre-solve event may be fired multiple times per time step per contact due to continuous collision detection.
+This is called after collision detection, but before collision resolution. This gives you a chance to disable the contact based on the current configuration. For example, you can implement a one-sided platform using this callback and calling b2Contact.SetEnabled(False). The contact will be re-enabled each time through collision processing, so you will need to disable the contact every time-step. The pre-solve event may be fired multiple times per time step per contact due to continuous collision detection.
 
 {{{
 void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
-  b2WorldManifold worldManifold;
-  contact->GetWorldManifold(&worldManifold);
+  b2WorldManifold worldManifold
+  contact->GetWorldManifold(&worldManifold)
   if (worldManifold.normal.y < -0.5f)
   {
-    contact->SetEnabled(false);
+    contact->SetEnabled(False)
   }
 }
 }}}
@@ -1379,21 +1445,21 @@ The pre-solve event is also a good place to determine the point state and the ap
 {{{
 void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
-  b2WorldManifold worldManifold;
-  contact->GetWorldManifold(&worldManifold);
-  b2PointState state1[2], state2[2];
-  b2GetPointStates(state1, state2, oldManifold, contact->GetManifold());
+  b2WorldManifold worldManifold
+  contact->GetWorldManifold(&worldManifold)
+  b2PointState state1[2], state2[2]
+  b2GetPointStates(state1, state2, oldManifold, contact->GetManifold())
   if (state2[0] == b2_addState)
   {
-    const b2Body* bodyA = contact->GetFixtureA()->GetBody();
-    const b2Body* bodyB = contact->GetFixtureB()->GetBody();
-    b2Vec2 point = worldManifold.points[0];
-    b2Vec2 vA = bodyA->GetLinearVelocityFromWorldPoint(point);
-    b2Vec2 vB = bodyB->GetLinearVelocityFromWorldPoint(point);
-    float32 approachVelocity = b2Dot(vB   vA, worldManifold.normal);
+    const b2Body* bodyA = contact->GetFixtureA()->GetBody()
+    const b2Body* bodyB = contact->GetFixtureB()->GetBody()
+    b2Vec2 point = worldManifold.points[0]
+    b2Vec2 vA = bodyA->GetLinearVelocityFromWorldPoint(point)
+    b2Vec2 vB = bodyB->GetLinearVelocityFromWorldPoint(point)
+    float32 approachVelocity = b2Dot(vB   vA, worldManifold.normal)
     if (approachVelocity > 1.0f)
     {
-      MyPlayCollisionSound();
+      MyPlayCollisionSound()
     }
   }
 }
@@ -1403,7 +1469,7 @@ void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 
 The post solve event is where you can gather collision impulse results. If you don't care about the impulses, you should probably just implement the pre-solve event.
 
-It is tempting to implement game logic that alters the physics world inside a contact callback. For example, you may have a collision that applies damage and try to destroy the associated actor and its rigid body. However, Box2D does not allow you to alter the physics world inside a callback because you might destroy objects that Box2D is currently processing, leading to orphaned pointers.
+It is tempting to implement game logic that alters the physics world inside a contact callback. For example, you may have a collision that applies damage and try to destroy the associated actor and its rigid body. However, pybox2d does not allow you to alter the physics world inside a callback because you might destroy objects that Box2D is currently processing, leading to orphaned pointers (which is not a good thing).
 
 The recommended practice for processing contact points is to buffer all contact data that you care about and process it after the time step. You should always process the contact points immediately after the time step; otherwise some other client code might alter the physics world, invalidating the contact buffer. When you process the contact buffer you can alter the physics world, but you still need to be careful that you don't orphan pointers stored in the contact point buffer. The testbed has example contact point processing that is safe from orphaned pointers.
 
@@ -1413,46 +1479,46 @@ This code from the CollisionProcessing test shows how to handle orphaned bodies 
 // We are going to destroy some bodies according to contact
 // points. We must buffer the bodies that should be destroyed
 // because they may belong to multiple contact points.
-const int32 k_maxNuke = 6;
-b2Body* nuke[k_maxNuke];
-int32 nukeCount = 0;
+const int32 k_maxNuke = 6
+b2Body* nuke[k_maxNuke]
+int32 nukeCount = 0
 // Traverse the contact buffer. Destroy bodies that
 // are touching heavier bodies.
 for (int32 i = 0; i < m_pointCount; ++i)
 {
-    ContactPoint* point = m_points + i;
-    b2Body* body1 = point->shape1->GetBody();
-    b2Body* body2 = point->shape2->GetBody();
-    float32 mass1 = body1->GetMass();
-    float32 mass2 = body2->GetMass();
+    ContactPoint* point = m_points + i
+    b2Body* body1 = point->shape1->GetBody()
+    b2Body* body2 = point->shape2->GetBody()
+    float32 mass1 = body1->GetMass()
+    float32 mass2 = body2->GetMass()
     if (mass1 > 0.0f && mass2 > 0.0f)
     {
         if (mass2 > mass1)
         {
-            nuke[nukeCount++] = body1;
+            nuke[nukeCount++] = body1
         }
         else
         {
-            nuke[nukeCount++] = body2;
+            nuke[nukeCount++] = body2
         }
         if (nukeCount == k_maxNuke)
         {
-            break;
+            break
         }
     }
 }
 // Sort the nuke array to group duplicates.
-std::sort(nuke, nuke + nukeCount);
+std.sort(nuke, nuke + nukeCount)
 // Destroy the bodies, skipping duplicates.
-int32 i = 0;
+int32 i = 0
 while (i < nukeCount)
 {
-    b2Body* b = nuke[i++];
+    b2Body* b = nuke[i++]
     while (i < nukeCount && nuke[i] == b)
     {
-        ++i;
+        ++i
     }
-    m_world->DestroyBody(b);
+    m_world->DestroyBody(b)
 }
 }}}
 
@@ -1460,31 +1526,31 @@ while (i < nukeCount)
 
 Often in a game you don't want all objects to collide. For example, you may want to create a door that only certain characters can pass through. This is called contact filtering, because some interactions are filtered out.
 
-Box2D allows you to achieve custom contact filtering by implementing a b2ContactFilter class. This class requires you to implement a ShouldCollide function that receives two b2Shape pointers. Your function returns true if the shapes should collide.
+pybox2d allows you to achieve custom contact filtering by implementing a b2ContactFilter class. This class requires you to implement a ShouldCollide function that receives two b2Shape pointers. Your function returns True if the shapes should collide.
 
 The default implementation of ShouldCollide uses the b2FilterData defined in [GettingStartedManual#Fixtures].
 
 {{{
-bool b2ContactFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
+bool b2ContactFilter.ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
-   const b2FilterData& filter1 = shape1->GetFilterData();
-   const b2FilterData& filter2 = shape2->GetFilterData();
+   const b2FilterData& filter1 = shape1->GetFilterData()
+   const b2FilterData& filter2 = shape2->GetFilterData()
    if (filter1.groupIndex == filter2.groupIndex &&
        filter1.groupIndex != 0)
    {
-          return filter1.groupIndex > 0;
+          return filter1.groupIndex > 0
    }
    bool collide = (filter1.maskBits & filter2.categoryBits) != 0 &&
-                 (filter1.categoryBits & filter2.maskBits) != 0;
-   return collide;
+                 (filter1.categoryBits & filter2.maskBits) != 0
+   return collide
 }
 }}}
 
-At run-time you can create an instance of your contact filter and register it with b2World::SetContactFilter. Make sure your filter stays in scope while the world exists.
+At run-time you can create an instance of your contact filter and register it with b2World.SetContactFilter. Make sure your filter stays in scope while the world exists.
 
 {{{
-MyContactFilter filter;
-world->SetContactFilter(&filter);
+MyContactFilter filter
+world->SetContactFilter(&filter)
 // filter remains in scope...
 }}}
 
@@ -1492,16 +1558,16 @@ world->SetContactFilter(&filter);
 
 === About ===
 
-The b2World class contains the bodies and joints. It manages all aspects of the simulation and allows for asynchronous queries (like AABB queries and ray-casts). Much of your interactions with Box2D will be with a b2World object.
+The b2World class contains the bodies and joints. It manages all aspects of the simulation and allows for asynchronous queries (like AABB queries and ray-casts). Much of your interactions with pybox2d will be with a b2World object.
 
 === Creating and Destroying a World ===
 
 Creating a world is fairly simple. You just need to provide a gravity vector and a Boolean indicating if bodies can sleep. Usually you will create and destroy a world using new and delete.
 
 {{{
-b2World* myWorld = new b2World(gravity, doSleep);
+b2World* myWorld = new b2World(gravity, doSleep)
 ... do stuff ...
-delete myWorld;
+delete myWorld
 }}}
 
 === Using a World ===
@@ -1513,10 +1579,10 @@ The world class contains factories for creating and destroying bodies and joints
 The world class is used to drive the simulation. You specify a time step and a velocity and position iteration count. For example:
 
 {{{
-float32 timeStep = 1.0f / 60.f;
-int32 velocityIterations = 10;
-int32 positionIterations = 8;
-myWorld->Step(timeStep, velocityIterations, positionIterations);
+float32 timeStep = 1.0f / 60.f
+int32 velocityIterations = 10
+int32 positionIterations = 8
+myWorld->Step(timeStep, velocityIterations, positionIterations)
 }}}
 
 After the time step you can examine your bodies and joints for information. Most likely you will grab the position off the bodies so that you can update your actors and render them. You can perform the time step anywhere in your game loop, but you should be aware of the order of things. For example, you must create bodies before the time step if you want to get collision results for the new bodies in that frame.
@@ -1525,10 +1591,10 @@ As I discussed above in the HelloWorld tutorial, you should use a fixed time ste
 
 The iteration count controls how many times the constraint solver sweeps over all the contacts and joints in the world. More iteration always yields a better simulation. But don't trade a small time step for a large iteration count. 60Hz and 10 iterations is far better than 30Hz and 20 iterations.
 
-After stepping, you should clear any forces you have applied to your bodies. This is done with the command b2World::ClearForces. This lets you take multiple sub-steps with the same force field.
+After stepping, you should clear any forces you have applied to your bodies. This is done with the command b2World.ClearForces. This lets you take multiple sub-steps with the same force field.
 
 {{{
-myWorld->ClearForces();
+myWorld->ClearForces()
 }}}
 
 === Exploring the World ===
@@ -1538,7 +1604,7 @@ The world is a container for bodies, contacts, and joints. You can grab the body
 {{{
 for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
 {
-    b->WakeUp();
+    b->WakeUp()
 }
 }}}
 
@@ -1547,7 +1613,7 @@ Unfortunately real programs can be more complicated. For example, the following 
 {{{
 for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
 {
-    GameActor* myActor = (GameActor*)b->GetUserData();
+    GameActor* myActor = (GameActor*)b->GetUserData()
     if (myActor->IsDead())
     {
         myWorld->DestroyBody(b); // ERROR: now GetNext returns garbage.
@@ -1555,18 +1621,18 @@ for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
 }
 }}}
 
-Everything goes ok until a body is destroyed. Once a body is destroyed, its next pointer becomes invalid. So the call to b2Body::GetNext() will return garbage. The solution to this is to copy the next pointer before destroying the body.
+Everything goes ok until a body is destroyed. Once a body is destroyed, its next pointer becomes invalid. So the call to b2Body.GetNext() will return garbage. The solution to this is to copy the next pointer before destroying the body.
 
 {{{
-b2Body* node = myWorld->GetBodyList();
+b2Body* node = myWorld->GetBodyList()
 while (node)
 {
-    b2Body* b = node;
-    node = node->GetNext();
-    GameActor* myActor = (GameActor*)b->GetUserData();
+    b2Body* b = node
+    node = node->GetNext()
+    GameActor* myActor = (GameActor*)b->GetUserData()
     if (myActor->IsDead())
     {
-        myWorld->DestroyBody(b);
+        myWorld->DestroyBody(b)
     }
 }
 }}}
@@ -1574,18 +1640,18 @@ while (node)
 This safely destroys the current body. However, you may want to call a game function that may destroy multiple bodies. In this case you need to be very careful. The solution is application specific, but for convenience I'll show one method of solving the problem.
 
 {{{
-b2Body* node = myWorld->GetBodyList();
+b2Body* node = myWorld->GetBodyList()
 while (node)
 {
-    b2Body* b = node;
-    node = node->GetNext();
-    GameActor* myActor = (GameActor*)b->GetUserData();
+    b2Body* b = node
+    node = node->GetNext()
+    GameActor* myActor = (GameActor*)b->GetUserData()
     if (myActor->IsDead())
     {
-        bool otherBodiesDestroyed = GameCrazyBodyDestroyer(b);
+        bool otherBodiesDestroyed = GameCrazyBodyDestroyer(b)
         if (otherBodiesDestroyed)
         {
-            node = myWorld->GetBodyList();
+            node = myWorld->GetBodyList()
         }
     }
 }
@@ -1595,7 +1661,7 @@ Obviously to make this work, GameCrazyBodyDestroyer must be honest about what it
 
 === AABB Queries ===
 
-Sometimes you want to determine all the shapes in a region. The b2World class has a fast log(N) method for this using the broad-phase data structure. You provide an AABB in world coordinates and an implementation of b2QueryCallback. The world calls your class with each fixture whose AABB overlaps the query AABB. Return true to continue the query, otherwise return false. For example, the following code finds all the fixtures that potentially intersect a specified AABB and wakes up all of the associated bodies.
+Sometimes you want to determine all the shapes in a region. The b2World class has a fast log(N) method for this using the broad-phase data structure. You provide an AABB in world coordinates and an implementation of b2QueryCallback. The world calls your class with each fixture whose AABB overlaps the query AABB. Return True to continue the query, otherwise return False. For example, the following code finds all the fixtures that potentially intersect a specified AABB and wakes up all of the associated bodies.
 
 {{{
 class MyQueryCallback : public b2QueryCallback
@@ -1603,18 +1669,18 @@ class MyQueryCallback : public b2QueryCallback
 public:
     bool ReportFixture(b2Fixture* fixture)
     {
-        b2Body* body = fixture->GetBody();
-        body->WakeUp();
-        // Return true to continue the query.
-        return true;
+        b2Body* body = fixture->GetBody()
+        body->WakeUp()
+        // Return True to continue the query.
+        return True
     }
-};
+}
 ...
-MyQueryCallback callback;
-b2AABB aabb;
-aabb.lowerBound.Set(-1.0f, -1.0f);
-aabb.upperBound.Set(1.0f, 1.0f);
-myWorld->Query(&callback, aabb);
+MyQueryCallback callback
+b2AABB aabb
+aabb.lowerBound.Set(-1.0f, -1.0f)
+aabb.upperBound.Set(1.0f, 1.0f)
+myWorld->Query(&callback, aabb)
 }}}
 
 You cannot make any assumptions about the order of the callbacks.
@@ -1636,25 +1702,25 @@ class MyRayCastCallback : public b2RayCastCallback
 public:
     MyRayCastCallback()
     {
-        m_fixture = NULL;
+        m_fixture = NULL
     }
     float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
     {
-        m_fixture = fixture;
-        m_point = point;
-        m_normal = normal;
-        m_fraction = fraction;
-        return fraction;
+        m_fixture = fixture
+        m_point = point
+        m_normal = normal
+        m_fraction = fraction
+        return fraction
     }
-    b2Fixture* m_fixture;
-    b2Vec2 m_point;
-    b2Vec2 m_normal;
-    float32 m_fraction;
-};
-MyRayCastCallback callback;
-b2Vec2 point1(-1.0f, 0.0f);
-b2Vec2 point2(3.0f, 1.0f);
-myWorld->RayCast(&callback, point1, point2);
+    b2Fixture* m_fixture
+    b2Vec2 m_point
+    b2Vec2 m_normal
+    float32 m_fraction
+}
+MyRayCastCallback callback
+b2Vec2 point1(-1.0f, 0.0f)
+b2Vec2 point2(3.0f, 1.0f)
+myWorld->RayCast(&callback, point1, point2)
 }}}
 
 *Caution*
@@ -1662,10 +1728,10 @@ myWorld->RayCast(&callback, point1, point2);
 Due to round-off errors, ray casts can sneak through small cracks between polygons in your static environment. If this is not acceptable in your application, please enlarge your polygons slightly.
 
 {{{
-void SetLinearVelocity(const b2Vec2& v);
-b2Vec2 GetLinearVelocity() const;
-void SetAngularVelocity(float32 omega);
-float32 GetAngularVelocity() const;
+void SetLinearVelocity(const b2Vec2& v)
+b2Vec2 GetLinearVelocity() const
+void SetAngularVelocity(float32 omega)
+float32 GetAngularVelocity() const
 }}}
 
 === Forces and Impulses ===
@@ -1673,18 +1739,18 @@ float32 GetAngularVelocity() const;
 You can apply forces, torques, and impulses to a body. When you apply a force or an impulse, you provide a world point where the load is applied. This often results in a torque about the center of mass.
 
 {{{
-void ApplyForce(const b2Vec2& force, const b2Vec2& point);
-void ApplyTorque(float32 torque);
-void ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point);
-void ApplyAngularImpulse(float32 impulse);
+void ApplyForce(const b2Vec2& force, const b2Vec2& point)
+void ApplyTorque(float32 torque)
+void ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point)
+void ApplyAngularImpulse(float32 impulse)
 }}}
 
 Applying a force, torque, or impulse wakes the body. Sometimes this is undesirable. For example, you may be applying a steady force and want to allow the body to sleep to improve performance. In this case you can use the following code.
 
 {{{
-if (myBody->IsAwake() == true)
+if (myBody->IsAwake() == True)
 {
-    myBody->ApplyForce(myForce, myPoint);
+    myBody->ApplyForce(myForce, myPoint)
 }
 }}}
 
@@ -1693,10 +1759,10 @@ if (myBody->IsAwake() == true)
 The body class has some utility functions to help you transform points and vectors between local and world space. If you don't understand these concepts, please read "Essential Mathematics for Games and Interactive Applications" by Jim Van Verth and Lars Bishop. These functions are efficient (when inlined).
 
 {{{
-b2Vec2 GetWorldPoint(const b2Vec2& localPoint);
-b2Vec2 GetWorldVector(const b2Vec2& localVector);
-b2Vec2 GetLocalPoint(const b2Vec2& worldPoint);
-b2Vec2 GetLocalVector(const b2Vec2& worldVector);
+b2Vec2 GetWorldPoint(const b2Vec2& localPoint)
+b2Vec2 GetWorldVector(const b2Vec2& localVector)
+b2Vec2 GetLocalPoint(const b2Vec2& worldPoint)
+b2Vec2 GetLocalVector(const b2Vec2& worldVector)
 }}}
 
 === Lists ===
@@ -1706,7 +1772,7 @@ You can iterate over a body's fixtures. This is mainly useful if you need to acc
 {{{
 for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext())
 {
-    MyFixtureData* data = (MyFixtureData*)f->GetUserData();
+    MyFixtureData* data = (MyFixtureData*)f->GetUserData()
     ... do something with data ...
 }
 }}}
@@ -1719,11 +1785,9 @@ The body also provides a list of associated contacts. You can use this to get in
 
 == Implicit Destruction ==
 
-Box2D doesn't use reference counting. So if you destroy a body it is really gone. Accessing a pointer to a destroyed body has undefined behavior. In other words, your program will likely crash and burn. To help fix these problems, the debug build memory manager fills destroyed entities with FDFDFDFD. This can help find problems more easily in some cases.
-
 If you destroy a Box2D entity, it is up to you to make sure you remove all references to the destroyed object. This is easy if you only have a single reference to the entity. If you have multiple references, you might consider implementing a handle class to wrap the raw pointer.
 
-Often when using Box2D you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called implicit destruction.
+Often when using pybox2d you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called implicit destruction.
 
 When you destroy a body, all its attached shapes, joints, and contacts are destroyed. This is called implicit destruction. Any body connected to one of those joints and/or contacts is woken. This process is usually convenient. However, you must be aware of one crucial issue:
 
@@ -1735,7 +1799,7 @@ To help you nullify your joint pointers, Box2D provides a listener class named b
 
 Implicit destruction is a great convenience in many cases. It can also make your program fall apart. You may store pointers to shapes and joints somewhere in your code. These pointers become orphaned when an associated body is destroyed. The situation becomes worse when you consider that joints are often created by a part of the code unrelated to management of the associated body. For example, the testbed creates a b2MouseJoint for interactive manipulation of bodies on the screen.
 
-Box2D provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.
+pybox2d provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.
 
 You can implement a b2DestructionListener that allows b2World to inform you when a shape or joint is implicitly destroyed because an associated body was destroyed. This will help prevent your code from accessing orphaned pointers.
 
@@ -1746,13 +1810,13 @@ class MyDestructionListener : public b2DestructionListener
     {
         // remove all references to joint.
     }
-};
+}
 }}}
 
 You can then register an instance of your destruction listener with your world object. You should do this during world initialization.
 
 {{{
-myWorld->SetListener(myDestructionListener);
+myWorld->SetListener(myDestructionListener)
 }}}
 
 = Debug Drawing =
@@ -1782,6 +1846,53 @@ Here are the current limitations:
  # Chains of bodies connected by joints may stretch if a lighter body is supporting a heavier body. For example, a wrecking ball connect to a chain of light weight bodies may not be stable. Stability degrades as the mass ratio passes 10:1.
  # There is typically around 0.5cm of slop in shape versus shape collision.
  # Continuous collision is processed sequentially. In a time of impact event, the body is moved back and held there for the rest of the time step. This may make fast moving objects appear to move in a non-smooth manner.
+
+= Settings =
+
+The C++ header file b2Settings.h, which is in the pybox2d source distribution, contains:
+
+ * Constants (accessible by way of the main module or b2Globals)
+ * Allocation wrappers
+ * The version number
+ * Friction and restitution mixing functions
+ * A wrapper to convert assertions into Python exceptions
+
+Please note that the average user should NOT need to worry about this. It is left in here for completeness.
+
+== Constants ==
+
+pybox2d defines several constants. These are all documented in b2Settings.h. Normally you do not need to adjust these constants, as this requires rebuilding the library from the source code in order to use. Also, this will make your library incompatible with the main pybox2d release. If you are creating your own binaries for your intended audience, this may not be an issue, but it is looked down upon for open source releases.
+
+pybox2d uses floating point math for collision and simulation. Due to round-off error some numerical tolerances are defined. Some tolerances are absolute and some are relative. Absolute tolerances use MKS units.
+
+{{{
+>>> import Box2D
+>>> Box2D.b2Globals.b2_version
+b2Version(2.2.0)
+>>> Box2D.b2_pi
+3.1415926535900001
+>>> Box2D.b2_maxPolygonVertices
+16
+>>>
+}}}
+
+== Version ==
+
+The pybox2d version number is accessible from {{{ Box2D.__version__ }}}, and the internal Box2D version can be determined from {{{ Box2D.b2Globals.b2_version }}}.
+
+== Friction and Restitution Mixing ==
+
+These are placed in the settings file in case you need to customize them for your application.
+
+== Memory Management ==
+
+A large number of the decisions about the design of Box2D were based on the need for quick and efficient use of memory. In this section I will discuss how and why Box2D allocates memory.
+
+Box2D tends to allocate a large number of small objects (around 50-300 bytes). Using the system heap through malloc or new for small objects is inefficient and can cause fragmentation. Many of these small objects may have a short life span, such as contacts, but can persist for several time steps. So we need an allocator that can efficiently provide heap memory for these objects.
+
+Box2D's solution is to use a small object allocator (SOA) called b2BlockAllocator. The SOA keeps a number of growable pools of varying sizes. When a request is made for memory, the SOA returns a block of memory that best fits the requested size. When a block is freed, it is returned to the pool. Both of these operations are fast and cause little heap traffic.
+
+While executing a time step, Box2D needs some temporary workspace memory. For this, it uses a stack allocator called b2StackAllocator to avoid per-step heap allocations. You don't need to interact with the stack allocator, but it's good to know it's there.
 
 = References =
 
