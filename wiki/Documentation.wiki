@@ -7,13 +7,13 @@ Please feel free to discuss your ideas and/or problems in the forums, also.
 
 ==Manual==
 
-The original Box2D manual has been ported to Python and mostly updated for the latest version. You can find it [http://www.box2d.org/wiki/index.php?title=Python_Manual here].
+The original Box2D manual has been ported to Python and mostly updated for the 2.0.2 version. You can find it [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/manual.htm here]. *Please note* that the majority of this does NOT apply to the new 2.1 version!
 
-Basic API documentation is available thanks to epydoc, [http://pybox2d.googlecode.com/svn/epydoc/html/index.html here]. It's hardly user-friendly, so unless you know what you're looking for, chances are the testbed examples are still your best bet.
+Basic API documentation is available thanks to epydoc, for [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/epydoc/html/index.html 2.0.2] and for [http://pybox2d.googlecode.com/svn/doc/epydoc/index.html 2.1]. Though the 2.1 version has been improved in terms of user-friendliness, neither will be useful unless you know what you're looking for. The [http://code.google.com/p/pybox2d/source/browse/#svn%2Ftrunk%2Fexamples testbed] examples are your best bet at seeing how to implement things.
 
 ==Version Numbers==
 
-The version numbers follow the main Box2D releases (currently 2.0.1) with a release number attached. For example, 2.0.1b3 is based on Box2D release 2.0.1 and is the third release of the bindings.
+The version numbers follow the main Box2D releases with a release number attached. For example, 2.0.1b3 is based on Box2D release 2.0.1 and is the third release of the bindings.
 
 Starting Box2D 2.0.2b1, the version number of the source code is available in Box2D:
 {{{
