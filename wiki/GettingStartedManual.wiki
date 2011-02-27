@@ -240,7 +240,7 @@ Every pybox2d program begins with the creation of a b2World object. b2World is t
 
 {{{
 |  __init__(self, *args, **kwargs)
-|      __init__(self, *args, **kwargs) -> b2World
+|      __init__(self, *args, **kwargs) . b2World
 |      Arguments:
 |      * gravity (default (0, -10))
 |      * doSleep (default True)
@@ -332,9 +332,9 @@ w.CreateBody(b)
 v=vec2()
 
 # and so on. The names are the same as the original library, with 'b2' stripped and the first character made lower-case.
-# b2World -> world
-# b2BodyDef -> bodyDef
-# b2Vec2 -> vec2
+# b2World . world
+# b2BodyDef . bodyDef
+# b2Vec2 . vec2
 
 }}}
 
@@ -582,14 +582,10 @@ points=[worldManifold.points[i] for i in range(manifold.pointCount)]
 During simulation shapes may move and the manifolds may change. Points may be added or removed. You can detect this using b2GetPointStates.
 
 {{{
-state1=[b2PointState(), b2PointState()]
-state2=[b2PointState(), b2PointState()]
-b2GetPointStates(state1, state2, manifold1, manifold2)
-if state1[0] == b2_removeState:
+state1, state2 = b2GetPointStates(manifold1, manifold2)
+if state1 == b2_removeState:
     pass
     # process event
-
-# TODO: test/wrap b2GetPointStates / b2PointState
 }}}
 
 == Distance ==
@@ -861,7 +857,9 @@ bodyDef.awake = True
 
 You may want a rigid body, such as a character, to have a fixed rotation. Such a body should not rotate, even under load. You can use the fixed rotation setting to achieve this:
 
+{{{
 bodyDef.fixedRotation = True
+}}}
 
 The fixed rotation flag causes the rotational inertia and its inverse to be set to zero.
 
@@ -875,7 +873,9 @@ Normally CCD is not used between dynamic bodies. This is done to keep performanc
 
 Fast moving objects in Box2D can be labeled as bullets. Bullets will perform CCD with both static and dynamic bodies. You should decide what bodies should be bullets based on your game design. If you decide a body should be treated as a bullet, use the following setting.
 
+{{{
 bodyDef.bullet = True
+}}}
 
 The bullet flag only affects dynamic bodies.
 
@@ -887,17 +887,19 @@ You may wish a body to be created but not participate in collision or dynamics. 
 
 You can create a body in an inactive state and later re-activate it.
 
+{{{
 bodyDef.active = True
+}}}
 
 Joints may be connected to inactive bodies. These joints will not be simulated. You should be careful when you activate a body that its joints are not distorted.
 
 === User Data ===
 
-User data is a void pointer. This gives you a hook to link your application objects to bodies. You should be consistent to use the same object type for all body user data.
+userData gives you a hook to link your application objects to bodies. You should be consistent to use the same object type for all body user data.
 
-b2BodyDef bodyDef
-
-bodyDef.userData = &myActor
+{{{
+bdef=b2BodyDef(userData=myActor)
+}}}
 
 == Body Factory ==
 
@@ -906,23 +908,19 @@ Bodies are created and destroyed using a body factory provided by the world clas
 Bodies can be dynamic or static depending on the mass properties. Both body types use the same creation and destruction methods.
 
 {{{
-b2Body* dynamicBody = myWorld->CreateBody(&bodyDef)
-... do stuff ...
-myWorld->DestroyBody(dynamicBody)
-dynamicBody = NULL
-}}}
-
-*Caution*
-
-{{{
-You should never use new or malloc to create a body. The world won't know about the body and the body won't be properly initialized.
+dynamicBody = myWorld.CreateDynamicBody(bodyDef)
+# ... do stuff ...
+myWorld.DestroyBody(dynamicBody)
+dynamicBody = None
 }}}
 
 Static bodies do not move under the influence of other bodies. You may manually move static bodies, but you should be careful so that you don't squash dynamic bodies between two or more static bodies. Friction will not work correctly if you move a static body. Static bodies never collide with static or kinematic bodies. It is faster to attach several shapes to a static body than to create several static bodies with a single shape on each one. Internally, Box2D sets the mass and inverse mass of static bodies to zero. This makes the math work out so that most algorithms don't need to treat static bodies as a special case.
 
-Box2D does not keep a reference to the body definition or any of the data it holds (except user data pointers). So you can create temporary body definitions and reuse the same body definitions.
+Box2D does not keep a reference to the body definition or any of the data it holds (except user data). So you can create temporary body definitions and reuse the same body definitions.
 
-When you destroy a body, the attached fixtures and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers.
+*Caution*
+
+When you destroy a body, the attached fixtures and joints are automatically destroyed. This has important implications for how you manage shape and joint pointers. You do need to be sure that you remove links to these after they are destroyed by Box2D. Failure to do so would very easily cause a segfault or crash.
 
 == Using a Body ==
 
@@ -935,41 +933,35 @@ Every body has a mass (scalar), center of mass (2-vector), and rotational inerti
 Normally the mass properties of a body are established automatically when fixtures are added to the body. You can also adjust the mass of a body at run-time. This is usually done when you have special game scenarios that require altering the mass.
 
 {{{
-void SetMassData(const b2MassData* data)
+body.massData=b2MassData(...)
 }}}
 
 After setting a body's mass directly, you may wish to revert to the natural mass dictated by the fixtures. You can do this with:
 
 {{{
-void ResetMassData()
+body.ResetMassData()
 }}}
 
-The body's mass data is available through the following functions:
+The body's mass data is available through the following read-write properties:
 
 {{{
-float32 GetMass() const
-float32 GetInertia() const
-const b2Vec2& GetLocalCenter() const
-void GetMassData(b2MassData* data) const
+body.mass
+body.inertia
+body.localCenter
+body.massData
 }}}
 
 === State Information ===
 
-There are many aspects to the body's state. You can access this state data efficiently through the following functions:
+There are many aspects to the body's state. You can access this state data efficiently through the following read-write properties:
 
 {{{
-void SetType(b2BodyType type)
-b2BodyType GetType()
-void SetBullet(bool flag)
-bool IsBullet() const
-void SetSleepingAllowed(bool flag)
-bool IsSleepingAllowed() const
-void SetAwake(bool flag)
-bool IsAwake() const
-void SetActive(bool flag)
-bool IsActive() const
-void SetFixedRotation(bool flag)
-bool IsFixedRotation() const
+body.type (b2BodyType)
+body.bullet
+body.awake
+body.sleepingAllowed
+body.active
+body.fixedRotation
 }}}
 
 === Position and Velocity ===
@@ -977,17 +969,18 @@ bool IsFixedRotation() const
 You can access the position and rotation of a body. This is common when rendering your associated game actor. You can also set the position, although this is less common since you will normally use pybox2d to simulate movement.
 
 {{{
-bool SetTransform(const b2Vec2& position, float32 angle)
-const b2Transform& GetTransform() const
-const b2Vec2& GetPosition() const
-float32 GetAngle() const
+body.transform
+body.position
+body.angle
 }}}
 
 You can access the center of mass position in local and world coordinates. Much of the internal simulation in Box2D uses the center of mass. However, you should normally not need to access it. Instead you will usually work with the body transform. For example, you may have a body that is square. The body origin might be a corner of the square, while the center of mass is located at the center of the square.
 
 {{{
-const b2Vec2& GetWorldCenter() const
-const b2Vec2& GetLocalCenter() const
+body.worldCenter (read-only)
+body.localCenter (read-write)
+body.linearVelocity (read-write)
+body.angularVelocity (read-write)
 }}}
 
 You can access the linear and angular velocity. The linear velocity is for the center of mass. Therefore, the linear velocity may change if the mass properties change.
@@ -1010,7 +1003,7 @@ You can specify user data for any joint type and you can provide a flag to preve
 
 Many joint definitions require that you provide some geometric data. Often a joint will be defined by anchor points. These are points fixed in the attached bodies. pybox2d requires these points to be specified in local coordinates. This way the joint can be specified even when the current body transforms violate the joint constraint --- a common occurrence when a game is saved and reloaded. Additionally, some joint definitions need to know the default relative angle between the bodies. This is necessary to constrain rotation correctly.
 
-Initializing the geometric data can be tedious, so many joints have initialization functions that use the current body transforms to remove much of the work. However, these initialization functions should usually only be used for prototyping. Production code should define the geometry directly. This will make joint behavior more robust.
+Initializing the geometric data can be tedious, so many joints have initialization functions and {{{__init__}}} kwargs that use the current body transforms to remove much of the work. However, these initialization functions should usually only be used for prototyping. Production code should define the geometry directly. This will make joint behavior more robust.
 
 The rest of the joint definition data depends on the joint type. We cover these now.
 
@@ -1018,30 +1011,29 @@ The rest of the joint definition data depends on the joint type. We cover these 
 
 Joints are created and destroyed using the world factory methods. This brings up an old issue:
 
-*Caution*
-
-Don't try to create a joint on the stack or on the heap using new or malloc. You must create and destroy bodies and joints using the create and destroy methods of the b2World class.
-
 Here's an example of the lifetime of a revolute joint:
 
 {{{
-b2RevoluteJointDef jointDef
-jointDef.body1 = myBody1
-jointDef.body2 = myBody2
-jointDef.anchorPoint = myBody1->GetCenterPosition()
-b2RevoluteJoint* joint = myWorld->CreateJoint(&jointDef)
-... do stuff ...
-myWorld->DestroyJoint(joint)
-joint = NULL
+joint=world.CreateRevoluteJoint(
+    bodyA=myBody1,
+    bodyB=myBody2,
+    anchor=myBody1.worldCenter)
+
+# ... do stuff ...
+
+world.DestroyJoint(joint)
+joint = None
 }}}
 
-It is always good to nullify your pointer after they are destroyed. This will make the program crash in a controlled manner if you try to reuse the pointer.
-
-The lifetime of a joint is not simple. Heed this warning well:
+It is always good to nullify your reference after they are destroyed. This will make the program crash in a controlled manner if you try to reuse the reference.
 
 *Caution*
 
+{{{
+The lifetime of a joint is not simple. Heed this warning well:
+
 Joints are destroyed when an attached body is destroyed.
+}}}
 
 This precaution is not always necessary. You may organize your game engine so that joints are always destroyed before the attached bodies. In this case you don't need to implement the listener class. See the section on Implicit Destruction for details.
 
@@ -1052,18 +1044,18 @@ Many simulations create the joints and don't access them again until they are de
 First of all, you can get the bodies, anchor points, and user data from a joint.
 
 {{{
-b2Body* GetBody1()
-b2Body* GetBody2()
-b2Vec2 GetAnchor1()
-b2Vec2 GetAnchor2()
-void* GetUserData()
+joint.bodyA (read-only)
+joint.bodyB
+joint.anchorA (read-only)
+joint.anchorB
+joint.userData (read-write)
 }}}
 
 All joints have a reaction force and torque. This the reaction force applied to body 2 at the anchor point. You can use reaction forces to break joints or trigger other game events. These functions may do some computations, so don't call them if you don't need the result.
 
 {{{
-b2Vec2 GetReactionForce()
-float32 GetReactionTorque()
+joint.GetReactionForce(inverse_dt)
+joint.GetReactionTorque(inverse_dt)
 }}}
 
 == Distance Joint ==
@@ -1075,9 +1067,7 @@ One of the simplest joint is a distance joint which says that the distance betwe
 Here is an example of a distance joint definition. In this case we decide to allow the bodies to collide.
 
 {{{
-b2DistanceJointDef jointDef
-jointDef.Initialize(myBody1, myBody2, worldAnchorOnBody1, worldAnchorOnBody2)
-jointDef.collideConnected = True
+world.CreateDistanceJoint(bodyA=myBody1, bodyB=myBody2, anchorA=worldAnchorOnBody1, anchorB=worldAnchorOnBody2, collideConnected=True)
 }}}
 
 The distance joint can also be made soft, like a spring-damper connection. See the Web example in the testbed to see how this behaves.
@@ -1087,8 +1077,8 @@ Softness is achieved by tuning two constants in the definition: frequency and da
 The damping ratio is non-dimensional and is typically between 0 and 1, but can be larger. At 1, the damping is critical (all oscillations should vanish).
 
 {{{
-jointDef.frequencyHz = 4.0f
-jointDef.dampingRatio = 0.5f
+jointDef.frequencyHz = 4.0
+jointDef.dampingRatio = 0.5
 }}}
 
 == Revolute Joint ==
@@ -1102,8 +1092,7 @@ To specify a revolute you need to provide two bodies and a single anchor point i
 In this example, two bodies are connected by a revolute joint at the first body's center of mass.
 
 {{{
-b2RevoluteJointDef jointDef
-jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter())
+world.CreateRevoluteJoint(bodyA=myBody1, bodyB=myBody2, anchor=myBody1.worldCenter)
 }}}
 
 The revolute joint angle is positive when body2 rotates CCW about the angle point. Like all angles in pybox2d, the revolute angle is measured in radians. By convention the revolute joint angle is zero when the joint is created using Initialize(), regardless of the current rotation of the two bodies.
@@ -1123,43 +1112,51 @@ You can use a joint motor to simulate joint friction. Just set the joint speed t
 Here's a revision of the revolute joint definition above; this time the joint has a limit and a motor enabled. The motor is setup to simulate joint friction.
 
 {{{
-b2RevoluteJointDef jointDef
-jointDef.Initialize(body1, body2, myBody1->GetWorldCenter())
-jointDef.lowerAngle = -0.5f * b2_pi; // -90 degrees
-jointDef.upperAngle = 0.25f * b2_pi; // 45 degrees
-jointDef.enableLimit = True
-jointDef.maxMotorTorque = 10.0f
-jointDef.motorSpeed = 0.0f
-jointDef.enableMotor = True
+rj=world.CreateRevoluteJoint(
+    bodyA=myBody1, 
+    bodyB=myBody2, 
+    anchor=myBody1.worldCenter,
+    lowerAngle = -0.5 * b2_pi, # -90 degrees
+    upperAngle = 0.25 * b2_pi, #  45 degrees
+    enableLimit = True,
+    maxMotorTorque = 10.0,
+    motorSpeed = 0.0,
+    enableMotor = True,
+    )
 }}}
 
 You can access a revolute joint's angle, speed, and motor torque.
 
 {{{
-float32 GetJointAngle() const
-float32 GetJointSpeed() const
-float32 GetMotorTorque() const
+rj.angle (read-only)
+rj.speed
+rj.GetMotorTorque(inverse_dt)
 }}}
 
 You also update the motor parameters each step.
 
 {{{
-void SetMotorSpeed(float32 speed)
-void SetMaxMotorTorque(float32 torque)
+rj.motorSpeed (read-write)
+rj.maxMotorTorque = 0 # (write-only)
 }}}
 
 Joint motors have some interesting abilities. You can update the joint speed every time step so you can make the joint move back-and-forth like a sine-wave or according to whatever function you want.
 
 {{{
-... Game Loop Begin ...
-myJoint->SetMotorSpeed(cosf(0.5f * time))
-... Game Loop End ...
+from math import cos
+# ... Game Loop Begin ...
+myJoint.motorSpeed=cos(0.5 * time)
+# ... Game Loop End ...
+}}}
+
 You can also use joint motors to track a desired joint angle. For example:
-... Game Loop Begin ...
-float32 angleError = myJoint->GetJointAngle() - angleTarget
-float32 gain = 0.1f
-myJoint->SetMotorSpeed(-gain * angleError)
-... Game Loop End ...
+
+{{{
+# ... Game Loop Begin ...
+angleError = myJoint.angle - angleTarget
+gain = 0.1
+myJoint.SetMotorSpeed(-gain * angleError)
+# ... Game Loop End ...
 }}}
 
 Generally your gain parameter should not be too large. Otherwise your joint may become unstable.
@@ -1173,29 +1170,31 @@ A prismatic joint allows for relative translation of two bodies along a specifie
 The prismatic joint definition is similar to the revolute joint description; just substitute translation for angle and force for torque. Using this analogy provides an example prismatic joint definition with a joint limit and a friction motor:
 
 {{{
-b2PrismaticJointDef jointDef
-b2Vec2 worldAxis(1.0f, 0.0f)
-jointDef.Initialize(myBody1, myBody2, myBody1->GetWorldCenter(), worldAxis)
-jointDef.lowerTranslation = -5.0f
-jointDef.upperTranslation = 2.5f
-jointDef.enableLimit = True
-jointDef.motorForce = 1.0f
-jointDef.motorSpeed = 0.0f
-jointDef.enableMotor = True
+pj=world.CreatePrismaticJoint(
+        bodyA=myBody1, 
+        bodyB=myBody2, 
+        anchor=myBody1.worldCenter,
+        axis=(1, 0),
+        lowerTranslation = -5.0,
+        upperTranslation = 2.5,
+        enableLimit = True,
+        motorForce = 1.0,
+        motorSpeed = 0.0,
+        enableMotor = True,
+    )
 }}}
 
 The revolute joint has an implicit axis coming out of the screen. The prismatic joint needs an explicit axis parallel to the screen. This axis is fixed in the two bodies and follows their motion.
 
 Like the revolute joint, the prismatic joint translation is zero when the joint is created using Initialize(). So be sure zero is between your lower and upper translation limits.
 
-Using a prismatic joint is similar to using a revolute joint. Here are the relevant member functions:
+Using a prismatic joint is similar to using a revolute joint. Here are the relevant properties:
 
 {{{
-float32 GetJointTranslation() const
-float32 GetJointSpeed() const
-float32 GetMotorForce() const
-void SetMotorSpeed(float32 speed)
-void SetMotorForce(float32 force)
+pj.translation (read-only)
+pj.speed (read-only)
+pj.motorSpeed (read-write)
+pj.motorForce (read-write)
 }}}
 
 == Pulley Joint ==
@@ -1221,18 +1220,21 @@ Pulleys can be troublesome when one side is fully extended. The rope on the othe
 Here is an example pulley definition:
 
 {{{
-b2Vec2 anchor1 = myBody1->GetWorldCenter()
-b2Vec2 anchor2 = myBody2->GetWorldCenter()
-b2Vec2 groundAnchor1(p1.x, p1.y + 10.0f)
-b2Vec2 groundAnchor2(p2.x, p2.y + 12.0f)
-float32 ratio = 1.0f
-b2PulleyJointDef jointDef
-jointDef.Initialize(myBody1, myBody2, groundAnchor1, groundAnchor2, anchor1, anchor2, ratio)
-jointDef.maxLength1 = 18.0f
-jointDef.maxLength2 = 20.0f
-Pulley joints provide the current lengths.
-float32 GetLength1() const
-float32 GetLength2() const
+pj=world.CreatePulleyJoint(
+        bodyA=myBody1, 
+        bodyB=myBody2, 
+        groundAnchorA=myBody1.worldCenter,
+        groundAnchorB=myBody2.worldCenter,
+        anchorA=(p1.x, p1.y + 10.0),
+        anchorB=(p2.x, p2.y + 12.0),
+        ratio=1.0,
+        maxLengthA=18,
+        maxLengthB=20,
+    )
+
+# Pulley joints provide the current lengths.
+pj.length1
+pj.length2
 }}}
 
 == Gear Joint ==
@@ -1252,18 +1254,20 @@ coordinate1 + ratio * coordinate2 == constant
 Here is an example gear joint:
 
 {{{
-b2GearJointDef jointDef
-jointDef.body1 = myBody1
-jointDef.body2 = myBody2
-jointDef.joint1 = myRevoluteJoint
-jointDef.joint2 = myPrismaticJoint
-jointDef.ratio = 2.0f * b2_pi / myLength
-Note that the gear joint depends on two other joints. This creates a fragile situation. What happens if those joints are deleted?
+pj=world.CreateGearJoint(
+        bodyA=myBody1, 
+        bodyB=myBody2, 
+        joint1=myRevoluteJoint,
+        joint2=myPrismaticJoint,
+        ratio = 2.0 * b2_pi / myLength
+    )
 }}}
+
+Note that the gear joint depends on two other joints. This creates a fragile situation. What happens if those joints are deleted?
 
 *Caution*
 
-Always delete gear joints before the revolute/prismatic joints on the gears. Otherwise your code will crash in a bad way due to the orphaned joint pointers in the gear joint. You should also delete the gear joint before you delete any of the bodies involved.
+Always delete gear joints *before* the revolute/prismatic joints on the gears. Otherwise your code will crash in a bad way due to the orphaned joint pointers in the gear joint. You should also delete the gear joint before you delete any of the bodies involved.
 
 == Mouse Joint ==
 
@@ -1271,11 +1275,13 @@ The mouse joint is used in the testbed to manipulate bodies with the mouse. It a
 
 The mouse joint definition has a target point, maximum force, frequency, and damping ratio. The target point initially coincides with the body's anchor point. The maximum force is used to prevent violent reactions when multiple dynamic bodies interact. You can make this as large as you like. The frequency and damping ratio are used to create a spring/damper effect similar to the distance joint.
 
- Many users have tried to adapt the mouse joint for game play. Users often want to achieve precise positioning and instantaneous response. The mouse joint doesn't work very well in that context. You may wish to consider using kinematic bodies instead.
+Many users have tried to adapt the mouse joint for game play. Users often want to achieve precise positioning and instantaneous response. The mouse joint doesn't work very well in that context. You may wish to consider using kinematic bodies instead.
 
 == Line Joint ==
 
-The line joint is like the prismatic joint with the rotation restriction removed. This was requested by a user to model a vehicle wheel with a suspension. See b2LineJoint.h for details.
+The line joint is like the prismatic joint with the rotation restriction removed. This was requested by a user to model a vehicle wheel with a suspension.
+
+As such, the initialization is very similar to the prismatic joint. Use introspection to find out more about it.
 
 == Weld Joint ==
 
@@ -1329,27 +1335,15 @@ So you might gather that there may be contacts created for fixtures that are not
 
 As mentioned before, the contact class is created and destroyed by Box2D. Contact objects are not created by the user. However, you are able to access the contact class and interact with it.
 
-You can access the raw contact manifold:
+You can access the raw contact manifold or the world manifold: {{{ contact.manifold and contact.worldManifold }}}.
 
-{{{
-b2Manifold* GetManifold()
-const b2Manifold* GetManifold() const
-}}}
-
+The latter uses the current positions of the bodies to compute world positions of the contact points.
 You can potentially modify the manifold, but this is generally not supported and is for advanced usage.
-
-There is a helper function to get the b2WorldManifold:
-
-{{{
-void GetWorldManifold(b2WorldManifold* worldManifold) const
-}}}
-
-This uses the current positions of the bodies to compute world positions of the contact points.
 
 Sensors do not create manifolds, so for them use:
 
 {{{
-bool touching = sensorContact->IsTouching()
+touching = sensorContact.touching
 }}}
 
 This function also works for non-sensors.
@@ -1357,9 +1351,9 @@ This function also works for non-sensors.
 You can get the fixtures from a contact. From those you can get the bodies.
 
 {{{
-b2Fixture* fixtureA = myContact->GetFixtureA()
-b2Body* bodyA = fixtureA->GetBody()
-MyActor* actorA = (MyActor*)bodyA->GetUserData()
+fixtureA = myContact.fixtureA
+bodyA = fixtureA.body
+actorA = bodyA.userData
 }}}
 
 You can disable a contact. This only works inside the b2ContactListener.PreSolve event, discussed below.
@@ -1371,16 +1365,16 @@ You can get access to contacts in several ways. You can access the contacts dire
 You can iterate over all contacts in the world:
 
 {{{
-for (b2Contact* c = myWorld->GetContactList(); c; c = c->GetNext())
-{
-  // process c
-}
+for contact in world.contacts:
+    # process contact
+}}}
+
 You can also iterate over all the contacts on a body. These are stored in a graph using a contact edge structure.
-for (b2ContactEdge* ce = myBody->GetContactList(); ce; ce = ce->next)
-{
-  b2Contact* c = ce->contact
-  // process c
-}
+
+{{{
+for contact_edge in body.contacts:
+    contact=ce.contact
+    # process contact
 }}}
 
 You can also access contacts using the contact listener that is described below.
@@ -1396,18 +1390,19 @@ Accessing contacts off b2World and b2Body may miss some transient contacts that 
 You can receive contact data by implementing b2ContactListener. The contact listener supports several events: begin, end, pre-solve, and post-solve.
 
 {{{
-class MyContactListener : public b2ContactListener
-{
-public:
-  void BeginContact(b2Contact* contact)
-  { // handle begin event }
-  void EndContact(b2Contact* contact)
-  { // handle end event }
-  void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-  { // handle pre-solve event }
-  void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
-  { // handle post-solve event }
-}
+class myContactListener(b2ContactListener):
+    def __init__(self):
+        b2ContactListener.__init__(self)
+    def BeginContact(self, contact):
+        pass
+    def EndContact(self, contact):
+        pass
+    def PreSolve(self, contact, oldManifold):
+        pass
+    def PostSolve(self, contact, impulse):
+        pass
+
+world=b2World(contactListener=myContactListener(), ...)
 }}}
 
 *Caution*
@@ -1426,43 +1421,35 @@ This is called when two fixtures cease to overlap. This is called for sensors an
 
 === Pre-Solve Event ===
 
-This is called after collision detection, but before collision resolution. This gives you a chance to disable the contact based on the current configuration. For example, you can implement a one-sided platform using this callback and calling b2Contact.SetEnabled(False). The contact will be re-enabled each time through collision processing, so you will need to disable the contact every time-step. The pre-solve event may be fired multiple times per time step per contact due to continuous collision detection.
+This is called after collision detection, but before collision resolution. This gives you a chance to disable the contact based on the current configuration. For example, you can implement a one-sided platform using this callback and setting b2Contact.enabled=False. The contact will be re-enabled each time through collision processing, so you will need to disable the contact every time-step. The pre-solve event may be fired multiple times per time step per contact due to continuous collision detection.
 
 {{{
-void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-{
-  b2WorldManifold worldManifold
-  contact->GetWorldManifold(&worldManifold)
-  if (worldManifold.normal.y < -0.5f)
-  {
-    contact->SetEnabled(False)
-  }
-}
+    def PreSolve(self, contact, old_manifold):
+        """
+        This is a critical function when there are many contacts in the world.
+        It should be optimized as much as possible.
+        """
+
+        worldManifold = contact.worldManifold
+        if worldManifold.normal.y < -0.5:
+            contact.enabled=False
 }}}
 
 The pre-solve event is also a good place to determine the point state and the approach velocity of collisions.
 
 {{{
-void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-{
-  b2WorldManifold worldManifold
-  contact->GetWorldManifold(&worldManifold)
-  b2PointState state1[2], state2[2]
-  b2GetPointStates(state1, state2, oldManifold, contact->GetManifold())
-  if (state2[0] == b2_addState)
-  {
-    const b2Body* bodyA = contact->GetFixtureA()->GetBody()
-    const b2Body* bodyB = contact->GetFixtureB()->GetBody()
-    b2Vec2 point = worldManifold.points[0]
-    b2Vec2 vA = bodyA->GetLinearVelocityFromWorldPoint(point)
-    b2Vec2 vB = bodyB->GetLinearVelocityFromWorldPoint(point)
-    float32 approachVelocity = b2Dot(vB   vA, worldManifold.normal)
-    if (approachVelocity > 1.0f)
-    {
-      MyPlayCollisionSound()
-    }
-  }
-}
+    def PreSolve(self, contact, old_manifold):
+        worldManifold=contact.worldManifold
+        state1, state2 = b2GetPointStates(old_manifold, contact.manifold)
+        if state2==b2_addState:
+            bodyA=contact.fixtureA.body
+            bodyB=contact.fixtureB.body
+            point=worldManifold.points[0]
+            vA = bodyA.GetLinearVelocityFromWorldPoint(point)
+            vB = bodyB.GetLinearVelocityFromWorldPoint(point)
+            approachVelocity = b2Dot(vB-vA, worldManifold.normal)
+            if approachVelocity > 1.0:
+                MyPlayCollisionSound()
 }}}
 
 === Post-Solve Event ===
@@ -1476,50 +1463,33 @@ The recommended practice for processing contact points is to buffer all contact 
 This code from the CollisionProcessing test shows how to handle orphaned bodies when processing the contact buffer. Here is an excerpt. Be sure to read the comments in the listing. This code assumes that all contact points have been buffered in the b2ContactPoint array m_points.
 
 {{{
-// We are going to destroy some bodies according to contact
-// points. We must buffer the bodies that should be destroyed
-// because they may belong to multiple contact points.
-const int32 k_maxNuke = 6
-b2Body* nuke[k_maxNuke]
-int32 nukeCount = 0
-// Traverse the contact buffer. Destroy bodies that
-// are touching heavier bodies.
-for (int32 i = 0; i < m_pointCount; ++i)
-{
-    ContactPoint* point = m_points + i
-    b2Body* body1 = point->shape1->GetBody()
-    b2Body* body2 = point->shape2->GetBody()
-    float32 mass1 = body1->GetMass()
-    float32 mass2 = body2->GetMass()
-    if (mass1 > 0.0f && mass2 > 0.0f)
-    {
-        if (mass2 > mass1)
-        {
-            nuke[nukeCount++] = body1
-        }
-        else
-        {
-            nuke[nukeCount++] = body2
-        }
-        if (nukeCount == k_maxNuke)
-        {
-            break
-        }
-    }
-}
-// Sort the nuke array to group duplicates.
-std.sort(nuke, nuke + nukeCount)
-// Destroy the bodies, skipping duplicates.
-int32 i = 0
-while (i < nukeCount)
-{
-    b2Body* b = nuke[i++]
-    while (i < nukeCount && nuke[i] == b)
-    {
-        ++i
-    }
-    m_world->DestroyBody(b)
-}
+        # We are going to destroy some bodies according to contact
+        # points. We must buffer the bodies that should be destroyed
+        # because they may belong to multiple contact points.
+        nuke = []
+        
+        # Traverse the contact results. Destroy bodies that
+        # are touching heavier bodies.
+        body_pairs = [(p['fixtureA'].body, p['fixtureB'].body) for p in self.points]
+        
+        for body1, body2 in body_pairs:
+            mass1, mass2 = body1.mass, body2.mass
+        
+            if mass1 > 0.0 and mass2 > 0.0:
+                if mass2 > mass1:
+                    nuke_body = body1
+                else:
+                    nuke_body = body2
+        
+                if nuke_body not in nuke:
+                    nuke.append(nuke_body)
+        
+        # Destroy the bodies, skipping duplicates.
+        for b in nuke:
+            print("Nuking:", b)
+            self.world.DestroyBody(b)
+        
+        nuke = None
 }}}
 
 == Contact Filtering ==
@@ -1531,27 +1501,24 @@ pybox2d allows you to achieve custom contact filtering by implementing a b2Conta
 The default implementation of ShouldCollide uses the b2FilterData defined in [GettingStartedManual#Fixtures].
 
 {{{
-bool b2ContactFilter.ShouldCollide(b2Shape* shape1, b2Shape* shape2)
-{
-   const b2FilterData& filter1 = shape1->GetFilterData()
-   const b2FilterData& filter2 = shape2->GetFilterData()
-   if (filter1.groupIndex == filter2.groupIndex &&
-       filter1.groupIndex != 0)
-   {
-          return filter1.groupIndex > 0
-   }
-   bool collide = (filter1.maskBits & filter2.categoryBits) != 0 &&
-                 (filter1.categoryBits & filter2.maskBits) != 0
-   return collide
-}
+class MyContactFilter(b2ContactFilter):
+    def __init__(self):
+        b2ContactFilter.__init__(self)
+    def ShouldCollide(self, shape1, shape2):
+        # Implements the default behavior of b2ContactFilter in Python
+        filter1 = shape1.filterData
+        filter2 = shape2.filterData
+        if filter1.groupIndex == filter2.groupIndex and filter1.groupIndex != 0:
+            return filter1.groupIndex > 0
+ 
+        collides = (filter1.maskBits & filter2.categoryBits) != 0 and (filter1.categoryBits & filter2.maskBits) != 0
+        return collides
 }}}
 
-At run-time you can create an instance of your contact filter and register it with b2World.SetContactFilter. Make sure your filter stays in scope while the world exists.
+At run-time you can create an instance of your contact filter and register it with b2World.SetContactFilter. The world will hold a reference to your contact filter, so it is unnecessary to keep your own copy.
 
 {{{
-MyContactFilter filter
-world->SetContactFilter(&filter)
-// filter remains in scope...
+world.SetContactFilter(MyContactFilter())
 }}}
 
 = World Class =
@@ -1562,12 +1529,10 @@ The b2World class contains the bodies and joints. It manages all aspects of the 
 
 === Creating and Destroying a World ===
 
-Creating a world is fairly simple. You just need to provide a gravity vector and a Boolean indicating if bodies can sleep. Usually you will create and destroy a world using new and delete.
+Creating a world is fairly simple. You can to provide a gravity vector and a Boolean indicating if bodies can sleep. The defaults of (0, -10) and allowing sleep will be used if neither are specified.
 
 {{{
-b2World* myWorld = new b2World(gravity, doSleep)
-... do stuff ...
-delete myWorld
+world=b2World(gravity=(0,-10), doSleep=True)
 }}}
 
 === Using a World ===
@@ -1579,10 +1544,9 @@ The world class contains factories for creating and destroying bodies and joints
 The world class is used to drive the simulation. You specify a time step and a velocity and position iteration count. For example:
 
 {{{
-float32 timeStep = 1.0f / 60.f
-int32 velocityIterations = 10
-int32 positionIterations = 8
-myWorld->Step(timeStep, velocityIterations, positionIterations)
+timeStep = 1.0 / 60
+vel_iters, pos_iters = 6, 2
+world.Step(timeStep, vel_iters, pos_iters)
 }}}
 
 After the time step you can examine your bodies and joints for information. Most likely you will grab the position off the bodies so that you can update your actors and render them. You can perform the time step anywhere in your game loop, but you should be aware of the order of things. For example, you must create bodies before the time step if you want to get collision results for the new bodies in that frame.
@@ -1594,7 +1558,7 @@ The iteration count controls how many times the constraint solver sweeps over al
 After stepping, you should clear any forces you have applied to your bodies. This is done with the command b2World.ClearForces. This lets you take multiple sub-steps with the same force field.
 
 {{{
-myWorld->ClearForces()
+world.ClearForces()
 }}}
 
 === Exploring the World ===
@@ -1602,85 +1566,41 @@ myWorld->ClearForces()
 The world is a container for bodies, contacts, and joints. You can grab the body, contact, and joint lists off the world and iterate over them. For example, this code wakes up all the bodies in the world:
 
 {{{
-for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
-{
-    b->WakeUp()
-}
+for body in world.bodies:
+    body.awake=True
 }}}
 
-Unfortunately real programs can be more complicated. For example, the following code is broken:
+Or browse through the rest with:
 
 {{{
-for (b2Body* b = myWorld->GetBodyList(); b; b = b->GetNext())
-{
-    GameActor* myActor = (GameActor*)b->GetUserData()
-    if (myActor->IsDead())
-    {
-        myWorld->DestroyBody(b); // ERROR: now GetNext returns garbage.
-    }
-}
+for joint in world.joints:
+    pass
+for contact in world.contacts:
+    pass
 }}}
-
-Everything goes ok until a body is destroyed. Once a body is destroyed, its next pointer becomes invalid. So the call to b2Body.GetNext() will return garbage. The solution to this is to copy the next pointer before destroying the body.
-
-{{{
-b2Body* node = myWorld->GetBodyList()
-while (node)
-{
-    b2Body* b = node
-    node = node->GetNext()
-    GameActor* myActor = (GameActor*)b->GetUserData()
-    if (myActor->IsDead())
-    {
-        myWorld->DestroyBody(b)
-    }
-}
-}}}
-
-This safely destroys the current body. However, you may want to call a game function that may destroy multiple bodies. In this case you need to be very careful. The solution is application specific, but for convenience I'll show one method of solving the problem.
-
-{{{
-b2Body* node = myWorld->GetBodyList()
-while (node)
-{
-    b2Body* b = node
-    node = node->GetNext()
-    GameActor* myActor = (GameActor*)b->GetUserData()
-    if (myActor->IsDead())
-    {
-        bool otherBodiesDestroyed = GameCrazyBodyDestroyer(b)
-        if (otherBodiesDestroyed)
-        {
-            node = myWorld->GetBodyList()
-        }
-    }
-}
-}}}
-
-Obviously to make this work, GameCrazyBodyDestroyer must be honest about what it has destroyed.
 
 === AABB Queries ===
 
 Sometimes you want to determine all the shapes in a region. The b2World class has a fast log(N) method for this using the broad-phase data structure. You provide an AABB in world coordinates and an implementation of b2QueryCallback. The world calls your class with each fixture whose AABB overlaps the query AABB. Return True to continue the query, otherwise return False. For example, the following code finds all the fixtures that potentially intersect a specified AABB and wakes up all of the associated bodies.
 
 {{{
-class MyQueryCallback : public b2QueryCallback
-{
-public:
-    bool ReportFixture(b2Fixture* fixture)
-    {
-        b2Body* body = fixture->GetBody()
-        body->WakeUp()
-        // Return True to continue the query.
+class myQueryCallback(b2QueryCallback):
+    def __init__(self): 
+        b2QueryCallback.__init__(self)
+
+    def ReportFixture(self, fixture):
+        body = fixture.body
+        body.awake=True
+
+        # Continue the query by returning True
         return True
-    }
-}
-...
-MyQueryCallback callback
-b2AABB aabb
-aabb.lowerBound.Set(-1.0f, -1.0f)
-aabb.upperBound.Set(1.0f, 1.0f)
-myWorld->Query(&callback, aabb)
+
+# Make a small box.
+aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
+
+# Query the world for overlapping shapes.
+query = myQueryCallback()
+world.QueryAABB(query, aabb)
 }}}
 
 You cannot make any assumptions about the order of the callbacks.
@@ -1696,62 +1616,54 @@ You may also return of fraction of -1 to filter the fixture. Then the ray cast w
 Here is an example:
 
 {{{
-// This class captures the closest hit shape.
-class MyRayCastCallback : public b2RayCastCallback
-{
-public:
-    MyRayCastCallback()
-    {
-        m_fixture = NULL
-    }
-    float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction)
-    {
-        m_fixture = fixture
-        m_point = point
-        m_normal = normal
-        m_fraction = fraction
+class RayCastCallback(b2RayCastCallback):
+    """
+    This class captures the closest hit shape.
+    """
+    def __init__(self, **kwargs):
+        super(RayCastCallback, self).__init__()
+        self.fixture = None
+
+    # Called for each fixture found in the query. You control how the ray proceeds
+    # by returning a float that indicates the fractional length of the ray. By returning
+    # 0, you set the ray length to zero. By returning the current fraction, you proceed
+    # to find the closest point. By returning 1, you continue with the original ray
+    # clipping.
+    def ReportFixture(self, fixture, point, normal, fraction):
+        self.fixture = fixture
+        self.point  = b2Vec2(point)
+        self.normal = b2Vec2(normal)
+        # You will get this error: "TypeError: Swig director type mismatch in output value of type 'float32'"
+        # without returning a value
         return fraction
-    }
-    b2Fixture* m_fixture
-    b2Vec2 m_point
-    b2Vec2 m_normal
-    float32 m_fraction
-}
-MyRayCastCallback callback
-b2Vec2 point1(-1.0f, 0.0f)
-b2Vec2 point2(3.0f, 1.0f)
-myWorld->RayCast(&callback, point1, point2)
+
+callback = RayCastCallback()
+point1=(-1, 0)
+point2=(3, 1)
+self.world.RayCast(callback, point1, point2)
 }}}
 
 *Caution*
 
 Due to round-off errors, ray casts can sneak through small cracks between polygons in your static environment. If this is not acceptable in your application, please enlarge your polygons slightly.
 
-{{{
-void SetLinearVelocity(const b2Vec2& v)
-b2Vec2 GetLinearVelocity() const
-void SetAngularVelocity(float32 omega)
-float32 GetAngularVelocity() const
-}}}
-
 === Forces and Impulses ===
 
 You can apply forces, torques, and impulses to a body. When you apply a force or an impulse, you provide a world point where the load is applied. This often results in a torque about the center of mass.
 
 {{{
-void ApplyForce(const b2Vec2& force, const b2Vec2& point)
-void ApplyTorque(float32 torque)
-void ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point)
-void ApplyAngularImpulse(float32 impulse)
+
+body.ApplyForce(force=(fx,fy), point=(px,py))
+body.ApplyTorque(0.0)
+body.ApplyLinearImpulse(impulse=(ix,iy), point=(px,py))
+body.ApplyAngularImpulse(impulse=0.0)
 }}}
 
 Applying a force, torque, or impulse wakes the body. Sometimes this is undesirable. For example, you may be applying a steady force and want to allow the body to sleep to improve performance. In this case you can use the following code.
 
 {{{
-if (myBody->IsAwake() == True)
-{
-    myBody->ApplyForce(myForce, myPoint)
-}
+if body.awake:
+    body.ApplyForce(myForce, myPoint)
 }}}
 
 === Coordinate Transformations ===
@@ -1759,10 +1671,10 @@ if (myBody->IsAwake() == True)
 The body class has some utility functions to help you transform points and vectors between local and world space. If you don't understand these concepts, please read "Essential Mathematics for Games and Interactive Applications" by Jim Van Verth and Lars Bishop. These functions are efficient (when inlined).
 
 {{{
-b2Vec2 GetWorldPoint(const b2Vec2& localPoint)
-b2Vec2 GetWorldVector(const b2Vec2& localVector)
-b2Vec2 GetLocalPoint(const b2Vec2& worldPoint)
-b2Vec2 GetLocalVector(const b2Vec2& worldVector)
+body.GetWorldPoint(localPoint)
+body.GetWorldVector(localVector)
+body.GetLocalPoint(worldPoint)
+body.GetLocalVector(worldVector)
 }}}
 
 === Lists ===
@@ -1770,22 +1682,30 @@ b2Vec2 GetLocalVector(const b2Vec2& worldVector)
 You can iterate over a body's fixtures. This is mainly useful if you need to access the fixture's user data.
 
 {{{
-for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext())
-{
-    MyFixtureData* data = (MyFixtureData*)f->GetUserData()
-    ... do something with data ...
-}
+for fixture in body.fixtures:
+    data=fixture.userData
+    # ...
 }}}
 
 You can similarly iterate over the body's joint list.
 
+{{{
+for joint in body.joints:
+    # ...
+}}}
+
 The body also provides a list of associated contacts. You can use this to get information about the current contacts. Be careful, because the contact list may not contain all the contacts that existed during the previous time step.
+
+{{{
+for contact in body.contacts:
+    # ...
+}}}
 
 = Loose Ends =
 
 == Implicit Destruction ==
 
-If you destroy a Box2D entity, it is up to you to make sure you remove all references to the destroyed object. This is easy if you only have a single reference to the entity. If you have multiple references, you might consider implementing a handle class to wrap the raw pointer.
+If you destroy a Box2D entity, it is up to you to make sure you remove all references to the destroyed object. This is easy if you only have a single reference to the entity. 
 
 Often when using pybox2d you will create and destroy many bodies, shapes, and joints. Managing these entities is somewhat automated by Box2D. If you destroy a body then all associated shapes and joints are automatically destroyed. This is called implicit destruction.
 
@@ -1793,30 +1713,35 @@ When you destroy a body, all its attached shapes, joints, and contacts are destr
 
 *Caution*
 
-When a body is destroyed, all shapes and joints attached to the body are automatically destroyed. You must nullify any pointers you have to those shapes and joints. Otherwise, your program will die horribly if you try to access or destroy those shapes or joints later.
+When a body is destroyed, all shapes and joints attached to the body are automatically destroyed. You must nullify any pointers you have to those shapes and joints. Otherwise, your program will die horribly if you try to access or destroy those shapes or joints later. This is still true in Python, so please be aware of this.
 
 To help you nullify your joint pointers, Box2D provides a listener class named b2WorldListener that you can implement and provide to your world object. Then the world object will notify you when a joint is going to be implicitly destroyed.
 
 Implicit destruction is a great convenience in many cases. It can also make your program fall apart. You may store pointers to shapes and joints somewhere in your code. These pointers become orphaned when an associated body is destroyed. The situation becomes worse when you consider that joints are often created by a part of the code unrelated to management of the associated body. For example, the testbed creates a b2MouseJoint for interactive manipulation of bodies on the screen.
 
-pybox2d provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.
+Box2D provides a callback mechanism to inform your application when implicit destruction occurs. This gives your application a chance to nullify the orphaned pointers. This callback mechanism is described later in this manual.
 
 You can implement a b2DestructionListener that allows b2World to inform you when a shape or joint is implicitly destroyed because an associated body was destroyed. This will help prevent your code from accessing orphaned pointers.
 
 {{{
-class MyDestructionListener : public b2DestructionListener
-{
-    void SayGoodbye(b2Joint* joint)
-    {
-        // remove all references to joint.
-    }
-}
+class myDestructionListener(b2DestructionListener):
+    """
+    The destruction listener callback:
+    "SayGoodbye" is called when a joint or shape is deleted.
+    """
+    def __init__(self, **kwargs):
+        super(myDestructionListener, self).__init__(**kwargs)
+
+    def SayGoodbye(self, object):
+        pass
+        # Remove all references to the joint or shape here
+
 }}}
 
 You can then register an instance of your destruction listener with your world object. You should do this during world initialization.
 
 {{{
-myWorld->SetListener(myDestructionListener)
+myWorld.destructionListener=myDestructionListener()
 }}}
 
 = Debug Drawing =
@@ -1834,6 +1759,18 @@ You can implement the b2DebugDraw class to get detailed drawing of the physics w
 This is the preferred method of drawing these physics entities, rather than accessing the data directly. The reason is that much of the necessary data is internal and subject to change.
 
 The testbed draws physics entities using the debug draw facility and the contact listener, so it serves as the primary example of how to implement debug drawing as well as how to draw contact points.
+
+This debug drawing, unlike in the standard Box2D distribution, is provided by different backends. At least three are available at the time of writing. To use different backends, the libraries must first be installed. 
+
+{{{
+python test_Web.py --backend pygame  (default)
+python test_Web.py --backend pyglet
+python test_Web.py --backend pyqt4
+}}}
+
+These backends have library-specific code in their respective x_framework.py. They are defined as children of the main FrameworkBase class, defined in framework.py. Further, when a testbed example is loaded, it is based on the 'Framework' class. This is so that the test examples can be derived from the different backends without knowing the name of their own superclass. 
+
+To implement your own framework, first look at the bottom of framework.py. Then, basing it off of the currently available frameworks would be advisable. At the very least, they must have the same structure and the functions listed as necessary implemented.
 
 = Limitations =
 
