@@ -1,4 +1,5 @@
 #summary Documentation Page
+#labels Phase-Deploy
 ==Help==
 
 For now, the main documentation will be kept on the *Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki]*.
@@ -7,9 +8,11 @@ Please feel free to discuss your ideas and/or problems in the forums, also.
 
 ==Manual==
 
-The original Box2D manual has been ported to Python and mostly updated for the 2.0.2 version. You can find it [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/manual.htm here]. *Please note* that the majority of this does NOT apply to the new 2.1 version!
+The original Box2D manual has been partially rewritten for Python. [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/manual.htm 2.0.x] manual / [GettingStartedManual 2.1] manual
 
-Basic API documentation is available thanks to epydoc, for [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/epydoc/html/index.html 2.0.2] and for [http://pybox2d.googlecode.com/svn/doc/epydoc/index.html 2.1]. Though the 2.1 version has been improved in terms of user-friendliness, neither will be useful unless you know what you're looking for. The [http://code.google.com/p/pybox2d/source/browse/#svn%2Ftrunk%2Fexamples testbed] examples are your best bet at seeing how to implement things.
+Basic API documentation is available thanks to epydoc, for [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/epydoc/html/index.html 2.0.2] and for [http://pybox2d.googlecode.com/svn/doc/epydoc/index.html 2.1].
+
+Though the 2.1 version has been improved in terms of user-friendliness, neither will be useful unless you know what you're looking for. The [http://code.google.com/p/pybox2d/source/browse/#svn%2Ftrunk%2Fexamples testbed] examples are your best bet at seeing how to implement things.
 
 ==Version Numbers==
 
