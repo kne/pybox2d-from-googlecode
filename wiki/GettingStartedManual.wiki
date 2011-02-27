@@ -1833,6 +1833,7 @@ While executing a time step, Box2D needs some temporary workspace memory. For th
 
 = References =
 
- # Erin Catto's GDC Tutorials: http://code.google.com/p/box2d/downloads/list
+ # The original C++ [http://www.box2d.org/manual.html manual]
+ # Erin Catto's GDC [http://code.google.com/p/box2d/downloads/list Tutorials]
  # Collision Detection in Interactive 3D Environments, Gino van den Bergen, 2004
  # Real-Time Collision Detection, Christer Ericson, 2005
