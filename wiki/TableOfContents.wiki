@@ -8,3 +8,6 @@
  * [Screenshots]
  * [NotesFor202 Notes for 2.0.2]
  * [Alternatives]
+
+----
+<wiki:toc max_depth="1" />
