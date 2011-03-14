@@ -10,7 +10,7 @@ To compile the latest SVN version, follow these steps:
    If you are using *Ubuntu*, you can install it via Synaptic Package Manager (package name 'swig'). You will also need
    to install the python-dev package, and build-essential (and python-pygame if you want to run the testbed).
 {{{
-sudo apt-get install build-essential python-dev swig python-pygame
+sudo apt-get install build-essential python-dev swig python-pygame subversion
 }}}
   #2 Check out the SVN
 {{{
