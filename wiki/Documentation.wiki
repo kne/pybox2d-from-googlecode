@@ -25,6 +25,13 @@ Box2D.__version__      # '2.0.2b1'
 Box2D.__version_info__ # (2,0,2,1)
 }}}
 
+==Acknowledgements==
+
+ * Thanks to all of those who have reported bugs or submitted patches. 
+ * Special thanks go to giorgosg, for contributing the 2.0.2 Cairo backend, the Gish Tribute testbed example, and other things.
+ * Thanks, santagada, for getting command-line arguments in the testbed.
+ * And, of course, to Erin Catto for Box2D itself.
+
 ==Changes==
 
 ===2.0.2b1 (2/25/2009)===
