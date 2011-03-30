@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -49,7 +50,7 @@ class TimeOfImpact (Framework):
         bd.position = (9.6363468, 28.050615)
         bd.angle = 1.6408679
         self.body2 = self.world.CreateBody(bd)
-        self.shape2 = self.body2.CreateShape(sd).getAsType()
+        self.shape2 = self.body2.CreateShape(sd)
         self.body2.SetMassFromShapes()
 
     def Step(self, settings):
@@ -85,12 +86,12 @@ class TimeOfImpact (Framework):
         for vertex in localVertices:
             vertices.append( box2d.b2Mul(xf2, vertex).tuple() )
 
-        self.debugDraw.DrawPolygon(vertices, vertexCount, box2d.b2Color(0.5, 0.7, 0.9))
+        self.debugDraw.DrawPolygon(vertices, box2d.b2Color(0.5, 0.7, 0.9))
 
         localVertices = self.shape2.getCoreVertices_b2Vec2()
         for vertex in localVertices:
             vertices.append( box2d.b2Mul(xf2, vertex).tuple() )
-        self.debugDraw.DrawPolygon(vertices, vertexCount, box2d.b2Color(0.5, 0.7, 0.9))
+        self.debugDraw.DrawPolygon(vertices, box2d.b2Color(0.5, 0.7, 0.9))
      
         settings.pause = True
         super(TimeOfImpact, self).Step(settings)

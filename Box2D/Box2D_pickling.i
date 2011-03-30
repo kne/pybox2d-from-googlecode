@@ -195,7 +195,11 @@ def _pickle_finalize(self, world=None, body=None):
     # the object.
     for fcn, output, input in pairs:
         if isinstance(self, output):
-            self = eval(input())
+            try:
+                self=input()
+            except:
+                # Eval worked in some old or new Python, I can't remember which...
+                self=eval(input())
             createfcn=fcn
             break
 

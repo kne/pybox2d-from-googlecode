@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -81,7 +82,7 @@ class SensorTest (Framework):
                 continue
 
             ground = self.sensor.GetBody()
-            typedshape = self.sensor.getAsType()
+            typedshape = self.sensor
             if self.sensor.GetType() == box2d.e_circleShape:
                 center = ground.GetWorldPoint(typedshape.GetLocalPosition())
             elif self.sensor.GetType() == box2d.e_polygonShape:

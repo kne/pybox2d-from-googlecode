@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #
 # Testbed example showing deformable and breakable bodies using the soft
@@ -418,7 +420,7 @@ class BreakableBody(Framework):
                 if b1==None or b2==None: continue
                 
                 dj.Initialize( b1,b2, b1.GetWorldCenter(), b2.GetWorldCenter())
-                self.world.CreateJoint(dj).getAsType()
+                self.world.CreateJoint(dj)
 
         # clean TriangleMesh
         md.Reset()

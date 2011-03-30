@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -63,7 +64,7 @@ class Gears (Framework):
         jd1.localAnchor1 = ground.GetLocalPoint(bd1.position)
         jd1.localAnchor2 = body1.GetLocalPoint(bd1.position)
         jd1.referenceAngle = body1.GetAngle() - ground.GetAngle()
-        self.joint1 = self.world.CreateJoint(jd1).getAsType()
+        self.joint1 = self.world.CreateJoint(jd1)
 
         bd2=box2d.b2BodyDef() 
         bd2.position = (0.0, 12.0)
@@ -73,7 +74,7 @@ class Gears (Framework):
 
         jd2=box2d.b2RevoluteJointDef() 
         jd2.Initialize(ground, body2, bd2.position)
-        self.joint2 = self.world.CreateJoint(jd2).getAsType()
+        self.joint2 = self.world.CreateJoint(jd2)
 
         bd3=box2d.b2BodyDef() 
         bd3.position = (2.5, 12.0)
@@ -87,7 +88,7 @@ class Gears (Framework):
         jd3.upperTranslation = 5.0
         jd3.enableLimit = True
 
-        self.joint3 = self.world.CreateJoint(jd3).getAsType()
+        self.joint3 = self.world.CreateJoint(jd3)
 
         jd4=box2d.b2GearJointDef() 
         jd4.body1 = body1
@@ -95,7 +96,7 @@ class Gears (Framework):
         jd4.joint1 = self.joint1
         jd4.joint2 = self.joint2
         jd4.ratio = circle2.radius / circle1.radius
-        self.joint4 = self.world.CreateJoint(jd4).getAsType()
+        self.joint4 = self.world.CreateJoint(jd4)
 
         jd5=box2d.b2GearJointDef() 
         jd5.body1 = body2
@@ -103,7 +104,7 @@ class Gears (Framework):
         jd5.joint1 = self.joint2
         jd5.joint2 = self.joint3
         jd5.ratio = -1.0 / circle2.radius
-        self.joint5 = self.world.CreateJoint(jd5).getAsType()
+        self.joint5 = self.world.CreateJoint(jd5)
              
     def Step(self, settings):
         if self.joint1 and self.joint2 and self.joint3 and self.joint4 and self.joint5:

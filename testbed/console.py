@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #   Interactive Python-GTK Console
 #   Copyright ©, 1998 James Henstridge <james@daa.com.au>

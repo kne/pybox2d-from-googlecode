@@ -1,4 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -198,7 +201,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         Draw the line segment from p1-p2 with the specified color.
         """
         color = self.convertColor(color)
-        pygame.draw.aaline(self.surface, color, self.toScreen_v(p1), self.toScreen_v(p2))
+        pygame.draw.aaline(self.surface, color, self.toScreen(p1), self.toScreen(p2))
 
     def DrawXForm(self, xf):
         """
@@ -206,9 +209,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         """
         p1 = xf.position
         k_axisScale = 0.4
-        p2 = self.toScreen_v(p1 + k_axisScale * xf.R.col1)
-        p3 = self.toScreen_v(p1 + k_axisScale * xf.R.col2)
-        p1 = self.toScreen_v(p1)
+        p2 = self.toScreen(p1 + k_axisScale * xf.R.col1)
+        p3 = self.toScreen(p1 + k_axisScale * xf.R.col2)
+        p1 = self.toScreen(p1)
 
         color = (255,0,0)
         pygame.draw.aaline(self.surface, color, p1, p2)
@@ -225,7 +228,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         if radius < 1: radius = 1
         else: radius = int(radius)
 
-        center = self.toScreen_v(center)
+        center = self.toScreen(center)
         pygame.draw.circle(self.surface, color, center, radius, drawwidth)
 
     def DrawSolidCircle(self, center_v, radius, axis, color):
@@ -237,15 +240,15 @@ class fwDebugDraw(box2d.b2DebugDraw):
         if radius < 1: radius = 1
         else: radius = int(radius)
 
-        center = self.toScreen_v(center_v)
+        center = self.toScreen(center_v)
         pygame.draw.circle(self.surface, (color[0]/2, color[1]/2, color[1]/2, 127), center, radius, 0)
 
         pygame.draw.circle(self.surface, color, center, radius, 1)
 
         p = radius * axis
-        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p.x, center[1] + p.y)) 
+        pygame.draw.aaline(self.surface, (255,0,0), center, (center[0] - p[0], center[1] + p[1])) 
 
-    def DrawPolygon(self, in_vertices, vertexCount, color):
+    def DrawPolygon(self, in_vertices, color):
         """
         Draw a wireframe polygon given the world vertices in_vertices (tuples) with the specified color.
         """
@@ -253,7 +256,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         vertices = [self.toScreen(v) for v in in_vertices]
         pygame.draw.polygon(self.surface, color, vertices, 1)
         
-    def DrawSolidPolygon(self, in_vertices, vertexCount, color):
+    def DrawSolidPolygon(self, in_vertices, color):
         """
         Draw a filled polygon given the world vertices in_vertices (tuples) with the specified color.
         """
@@ -262,12 +265,6 @@ class fwDebugDraw(box2d.b2DebugDraw):
         pygame.draw.polygon(self.surface, (color[0]/2, color[1]/2, color[1]/2, 127), vertices, 0)
         pygame.draw.polygon(self.surface, color, vertices, 1)
 
-    def toScreen_v(self, pt):
-        """
-        Input:  pt - a b2Vec2 in world coordinates
-        Output: (x, y) - a tuple in screen coordinates
-        """
-        return (int((pt.x * self.viewZoom) - self.viewOffset.x), int(self.height - ((pt.y * self.viewZoom) - self.viewOffset.y)))
     def toScreen(self, pt):
         """
         Input:  (x, y) - a tuple in world coordinates
@@ -825,7 +822,7 @@ class Framework(object):
             md.body2   = body
             md.target  = p
             md.maxForce= 1000.0 * body.GetMass()
-            self.mouseJoint = self.world.CreateJoint(md).getAsType()
+            self.mouseJoint = self.world.CreateJoint(md)
             body.WakeUp()
 
     def MouseUp(self, p):

@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -90,7 +91,7 @@ class Tribute (Framework):
                            (body1.position.x, body1.position.y),
                            (body2.position.x, body2.position.y))
             pjd.dampingRatio = 10.0
-            joint = self.world.CreateJoint(pjd).getAsType()
+            joint = self.world.CreateJoint(pjd)
 
         # Make the simulation a bit more stable
         self.settings.positionIterations = 20

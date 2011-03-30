@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
@@ -51,7 +53,7 @@ class Belt (Framework):
         # first joint
         rjd=box2d.b2RevoluteJointDef()
         rjd.Initialize(stat_c, c1, c1.GetWorldCenter())
-        self.world.CreateJoint(rjd) #.getAsType() use getAsType if you want to refer to this joint
+        self.world.CreateJoint(rjd)
         
         # second circle
         bd.position=(10, 15)

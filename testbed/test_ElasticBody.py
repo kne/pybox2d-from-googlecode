@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -109,7 +110,7 @@ class ElasticBody (Framework):
         jr.maxMotorTorque = 30000
         jr.enableMotor    = True
         jr.motorSpeed     = 20
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 1. left down
         bd.position = (-46.0,-2.5)
         cd.radius = 1.5
@@ -120,7 +121,7 @@ class ElasticBody (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter())
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 2.
         cd.radius   = 3.0
         jr.motorSpeed  = 20
@@ -129,7 +130,7 @@ class ElasticBody (Framework):
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 3.
         jr.motorSpeed     = 20
         bd.position = (-24.0,1.5)
@@ -137,28 +138,28 @@ class ElasticBody (Framework):
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 4.
         bd.position = (-16.0,0.8)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 5.
         bd.position = (-8.0,0.5)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 6.
         bd.position = (0.0,0.1)
         body = self.world.CreateBody(bd)
         body.CreateShape(cd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 7.
         bd.position = (8.0,-0.5)
         body = self.world.CreateBody(bd)
@@ -167,7 +168,7 @@ class ElasticBody (Framework):
         body.CreateShape(sd)
         body.SetMassFromShapes()
         jr.Initialize (g,body,body.GetWorldCenter()+(0,1))
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 8. right rotator
         sd.SetAsBox(5, 0.5)
         sd.density = 2.0
@@ -184,7 +185,7 @@ class ElasticBody (Framework):
         jr.Initialize (g,rightmotor,rightmotor.GetWorldCenter())
         jr.maxMotorTorque = 70000
         jr.motorSpeed     = -4
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # 9. left rotator
         sd.SetAsBox(8.5, 0.5)
         sd.density = 2.0
@@ -200,7 +201,7 @@ class ElasticBody (Framework):
         jr.Initialize (g,body,body.GetWorldCenter())
         jr.maxMotorTorque = 100000
         jr.motorSpeed     = -5
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # big compressor
         sd.SetAsBox(3.0,4)
         sd.density = 10.0
@@ -210,14 +211,14 @@ class ElasticBody (Framework):
         hammerleft.SetMassFromShapes()
         jd=box2d.b2DistanceJointDef() 
         jd.Initialize(body, hammerleft, body.GetWorldCenter()+(0,6), hammerleft.GetWorldCenter() )
-        self.world.CreateJoint(jd).getAsType()
+        self.world.CreateJoint(jd)
 
         bd.position = (4.0,17)
         hammerright = self.world.CreateBody(bd) 
         hammerright.CreateShape(sd)
         hammerright.SetMassFromShapes()
         jd.Initialize(body, hammerright, body.GetWorldCenter()-(0,6), hammerright.GetWorldCenter() )
-        self.world.CreateJoint(jd).getAsType()
+        self.world.CreateJoint(jd)
         # pusher
         sd.SetAsBox(6,0.75)
         bd.position = (-21.0,9)
@@ -228,7 +229,7 @@ class ElasticBody (Framework):
         pusher.CreateShape(sd)
         jd.Initialize(rightmotor,pusher,rightmotor.GetWorldCenter()+(-8.0,0),
             pusher.GetWorldCenter()+(5.0,0) )
-        self.world.CreateJoint(jd).getAsType()
+        self.world.CreateJoint(jd)
         # Static bodies above motors
         sd=box2d.b2PolygonDef() 
         cd=box2d.b2CircleDef() 
@@ -289,7 +290,7 @@ class ElasticBody (Framework):
         jp.enableMotor = True
         jp.maxMotorForce = 10000
         jp.motorSpeed    = 0
-        self.joint_elev = self.world.CreateJoint(jp).getAsType()
+        self.joint_elev = self.world.CreateJoint(jp)
 
         # Korb
         sd.SetAsBox(2.3, 0.5,(1,0.0), 0.0)
@@ -320,7 +321,7 @@ class ElasticBody (Framework):
         jr.lowerAngle  = -0.2
         jr.upperAngle  = box2d.b2_pi*1.1
         jr.collideConnected = True
-        self.world.CreateJoint(jr).getAsType()
+        self.world.CreateJoint(jr)
         # upper body exit
         sd.SetAsBox(14.0, 0.5,(-3.5,-10.0), 0.0)
         bd.position = (17.5,96.0)

@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -58,7 +59,7 @@ class SliderCrank (Framework):
         rjd.motorSpeed = 1.0 * box2d.b2_pi
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
-        self.joint1 = self.world.CreateJoint(rjd).getAsType()
+        self.joint1 = self.world.CreateJoint(rjd)
 
         prevBody = body
 
@@ -71,7 +72,7 @@ class SliderCrank (Framework):
 
         rjd.Initialize(prevBody, body, (0.0, 9.0))
         rjd.enableMotor = False
-        self.world.CreateJoint(rjd).getAsType()
+        self.world.CreateJoint(rjd)
 
         prevBody = body
 
@@ -83,7 +84,7 @@ class SliderCrank (Framework):
         body.SetMassFromShapes()
 
         rjd.Initialize(prevBody, body, (0.0, 17.0))
-        self.world.CreateJoint(rjd).getAsType()
+        self.world.CreateJoint(rjd)
 
         pjd=box2d.b2PrismaticJointDef() 
         pjd.Initialize(ground, body, (0.0, 17.0), (0.0, 1.0))
@@ -91,7 +92,7 @@ class SliderCrank (Framework):
         pjd.maxMotorForce = 1000.0
         pjd.enableMotor = True
 
-        self.joint2 = self.world.CreateJoint(pjd).getAsType()
+        self.joint2 = self.world.CreateJoint(pjd)
 
         # Create a payload
         sd.density = 2.0

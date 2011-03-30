@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -90,7 +91,7 @@ class Dominos (Framework):
         anchor=(-2.0, 1.0) 
         jd.Initialize(b1, b3, anchor)
         jd.collideConnected = True
-        self.world.CreateJoint(jd).getAsType() 
+        self.world.CreateJoint(jd)
 
         
         sd=box2d.b2PolygonDef() 
@@ -105,7 +106,7 @@ class Dominos (Framework):
 
         anchor = (-7.0, 15.0)
         jd.Initialize(b2, b4, anchor)
-        self.world.CreateJoint(jd).getAsType() 
+        self.world.CreateJoint(jd)
 
         
         bd=box2d.b2BodyDef() 
@@ -129,7 +130,7 @@ class Dominos (Framework):
 
         anchor = (6.0, 2.0)
         jd.Initialize(b1, b5, anchor)
-        self.world.CreateJoint(jd).getAsType() 
+        self.world.CreateJoint(jd)
 
         
         sd=box2d.b2PolygonDef() 
@@ -145,7 +146,7 @@ class Dominos (Framework):
 
         anchor = (7.5, 4.0)
         jd.Initialize(b5, b6, anchor)
-        self.world.CreateJoint(jd).getAsType() 
+        self.world.CreateJoint(jd)
 
         
         sd=box2d.b2PolygonDef() 
@@ -166,7 +167,7 @@ class Dominos (Framework):
         djd.localAnchor2 = (0.0, -1.0)
         d = djd.body2.GetWorldPoint(djd.localAnchor2) - djd.body1.GetWorldPoint(djd.localAnchor1)
         djd.length = d.Length()
-        self.world.CreateJoint(djd).getAsType() 
+        self.world.CreateJoint(djd)
 
         sd=box2d.b2CircleDef() 
         sd.radius = 0.2

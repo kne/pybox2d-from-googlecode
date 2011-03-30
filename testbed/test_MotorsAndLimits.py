@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -58,7 +59,7 @@ class MotorsAndLimits (Framework):
         rjd.maxMotorTorque = 10000.0
         rjd.enableMotor = True
 
-        self.joint1 = self.world.CreateJoint(rjd).getAsType()
+        self.joint1 = self.world.CreateJoint(rjd)
 
         prevBody = body
 
@@ -75,7 +76,7 @@ class MotorsAndLimits (Framework):
         rjd.upperAngle = 0.5 * box2d.b2_pi
         rjd.enableLimit = True
 
-        self.joint2 = self.world.CreateJoint(rjd).getAsType()
+        self.joint2 = self.world.CreateJoint(rjd)
 
         bd.position = (-10.0, 10.0)
         bd.angle = 0.5 * box2d.b2_pi
@@ -92,7 +93,7 @@ class MotorsAndLimits (Framework):
         pjd.upperTranslation = 20.0
         pjd.enableLimit = True
 
-        self.joint3 = self.world.CreateJoint(pjd).getAsType()
+        self.joint3 = self.world.CreateJoint(pjd)
 
     def Keyboard(self, key):
         if not self.joint1 or not self.joint2 or not self.joint3:
