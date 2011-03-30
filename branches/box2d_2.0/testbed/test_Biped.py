@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
@@ -252,22 +254,22 @@ class Biped(object):
         bdef.RWristDef.body2	= self.RForearm
 
         # create joints
-        self.LAnkle		= self.world.CreateJoint(bdef.LAnkleDef).getAsType()
-        self.RAnkle		= self.world.CreateJoint(bdef.RAnkleDef).getAsType()
-        self.LKnee		= self.world.CreateJoint(bdef.LKneeDef).getAsType()
-        self.RKnee		= self.world.CreateJoint(bdef.RKneeDef).getAsType()
-        self.LHip		= self.world.CreateJoint(bdef.LHipDef).getAsType()
-        self.RHip		= self.world.CreateJoint(bdef.RHipDef).getAsType()
-        self.LowerAbs	= self.world.CreateJoint(bdef.LowerAbsDef).getAsType()
-        self.UpperAbs	= self.world.CreateJoint(bdef.UpperAbsDef).getAsType()
-        self.LowerNeck	= self.world.CreateJoint(bdef.LowerNeckDef).getAsType()
-        self.UpperNeck	= self.world.CreateJoint(bdef.UpperNeckDef).getAsType()
-        self.LShoulder	= self.world.CreateJoint(bdef.LShoulderDef).getAsType()
-        self.RShoulder	= self.world.CreateJoint(bdef.RShoulderDef).getAsType()
-        self.LElbow		= self.world.CreateJoint(bdef.LElbowDef).getAsType()
-        self.RElbow		= self.world.CreateJoint(bdef.RElbowDef).getAsType()
-        self.LWrist		= self.world.CreateJoint(bdef.LWristDef).getAsType()
-        self.RWrist		= self.world.CreateJoint(bdef.RWristDef).getAsType()
+        self.LAnkle		= self.world.CreateJoint(bdef.LAnkleDef)
+        self.RAnkle		= self.world.CreateJoint(bdef.RAnkleDef)
+        self.LKnee		= self.world.CreateJoint(bdef.LKneeDef)
+        self.RKnee		= self.world.CreateJoint(bdef.RKneeDef)
+        self.LHip		= self.world.CreateJoint(bdef.LHipDef)
+        self.RHip		= self.world.CreateJoint(bdef.RHipDef)
+        self.LowerAbs	= self.world.CreateJoint(bdef.LowerAbsDef)
+        self.UpperAbs	= self.world.CreateJoint(bdef.UpperAbsDef)
+        self.LowerNeck	= self.world.CreateJoint(bdef.LowerNeckDef)
+        self.UpperNeck	= self.world.CreateJoint(bdef.UpperNeckDef)
+        self.LShoulder	= self.world.CreateJoint(bdef.LShoulderDef)
+        self.RShoulder	= self.world.CreateJoint(bdef.RShoulderDef)
+        self.LElbow		= self.world.CreateJoint(bdef.LElbowDef)
+        self.RElbow		= self.world.CreateJoint(bdef.RElbowDef)
+        self.LWrist		= self.world.CreateJoint(bdef.LWristDef)
+        self.RWrist		= self.world.CreateJoint(bdef.RWristDef)
 
 class BipedDef(object):
     # BodyDefs

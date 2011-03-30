@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -120,7 +121,7 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         else:
             return [1-c for c in color]
 
-    def DrawPolygon(self, vertices, vertex_count, color):
+    def DrawPolygon(self, vertices, color):
         cr = self.cr
         color = self.convert_color(color)
         cr.set_source_rgb(color[0], color[1], color[2])
@@ -130,7 +131,7 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         cr.close_path()
         cr.stroke()
     
-    def DrawSolidPolygon(self, vertices, vertex_count, color):
+    def DrawSolidPolygon(self, vertices, color):
         cr = self.cr
         color = self.convert_color(color)
         cr.set_source_rgba(color[0], color[1], color[2], 0.7)
@@ -147,30 +148,30 @@ class CairoDebugDraw(box2d.b2DebugDraw):
         cr = self.cr
         color = self.convert_color(color)
         cr.set_source_rgb(color[0], color[1], color[2])
-        cr.arc(center.x, center.y, radius, 0, 2*math.pi)
+        cr.arc(center[0], center[1], radius, 0, 2*math.pi)
         cr.stroke()
 
     def DrawSolidCircle(self, center, radius, axis, color):
         cr = self.cr
         color = self.convert_color(color)
         cr.set_source_rgba(color[0], color[1], color[2], 0.7)
-        cr.arc(center.x, center.y, radius, 0, 2*math.pi)
+        cr.arc(center[0], center[1], radius, 0, 2*math.pi)
         cr.fill_preserve()
 
         cr.set_source_rgb(color[0], color[1], color[2])
         cr.stroke()
 
-        p = radius * axis
-        cr.move_to(center.x, center.y)
-        cr.line_to(center.x + p.x, center.y + p.y)
+        p = radius * box2d.b2Vec2(axis)
+        cr.move_to(center[0], center[1])
+        cr.line_to(center[0] + p[0], center[1] + p[1])
         cr.stroke()
                
     def DrawSegment(self, v1, v2, color):
         color = self.convert_color(color)
         cr = self.cr
         cr.set_source_rgba(color[0], color[1], color[2], 0.5)
-        cr.move_to(v1.x, v1.y)
-        cr.line_to(v2.x, v2.y)
+        cr.move_to(v1[0], v1[1])
+        cr.line_to(v2[0], v2[1])
         cr.stroke()
 
     def DrawPoint(self, p, size, color):
@@ -402,7 +403,7 @@ class Framework(object):
             md.body2 = body
             md.target = world_coord
             md.maxForce = 1000 * body.GetMass()
-            self.mouse_joint = self.world.CreateJoint(md).getAsType()
+            self.mouse_joint = self.world.CreateJoint(md)
             body.WakeUp()
 
     def run(self):

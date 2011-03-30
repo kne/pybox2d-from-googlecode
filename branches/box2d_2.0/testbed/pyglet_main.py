@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
@@ -294,9 +296,9 @@ class fwDebugDraw(box2d.b2DebugDraw):
         ret_tf, ret_ll = [], []
 
         for x, y in self.circle_cache_tf[radius]:
-            ret_tf.extend( (x+center.x, y+center.y) )
+            ret_tf.extend( (x+center[0], y+center[1]) )
         for x, y in self.circle_cache_ll[radius]:
-            ret_ll.extend( (x+center.x, y+center.y) )
+            ret_ll.extend( (x+center[0], y+center[1]) )
         return ret_tf, ret_ll
 
     def DrawCircle(self, center, radius, color):
@@ -326,12 +328,12 @@ class fwDebugDraw(box2d.b2DebugDraw):
             ('v2f', ll_vertices),
             ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-        p = center + radius * axis
+        p = box2d.b2Vec2(axis)*radius+center
         self.batch.add(2, gl.GL_LINES, None,
-            ('v2f', (center.x, center.y, p.x, p.y)),
+            ('v2f', (center[0], center[1], p[0], p[1])),
             ('c3f', [1.0, 0.0, 0.0] * 2))
 
-    def DrawPolygon(self, vertices, vertexCount, color):
+    def DrawPolygon(self, vertices, color):
         """
         Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
@@ -341,7 +343,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
             ('v2f', ll_vertices),
             ('c4f', [color.r, color.g, color.b, 1.0] * (ll_count)))
 
-    def DrawSolidPolygon(self, vertices, vertexCount, color):
+    def DrawSolidPolygon(self, vertices, color):
         """
         Draw a wireframe polygon given the world vertices (tuples) with the specified color.
         """
@@ -362,7 +364,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         Draw the line segment from p1-p2 with the specified color.
         """
         self.batch.add(2, gl.GL_LINES, None,
-            ('v2f', (p1.x, p1.y, p2.x, p2.y)),
+            ('v2f', (p1[0], p1[1], p2[0], p2[1])),
             ('c3f', [color.r, color.g, color.b]*2))
 
     def DrawXForm(self, xf):
@@ -375,7 +377,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         p3 = p1 + k_axisScale * xf.R.col2
 
         self.batch.add(3, gl.GL_LINES, None,
-            ('v2f', (p1.x, p1.y, p2.x, p2.y, p1.x, p1.y, p3.x, p3.y)),
+            ('v2f', (p1[0], p1[1], p2[0], p2[1], p1[0], p1[1], p3[0], p3[1])),
             ('c3f', [1.0, 0.0, 0.0] * 2 + [0.0, 1.0, 0.0] * 2))
 
     def DrawPoint(self, p, size, color):
@@ -383,7 +385,7 @@ class fwDebugDraw(box2d.b2DebugDraw):
         Draw a single point at point p given a point size and color.
         """
         self.batch.add(1, gl.GL_POINTS, grPointSize(size),
-            ('v2f', (p.x, p.y)),
+            ('v2f', (p[0], p[1])),
             ('c3f', [color.r, color.g, color.b]))
         
     def DrawAABB(self, aabb, color):
@@ -959,7 +961,7 @@ class Framework(pyglet.window.Window):
             md.body2   = body
             md.target  = p
             md.maxForce= 1000.0 * body.GetMass()
-            self.mouseJoint = self.world.CreateJoint(md).getAsType()
+            self.mouseJoint = self.world.CreateJoint(md)
             body.WakeUp()
             
     def MouseUp(self, p):

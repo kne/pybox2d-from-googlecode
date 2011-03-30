@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -79,7 +80,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = ground
         jd.body2 = self.bodies[1]
@@ -89,7 +90,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = ground
         jd.body2 = self.bodies[2]
@@ -99,7 +100,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = ground
         jd.body2 = self.bodies[3]
@@ -109,7 +110,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = self.bodies[0]
         jd.body2 = self.bodies[1]
@@ -119,7 +120,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = self.bodies[1]
         jd.body2 = self.bodies[2]
@@ -129,7 +130,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = self.bodies[2]
         jd.body2 = self.bodies[3]
@@ -139,7 +140,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
 
         jd.body1 = self.bodies[3]
         jd.body2 = self.bodies[0]
@@ -149,7 +150,7 @@ class Web (Framework):
         p2 = jd.body2.GetWorldPoint(jd.localAnchor2)
         d = p2 - p1
         jd.length = d.Length()
-        self.joints.append(self.world.CreateJoint(jd).getAsType())
+        self.joints.append(self.world.CreateJoint(jd))
      
     def Keyboard(self, key):
         # Note: these functions are still causing some problems

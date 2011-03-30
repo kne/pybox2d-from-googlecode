@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -87,8 +88,8 @@ def main():
     renderer.width, renderer.height = width, height
     renderer.viewOffset = renderer.viewCenter - box2d.b2Vec2(width, height)/2
     renderer.SetFlags(box2d.b2DebugDraw.e_shapeBit) # we only want shapes to be drawn
-    renderer.DrawSolidPolygon = lambda a,b,c: 0 # make it not draw the polygons!
-    renderer.DrawPolygon = lambda a,b,c: 0      #
+    renderer.DrawSolidPolygon = lambda *args: 0 # make it not draw the polygons!
+    renderer.DrawPolygon = lambda *args: 0      #
 
     # Create the world
     worldAABB=box2d.b2AABB()
@@ -143,7 +144,7 @@ def get_shapes(world):
     for body in world.bodyList:
         shape = body.GetShapeList()
         while shape:
-            yield (body, shape.getAsType())
+            yield (body, shape)
             shape=shape.GetNext()
 
 def update_shapes(world):

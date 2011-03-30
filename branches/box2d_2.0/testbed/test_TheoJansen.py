@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -97,21 +98,21 @@ class TheoJansen (Framework):
         # usable, but doesn't act like it seems it should?
         
         djd.Initialize(body1, body2, p2 + self.offset, p5 + self.offset)
-        self.world.CreateJoint(djd).getAsType() 
+        self.world.CreateJoint(djd)
         
         djd.Initialize(body1, body2, p3 + self.offset, p4 + self.offset)
-        self.world.CreateJoint(djd).getAsType() 
+        self.world.CreateJoint(djd)
         
         djd.Initialize(body1, self.wheel, p3 + self.offset, wheelAnchor + self.offset)
-        self.world.CreateJoint(djd).getAsType() 
+        self.world.CreateJoint(djd)
         
         djd.Initialize(body2, self.wheel, p6 + self.offset, wheelAnchor + self.offset)
-        self.world.CreateJoint(djd).getAsType() 
+        self.world.CreateJoint(djd)
         
         rjd=box2d.b2RevoluteJointDef() 
         
         rjd.Initialize(body2, self.chassis, p4 + self.offset)
-        self.world.CreateJoint(rjd).getAsType() 
+        self.world.CreateJoint(rjd)
     
     def __init__(self):
         super(TheoJansen, self).__init__()
@@ -172,7 +173,7 @@ class TheoJansen (Framework):
         jd.motorSpeed = self.motorSpeed
         jd.maxMotorTorque = 400.0
         jd.enableMotor = self.motorOn
-        self.motorJoint = self.world.CreateJoint(jd).getAsType()
+        self.motorJoint = self.world.CreateJoint(jd)
     
         wheelAnchor = pivot + box2d.b2Vec2(0.0, -0.8)
         

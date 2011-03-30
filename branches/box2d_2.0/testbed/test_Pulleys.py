@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -65,7 +66,7 @@ class Pulleys (Framework):
 
         pulleyDef.Initialize(body1, body2, groundAnchor1, groundAnchor2, anchor1, anchor2, 2.0)
 
-        self.joint1 = self.world.CreateJoint(pulleyDef).getAsType() 
+        self.joint1 = self.world.CreateJoint(pulleyDef)
      
     def Step(self, settings):
         super(Pulleys, self).Step(settings)

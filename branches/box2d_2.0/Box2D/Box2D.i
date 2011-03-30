@@ -37,6 +37,11 @@
             } catch(b2AssertException) {
                 // error already set, pass it on to python
             }
+
+            if (PyErr_Occurred()) {
+                // This is if we set the error inside a function; report it to swig
+                SWIG_fail;
+            }
         }
     #endif
 
@@ -188,6 +193,7 @@
         $1 = &temp;
     }
 
+
     //Allow access to void* types
     %typemap(in) void* {
         $1 = $input;
@@ -202,16 +208,22 @@
         Py_INCREF($result);
     }
 
-    %typemap(directorin) b2Vec2* vertices {
+    %typemap(directorin) (const b2Vec2* vertices, int32 vertexCount) {
         $input = PyTuple_New(vertexCount);
         PyObject* vertex;
         for (int i=0; i < vertexCount; i++) {
             vertex = PyTuple_New(2);
-            PyTuple_SetItem(vertex, 0, PyFloat_FromDouble((float32)vertices[i].x));
-            PyTuple_SetItem(vertex, 1, PyFloat_FromDouble((float32)vertices[i].y));
+            PyTuple_SetItem(vertex, 0, SWIG_From_double((float32)vertices[i].x));
+            PyTuple_SetItem(vertex, 1, SWIG_From_double((float32)vertices[i].y));
 
             PyTuple_SetItem($input, i, vertex);
         }
+    }
+
+    %typemap(directorin) b2Vec2& {
+        $input = PyTuple_New(2);
+        PyTuple_SetItem( $input, 0, SWIG_From_double((float32)$1_name.x));
+        PyTuple_SetItem( $input, 1, SWIG_From_double((float32)$1_name.y));
     }
 
     /* ---- ignores ---- */
@@ -246,11 +258,9 @@
             ret = PyTuple_New(2);
             
             PyObject* shapeList=PyTuple_New(num);
-            PyObject* shape;
 
             for (int i=0; i < num; i++) {
-                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Shape, 0 );
-                PyTuple_SetItem(shapeList, i, shape);
+                PyTuple_SetItem(shapeList, i, _downcasted_shape(shapes[i]));
             }
 
             PyTuple_SetItem(ret, 0, SWIG_From_int(num));
@@ -278,7 +288,7 @@
 
             PyTuple_SetItem(ret, 0, SWIG_From_float(lambda));
             PyTuple_SetItem(ret, 1, SWIG_NewPointerObj(SWIG_as_voidptr(normal), SWIGTYPE_p_b2Vec2, 0) );
-            PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(shape), SWIGTYPE_p_b2Shape, 0) );
+            PyTuple_SetItem(ret, 2, _downcasted_shape(shape));
 
             return ret;
         }
@@ -300,11 +310,9 @@
             ret = PyTuple_New(2);
             
             PyObject* shapeList=PyTuple_New(num);
-            PyObject* shape;
 
             for (int i=0; i < num; i++) {
-                shape=SWIG_NewPointerObj(SWIG_as_voidptr(shapes[i]), SWIGTYPE_p_b2Shape, 0 );
-                PyTuple_SetItem(shapeList, i, shape);
+                PyTuple_SetItem(shapeList, i, _downcasted_shape(shapes[i]));
             }
 
             PyTuple_SetItem(ret, 0, SWIG_From_int(num));
@@ -322,7 +330,7 @@
                 jointList = []
                 joint = self._GetJointList()
                 while joint:
-                    jointList.append(joint.getAsType())
+                    jointList.append(joint)
                     joint = joint.GetNext()
                 jointList.reverse() # jointlist is in reverse order
                 return jointList
@@ -344,7 +352,7 @@
                 controllerList = []
                 controller = self._GetControllerList()
                 while controller:
-                    controllerList.append(controller.getAsType())
+                    controllerList.append(controller)
                     controller = controller.GetNext()
                 controllerList.reverse() # controllerlist is in reverse order
                 return controllerList
@@ -395,16 +403,6 @@
         isSensor   = property(IsSensor, None) # for symmetry with defn + pickling
         __eq__ = b2ShapeCompare
         __ne__ = lambda self,other: not b2ShapeCompare(self,other)
-        def typeName(self):
-            types = {  e_unknownShape   : "Unknown",
-                        e_circleShape   : "Circle",
-                        e_polygonShape  : "Polygon",
-                        e_edgeShape     : "Edge",
-                        e_shapeTypeCount: "ShapeType" }
-            return types[self.GetType()]
-        def getAsType(self):
-            """Return a typecasted version of the shape"""
-            return (getattr(self, "as%s" % self.typeName())) ()
         %}
         b2CircleShape* asCircle() {
             if ($self->GetType()==e_circleShape)
@@ -442,6 +440,82 @@
                 return False
             return __b2PythonControllerPointerEquals__(a, b)
     %}
+    /* Properly downcast joints for all return values using b2Joint */
+    %typemap(out) b2Controller* {
+        if ($1) {
+            switch (($1)->GetType())
+            {
+            case e_buoyancyController:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2BuoyancyController*), 0); break;
+            case e_constantAccelController:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2ConstantAccelController*), 0); break;
+            case e_constantForceController:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2ConstantForceController*), 0); break;
+            case e_gravityController:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2GravityController*), 0); break;
+            case e_tensorDampingController:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2TensorDampingController*), 0); break;
+            case e_unknownController:
+            default:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2Controller*), 0); break;
+                break;
+            }
+        } else {
+            $result=Py_None; 
+            Py_INCREF($result);
+        }
+    }
+
+    %typemap(out) b2Joint* {
+        if ($1) {
+            switch (($1)->GetType())
+            {
+            case e_revoluteJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2RevoluteJoint*), 0); break;
+            case e_prismaticJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2PrismaticJoint*), 0); break;
+            case e_distanceJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2DistanceJoint*), 0); break;
+            case e_pulleyJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2PulleyJoint*), 0); break;
+            case e_mouseJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2MouseJoint*), 0); break;
+            case e_gearJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2GearJoint*), 0); break;
+            case e_lineJoint:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2LineJoint*), 0); break;
+            case e_unknownJoint:
+            default:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2Joint*), 0); break;
+                break;
+            }
+        } else {
+            $result=Py_None; 
+            Py_INCREF($result);
+        }
+    }
+
+    /* Properly downcast shapes for all return values using b2Shape */
+    %typemap(out) b2Shape* {
+        if ($1) {
+            switch (($1)->GetType())
+            {
+            case e_circleShape:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2CircleShape*), 0); break;
+            case e_polygonShape:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2PolygonShape*), 0); break;
+            case e_edgeShape:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2EdgeShape*), 0); break;
+            case e_unknownShape:
+            default:
+                $result=SWIG_NewPointerObj($1, $descriptor(b2Shape*), 0); break;
+            }
+        } else {
+            $result=Py_None; 
+            Py_INCREF($result);
+        }
+    }
+
 
     // Clean up naming. We do not need m_* on the Python end.
     %rename(localAnchor) b2MouseJoint::m_localAnchor;
@@ -627,23 +701,6 @@
     %extend b2Controller {
         long __hash__() { return (long)self; }
         %pythoncode %{
-        def typeName(self):
-            """
-            Return the name of the controller from:
-             Unknown, Buoyancy, ConstantAccel, ConstantForce, Gravity, TensorDamping
-            """
-            types = { e_unknownController       : 'Unknown',
-                      e_buoyancyController      : 'Buoyancy',
-                      e_constantAccelController : 'ConstantAccel',
-                      e_constantForceController : 'ConstantForce',
-                      e_gravityController       : 'Gravity',
-                      e_tensorDampingController : 'TensorDamping' }
-            return types[self.GetType()]
-        def getAsType(self):
-            """
-            Return a typecasted version of the controller
-            """
-            return (getattr(self, "_as%sController" % self.typeName())) ()
         def GetBodyList(self):
             bodyList = []
             c_edge = self._GetBodyList()
@@ -717,11 +774,6 @@
                       e_revoluteJoint : "Revolute",
                       e_lineJoint     : "Line" }
             return types[self.GetType()]
-        def getAsType(self):
-            """
-            Return a typecasted version of the joint
-            """
-            return (getattr(self, "as%sJoint" % self.typeName())) ()
         %}
 
         b2MouseJoint* asMouseJoint() {
@@ -997,6 +1049,14 @@
 
         %pythoncode %{
         __iter__ = lambda self: iter( (self.x, self.y) )
+        __eq__ = lambda self, other: self.__equ(other)
+        __ne__ = lambda self,other: not self.__equ(other)
+        def __len__(self):
+            return 2
+        def __neg__(self):
+            return b2Vec2(-self.x, -self.y)
+        def __copy__(self):
+            return b2Vec2(self.x, self.y)
         def __repr__(self):
             return "b2Vec2(%g,%g)" % (self.x, self.y)
         def tuple(self):
@@ -1034,17 +1094,40 @@
         def __idiv__(self, a):
             self.div_float(a)
             return self
-        def dot(self, v):
-            """
-            Dot product with v (list/tuple or b2Vec2)
-            """
-            if isinstance(v, (list, tuple)):
-                return self.x*v[0] + self.y*v[1]
-            else:
-                return self.x*v.x + self.y*v.y
-
         %}
-        b2Vec2 __div__(float32 a) { //convenience function
+        float32 cross(b2Vec2& other) {
+            return $self->x * other.y - $self->y * other.x;
+        }
+        b2Vec2 cross(float32 s) {
+            return b2Vec2(s * $self->y, -s * $self->x);
+        }
+
+        float32 __getitem__(int i) {
+            if (i==0) 
+                return $self->x;
+            else if (i==1) 
+                return $self->y;
+            PyErr_SetString(PyExc_IndexError, "Index must be in (0,1)");
+            return 0.0f;
+        }
+        void __setitem__(int i, float32 value) {
+            if (i==0) 
+                $self->x=value;
+            else if (i==1) 
+                $self->y=value;
+            else
+                PyErr_SetString(PyExc_IndexError, "Index must be in (0,1)");
+        }
+        bool __equ(b2Vec2& other) {
+            return ($self->x == other.x && $self->y == other.y);
+        }
+        float32 dot(b2Vec2& other) {
+            return $self->x * other.x + $self->y * other.y;
+        }
+        b2Vec2 __truediv__(float32 a) { //python 3k
+            return b2Vec2($self->x / a, $self->y / a);
+        }
+        b2Vec2 __div__(float32 a) {
             return b2Vec2($self->x / a, $self->y / a);
         }
         b2Vec2 __mul__(float32 a) {
@@ -1063,9 +1146,9 @@
         b2Vec2 __rdiv__(float32 a) {
             return b2Vec2($self->x / a, $self->y / a);
         }
-        void div_float(float32 a) {
-            self->x /= a;
-            self->y /= a;
+        void __div_float(float32 a) {
+            $self->x /= a;
+            $self->y /= a;
         }
     }
 
@@ -1101,7 +1184,7 @@
                 ret.center=self.GetLocalCenter()
                 return ret
             
-            def GetShapeList(self, asType=True):
+            def GetShapeList(self):
                 """
                 Get a list of the shapes in this body
 
@@ -1114,8 +1197,6 @@
                 shapeList = []
                 shape = self._GetShapeList()
                 while shape:
-                    if asType:
-                        shape=shape.getAsType()
                     shapeList.append(shape)
                     shape = shape.GetNext()
                 shapeList.reverse() # shapelist is in reverse order
@@ -1157,7 +1238,29 @@
             PyTuple_SetItem(ret, 2, SWIG_NewPointerObj(SWIG_as_voidptr(x2), SWIGTYPE_p_b2Vec2, 0 ));
             return ret;
         }
+
+
+        PyObject* _downcasted_shape(b2Shape* shape) {
+            if (!shape) {
+                Py_INCREF(Py_None);
+                return Py_None; 
+            }
+            switch (shape->GetType())
+            {
+            case e_circleShape:
+                return SWIG_NewPointerObj(shape, SWIGTYPE_p_b2CircleShape, 0);
+            case e_polygonShape:
+                return SWIG_NewPointerObj(shape, SWIGTYPE_p_b2PolygonShape, 0);
+            case e_edgeShape:
+                return SWIG_NewPointerObj(shape, SWIGTYPE_p_b2EdgeShape, 0); 
+            case e_unknownShape:
+            default:
+                return SWIG_NewPointerObj(shape, SWIGTYPE_p_b2Shape, 0);
+            }
+        }
     %}
+
+    %ignore _downcasted_shape;
 
     /* Additional supporting C++ code */
     %typemap(out) bool b2CheckPolygonDef(b2PolygonDef*) {

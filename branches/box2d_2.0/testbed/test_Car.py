@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -95,11 +96,11 @@ class Car (Framework):
         jd.enableMotor = True
         jd.maxMotorTorque = 10.0
         jd.motorSpeed = 0.0
-        self.leftJoint = self.world.CreateJoint(jd).getAsType() 
+        self.leftJoint = self.world.CreateJoint(jd)
 
         jd.Initialize(self.vehicle, self.rightWheel, self.rightWheel.GetWorldCenter())
         jd.collideConnected = False
-        self.rightJoint = self.world.CreateJoint(jd).getAsType() 
+        self.rightJoint = self.world.CreateJoint(jd)
 
         # ground
         box=box2d.b2PolygonDef() 

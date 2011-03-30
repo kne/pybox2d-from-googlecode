@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 # Python version Copyright (c) 2008 kne / sirkne at gmail dot com
@@ -61,7 +62,7 @@ class Buoyancy (Framework):
             
             anchor=(-15.0 + 1.0 * i, 5.0)
             jd.Initialize(prevBody, body, anchor)
-            self.world.CreateJoint(jd).getAsType()
+            self.world.CreateJoint(jd)
             
             prevBody = body
             
@@ -69,7 +70,7 @@ class Buoyancy (Framework):
         
         anchor=(-15.0 + 1.0 * numPlanks, 5.0)
         jd.Initialize(prevBody, ground, anchor)
-        self.world.CreateJoint(jd).getAsType()
+        self.world.CreateJoint(jd)
         
         for i in range(2):
             sd=box2d.b2PolygonDef()

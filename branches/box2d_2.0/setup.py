@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Setup script for pyBox2D distribution.
 
@@ -23,7 +24,7 @@ except:
 
 # release version number
 box2d_version  = '2.0.2'
-release_number = 1
+release_number = 2
 
 # create the version string
 version_str = "%sb%s" % (box2d_version, str(release_number))
@@ -60,7 +61,7 @@ box2d_source_files = ['Box2D/Box2D.i'] + \
     sum( [glob(os.path.join(path, "*.cpp")) for path in source_paths], [])
 
 # arguments to pass to SWIG. for old versions of SWIG, -O (optimize) might not be present.
-swig_arguments = '-c++ -IBox2D -O -includeall -ignoremissing -w201 -outdir .'
+swig_arguments = '-c++ -IBox2D -O -small -includeall -ignoremissing -w201 -outdir .'
 
 pybox2d_extension = \
     Extension('Box2D._Box2D', box2d_source_files, extra_compile_args=['-I.'], language='c++')
@@ -73,7 +74,7 @@ LONG_DESCRIPTION = \
     homepage.
 
     pybox2d homepage: http://pybox2d.googlecode.com
-    Box2D's homepage: http://www.box2d.org
+    Box2D homepage: http://www.box2d.org
     """ % (box2d_version,)
 
 CLASSIFIERS = [

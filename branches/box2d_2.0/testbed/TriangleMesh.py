@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # A lite constrained delauney triangle mesh generator,supporting holes and
 # non convex boundaries.

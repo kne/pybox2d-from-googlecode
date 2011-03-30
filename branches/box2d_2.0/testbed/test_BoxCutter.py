@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #
 # Original C++ version by Daid 
@@ -201,7 +203,7 @@ class BoxCutter (Framework):
             if shapes[i].GetType() != box2d.e_polygonShape:
                 continue
 
-            polyShape = shapes[i].getAsType()
+            polyShape = shapes[i]
             
             b = polyShape.GetBody()
             #Custom check to make sure we don't cut stuff we don't want to cut.
