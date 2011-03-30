@@ -6,7 +6,7 @@
 ===Linux===
 To compile the latest SVN version, follow these steps:
 
-  #1 Download and install the latest version of [http://www.swig.org SWIG] (preferably 1.3.31+) with your package manager.
+  #1 Download and install the latest version of [http://www.swig.org SWIG] (preferably 2.0.0+) with your package manager.
    If you are using *Ubuntu*, you can install it via Synaptic Package Manager (package name 'swig'). You will also need
    to install the python-dev package, and build-essential (and python-pygame if you want to run the testbed).
 {{{
@@ -99,7 +99,7 @@ To build pybox2d, you will need:
 
 ==== SWIG Installation ====
 
-  # Download the latest source release of SWIG [http://downloads.sourceforge.net/swig/swig-1.3.40.tar.gz here]
+  # Download the latest source release of SWIG [http://downloads.sourceforge.net/swig/swig-2.0.3.tar.gz here]
   # Place the file onto your Desktop  
   # Open Terminal.app located in the Applications/Utilities folder
   # Then enter the following into the terminal window:
