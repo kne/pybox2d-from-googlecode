@@ -1,11 +1,5 @@
 #summary Documentation Page
 #labels Phase-Deploy
-==Help==
-
-For now, the main documentation will be kept on the *Box2D [http://www.box2d.org/wiki/index.php?title=Box2D_with_Python wiki]*.
-
-Please feel free to discuss your ideas and/or problems in the forums, also.
-
 ==Manual==
 
 The original Box2D manual has been partially rewritten for Python. [http://pybox2d.googlecode.com/svn/branches/box2d_2.0/doc/manual.htm 2.0.x] manual / [GettingStartedManual 2.1] manual
