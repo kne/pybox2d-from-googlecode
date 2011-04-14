@@ -14,7 +14,8 @@
 
 === Games ===
 
- * [http://code.google.com/p/pybotwar/ pybotwar] "is a fun and educational game where players create computer programs to control simulated robots to compete in a battle arena"
+ * [http://www.pyweek.org/e/RohypnolTappper/ Nein] is a 2D physics sandbox based around animal cruelty. Specifically, animal cruelty towards a cat.
+ * [http://code.google.com/p/pybotwar/ pybotwar] is a fun and educational game where players create computer programs to control simulated robots to compete in a battle arena
  * [http://ew.dy.fi/code/random/wiki/Torqueball Torqueball] is a cool single player platform/puzzle game with a level editor ([http://forum.openhandhelds.org/viewtopic.php?f=14&t=1031 help] the author make levels)
  * [http://cd21.org/games/the-bird-eating-macaque/ The Bird-eating Macaque] by cap ([http://www.ludumdare.com/compo/2009/02/08/the-bird-eating-macaque-final/ LD page])
  * [http://www.ludumdare.com/compo/2008/08/10/junktowers-final/ Junktowers] by Papper, his submission to the 48 hour solo game development competition [http://www.ludumdare.com/ Ludum Dare]
