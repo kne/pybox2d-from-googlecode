@@ -1,5 +1,8 @@
-#summary Projects and games using pybox2d
+#summary Projects, games, and anything using pybox2d
 #labels Featured
+
+=== In Academia ===
+ * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_.
 
 === Libraries / Add-ons / Learning Utilities ===
 
@@ -14,6 +17,7 @@
 
 === Games ===
 
+ * [http://www.pygame.org/project-Bricks+Knock+Off-1712-.html Bricks Knock Off] Knock the bricks off the platform to win (pybox2d 2.1)
  * [http://www.pyweek.org/e/RohypnolTappper/ Nein] is a 2D physics sandbox based around animal cruelty. Specifically, animal cruelty towards a cat.
  * [http://code.google.com/p/pybotwar/ pybotwar] is a fun and educational game where players create computer programs to control simulated robots to compete in a battle arena
  * [http://ew.dy.fi/code/random/wiki/Torqueball Torqueball] is a cool single player platform/puzzle game with a level editor ([http://forum.openhandhelds.org/viewtopic.php?f=14&t=1031 help] the author make levels)
