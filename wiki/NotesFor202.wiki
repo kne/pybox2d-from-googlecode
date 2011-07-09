@@ -7,6 +7,7 @@ After installing pybox2d, if you want to know where to begin, see the python [ht
 
 *Please note* that this wiki was converted from an old copy of the defunct official box2d wiki. There may be some inconsistencies.
 
+
 === Source Code Examples ===
 
   * A port of the Box2D Hello World: [http://code.google.com/p/pybox2d/source/browse/branches/box2d_2.0/testbed/hello.py hello.py]
@@ -14,6 +15,15 @@ After installing pybox2d, if you want to know where to begin, see the python [ht
   * Other projects linked from the pybox2d wiki page, [http://code.google.com/p/pybox2d/wiki/Projects Projects]
 
 === Usage ===
+
+==== 2.0.2b2 Notes ====
+ * This version fixes a major memory leak.
+ * 2.0.2 is an old version which is not often updated. Please try to move to the SVN 2.1.x version.
+ * The inconvenient getAsType() is no longer necessary from 2.0.2b2 and on.
+ * The vertexCount parameter has been removed in DrawSolidPolygon and DrawPolygon of b2DebugDraw (you will get a "Swig director method error" if you don't change it)
+{{{
+TypeError: "DrawSolidPolygon() takes exactly 4 arguments (3 given) Swig director method error Error detected when calling 'b2DebugDraw.DrawSolidPolygon'"
+}}}
 
 ==== b2Vec2 ====
 
@@ -154,6 +164,8 @@ revolutejoint = self.world.CreateJoint(jd).getAsType()
 }}}
 
 The 'revolutejoint' variable would then hold a b2RevoluteJoint. Without using .getAsType(), it would be a b2Joint. b2Shapes can similarly be retrieved.
+
+**NOTE** getAsType() is no longer necessary from 2.0.2b2 and on.
 
 === Crashes ===
 
