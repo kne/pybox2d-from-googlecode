@@ -5,9 +5,12 @@
 
 [http://code.google.com/p/pymunk/ pymunk]
 
+[https://bitbucket.org/timostolz/gamephysics/ gamephysics] A Cython wrapper for Box2D
 
 == 3D ==
 
 [http://pyode.sourceforge.net/ PyODE]
 
 [http://python-ogre.org/ Python-Ogre]'s Newton
+
+Bullet physics ([http://hg.codeflow.org/ctypes_bullet Ctypes]) ([http://www.blender.org/ Blender])
