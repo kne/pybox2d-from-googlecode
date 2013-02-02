@@ -1,12 +1,15 @@
 #summary Projects, games, and anything using pybox2d
 #labels Featured
 
+Note that the categories and entries are in no particular order (not even alphabetical).
+
 === In Academia ===
  * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_.
 
 === Libraries / Add-ons / Learning Utilities ===
 
  * [http://mekanimo.net/ Mekanimo] Simulation designer for games/learning/etc. with nice GUI and export options
+ * [http://pilas-engine.com.ar/ Pilas Engine] Game engine used in teaching children programming. See it in action [http://www.youtube.com/watch?v=w9gdL7ZM3cI here] (Shaolin's Blind Fury)
  * [http://sifter.org/~simon/aichallenge/01/challenge.html Simon Funk's AI Challenge] An interesting AI challenge for everyone
  * [http://home.gna.org/box2dsimulator/Html/index.html Box2dSimulator] A 2D physics engine for long run robotic experiments
  * [http://code.google.com/p/pybox2d-foil/ pybox2d-foil] Airfoil physics simulation for pyBox2D by [http://code.google.com/u/snickell/ snickell]
