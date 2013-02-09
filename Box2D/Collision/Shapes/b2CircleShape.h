@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -19,73 +19,80 @@
 #ifndef B2_CIRCLE_SHAPE_H
 #define B2_CIRCLE_SHAPE_H
 
-#include <Box2D/Collision/Shapes/b2Shape.h>
+#include "b2Shape.h"
+
+/// This structure is used to build circle shapes.
+struct b2CircleDef : public b2ShapeDef
+{
+	b2CircleDef()
+	{
+		type = e_circleShape;
+		localPosition.SetZero();
+		radius = 1.0f;
+	}
+
+	b2Vec2 localPosition;
+	float32 radius;
+};
 
 /// A circle shape.
 class b2CircleShape : public b2Shape
 {
 public:
-	b2CircleShape();
+	/// @see b2Shape::TestPoint
+	bool TestPoint(const b2XForm& transform, const b2Vec2& p) const;
 
-	/// Implement b2Shape.
-	b2Shape* Clone(b2BlockAllocator* allocator) const;
-
-	/// @see b2Shape::GetChildCount
-	int32 GetChildCount() const;
-
-	/// Implement b2Shape.
-	bool TestPoint(const b2Transform& transform, const b2Vec2& p) const;
-
-	/// Implement b2Shape.
-	bool RayCast(b2RayCastOutput* output, const b2RayCastInput& input,
-				const b2Transform& transform, int32 childIndex) const;
+	/// @see b2Shape::TestSegment
+	b2SegmentCollide TestSegment(	const b2XForm& transform,
+						float32* lambda,
+						b2Vec2* normal,
+						const b2Segment& segment,
+						float32 maxLambda) const;
 
 	/// @see b2Shape::ComputeAABB
-	void ComputeAABB(b2AABB* aabb, const b2Transform& transform, int32 childIndex) const;
+	void ComputeAABB(b2AABB* aabb, const b2XForm& transform) const;
+
+	/// @see b2Shape::ComputeSweptAABB
+	void ComputeSweptAABB(	b2AABB* aabb,
+							const b2XForm& transform1,
+							const b2XForm& transform2) const;
 
 	/// @see b2Shape::ComputeMass
-	void ComputeMass(b2MassData* massData, float32 density) const;
+	void ComputeMass(b2MassData* massData) const;
 
-	/// Get the supporting vertex index in the given direction.
-	int32 GetSupport(const b2Vec2& d) const;
+	/// @see b2Shape::ComputeSubmergedArea
+	float32 ComputeSubmergedArea(	const b2Vec2& normal,
+									float32 offset,
+									const b2XForm& xf, 
+									b2Vec2* c) const;
 
-	/// Get the supporting vertex in the given direction.
-	const b2Vec2& GetSupportVertex(const b2Vec2& d) const;
+	/// Get the local position of this circle in its parent body.
+	const b2Vec2& GetLocalPosition() const;
 
-	/// Get the vertex count.
-	int32 GetVertexCount() const { return 1; }
+	/// Get the radius of this circle.
+	float32 GetRadius() const;
 
-	/// Get a vertex by index. Used by b2Distance.
-	const b2Vec2& GetVertex(int32 index) const;
+private:
 
-	/// Position
-	b2Vec2 m_p;
+	friend class b2Shape;
+
+	b2CircleShape(const b2ShapeDef* def);
+
+	void UpdateSweepRadius(const b2Vec2& center);
+
+	// Local position in parent body
+	b2Vec2 m_localPosition;
+	float32 m_radius;
 };
 
-inline b2CircleShape::b2CircleShape()
+inline const b2Vec2& b2CircleShape::GetLocalPosition() const
 {
-	m_type = e_circle;
-	m_radius = 0.0f;
-	m_p.SetZero();
+	return m_localPosition;
 }
 
-inline int32 b2CircleShape::GetSupport(const b2Vec2 &d) const
+inline float32 b2CircleShape::GetRadius() const
 {
-	B2_NOT_USED(d);
-	return 0;
-}
-
-inline const b2Vec2& b2CircleShape::GetSupportVertex(const b2Vec2 &d) const
-{
-	B2_NOT_USED(d);
-	return m_p;
-}
-
-inline const b2Vec2& b2CircleShape::GetVertex(int32 index) const
-{
-	B2_NOT_USED(index);
-	b2Assert(index == 0);
-	return m_p;
+	return m_radius;
 }
 
 #endif

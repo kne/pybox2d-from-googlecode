@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -19,25 +19,65 @@
 #ifndef B2_MATH_H
 #define B2_MATH_H
 
-#include <Box2D/Common/b2Settings.h>
+#include "b2Settings.h"
 
+#ifdef TARGET_OS_IPHONE
+#include "math.h"
+#else
 #include <cmath>
+#endif
+
+
+
 #include <cfloat>
-#include <cstddef>
-#include <limits>
+#include <cstdlib>
+
+#include <stdio.h>
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+
+inline Fixed b2Min(const Fixed& a, const Fixed& b)
+{
+  return a < b ? a : b;
+}
+
+inline Fixed b2Max(const Fixed& a, const Fixed& b)
+{
+  return a > b ? a : b;
+}
+
+inline Fixed b2Clamp(Fixed a, Fixed low, Fixed high)
+{
+	return b2Max(low, b2Min(a, high));
+}
+
+inline bool b2IsValid(Fixed x)
+{
+	B2_NOT_USED(x);
+	return true;
+}
+
+#define	b2Sqrt(x)	sqrt(x)
+#define	b2Atan2(y, x)	atan2(y, x)
+
+#else
 
 /// This function is used to ensure that a floating point number is
 /// not a NaN or infinity.
 inline bool b2IsValid(float32 x)
 {
-	if (x != x)
-	{
-		// NaN.
-		return false;
-	}
-
-	float32 infinity = std::numeric_limits<float32>::infinity();
-	return -infinity < x && x < infinity;
+#ifdef _MSC_VER
+	return _finite(x) != 0;
+#else
+	
+#ifdef TARGET_OS_IPHONE
+	return isfinite(x);
+#else
+	return finite(x) != 0;
+#endif
+	
+	
+#endif
 }
 
 /// This is a approximate yet fast inverse square-root.
@@ -57,14 +97,21 @@ inline float32 b2InvSqrt(float32 x)
 	return x;
 }
 
-#define	b2Sqrt(x)	std::sqrt(x)
-#define	b2Atan2(y, x)	std::atan2(y, x)
+#define	b2Sqrt(x)	sqrtf(x)
+#define	b2Atan2(y, x)	atan2f(y, x)
+
+#endif
+
+inline float32 b2Abs(float32 a)
+{
+	return a > 0.0f ? a : -a;
+}
 
 /// A 2D column vector.
 struct b2Vec2
 {
 	/// Default constructor does nothing (for performance).
-	b2Vec2() {}
+	b2Vec2() : x(0.0f), y(0.0f) {}
 
 	/// Construct using coordinates.
 	b2Vec2(float32 x, float32 y) : x(x), y(y) {}
@@ -78,18 +125,6 @@ struct b2Vec2
 	/// Negate this vector.
 	b2Vec2 operator -() const { b2Vec2 v; v.Set(-x, -y); return v; }
 	
-	/// Read from and indexed element.
-	float32 operator () (int32 i) const
-	{
-		return (&x)[i];
-	}
-
-	/// Write to an indexed element.
-	float32& operator () (int32 i)
-	{
-		return (&x)[i];
-	}
-
 	/// Add a vector to this vector.
 	void operator += (const b2Vec2& v)
 	{
@@ -111,7 +146,20 @@ struct b2Vec2
 	/// Get the length of this vector (the norm).
 	float32 Length() const
 	{
+#ifdef TARGET_FLOAT32_IS_FIXED
+		float est = b2Abs(x) + b2Abs(y);
+		if(est == 0.0f) {
+			return 0.0;
+		} else if(est < 0.1) {
+			return (1.0/256.0) * b2Vec2(x<<8, y<<8).Length();
+		} else if(est < 180.0f) {
+			return b2Sqrt(x * x + y * y);
+		} else {
+			return 256.0 * (b2Vec2(x>>8, y>>8).Length());
+		}
+#else
 		return b2Sqrt(x * x + y * y);
+#endif 
 	}
 
 	/// Get the length squared. For performance, use this instead of
@@ -122,10 +170,38 @@ struct b2Vec2
 	}
 
 	/// Convert this vector into a unit vector. Returns the length.
+#ifdef TARGET_FLOAT32_IS_FIXED
 	float32 Normalize()
 	{
 		float32 length = Length();
-		if (length < b2_epsilon)
+		if (length < B2_FLT_EPSILON)
+		{
+			return 0.0f;
+		} 
+#ifdef NORMALIZE_BY_INVERT_MULTIPLY
+		if (length < (1.0/16.0)) {
+			x = x << 4;
+			y = y << 4;
+			return (1.0/16.0)*Normalize();
+		} else if(length > 16.0) {
+			x = x >> 4;
+			y = y >> 4;
+			return 16.0*Normalize();
+		}
+		float32 invLength = 1.0f / length;
+		x *= invLength;
+		y *= invLength;
+#else
+		x /= length;
+		y /= length;
+#endif
+		return length;
+	}
+#else
+	float32 Normalize()
+	{
+		float32 length = Length();
+		if (length < B2_FLT_EPSILON)
 		{
 			return 0.0f;
 		}
@@ -135,17 +211,12 @@ struct b2Vec2
 
 		return length;
 	}
+#endif
 
 	/// Does this vector contain finite coordinates?
 	bool IsValid() const
 	{
 		return b2IsValid(x) && b2IsValid(y);
-	}
-
-	/// Get the skew vector such that dot(skew_vec, other) == cross(vec, other)
-	b2Vec2 Skew() const
-	{
-		return b2Vec2(-y, x);
 	}
 
 	float32 x, y;
@@ -199,49 +270,139 @@ struct b2Mat22
 	/// Construct this matrix using columns.
 	b2Mat22(const b2Vec2& c1, const b2Vec2& c2)
 	{
-		ex = c1;
-		ey = c2;
+		col1 = c1;
+		col2 = c2;
 	}
 
 	/// Construct this matrix using scalars.
 	b2Mat22(float32 a11, float32 a12, float32 a21, float32 a22)
 	{
-		ex.x = a11; ex.y = a21;
-		ey.x = a12; ey.y = a22;
+		col1.x = a11; col1.y = a21;
+		col2.x = a12; col2.y = a22;
+	}
+
+	/// Construct this matrix using an angle. This matrix becomes
+	/// an orthonormal rotation matrix.
+	explicit b2Mat22(float32 angle)
+	{
+		// TODO_ERIN compute sin+cos together.
+		float32 c = cosf(angle), s = sinf(angle);
+		col1.x = c; col2.x = -s;
+		col1.y = s; col2.y = c;
 	}
 
 	/// Initialize this matrix using columns.
 	void Set(const b2Vec2& c1, const b2Vec2& c2)
 	{
-		ex = c1;
-		ey = c2;
+		col1 = c1;
+		col2 = c2;
+	}
+
+	/// Initialize this matrix using an angle. This matrix becomes
+	/// an orthonormal rotation matrix.
+	void Set(float32 angle)
+	{
+		float32 c = cosf(angle), s = sinf(angle);
+		col1.x = c; col2.x = -s;
+		col1.y = s; col2.y = c;
 	}
 
 	/// Set this to the identity matrix.
 	void SetIdentity()
 	{
-		ex.x = 1.0f; ey.x = 0.0f;
-		ex.y = 0.0f; ey.y = 1.0f;
+		col1.x = 1.0f; col2.x = 0.0f;
+		col1.y = 0.0f; col2.y = 1.0f;
 	}
 
 	/// Set this matrix to all zeros.
 	void SetZero()
 	{
-		ex.x = 0.0f; ey.x = 0.0f;
-		ex.y = 0.0f; ey.y = 0.0f;
+		col1.x = 0.0f; col2.x = 0.0f;
+		col1.y = 0.0f; col2.y = 0.0f;
 	}
 
+	/// Extract the angle from this matrix (assumed to be
+	/// a rotation matrix).
+	float32 GetAngle() const
+	{
+		return b2Atan2(col1.y, col1.x);
+	}
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+
+	/// Compute the inverse of this matrix, such that inv(A) * A = identity.
 	b2Mat22 GetInverse() const
 	{
-		float32 a = ex.x, b = ey.x, c = ex.y, d = ey.y;
+		float32 a = col1.x, b = col2.x, c = col1.y, d = col2.y;
+		float32 det = a * d - b * c;
+		b2Mat22 B;
+		int n = 0;
+
+		if(b2Abs(det) <= (B2_FLT_EPSILON<<8))
+		{
+			n = 3;
+			a = a<<n; b = b<<n; 
+			c = c<<n; d = d<<n;
+			det = a * d - b * c;
+			b2Assert(det != 0.0f);
+			det = float32(1) / det;
+			B.col1.x = ( det * d) << n;	B.col2.x = (-det * b) << n;
+			B.col1.y = (-det * c) << n;	B.col2.y = ( det * a) << n;
+		} 
+		else
+		{
+			n = (b2Abs(det) >= 16.0)? 4 : 0;
+			b2Assert(det != 0.0f);
+			det = float32(1<<n) / det;
+			B.col1.x = ( det * d) >> n;	B.col2.x = (-det * b) >> n;
+			B.col1.y = (-det * c) >> n;	B.col2.y = ( det * a) >> n;
+		}
+		
+		return B;
+	}
+
+	// Solve A * x = b
+	b2Vec2 Solve(const b2Vec2& b) const
+	{
+		float32 a11 = col1.x, a12 = col2.x, a21 = col1.y, a22 = col2.y;
+		float32 det = a11 * a22 - a12 * a21;
+		int n = 0;
+		b2Vec2 x;
+
+		
+		if(b2Abs(det) <= (B2_FLT_EPSILON<<8))
+		{
+			n = 3;
+			a11 = col1.x<<n; a12 = col2.x<<n;
+			a21 = col1.y<<n; a22 = col2.y<<n;
+			det = a11 * a22 - a12 * a21;
+			b2Assert(det != 0.0f);
+			det = float32(1) / det;
+			x.x = (det * (a22 * b.x - a12 * b.y)) << n;
+			x.y = (det * (a11 * b.y - a21 * b.x)) << n;
+		} 
+		else 
+		{
+			n = (b2Abs(det) >= 16.0) ? 4 : 0;
+			b2Assert(det != 0.0f);
+			det = float32(1<<n) / det;
+			x.x = (det * (a22 * b.x - a12 * b.y)) >> n;
+			x.y = (det * (a11 * b.y - a21 * b.x)) >> n;
+		}
+
+		return x;
+	}
+
+#else
+	b2Mat22 GetInverse() const
+	{
+		float32 a = col1.x, b = col2.x, c = col1.y, d = col2.y;
 		b2Mat22 B;
 		float32 det = a * d - b * c;
-		if (det != 0.0f)
-		{
-			det = 1.0f / det;
-		}
-		B.ex.x =  det * d;	B.ey.x = -det * b;
-		B.ex.y = -det * c;	B.ey.y =  det * a;
+		b2Assert(det != 0.0f);
+		det = float32(1.0f) / det;
+		B.col1.x =  det * d;	B.col2.x = -det * b;
+		B.col1.y = -det * c;	B.col2.y =  det * a;
 		return B;
 	}
 
@@ -249,19 +410,18 @@ struct b2Mat22
 	/// than computing the inverse in one-shot cases.
 	b2Vec2 Solve(const b2Vec2& b) const
 	{
-		float32 a11 = ex.x, a12 = ey.x, a21 = ex.y, a22 = ey.y;
+		float32 a11 = col1.x, a12 = col2.x, a21 = col1.y, a22 = col2.y;
 		float32 det = a11 * a22 - a12 * a21;
-		if (det != 0.0f)
-		{
-			det = 1.0f / det;
-		}
+		b2Assert(det != 0.0f);
+		det = 1.0f / det;
 		b2Vec2 x;
 		x.x = det * (a22 * b.x - a12 * b.y);
 		x.y = det * (a11 * b.y - a21 * b.x);
 		return x;
 	}
+#endif
 
-	b2Vec2 ex, ey;
+	b2Vec2 col1, col2;
 };
 
 /// A 3-by-3 matrix. Stored in column-major order.
@@ -273,17 +433,17 @@ struct b2Mat33
 	/// Construct this matrix using columns.
 	b2Mat33(const b2Vec3& c1, const b2Vec3& c2, const b2Vec3& c3)
 	{
-		ex = c1;
-		ey = c2;
-		ez = c3;
+		col1 = c1;
+		col2 = c2;
+		col3 = c3;
 	}
 
 	/// Set this matrix to all zeros.
 	void SetZero()
 	{
-		ex.SetZero();
-		ey.SetZero();
-		ez.SetZero();
+		col1.SetZero();
+		col2.SetZero();
+		col3.SetZero();
 	}
 
 	/// Solve A * x = b, where b is a column vector. This is more efficient
@@ -295,93 +455,28 @@ struct b2Mat33
 	/// 2-by-2 matrix equation.
 	b2Vec2 Solve22(const b2Vec2& b) const;
 
-	/// Get the inverse of this matrix as a 2-by-2.
-	/// Returns the zero matrix if singular.
-	void GetInverse22(b2Mat33* M) const;
-
-	/// Get the symmetric inverse of this matrix as a 3-by-3.
-	/// Returns the zero matrix if singular.
-	void GetSymInverse33(b2Mat33* M) const;
-
-	b2Vec3 ex, ey, ez;
-};
-
-/// Rotation
-struct b2Rot
-{
-	b2Rot() {}
-
-	/// Initialize from an angle in radians
-	explicit b2Rot(float32 angle)
-	{
-		/// TODO_ERIN optimize
-		s = sinf(angle);
-		c = cosf(angle);
-	}
-
-	/// Set using an angle in radians.
-	void Set(float32 angle)
-	{
-		/// TODO_ERIN optimize
-		s = sinf(angle);
-		c = cosf(angle);
-	}
-
-	/// Set to the identity rotation
-	void SetIdentity()
-	{
-		s = 0.0f;
-		c = 1.0f;
-	}
-
-	/// Get the angle in radians
-	float32 GetAngle() const
-	{
-		return b2Atan2(s, c);
-	}
-
-	/// Get the x-axis
-	b2Vec2 GetXAxis() const
-	{
-		return b2Vec2(c, s);
-	}
-
-	/// Get the u-axis
-	b2Vec2 GetYAxis() const
-	{
-		return b2Vec2(-s, c);
-	}
-
-	/// Sine and cosine
-	float32 s, c;
+	b2Vec3 col1, col2, col3;
 };
 
 /// A transform contains translation and rotation. It is used to represent
 /// the position and orientation of rigid frames.
-struct b2Transform
+struct b2XForm
 {
-	/// The default constructor does nothing.
-	b2Transform() {}
+	/// The default constructor does nothing (for performance).
+	b2XForm() {}
 
-	/// Initialize using a position vector and a rotation.
-	b2Transform(const b2Vec2& position, const b2Rot& rotation) : p(position), q(rotation) {}
+	/// Initialize using a position vector and a rotation matrix.
+	b2XForm(const b2Vec2& position, const b2Mat22& R) : position(position), R(R) {}
 
 	/// Set this to the identity transform.
 	void SetIdentity()
 	{
-		p.SetZero();
-		q.SetIdentity();
+		position.SetZero();
+		R.SetIdentity();
 	}
 
-	/// Set this based on the position and angle.
-	void Set(const b2Vec2& position, float32 angle)
-	{
-		p = position;
-		q.Set(angle);
-	}
-
-	b2Vec2 p;
-	b2Rot q;
+	b2Vec2 position;
+	b2Mat22 R;
 };
 
 /// This describes the motion of a body/shape for TOI computation.
@@ -391,29 +486,25 @@ struct b2Transform
 struct b2Sweep
 {
 	/// Get the interpolated transform at a specific time.
-	/// @param beta is a factor in [0,1], where 0 indicates alpha0.
-	void GetTransform(b2Transform* xfb, float32 beta) const;
+	/// @param t the normalized time in [0,1].
+	void GetXForm(b2XForm* xf, float32 t) const;
 
 	/// Advance the sweep forward, yielding a new initial state.
-	/// @param alpha the new initial time.
-	void Advance(float32 alpha);
-
-	/// Normalize the angles.
-	void Normalize();
+	/// @param t the new initial time.
+	void Advance(float32 t);
 
 	b2Vec2 localCenter;	///< local center of mass position
 	b2Vec2 c0, c;		///< center world positions
 	float32 a0, a;		///< world angles
-
-	/// Fraction of the current time step in the range [0,1]
-	/// c0 and a0 are the positions at alpha0.
-	float32 alpha0;
+	float32 t0;			///< time interval = [t0,1], where t0 is in [0,1]
 };
 
-/// Useful constant
-extern const b2Vec2 b2Vec2_zero;
 
-/// Perform the dot product on two vectors.
+extern const b2Vec2 b2Vec2_zero;
+extern const b2Mat22 b2Mat22_identity;
+extern const b2XForm b2XForm_identity;
+
+/// Peform the dot product on two vectors.
 inline float32 b2Dot(const b2Vec2& a, const b2Vec2& b)
 {
 	return a.x * b.x + a.y * b.y;
@@ -443,14 +534,14 @@ inline b2Vec2 b2Cross(float32 s, const b2Vec2& a)
 /// then this transforms the vector from one frame to another.
 inline b2Vec2 b2Mul(const b2Mat22& A, const b2Vec2& v)
 {
-	return b2Vec2(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+	return b2Vec2(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
 }
 
 /// Multiply a matrix transpose times a vector. If a rotation matrix is provided,
 /// then this transforms the vector from one frame to another (inverse transform).
 inline b2Vec2 b2MulT(const b2Mat22& A, const b2Vec2& v)
 {
-	return b2Vec2(b2Dot(v, A.ex), b2Dot(v, A.ey));
+	return b2Vec2(b2Dot(v, A.col1), b2Dot(v, A.col2));
 }
 
 /// Add two vectors component-wise.
@@ -518,115 +609,37 @@ inline b2Vec3 b2Cross(const b2Vec3& a, const b2Vec3& b)
 
 inline b2Mat22 operator + (const b2Mat22& A, const b2Mat22& B)
 {
-	return b2Mat22(A.ex + B.ex, A.ey + B.ey);
+	return b2Mat22(A.col1 + B.col1, A.col2 + B.col2);
 }
 
 // A * B
 inline b2Mat22 b2Mul(const b2Mat22& A, const b2Mat22& B)
 {
-	return b2Mat22(b2Mul(A, B.ex), b2Mul(A, B.ey));
+	return b2Mat22(b2Mul(A, B.col1), b2Mul(A, B.col2));
 }
 
 // A^T * B
 inline b2Mat22 b2MulT(const b2Mat22& A, const b2Mat22& B)
 {
-	b2Vec2 c1(b2Dot(A.ex, B.ex), b2Dot(A.ey, B.ex));
-	b2Vec2 c2(b2Dot(A.ex, B.ey), b2Dot(A.ey, B.ey));
+	b2Vec2 c1(b2Dot(A.col1, B.col1), b2Dot(A.col2, B.col1));
+	b2Vec2 c2(b2Dot(A.col1, B.col2), b2Dot(A.col2, B.col2));
 	return b2Mat22(c1, c2);
 }
 
 /// Multiply a matrix times a vector.
 inline b2Vec3 b2Mul(const b2Mat33& A, const b2Vec3& v)
 {
-	return v.x * A.ex + v.y * A.ey + v.z * A.ez;
+	return v.x * A.col1 + v.y * A.col2 + v.z * A.col3;
 }
 
-/// Multiply a matrix times a vector.
-inline b2Vec2 b2Mul22(const b2Mat33& A, const b2Vec2& v)
+inline b2Vec2 b2Mul(const b2XForm& T, const b2Vec2& v)
 {
-	return b2Vec2(A.ex.x * v.x + A.ey.x * v.y, A.ex.y * v.x + A.ey.y * v.y);
+	return T.position + b2Mul(T.R, v);
 }
 
-/// Multiply two rotations: q * r
-inline b2Rot b2Mul(const b2Rot& q, const b2Rot& r)
+inline b2Vec2 b2MulT(const b2XForm& T, const b2Vec2& v)
 {
-	// [qc -qs] * [rc -rs] = [qc*rc-qs*rs -qc*rs-qs*rc]
-	// [qs  qc]   [rs  rc]   [qs*rc+qc*rs -qs*rs+qc*rc]
-	// s = qs * rc + qc * rs
-	// c = qc * rc - qs * rs
-	b2Rot qr;
-	qr.s = q.s * r.c + q.c * r.s;
-	qr.c = q.c * r.c - q.s * r.s;
-	return qr;
-}
-
-/// Transpose multiply two rotations: qT * r
-inline b2Rot b2MulT(const b2Rot& q, const b2Rot& r)
-{
-	// [ qc qs] * [rc -rs] = [qc*rc+qs*rs -qc*rs+qs*rc]
-	// [-qs qc]   [rs  rc]   [-qs*rc+qc*rs qs*rs+qc*rc]
-	// s = qc * rs - qs * rc
-	// c = qc * rc + qs * rs
-	b2Rot qr;
-	qr.s = q.c * r.s - q.s * r.c;
-	qr.c = q.c * r.c + q.s * r.s;
-	return qr;
-}
-
-/// Rotate a vector
-inline b2Vec2 b2Mul(const b2Rot& q, const b2Vec2& v)
-{
-	return b2Vec2(q.c * v.x - q.s * v.y, q.s * v.x + q.c * v.y);
-}
-
-/// Inverse rotate a vector
-inline b2Vec2 b2MulT(const b2Rot& q, const b2Vec2& v)
-{
-	return b2Vec2(q.c * v.x + q.s * v.y, -q.s * v.x + q.c * v.y);
-}
-
-inline b2Vec2 b2Mul(const b2Transform& T, const b2Vec2& v)
-{
-	float32 x = (T.q.c * v.x - T.q.s * v.y) + T.p.x;
-	float32 y = (T.q.s * v.x + T.q.c * v.y) + T.p.y;
-
-	return b2Vec2(x, y);
-}
-
-inline b2Vec2 b2MulT(const b2Transform& T, const b2Vec2& v)
-{
-	float32 px = v.x - T.p.x;
-	float32 py = v.y - T.p.y;
-	float32 x = (T.q.c * px + T.q.s * py);
-	float32 y = (-T.q.s * px + T.q.c * py);
-
-	return b2Vec2(x, y);
-}
-
-// v2 = A.q.Rot(B.q.Rot(v1) + B.p) + A.p
-//    = (A.q * B.q).Rot(v1) + A.q.Rot(B.p) + A.p
-inline b2Transform b2Mul(const b2Transform& A, const b2Transform& B)
-{
-	b2Transform C;
-	C.q = b2Mul(A.q, B.q);
-	C.p = b2Mul(A.q, B.p) + A.p;
-	return C;
-}
-
-// v2 = A.q' * (B.q * v1 + B.p - A.p)
-//    = A.q' * B.q * v1 + A.q' * (B.p - A.p)
-inline b2Transform b2MulT(const b2Transform& A, const b2Transform& B)
-{
-	b2Transform C;
-	C.q = b2MulT(A.q, B.q);
-	C.p = b2MulT(A.q, B.p - A.p);
-	return C;
-}
-
-template <typename T>
-inline T b2Abs(T a)
-{
-	return a > T(0) ? a : -a;
+	return b2MulT(T.R, v - T.position);
 }
 
 inline b2Vec2 b2Abs(const b2Vec2& a)
@@ -636,7 +649,7 @@ inline b2Vec2 b2Abs(const b2Vec2& a)
 
 inline b2Mat22 b2Abs(const b2Mat22& A)
 {
-	return b2Mat22(b2Abs(A.ex), b2Abs(A.ey));
+	return b2Mat22(b2Abs(A.col1), b2Abs(A.col2));
 }
 
 template <typename T>
@@ -698,34 +711,6 @@ inline bool b2IsPowerOfTwo(uint32 x)
 {
 	bool result = x > 0 && (x & (x - 1)) == 0;
 	return result;
-}
-
-inline void b2Sweep::GetTransform(b2Transform* xf, float32 beta) const
-{
-	xf->p = (1.0f - beta) * c0 + beta * c;
-	float32 angle = (1.0f - beta) * a0 + beta * a;
-	xf->q.Set(angle);
-
-	// Shift to origin
-	xf->p -= b2Mul(xf->q, localCenter);
-}
-
-inline void b2Sweep::Advance(float32 alpha)
-{
-	b2Assert(alpha0 < 1.0f);
-	float32 beta = (alpha - alpha0) / (1.0f - alpha0);
-	c0 = (1.0f - beta) * c0 + beta * c;
-	a0 = (1.0f - beta) * a0 + beta * a;
-	alpha0 = alpha;
-}
-
-/// Normalize an angle in radians to be between -pi and pi
-inline void b2Sweep::Normalize()
-{
-	float32 twoPi = 2.0f * b2_pi;
-	float32 d =  twoPi * floorf(a0 / twoPi);
-	a0 -= d;
-	a -= d;
 }
 
 #endif

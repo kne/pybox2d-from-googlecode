@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,315 +16,41 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <Box2D/Collision/b2Distance.h>
-#include <Box2D/Collision/Shapes/b2CircleShape.h>
-#include <Box2D/Collision/Shapes/b2EdgeShape.h>
-#include <Box2D/Collision/Shapes/b2ChainShape.h>
-#include <Box2D/Collision/Shapes/b2PolygonShape.h>
+#include "b2Collision.h"
+#include "Shapes/b2CircleShape.h"
+#include "Shapes/b2PolygonShape.h"
+#include "Shapes/b2EdgeShape.h"
 
-// GJK using Voronoi regions (Christer Ericson) and Barycentric coordinates.
-int32 b2_gjkCalls, b2_gjkIters, b2_gjkMaxIters;
+int32 g_GJK_Iterations = 0;
 
-void b2DistanceProxy::Set(const b2Shape* shape, int32 index)
+// GJK using Voronoi regions (Christer Ericson) and region selection
+// optimizations (Casey Muratori).
+
+// The origin is either in the region of points[1] or in the edge region. The origin is
+// not in region of points[0] because that is the old point.
+static int32 ProcessTwo(b2Vec2* x1, b2Vec2* x2, b2Vec2* p1s, b2Vec2* p2s, b2Vec2* points)
 {
-	switch (shape->GetType())
+	// If in point[1] region
+	b2Vec2 r = -points[1];
+	b2Vec2 d = points[0] - points[1];
+	float32 length = d.Normalize();
+	float32 lambda = b2Dot(r, d);
+	if (lambda <= 0.0f || length < B2_FLT_EPSILON)
 	{
-	case b2Shape::e_circle:
-		{
-			const b2CircleShape* circle = (b2CircleShape*)shape;
-			m_vertices = &circle->m_p;
-			m_count = 1;
-			m_radius = circle->m_radius;
-		}
-		break;
-
-	case b2Shape::e_polygon:
-		{
-			const b2PolygonShape* polygon = (b2PolygonShape*)shape;
-			m_vertices = polygon->m_vertices;
-			m_count = polygon->m_count;
-			m_radius = polygon->m_radius;
-		}
-		break;
-
-	case b2Shape::e_chain:
-		{
-			const b2ChainShape* chain = (b2ChainShape*)shape;
-			b2Assert(0 <= index && index < chain->m_count);
-
-			m_buffer[0] = chain->m_vertices[index];
-			if (index + 1 < chain->m_count)
-			{
-				m_buffer[1] = chain->m_vertices[index + 1];
-			}
-			else
-			{
-				m_buffer[1] = chain->m_vertices[0];
-			}
-
-			m_vertices = m_buffer;
-			m_count = 2;
-			m_radius = chain->m_radius;
-		}
-		break;
-
-	case b2Shape::e_edge:
-		{
-			const b2EdgeShape* edge = (b2EdgeShape*)shape;
-			m_vertices = &edge->m_vertex1;
-			m_count = 2;
-			m_radius = edge->m_radius;
-		}
-		break;
-
-	default:
-		b2Assert(false);
-	}
-}
-
-
-struct b2SimplexVertex
-{
-	b2Vec2 wA;		// support point in proxyA
-	b2Vec2 wB;		// support point in proxyB
-	b2Vec2 w;		// wB - wA
-	float32 a;		// barycentric coordinate for closest point
-	int32 indexA;	// wA index
-	int32 indexB;	// wB index
-};
-
-struct b2Simplex
-{
-	void ReadCache(	const b2SimplexCache* cache,
-					const b2DistanceProxy* proxyA, const b2Transform& transformA,
-					const b2DistanceProxy* proxyB, const b2Transform& transformB)
-	{
-		b2Assert(cache->count <= 3);
-		
-		// Copy data from cache.
-		m_count = cache->count;
-		b2SimplexVertex* vertices = &m_v1;
-		for (int32 i = 0; i < m_count; ++i)
-		{
-			b2SimplexVertex* v = vertices + i;
-			v->indexA = cache->indexA[i];
-			v->indexB = cache->indexB[i];
-			b2Vec2 wALocal = proxyA->GetVertex(v->indexA);
-			b2Vec2 wBLocal = proxyB->GetVertex(v->indexB);
-			v->wA = b2Mul(transformA, wALocal);
-			v->wB = b2Mul(transformB, wBLocal);
-			v->w = v->wB - v->wA;
-			v->a = 0.0f;
-		}
-
-		// Compute the new simplex metric, if it is substantially different than
-		// old metric then flush the simplex.
-		if (m_count > 1)
-		{
-			float32 metric1 = cache->metric;
-			float32 metric2 = GetMetric();
-			if (metric2 < 0.5f * metric1 || 2.0f * metric1 < metric2 || metric2 < b2_epsilon)
-			{
-				// Reset the simplex.
-				m_count = 0;
-			}
-		}
-
-		// If the cache is empty or invalid ...
-		if (m_count == 0)
-		{
-			b2SimplexVertex* v = vertices + 0;
-			v->indexA = 0;
-			v->indexB = 0;
-			b2Vec2 wALocal = proxyA->GetVertex(0);
-			b2Vec2 wBLocal = proxyB->GetVertex(0);
-			v->wA = b2Mul(transformA, wALocal);
-			v->wB = b2Mul(transformB, wBLocal);
-			v->w = v->wB - v->wA;
-			v->a = 1.0f;
-			m_count = 1;
-		}
+		// The simplex is reduced to a point.
+		*x1 = p1s[1];
+		*x2 = p2s[1];
+		p1s[0] = p1s[1];
+		p2s[0] = p2s[1];
+		points[0] = points[1];
+		return 1;
 	}
 
-	void WriteCache(b2SimplexCache* cache) const
-	{
-		cache->metric = GetMetric();
-		cache->count = uint16(m_count);
-		const b2SimplexVertex* vertices = &m_v1;
-		for (int32 i = 0; i < m_count; ++i)
-		{
-			cache->indexA[i] = uint8(vertices[i].indexA);
-			cache->indexB[i] = uint8(vertices[i].indexB);
-		}
-	}
-
-	b2Vec2 GetSearchDirection() const
-	{
-		switch (m_count)
-		{
-		case 1:
-			return -m_v1.w;
-
-		case 2:
-			{
-				b2Vec2 e12 = m_v2.w - m_v1.w;
-				float32 sgn = b2Cross(e12, -m_v1.w);
-				if (sgn > 0.0f)
-				{
-					// Origin is left of e12.
-					return b2Cross(1.0f, e12);
-				}
-				else
-				{
-					// Origin is right of e12.
-					return b2Cross(e12, 1.0f);
-				}
-			}
-
-		default:
-			b2Assert(false);
-			return b2Vec2_zero;
-		}
-	}
-
-	b2Vec2 GetClosestPoint() const
-	{
-		switch (m_count)
-		{
-		case 0:
-			b2Assert(false);
-			return b2Vec2_zero;
-
-		case 1:
-			return m_v1.w;
-
-		case 2:
-			return m_v1.a * m_v1.w + m_v2.a * m_v2.w;
-
-		case 3:
-			return b2Vec2_zero;
-
-		default:
-			b2Assert(false);
-			return b2Vec2_zero;
-		}
-	}
-
-	void GetWitnessPoints(b2Vec2* pA, b2Vec2* pB) const
-	{
-		switch (m_count)
-		{
-		case 0:
-			b2Assert(false);
-			break;
-
-		case 1:
-			*pA = m_v1.wA;
-			*pB = m_v1.wB;
-			break;
-
-		case 2:
-			*pA = m_v1.a * m_v1.wA + m_v2.a * m_v2.wA;
-			*pB = m_v1.a * m_v1.wB + m_v2.a * m_v2.wB;
-			break;
-
-		case 3:
-			*pA = m_v1.a * m_v1.wA + m_v2.a * m_v2.wA + m_v3.a * m_v3.wA;
-			*pB = *pA;
-			break;
-
-		default:
-			b2Assert(false);
-			break;
-		}
-	}
-
-	float32 GetMetric() const
-	{
-		switch (m_count)
-		{
-		case 0:
-			b2Assert(false);
-			return 0.0f;
-
-		case 1:
-			return 0.0f;
-
-		case 2:
-			return b2Distance(m_v1.w, m_v2.w);
-
-		case 3:
-			return b2Cross(m_v2.w - m_v1.w, m_v3.w - m_v1.w);
-
-		default:
-			b2Assert(false);
-			return 0.0f;
-		}
-	}
-
-	void Solve2();
-	void Solve3();
-
-	b2SimplexVertex m_v1, m_v2, m_v3;
-	int32 m_count;
-};
-
-
-// Solve a line segment using barycentric coordinates.
-//
-// p = a1 * w1 + a2 * w2
-// a1 + a2 = 1
-//
-// The vector from the origin to the closest point on the line is
-// perpendicular to the line.
-// e12 = w2 - w1
-// dot(p, e) = 0
-// a1 * dot(w1, e) + a2 * dot(w2, e) = 0
-//
-// 2-by-2 linear system
-// [1      1     ][a1] = [1]
-// [w1.e12 w2.e12][a2] = [0]
-//
-// Define
-// d12_1 =  dot(w2, e12)
-// d12_2 = -dot(w1, e12)
-// d12 = d12_1 + d12_2
-//
-// Solution
-// a1 = d12_1 / d12
-// a2 = d12_2 / d12
-void b2Simplex::Solve2()
-{
-	b2Vec2 w1 = m_v1.w;
-	b2Vec2 w2 = m_v2.w;
-	b2Vec2 e12 = w2 - w1;
-
-	// w1 region
-	float32 d12_2 = -b2Dot(w1, e12);
-	if (d12_2 <= 0.0f)
-	{
-		// a2 <= 0, so we clamp it to 0
-		m_v1.a = 1.0f;
-		m_count = 1;
-		return;
-	}
-
-	// w2 region
-	float32 d12_1 = b2Dot(w2, e12);
-	if (d12_1 <= 0.0f)
-	{
-		// a1 <= 0, so we clamp it to 0
-		m_v2.a = 1.0f;
-		m_count = 1;
-		m_v1 = m_v2;
-		return;
-	}
-
-	// Must be in e12 region.
-	float32 inv_d12 = 1.0f / (d12_1 + d12_2);
-	m_v1.a = d12_1 * inv_d12;
-	m_v2.a = d12_2 * inv_d12;
-	m_count = 2;
+	// Else in edge region
+	lambda /= length;
+	*x1 = p1s[1] + lambda * (p1s[0] - p1s[1]);
+	*x2 = p2s[1] + lambda * (p2s[0] - p2s[1]);
+	return 2;
 }
 
 // Possible regions:
@@ -332,272 +58,380 @@ void b2Simplex::Solve2()
 // - edge points[0]-points[2]
 // - edge points[1]-points[2]
 // - inside the triangle
-void b2Simplex::Solve3()
+static int32 ProcessThree(b2Vec2* x1, b2Vec2* x2, b2Vec2* p1s, b2Vec2* p2s, b2Vec2* points)
 {
-	b2Vec2 w1 = m_v1.w;
-	b2Vec2 w2 = m_v2.w;
-	b2Vec2 w3 = m_v3.w;
+	b2Vec2 a = points[0];
+	b2Vec2 b = points[1];
+	b2Vec2 c = points[2];
 
-	// Edge12
-	// [1      1     ][a1] = [1]
-	// [w1.e12 w2.e12][a2] = [0]
-	// a3 = 0
-	b2Vec2 e12 = w2 - w1;
-	float32 w1e12 = b2Dot(w1, e12);
-	float32 w2e12 = b2Dot(w2, e12);
-	float32 d12_1 = w2e12;
-	float32 d12_2 = -w1e12;
+	b2Vec2 ab = b - a;
+	b2Vec2 ac = c - a;
+	b2Vec2 bc = c - b;
 
-	// Edge13
-	// [1      1     ][a1] = [1]
-	// [w1.e13 w3.e13][a3] = [0]
-	// a2 = 0
-	b2Vec2 e13 = w3 - w1;
-	float32 w1e13 = b2Dot(w1, e13);
-	float32 w3e13 = b2Dot(w3, e13);
-	float32 d13_1 = w3e13;
-	float32 d13_2 = -w1e13;
+	float32 sn = -b2Dot(a, ab), sd = b2Dot(b, ab);
+	float32 tn = -b2Dot(a, ac), td = b2Dot(c, ac);
+	float32 un = -b2Dot(b, bc), ud = b2Dot(c, bc);
 
-	// Edge23
-	// [1      1     ][a2] = [1]
-	// [w2.e23 w3.e23][a3] = [0]
-	// a1 = 0
-	b2Vec2 e23 = w3 - w2;
-	float32 w2e23 = b2Dot(w2, e23);
-	float32 w3e23 = b2Dot(w3, e23);
-	float32 d23_1 = w3e23;
-	float32 d23_2 = -w2e23;
-	
-	// Triangle123
-	float32 n123 = b2Cross(e12, e13);
-
-	float32 d123_1 = n123 * b2Cross(w2, w3);
-	float32 d123_2 = n123 * b2Cross(w3, w1);
-	float32 d123_3 = n123 * b2Cross(w1, w2);
-
-	// w1 region
-	if (d12_2 <= 0.0f && d13_2 <= 0.0f)
+	// In vertex c region?
+	if (td <= 0.0f && ud <= 0.0f)
 	{
-		m_v1.a = 1.0f;
-		m_count = 1;
-		return;
+		// Single point
+		*x1 = p1s[2];
+		*x2 = p2s[2];
+		p1s[0] = p1s[2];
+		p2s[0] = p2s[2];
+		points[0] = points[2];
+		return 1;
 	}
 
-	// e12
-	if (d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f)
+	// Should not be in vertex a or b region.
+	B2_NOT_USED(sd);
+	B2_NOT_USED(sn);
+	b2Assert(sn > 0.0f || tn > 0.0f);
+	b2Assert(sd > 0.0f || un > 0.0f);
+
+	float32 n = b2Cross(ab, ac);
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+	n = (n < 0.0)? -1.0 : ((n > 0.0)? 1.0 : 0.0);
+#endif
+
+	// Should not be in edge ab region.
+	float32 vc = n * b2Cross(a, b);
+	b2Assert(vc > 0.0f || sn > 0.0f || sd > 0.0f);
+
+	// In edge bc region?
+	float32 va = n * b2Cross(b, c);
+	if (va <= 0.0f && un >= 0.0f && ud >= 0.0f && (un+ud) > 0.0f)
 	{
-		float32 inv_d12 = 1.0f / (d12_1 + d12_2);
-		m_v1.a = d12_1 * inv_d12;
-		m_v2.a = d12_2 * inv_d12;
-		m_count = 2;
-		return;
+		b2Assert(un + ud > 0.0f);
+		float32 lambda = un / (un + ud);
+		*x1 = p1s[1] + lambda * (p1s[2] - p1s[1]);
+		*x2 = p2s[1] + lambda * (p2s[2] - p2s[1]);
+		p1s[0] = p1s[2];
+		p2s[0] = p2s[2];
+		points[0] = points[2];
+		return 2;
 	}
 
-	// e13
-	if (d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f)
+	// In edge ac region?
+	float32 vb = n * b2Cross(c, a);
+	if (vb <= 0.0f && tn >= 0.0f && td >= 0.0f && (tn+td) > 0.0f)
 	{
-		float32 inv_d13 = 1.0f / (d13_1 + d13_2);
-		m_v1.a = d13_1 * inv_d13;
-		m_v3.a = d13_2 * inv_d13;
-		m_count = 2;
-		m_v2 = m_v3;
-		return;
+		b2Assert(tn + td > 0.0f);
+		float32 lambda = tn / (tn + td);
+		*x1 = p1s[0] + lambda * (p1s[2] - p1s[0]);
+		*x2 = p2s[0] + lambda * (p2s[2] - p2s[0]);
+		p1s[1] = p1s[2];
+		p2s[1] = p2s[2];
+		points[1] = points[2];
+		return 2;
 	}
 
-	// w2 region
-	if (d12_1 <= 0.0f && d23_2 <= 0.0f)
-	{
-		m_v2.a = 1.0f;
-		m_count = 1;
-		m_v1 = m_v2;
-		return;
-	}
+	// Inside the triangle, compute barycentric coordinates
+	float32 denom = va + vb + vc;
+	b2Assert(denom > 0.0f);
+	denom = 1.0f / denom;
 
-	// w3 region
-	if (d13_1 <= 0.0f && d23_1 <= 0.0f)
-	{
-		m_v3.a = 1.0f;
-		m_count = 1;
-		m_v1 = m_v3;
-		return;
-	}
-
-	// e23
-	if (d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f)
-	{
-		float32 inv_d23 = 1.0f / (d23_1 + d23_2);
-		m_v2.a = d23_1 * inv_d23;
-		m_v3.a = d23_2 * inv_d23;
-		m_count = 2;
-		m_v1 = m_v3;
-		return;
-	}
-
-	// Must be in triangle123
-	float32 inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
-	m_v1.a = d123_1 * inv_d123;
-	m_v2.a = d123_2 * inv_d123;
-	m_v3.a = d123_3 * inv_d123;
-	m_count = 3;
+#ifdef TARGET_FLOAT32_IS_FIXED
+	*x1 = denom * (va * p1s[0] + vb * p1s[1] + vc * p1s[2]);
+	*x2 = denom * (va * p2s[0] + vb * p2s[1] + vc * p2s[2]);
+#else
+	float32 u = va * denom;
+	float32 v = vb * denom;
+	float32 w = 1.0f - u - v;
+	*x1 = u * p1s[0] + v * p1s[1] + w * p1s[2];
+	*x2 = u * p2s[0] + v * p2s[1] + w * p2s[2];
+#endif
+	return 3;
 }
 
-void b2Distance(b2DistanceOutput* output,
-				b2SimplexCache* cache,
-				const b2DistanceInput* input)
+static bool InPoints(const b2Vec2& w, const b2Vec2* points, int32 pointCount)
 {
-	++b2_gjkCalls;
-
-	const b2DistanceProxy* proxyA = &input->proxyA;
-	const b2DistanceProxy* proxyB = &input->proxyB;
-
-	b2Transform transformA = input->transformA;
-	b2Transform transformB = input->transformB;
-
-	// Initialize the simplex.
-	b2Simplex simplex;
-	simplex.ReadCache(cache, proxyA, transformA, proxyB, transformB);
-
-	// Get simplex vertices as an array.
-	b2SimplexVertex* vertices = &simplex.m_v1;
-	const int32 k_maxIters = 20;
-
-	// These store the vertices of the last simplex so that we
-	// can check for duplicates and prevent cycling.
-	int32 saveA[3], saveB[3];
-	int32 saveCount = 0;
-
-	float32 distanceSqr1 = b2_maxFloat;
-	float32 distanceSqr2 = distanceSqr1;
-
-	// Main iteration loop.
-	int32 iter = 0;
-	while (iter < k_maxIters)
+	const float32 k_tolerance = 100.0f * B2_FLT_EPSILON;
+	for (int32 i = 0; i < pointCount; ++i)
 	{
-		// Copy simplex so we can identify duplicates.
-		saveCount = simplex.m_count;
-		for (int32 i = 0; i < saveCount; ++i)
+		b2Vec2 d = b2Abs(w - points[i]);
+		b2Vec2 m = b2Max(b2Abs(w), b2Abs(points[i]));
+		
+		if (d.x < k_tolerance * (m.x + 1.0f) &&
+			d.y < k_tolerance * (m.y + 1.0f))
 		{
-			saveA[i] = vertices[i].indexA;
-			saveB[i] = vertices[i].indexB;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+template <typename T1, typename T2>
+float32 DistanceGeneric(b2Vec2* x1, b2Vec2* x2,
+				   const T1* shape1, const b2XForm& xf1,
+				   const T2* shape2, const b2XForm& xf2)
+{
+	b2Vec2 p1s[3], p2s[3];
+	b2Vec2 points[3];
+	int32 pointCount = 0;
+
+	*x1 = shape1->GetFirstVertex(xf1);
+	*x2 = shape2->GetFirstVertex(xf2);
+
+	float32 vSqr = 0.0f;
+	const int32 maxIterations = 20;
+	for (int32 iter = 0; iter < maxIterations; ++iter)
+	{
+		b2Vec2 v = *x2 - *x1;
+		b2Vec2 w1 = shape1->Support(xf1, v);
+		b2Vec2 w2 = shape2->Support(xf2, -v);
+
+		vSqr = b2Dot(v, v);
+		b2Vec2 w = w2 - w1;
+		float32 vw = b2Dot(v, w);
+		if (vSqr - vw <= 0.01f * vSqr || InPoints(w, points, pointCount)) // or w in points
+		{
+			if (pointCount == 0)
+			{
+				*x1 = w1;
+				*x2 = w2;
+			}
+			g_GJK_Iterations = iter;
+			return b2Sqrt(vSqr);
 		}
 
-		switch (simplex.m_count)
+		switch (pointCount)
 		{
+		case 0:
+			p1s[0] = w1;
+			p2s[0] = w2;
+			points[0] = w;
+			*x1 = p1s[0];
+			*x2 = p2s[0];
+			++pointCount;
+			break;
+
 		case 1:
+			p1s[1] = w1;
+			p2s[1] = w2;
+			points[1] = w;
+			pointCount = ProcessTwo(x1, x2, p1s, p2s, points);
 			break;
 
 		case 2:
-			simplex.Solve2();
-			break;
-
-		case 3:
-			simplex.Solve3();
-			break;
-
-		default:
-			b2Assert(false);
-		}
-
-		// If we have 3 points, then the origin is in the corresponding triangle.
-		if (simplex.m_count == 3)
-		{
+			p1s[2] = w1;
+			p2s[2] = w2;
+			points[2] = w;
+			pointCount = ProcessThree(x1, x2, p1s, p2s, points);
 			break;
 		}
 
-		// Compute closest point.
-		b2Vec2 p = simplex.GetClosestPoint();
-		distanceSqr2 = p.LengthSquared();
-
-		// Ensure progress
-		if (distanceSqr2 >= distanceSqr1)
+		// If we have three points, then the origin is in the corresponding triangle.
+		if (pointCount == 3)
 		{
-			//break;
-		}
-		distanceSqr1 = distanceSqr2;
-
-		// Get search direction.
-		b2Vec2 d = simplex.GetSearchDirection();
-
-		// Ensure the search direction is numerically fit.
-		if (d.LengthSquared() < b2_epsilon * b2_epsilon)
-		{
-			// The origin is probably contained by a line segment
-			// or triangle. Thus the shapes are overlapped.
-
-			// We can't return zero here even though there may be overlap.
-			// In case the simplex is a point, segment, or triangle it is difficult
-			// to determine if the origin is contained in the CSO or very close to it.
-			break;
+			g_GJK_Iterations = iter;
+			return 0.0f;
 		}
 
-		// Compute a tentative new simplex vertex using support points.
-		b2SimplexVertex* vertex = vertices + simplex.m_count;
-		vertex->indexA = proxyA->GetSupport(b2MulT(transformA.q, -d));
-		vertex->wA = b2Mul(transformA, proxyA->GetVertex(vertex->indexA));
-		b2Vec2 wBLocal;
-		vertex->indexB = proxyB->GetSupport(b2MulT(transformB.q, d));
-		vertex->wB = b2Mul(transformB, proxyB->GetVertex(vertex->indexB));
-		vertex->w = vertex->wB - vertex->wA;
-
-		// Iteration count is equated to the number of support point calls.
-		++iter;
-		++b2_gjkIters;
-
-		// Check for duplicate support points. This is the main termination criteria.
-		bool duplicate = false;
-		for (int32 i = 0; i < saveCount; ++i)
+		float32 maxSqr = -B2_FLT_MAX;
+		for (int32 i = 0; i < pointCount; ++i)
 		{
-			if (vertex->indexA == saveA[i] && vertex->indexB == saveB[i])
-			{
-				duplicate = true;
-				break;
+			maxSqr = b2Max(maxSqr, b2Dot(points[i], points[i]));
+		}
+
+#ifdef TARGET_FLOAT32_IS_FIXED
+		if (pointCount == 3 || vSqr <= 5.0*B2_FLT_EPSILON * maxSqr)
+#else
+		if (vSqr <= 100.0f * B2_FLT_EPSILON * maxSqr)
+#endif
+		{
+			g_GJK_Iterations = iter;
+			v = *x2 - *x1;
+			vSqr = b2Dot(v, v);
+			return b2Sqrt(vSqr);
+		}
+	}
+
+	g_GJK_Iterations = maxIterations;
+	return b2Sqrt(vSqr);
+}
+
+static float32 DistanceCC(
+	b2Vec2* x1, b2Vec2* x2,
+	const b2CircleShape* circle1, const b2XForm& xf1,
+	const b2CircleShape* circle2, const b2XForm& xf2)
+{
+	b2Vec2 p1 = b2Mul(xf1, circle1->GetLocalPosition());
+	b2Vec2 p2 = b2Mul(xf2, circle2->GetLocalPosition());
+
+	b2Vec2 d = p2 - p1;
+	float32 dSqr = b2Dot(d, d);
+	float32 r1 = circle1->GetRadius() - b2_toiSlop;
+	float32 r2 = circle2->GetRadius() - b2_toiSlop;
+	float32 r = r1 + r2;
+	if (dSqr > r * r)
+	{
+		float32 dLen = d.Normalize();
+		float32 distance = dLen - r;
+		*x1 = p1 + r1 * d;
+		*x2 = p2 - r2 * d;
+		return distance;
+	}
+	else if (dSqr > B2_FLT_EPSILON * B2_FLT_EPSILON)
+	{
+		d.Normalize();
+		*x1 = p1 + r1 * d;
+		*x2 = *x1;
+		return 0.0f;
+	}
+
+	*x1 = p1;
+	*x2 = *x1;
+	return 0.0f;
+}
+
+static float32 DistanceEdgeCircle(
+	b2Vec2* x1, b2Vec2* x2,
+	const b2EdgeShape* edge, const b2XForm& xf1,
+	const b2CircleShape* circle, const b2XForm& xf2)
+{
+	b2Vec2 vWorld;
+	b2Vec2 d;
+	float32 dSqr;
+	float32 dLen;
+	float32 r = circle->GetRadius() - b2_toiSlop;
+	b2Vec2 cWorld = b2Mul(xf2, circle->GetLocalPosition());
+	b2Vec2 cLocal = b2MulT(xf1, cWorld);
+	float32 dirDist = b2Dot(cLocal - edge->GetCoreVertex1(), edge->GetDirectionVector());
+	if (dirDist <= 0.0f) {
+		vWorld = b2Mul(xf1, edge->GetCoreVertex1());
+	} else if (dirDist >= edge->GetLength()) {
+		vWorld = b2Mul(xf1, edge->GetCoreVertex2());
+	} else {
+		*x1 = b2Mul(xf1, edge->GetCoreVertex1() + dirDist * edge->GetDirectionVector());
+		dLen = b2Dot(cLocal - edge->GetCoreVertex1(), edge->GetNormalVector());
+		if (dLen < 0.0f) {
+			if (dLen < -r) {
+				*x2 = b2Mul(xf1, cLocal + r * edge->GetNormalVector());
+				return -dLen - r;
+			} else {
+				*x2 = *x1;
+				return 0.0f;
+			}
+		} else {
+			if (dLen > r) {
+				*x2 = b2Mul(xf1, cLocal  - r * edge->GetNormalVector());
+				return dLen - r;
+			} else {
+				*x2 = *x1;
+				return 0.0f;
 			}
 		}
-
-		// If we found a duplicate support point we must exit to avoid cycling.
-		if (duplicate)
-		{
-			break;
-		}
-
-		// New vertex is ok and needed.
-		++simplex.m_count;
 	}
+	
+	*x1 = vWorld;
+	d = cWorld - vWorld;
+	dSqr = b2Dot(d, d);
+	if (dSqr > r * r) {
+		dLen = d.Normalize();
+		*x2 = cWorld - r * d;
+		return dLen - r;
+	} else {
+		*x2 = vWorld;
+		return 0.0f;
+	}
+}
 
-	b2_gjkMaxIters = b2Max(b2_gjkMaxIters, iter);
-
-	// Prepare output.
-	simplex.GetWitnessPoints(&output->pointA, &output->pointB);
-	output->distance = b2Distance(output->pointA, output->pointB);
-	output->iterations = iter;
-
-	// Cache the simplex.
-	simplex.WriteCache(cache);
-
-	// Apply radii if requested.
-	if (input->useRadii)
+// This is used for polygon-vs-circle distance.
+struct Point
+{
+	b2Vec2 Support(const b2XForm&, const b2Vec2&) const
 	{
-		float32 rA = proxyA->m_radius;
-		float32 rB = proxyB->m_radius;
-
-		if (output->distance > rA + rB && output->distance > b2_epsilon)
-		{
-			// Shapes are still no overlapped.
-			// Move the witness points to the outer surface.
-			output->distance -= rA + rB;
-			b2Vec2 normal = output->pointB - output->pointA;
-			normal.Normalize();
-			output->pointA += rA * normal;
-			output->pointB -= rB * normal;
-		}
-		else
-		{
-			// Shapes are overlapped when radii are considered.
-			// Move the witness points to the middle.
-			b2Vec2 p = 0.5f * (output->pointA + output->pointB);
-			output->pointA = p;
-			output->pointB = p;
-			output->distance = 0.0f;
-		}
+		return p;
 	}
+
+	b2Vec2 GetFirstVertex(const b2XForm&) const
+	{
+		return p;
+	}
+	
+	b2Vec2 p;
+};
+
+// GJK is more robust with polygon-vs-point than polygon-vs-circle.
+// So we convert polygon-vs-circle to polygon-vs-point.
+static float32 DistancePC(
+	b2Vec2* x1, b2Vec2* x2,
+	const b2PolygonShape* polygon, const b2XForm& xf1,
+	const b2CircleShape* circle, const b2XForm& xf2)
+{
+	Point point;
+	point.p = b2Mul(xf2, circle->GetLocalPosition());
+
+	float32 distance = DistanceGeneric(x1, x2, polygon, xf1, &point, b2XForm_identity);
+
+	float32 r = circle->GetRadius() - b2_toiSlop;
+
+	if (distance > r)
+	{
+		distance -= r;
+		b2Vec2 d = *x2 - *x1;
+		d.Normalize();
+		*x2 -= r * d;
+	}
+	else
+	{
+		distance = 0.0f;
+		*x2 = *x1;
+	}
+
+	return distance;
+}
+
+float32 b2Distance(b2Vec2* x1, b2Vec2* x2,
+				   const b2Shape* shape1, const b2XForm& xf1,
+				   const b2Shape* shape2, const b2XForm& xf2)
+{
+	b2ShapeType type1 = shape1->GetType();
+	b2ShapeType type2 = shape2->GetType();
+
+	if (type1 == e_circleShape && type2 == e_circleShape)
+	{
+		return DistanceCC(x1, x2, (b2CircleShape*)shape1, xf1, (b2CircleShape*)shape2, xf2);
+	}
+	
+	if (type1 == e_polygonShape && type2 == e_circleShape)
+	{
+		return DistancePC(x1, x2, (b2PolygonShape*)shape1, xf1, (b2CircleShape*)shape2, xf2);
+	}
+
+	if (type1 == e_circleShape && type2 == e_polygonShape)
+	{
+		return DistancePC(x2, x1, (b2PolygonShape*)shape2, xf2, (b2CircleShape*)shape1, xf1);
+	}
+
+	if (type1 == e_polygonShape && type2 == e_polygonShape)
+	{
+		return DistanceGeneric(x1, x2, (b2PolygonShape*)shape1, xf1, (b2PolygonShape*)shape2, xf2);
+	}
+
+	if (type1 == e_edgeShape && type2 == e_circleShape)
+	{
+		return DistanceEdgeCircle(x1, x2, (b2EdgeShape*)shape1, xf1, (b2CircleShape*)shape2, xf2);
+	}
+	
+	if (type1 == e_circleShape && type2 == e_edgeShape)
+	{
+		return DistanceEdgeCircle(x2, x1, (b2EdgeShape*)shape2, xf2, (b2CircleShape*)shape1, xf1);
+	}
+
+	if (type1 == e_polygonShape && type2 == e_edgeShape)
+	{
+		return DistanceGeneric(x2, x1, (b2EdgeShape*)shape2, xf2, (b2PolygonShape*)shape1, xf1);
+	}
+
+	if (type1 == e_edgeShape && type2 == e_polygonShape)
+	{
+		return DistanceGeneric(x1, x2, (b2EdgeShape*)shape1, xf1, (b2PolygonShape*)shape2, xf2);
+	}
+
+	return 0.0f;
 }

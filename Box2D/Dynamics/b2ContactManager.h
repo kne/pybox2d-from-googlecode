@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -19,34 +19,36 @@
 #ifndef B2_CONTACT_MANAGER_H
 #define B2_CONTACT_MANAGER_H
 
-#include <Box2D/Collision/b2BroadPhase.h>
+#include "../Collision/b2BroadPhase.h"
+#include "../Dynamics/Contacts/b2NullContact.h"
 
+class b2World;
 class b2Contact;
-class b2ContactFilter;
-class b2ContactListener;
-class b2BlockAllocator;
+struct b2TimeStep;
 
 // Delegate of b2World.
-class b2ContactManager
+class b2ContactManager : public b2PairCallback
 {
 public:
-	b2ContactManager();
+	b2ContactManager() : m_world(NULL), m_destroyImmediate(false) {}
 
-	// Broad-phase callback.
-	void AddPair(void* proxyUserDataA, void* proxyUserDataB);
+	// Implements PairCallback
+	void* PairAdded(void* proxyUserData1, void* proxyUserData2);
 
-	void FindNewContacts();
+	// Implements PairCallback
+	void PairRemoved(void* proxyUserData1, void* proxyUserData2, void* pairUserData);
 
 	void Destroy(b2Contact* c);
 
 	void Collide();
-            
-	b2BroadPhase m_broadPhase;
-	b2Contact* m_contactList;
-	int32 m_contactCount;
-	b2ContactFilter* m_contactFilter;
-	b2ContactListener* m_contactListener;
-	b2BlockAllocator* m_allocator;
+
+	b2World* m_world;
+
+	// This lets us provide broadphase proxy pair user data for
+	// contacts that shouldn't exist.
+	b2NullContact m_nullContact;
+
+	bool m_destroyImmediate;
 };
 
 #endif

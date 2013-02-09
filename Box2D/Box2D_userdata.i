@@ -28,51 +28,51 @@
 
 %extend b2World {
 public:        
-    b2Body* __CreateBody(b2BodyDef* defn) {
+    b2Body* CreateBody(b2BodyDef* defn) {
         b2Body* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
         ret=self->CreateBody(defn);
         return ret;
     }
-    b2Joint* __CreateJoint(b2JointDef* defn) {
+    b2Joint* CreateJoint(b2JointDef* defn) {
+        b2Joint* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
-
-        return self->CreateJoint(defn);
+        ret=self->CreateJoint(defn);
+        return ret;
     }
-
     void DestroyBody(b2Body* body) {
         Py_XDECREF((PyObject*)body->GetUserData());
         self->DestroyBody(body);
     }
-
     void DestroyJoint(b2Joint* joint) {
         Py_XDECREF((PyObject*)joint->GetUserData());
         self->DestroyJoint(joint);
     }
+
 }
 
 %extend b2Body {
 public:        
-    void DestroyFixture(b2Fixture* fixture) {
-        Py_XDECREF((PyObject*)fixture->GetUserData());
-        self->DestroyFixture(fixture);
+    void DestroyShape(b2Shape* shape) {
+        Py_XDECREF((PyObject*)shape->GetUserData());
+        self->DestroyShape(shape);
     }
-    b2Fixture* __CreateFixture(b2FixtureDef* defn) {
-        b2Fixture* ret;
+    b2Shape* CreateShape(b2ShapeDef* defn) {
+        b2Shape* ret;
         if (defn)
             Py_XINCREF((PyObject*)defn->userData);
-        ret=self->CreateFixture(defn);
+        ret=self->CreateShape(defn);
         return ret;
     }
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -82,19 +82,19 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
     %}
 }
 
 %extend b2Joint {
 public:        
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -104,19 +104,19 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
     %}
 }
 
-%extend b2Fixture {
+%extend b2Shape {
 public:        
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret=(PyObject*)self->GetUserData();
         if (!ret) ret=Py_None;
         Py_XINCREF(ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->GetUserData());
         Py_INCREF(data);
         self->SetUserData(data);
@@ -126,14 +126,14 @@ public:
         self->SetUserData(NULL);
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
     %}
 }
 
 //Allow access to userData in definitions, with proper destruction
 %extend b2JointDef {
 public:
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -142,7 +142,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -152,7 +152,7 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}
@@ -160,7 +160,7 @@ public:
 
 %extend b2BodyDef {
 public:
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -169,7 +169,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -179,15 +179,15 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}
 }
 
-%extend b2FixtureDef {
+%extend b2ShapeDef {
 public:
-    PyObject* __GetUserData() {
+    PyObject* GetUserData() {
         PyObject* ret;
         if (!self->userData)
             ret=Py_None;
@@ -196,7 +196,7 @@ public:
         Py_INCREF((PyObject*)ret);
         return ret;
     }
-    void __SetUserData(PyObject* data) {
+    void SetUserData(PyObject* data) {
         Py_XDECREF((PyObject*)self->userData);
         Py_INCREF(data);
         self->userData=(void*)data;
@@ -206,7 +206,7 @@ public:
         self->userData=NULL;
     }
     %pythoncode %{
-        userData = property(__GetUserData, __SetUserData)
+        userData = property(GetUserData, SetUserData)
         def __del__(self):
             self.ClearUserData()
     %}
@@ -218,15 +218,14 @@ public:
 %ignore GetUserData;
 %ignore userData;
 
-%newobject b2World::__CreateBody;
-%newobject b2World::__CreateJoint;
-%newobject b2Body::__CreateFixture;
-%rename (__CreateFixture) b2Body::CreateFixture(const b2Shape* shape, float32 density);
+%newobject b2World::CreateBody;
+%newobject b2World::CreateJoint;
+%newobject b2Body::CreateShape;
 
 %ignore b2World::CreateBody;
 %ignore b2World::CreateJoint;
-%ignore b2Body::CreateFixture;
+%ignore b2Body::CreateShape;
 
 %ignore b2World::DestroyBody;
 %ignore b2World::DestroyJoint;
-%ignore b2Body::DestroyFixture;
+%ignore b2Body::DestroyShape;

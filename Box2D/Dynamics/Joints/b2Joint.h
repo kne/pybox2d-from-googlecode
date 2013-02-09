@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,14 +16,14 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef B2_JOINT_H
-#define B2_JOINT_H
+#ifndef JOINT_H
+#define JOINT_H
 
-#include <Box2D/Common/b2Math.h>
+#include "../../Common/b2Math.h"
 
 class b2Body;
 class b2Joint;
-struct b2SolverData;
+struct b2TimeStep;
 class b2BlockAllocator;
 
 enum b2JointType
@@ -35,11 +35,7 @@ enum b2JointType
 	e_pulleyJoint,
 	e_mouseJoint,
 	e_gearJoint,
-	e_wheelJoint,
-    e_weldJoint,
-	e_frictionJoint,
-	e_ropeJoint,
-	e_motorJoint
+	e_lineJoint
 };
 
 enum b2LimitState
@@ -52,9 +48,14 @@ enum b2LimitState
 
 struct b2Jacobian
 {
-	b2Vec2 linear;
-	float32 angularA;
-	float32 angularB;
+	b2Vec2 linear1;
+	float32 angular1;
+	b2Vec2 linear2;
+	float32 angular2;
+
+	void SetZero();
+	void Set(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2);
+	float32 Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2);
 };
 
 /// A joint edge is used to connect bodies and joints together
@@ -77,8 +78,8 @@ struct b2JointDef
 	{
 		type = e_unknownJoint;
 		userData = NULL;
-		bodyA = NULL;
-		bodyB = NULL;
+		body1 = NULL;
+		body2 = NULL;
 		collideConnected = false;
 	}
 
@@ -89,10 +90,10 @@ struct b2JointDef
 	void* userData;
 
 	/// The first attached body.
-	b2Body* bodyA;
+	b2Body* body1;
 
 	/// The second attached body.
-	b2Body* bodyB;
+	b2Body* body2;
 
 	/// Set this flag to true if the attached bodies should collide.
 	bool collideConnected;
@@ -108,52 +109,40 @@ public:
 	b2JointType GetType() const;
 
 	/// Get the first body attached to this joint.
-	b2Body* GetBodyA();
+	b2Body* GetBody1();
 
 	/// Get the second body attached to this joint.
-	b2Body* GetBodyB();
+	b2Body* GetBody2();
 
-	/// Get the anchor point on bodyA in world coordinates.
-	virtual b2Vec2 GetAnchorA() const = 0;
+	/// Get the anchor point on body1 in world coordinates.
+	virtual b2Vec2 GetAnchor1() const = 0;
 
-	/// Get the anchor point on bodyB in world coordinates.
-	virtual b2Vec2 GetAnchorB() const = 0;
+	/// Get the anchor point on body2 in world coordinates.
+	virtual b2Vec2 GetAnchor2() const = 0;
 
-	/// Get the reaction force on bodyB at the joint anchor in Newtons.
+	/// Get the reaction force on body2 at the joint anchor.
 	virtual b2Vec2 GetReactionForce(float32 inv_dt) const = 0;
 
-	/// Get the reaction torque on bodyB in N*m.
+	/// Get the reaction torque on body2.
 	virtual float32 GetReactionTorque(float32 inv_dt) const = 0;
 
 	/// Get the next joint the world joint list.
 	b2Joint* GetNext();
-	const b2Joint* GetNext() const;
 
 	/// Get the user data pointer.
-	void* GetUserData() const;
+	void* GetUserData();
 
 	/// Set the user data pointer.
 	void SetUserData(void* data);
 
-	/// Short-cut function to determine if either body is inactive.
-	bool IsActive() const;
+	/// Get whether or not joint bodies can collide
+	bool GetCollideConnected();
 
-	/// Get collide connected.
-	/// Note: modifying the collide connect flag won't work correctly because
-	/// the flag is only checked when fixture AABBs begin to overlap.
-	bool GetCollideConnected() const;
-
-	/// Dump this joint to the log file.
-	virtual void Dump() { b2Log("// Dump is not supported for this joint type.\n"); }
-
-	/// Shift the origin for any points stored in world coordinates.
-	virtual void ShiftOrigin(const b2Vec2& newOrigin) { B2_NOT_USED(newOrigin);  }
-
+	//--------------- Internals Below -------------------
 protected:
 	friend class b2World;
 	friend class b2Body;
 	friend class b2Island;
-	friend class b2GearJoint;
 
 	static b2Joint* Create(const b2JointDef* def, b2BlockAllocator* allocator);
 	static void Destroy(b2Joint* joint, b2BlockAllocator* allocator);
@@ -161,41 +150,63 @@ protected:
 	b2Joint(const b2JointDef* def);
 	virtual ~b2Joint() {}
 
-	virtual void InitVelocityConstraints(const b2SolverData& data) = 0;
-	virtual void SolveVelocityConstraints(const b2SolverData& data) = 0;
+	virtual void InitVelocityConstraints(const b2TimeStep& step) = 0;
+	virtual void SolveVelocityConstraints(const b2TimeStep& step) = 0;
 
 	// This returns true if the position errors are within tolerance.
-	virtual bool SolvePositionConstraints(const b2SolverData& data) = 0;
+	virtual bool SolvePositionConstraints(float32 baumgarte) = 0;
+
+	void ComputeXForm(b2XForm* xf, const b2Vec2& center, const b2Vec2& localCenter, float32 angle) const;
 
 	b2JointType m_type;
 	b2Joint* m_prev;
 	b2Joint* m_next;
-	b2JointEdge m_edgeA;
-	b2JointEdge m_edgeB;
-	b2Body* m_bodyA;
-	b2Body* m_bodyB;
-
-	int32 m_index;
+	b2JointEdge m_node1;
+	b2JointEdge m_node2;
+	b2Body* m_body1;
+	b2Body* m_body2;
 
 	bool m_islandFlag;
 	bool m_collideConnected;
 
 	void* m_userData;
+
+	// Cache here per time step to reduce cache misses.
+	b2Vec2 m_localCenter1, m_localCenter2;
+	float32 m_invMass1, m_invI1;
+	float32 m_invMass2, m_invI2;
 };
+
+inline void b2Jacobian::SetZero()
+{
+	linear1.SetZero(); angular1 = 0.0f;
+	linear2.SetZero(); angular2 = 0.0f;
+}
+
+inline void b2Jacobian::Set(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2)
+{
+	linear1 = x1; angular1 = a1;
+	linear2 = x2; angular2 = a2;
+}
+
+inline float32 b2Jacobian::Compute(const b2Vec2& x1, float32 a1, const b2Vec2& x2, float32 a2)
+{
+	return b2Dot(linear1, x1) + angular1 * a1 + b2Dot(linear2, x2) + angular2 * a2;
+}
 
 inline b2JointType b2Joint::GetType() const
 {
 	return m_type;
 }
 
-inline b2Body* b2Joint::GetBodyA()
+inline b2Body* b2Joint::GetBody1()
 {
-	return m_bodyA;
+	return m_body1;
 }
 
-inline b2Body* b2Joint::GetBodyB()
+inline b2Body* b2Joint::GetBody2()
 {
-	return m_bodyB;
+	return m_body2;
 }
 
 inline b2Joint* b2Joint::GetNext()
@@ -203,12 +214,7 @@ inline b2Joint* b2Joint::GetNext()
 	return m_next;
 }
 
-inline const b2Joint* b2Joint::GetNext() const
-{
-	return m_next;
-}
-
-inline void* b2Joint::GetUserData() const
+inline void* b2Joint::GetUserData()
 {
 	return m_userData;
 }
@@ -218,9 +224,15 @@ inline void b2Joint::SetUserData(void* data)
 	m_userData = data;
 }
 
-inline bool b2Joint::GetCollideConnected() const
+inline bool b2Joint::GetCollideConnected()
 {
 	return m_collideConnected;
+}
+
+inline void b2Joint::ComputeXForm(b2XForm* xf, const b2Vec2& center, const b2Vec2& localCenter, float32 angle) const
+{
+	xf->R.Set(angle);
+	xf->position = center - b2Mul(xf->R, localCenter);
 }
 
 #endif

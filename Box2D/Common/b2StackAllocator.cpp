@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,8 +16,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <Box2D/Common/b2StackAllocator.h>
-#include <Box2D/Common/b2Math.h>
+#include "b2StackAllocator.h"
+#include "b2Math.h"
 
 b2StackAllocator::b2StackAllocator()
 {

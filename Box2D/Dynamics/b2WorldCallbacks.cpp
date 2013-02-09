@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,21 +16,56 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <Box2D/Dynamics/b2WorldCallbacks.h>
-#include <Box2D/Dynamics/b2Fixture.h>
+#include "b2WorldCallbacks.h"
+#include "../Collision/Shapes/b2Shape.h"
+
+b2ContactFilter b2_defaultFilter;
 
 // Return true if contact calculations should be performed between these two shapes.
 // If you implement your own collision filter you may want to build from this implementation.
-bool b2ContactFilter::ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB)
+bool b2ContactFilter::ShouldCollide(b2Shape* shape1, b2Shape* shape2)
 {
-	const b2Filter& filterA = fixtureA->GetFilterData();
-	const b2Filter& filterB = fixtureB->GetFilterData();
+	const b2FilterData& filter1 = shape1->GetFilterData();
+	const b2FilterData& filter2 = shape2->GetFilterData();
 
-	if (filterA.groupIndex == filterB.groupIndex && filterA.groupIndex != 0)
+	if (filter1.groupIndex == filter2.groupIndex && filter1.groupIndex != 0)
 	{
-		return filterA.groupIndex > 0;
+		return filter1.groupIndex > 0;
 	}
 
-	bool collide = (filterA.maskBits & filterB.categoryBits) != 0 && (filterA.categoryBits & filterB.maskBits) != 0;
+	bool collide = (filter1.maskBits & filter2.categoryBits) != 0 && (filter1.categoryBits & filter2.maskBits) != 0;
 	return collide;
+}
+
+bool b2ContactFilter::RayCollide(void* userData, b2Shape* shape)
+{
+	//By default, cast userData as a shape, and then collide if the shapes would collide
+	if(!userData)
+		return true;
+	return ShouldCollide((b2Shape*)userData,shape);
+}
+
+b2DebugDraw::b2DebugDraw()
+{
+	m_drawFlags = 0;
+}
+
+void b2DebugDraw::SetFlags(uint32 flags)
+{
+	m_drawFlags = flags;
+}
+
+uint32 b2DebugDraw::GetFlags() const
+{
+	return m_drawFlags;
+}
+
+void b2DebugDraw::AppendFlags(uint32 flags)
+{
+	m_drawFlags |= flags;
+}
+
+void b2DebugDraw::ClearFlags(uint32 flags)
+{
+	m_drawFlags &= ~flags;
 }
