@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -16,29 +16,36 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <Box2D/Common/b2Settings.h>
+#include "b2Settings.h"
 #include <cstdlib>
-#include <cstdio>
-#include <cstdarg>
 
-b2Version b2_version = {2, 3, 0};
+b2Version b2_version = {2, 0, 2};
+
+int32 b2_byteCount = 0;
+
+
 
 // Memory allocators. Modify these to use your own allocator.
 void* b2Alloc(int32 size)
 {
-	return malloc(size);
+	size += 4;
+	b2_byteCount += size;
+	char* bytes = (char*)malloc(size);
+	*(int32*)bytes = size;
+	return bytes + 4;
 }
 
 void b2Free(void* mem)
 {
-	free(mem);
-}
+	if (mem == NULL)
+	{
+		return;
+	}
 
-// You can modify this to use your logging facility.
-void b2Log(const char* string, ...)
-{
-	va_list args;
-	va_start(args, string);
-	vprintf(string, args);
-	va_end(args);
+	char* bytes = (char*)mem;
+	bytes -= 4;
+	int32 size = *(int32*)bytes;
+	b2Assert(b2_byteCount >= size);
+	b2_byteCount -= size;
+	free(bytes);
 }

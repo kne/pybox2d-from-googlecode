@@ -1,524 +1,605 @@
-//!/usr/bin/python
-//
-// C++ version copyright 2010 Erin Catto http://www.gphysics.com
-// Python version copyright 2010 Ken Lauer / sirkne at gmail dot com
-// 
-// This software is provided 'as-is', without any express or implied
-// warranty.  In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 1. The origin of this software must not be misrepresented; you must not
-// claim that you wrote the original software. If you use this software
-// in a product, an acknowledgment in the product documentation would be
-// appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-// misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-// 
-
-%pythoncode %{
-_format_recursed=0
-def _format_repr(item, props, indent_amount=4, max_level=4, max_str_len=250, max_sub_lines=10):
-    global _format_recursed
-    _format_recursed+=1
-    indent_str=' ' * (_format_recursed*indent_amount) 
-    ret=['%s(' % item.__class__.__name__]
-
-    #ret.append(str(_format_recursed))
-    if _format_recursed > max_level:
-        _format_recursed-=1
-        return indent_str + '(*recursion*)'
-    
-    for prop in props:
-        try:
-            s=repr(getattr(item, prop))
-        except:
-            from sys import exc_info
-            s='(*repr failed: %s*)' % exc_info()[1]
-
-        if s.count('\n') > max_sub_lines:
-            length=0
-            for i, line in enumerate(s.split('\n')[:max_sub_lines]):
-                length+=len(line)
-                if length > max_str_len:
-                    ending_delim=''
-                    for j in s[::-1]:
-                        if j in ')]}':
-                            ending_delim+=j
-                        else:
-                            break
-                    ret[-1]+='(...) %s' % ending_delim[::-1]
-                    break
-
-                if i==0:
-                    ret.append('%s=%s' % (prop, line))
-                else:
-                    ret.append(line) 
-        else:
-            if '\n' in s:
-                toadd=s.split('\n')
-                ret.append('%s=%s' % (prop, toadd[0]))
-                ret.extend(toadd[1:])
-            else:
-                ret.append('%s=%s,' % (prop, s))
-    
-    separator='\n%s' % indent_str
-    _format_recursed-=1
-    
-    if len(ret) <= 3:
-        ret[-1]+=')'
-        if _format_recursed==0:
-            return ''.join(ret)
-        else:
-            return [''.join(ret)]
-    else:
-        ret.append(')')
-        return separator.join(ret)
-%}
-
 %extend b2AABB {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['center','extents','lowerBound','perimeter','upperBound','valid']) 
+    def __repr__(self):
+        return "b2AABB(IsValid():%s lowerBound:%s upperBound:%s)" %\
+            tuple([str(a) for a in (self.IsValid(),self.lowerBound,self.upperBound)])
     %}
 }
-%extend b2AssertException {
+
+%extend b2BlockAllocator {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return "b2AssertException()"
+    def __repr__(self):
+        return "b2BlockAllocator()"
     %}
 }
+
 %extend b2Body {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','angle','angularDamping','angularVelocity','awake','bullet','contacts','fixedRotation','fixtures','inertia','joints','linearDamping','linearVelocity','localCenter','mass','massData','position','sleepingAllowed','transform','type','userData','worldCenter']) 
+    def __repr__(self):
+        return "b2Body(GetAngle():%s GetAngularVelocity():%s GetControllerList():%s GetInertia():%s GetLinearVelocity():%s GetLocalCenter():%s GetMass():%s GetPosition():%s GetWorldCenter():%s GetXForm():%s IsBullet():%s IsDynamic():%s IsFrozen():%s IsSleeping():%s IsStatic():%s)" %\
+            tuple([str(a) for a in (self.GetAngle(),self.GetAngularVelocity(),self.GetControllerList(),self.GetInertia(),self.GetLinearVelocity(),self.GetLocalCenter(),self.GetMass(),self.GetPosition(),self.GetWorldCenter(),self.GetXForm(),self.IsBullet(),self.IsDynamic(),self.IsFrozen(),self.IsSleeping(),self.IsStatic())])
     %}
 }
+
 %extend b2BodyDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','allowSleep','angle','angularDamping','angularVelocity','awake','bullet','fixedRotation','fixtures','inertiaScale','linearDamping','linearVelocity','position','shapeFixture','shapes','type','userData']) 
+    def __repr__(self):
+        return "b2BodyDef(allowSleep:%s angle:%s angularDamping:%s fixedRotation:%s isBullet:%s isSleeping:%s linearDamping:%s massData:%s position:%s userData:%s)" %\
+            tuple([str(a) for a in (self.allowSleep,self.angle,self.angularDamping,self.fixedRotation,self.isBullet,self.isSleeping,self.linearDamping,self.massData,self.position,self.userData)])
     %}
 }
+
+%extend b2Bound {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2Bound(IsLower():%s IsUpper():%s proxyId:%s stabbingCount:%s value:%s)" %\
+            tuple([str(a) for a in (self.IsLower(),self.IsUpper(),self.proxyId,self.stabbingCount,self.value)])
+    %}
+}
+
 %extend b2BroadPhase {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['proxyCount']) 
+    def __repr__(self):
+        return "b2BroadPhase(m_bounds:%s m_freeProxy:%s m_pairManager:%s m_proxyCount:%s m_proxyPool:%s m_quantizationFactor:%s m_queryResultCount:%s m_queryResults:%s m_querySortKeys:%s m_timeStamp:%s m_worldAABB:%s s_validate:%s)" %\
+            tuple([str(a) for a in (self.m_bounds,self.m_freeProxy,self.m_pairManager,self.m_proxyCount,self.m_proxyPool,self.m_quantizationFactor,self.m_queryResultCount,self.m_queryResults,self.m_querySortKeys,self.m_timeStamp,self.m_worldAABB,self.s_validate)])
     %}
 }
+
+%extend b2BufferedPair {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2BufferedPair(proxyId1:%s proxyId2:%s)" %\
+            tuple([str(a) for a in (self.proxyId1,self.proxyId2)])
+    %}
+}
+
+%extend b2CircleDef {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2CircleDef(density:%s filter:%s friction:%s isSensor:%s localPosition:%s radius:%s restitution:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.density,self.filter,self.friction,self.isSensor,self.localPosition,self.radius,self.restitution,self.type,self.userData)])
+    %}
+}
+
 %extend b2CircleShape {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['childCount','pos','radius','type']) 
+    def __repr__(self):
+        return "b2CircleShape(GetBody():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetLocalPosition():%s GetRadius():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetLocalPosition(),self.GetRadius(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
     %}
 }
-%extend b2ClipVertex {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['id','v']) 
-    %}
-}
+
 %extend b2Color {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['b','bytes','g','list','r']) 
+    def __repr__(self):
+        return "b2Color(b:%s g:%s r:%s)" %\
+            tuple([str(a) for a in (self.b,self.g,self.r)])
     %}
 }
+
 %extend b2Contact {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['childIndexA','childIndexB','enabled','fixtureA','fixtureB','manifold','touching','worldManifold']) 
+    def __repr__(self):
+        return "b2Contact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
+            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
     %}
 }
+
 %extend b2ContactEdge {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['contact','other']) 
+    def __repr__(self):
+        return "b2ContactEdge(contact:%s other:%s)" %\
+            tuple([str(a) for a in (self.contact,self.other)])
     %}
 }
-%extend b2ContactFeature {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['indexA','indexB','typeA','typeB']) 
-    %}
-}
+
 %extend b2ContactFilter {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return "b2ContactFilter()"
+    def __repr__(self):
+        return "b2ContactFilter()"
     %}
 }
+
 %extend b2ContactID {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['cf','key']) 
+    def __repr__(self):
+        return "b2ContactID(features:%s key:%s)" %\
+            tuple([str(a) for a in (self.features,self.key)])
     %}
 }
-%extend b2ContactImpulse {
+
+%extend b2ContactID_features {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['normalImpulses','tangentImpulses']) 
+    def __repr__(self):
+        return "b2ContactID_features(flip:%s incidentEdge:%s incidentVertex:%s referenceEdge:%s)" %\
+            tuple([str(a) for a in (self.flip,self.incidentEdge,self.incidentVertex,self.referenceEdge)])
     %}
 }
-%extend b2ContactListener {
-    %pythoncode %{
-        def __repr__(self):
-            return "b2ContactListener()"
-    %}
-}
+
 %extend b2ContactManager {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['allocator','broadPhase','contactCount','contactFilter','contactList','contactListener']) 
+    def __repr__(self):
+        return "b2ContactManager(m_destroyImmediate:%s m_nullContact:%s m_world:%s)" %\
+            tuple([str(a) for a in (self.m_destroyImmediate,self.m_nullContact,self.m_world)])
     %}
 }
+
 %extend b2ContactPoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['fixtureA','fixtureB','normal','position','state']) 
+    def __repr__(self):
+        return "b2ContactPoint(friction:%s id:%s normal:%s position:%s restitution:%s separation:%s shape1:%s shape2:%s velocity:%s)" %\
+            tuple([str(a) for a in (self.friction,self.id,self.normal,self.position,self.restitution,self.separation,self.shape1,self.shape2,self.velocity)])
     %}
 }
-%extend b2DestructionListener {
+
+%extend b2ContactRegister {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return "b2DestructionListener()"
+    def __repr__(self):
+        return "b2ContactRegister(createFcn:%s destroyFcn:%s primary:%s)" %\
+            tuple([str(a) for a in (self.createFcn,self.destroyFcn,self.primary)])
     %}
 }
-%extend b2DistanceInput {
+
+%extend b2ContactResult {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['proxyA','proxyB','transformA','transformB','useRadii']) 
+    def __repr__(self):
+        return "b2ContactResult(id:%s normal:%s normalImpulse:%s position:%s shape1:%s shape2:%s tangentImpulse:%s)" %\
+            tuple([str(a) for a in (self.id,self.normal,self.normalImpulse,self.position,self.shape1,self.shape2,self.tangentImpulse)])
     %}
 }
+
 %extend b2DistanceJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','dampingRatio','frequency','length','type','userData']) 
+    def __repr__(self):
+        return "b2DistanceJoint(GetAnchor1():%s GetAnchor2():%s GetType():%s m_bias:%s m_dampingRatio:%s m_frequencyHz:%s m_gamma:%s m_impulse:%s m_length:%s m_localAnchor1:%s m_localAnchor2:%s m_mass:%s m_u:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetType(),self.m_bias,self.m_dampingRatio,self.m_frequencyHz,self.m_gamma,self.m_impulse,self.m_length,self.m_localAnchor1,self.m_localAnchor2,self.m_mass,self.m_u)])
     %}
 }
+
 %extend b2DistanceJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchorA','anchorB','bodyA','bodyB','collideConnected','dampingRatio','frequencyHz','length','localAnchorA','localAnchorB','type','userData']) 
+    def __repr__(self):
+        return "b2DistanceJointDef(body1:%s body2:%s collideConnected:%s dampingRatio:%s frequencyHz:%s length:%s localAnchor1:%s localAnchor2:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.dampingRatio,self.frequencyHz,self.length,self.localAnchor1,self.localAnchor2,self.type,self.userData)])
     %}
 }
-%extend b2DistanceOutput {
+
+%extend b2FilterData {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['distance','iterations','pointA','pointB']) 
+    def __repr__(self):
+        return "b2FilterData(categoryBits:%s groupIndex:%s maskBits:%s)" %\
+            tuple([str(a) for a in (self.categoryBits,self.groupIndex,self.maskBits)])
     %}
 }
-%extend b2DistanceProxy {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['m_buffer','shape','vertices']) 
-    %}
-}
-%extend b2Draw {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['flags']) 
-    %}
-}
-%extend b2DrawExtended {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['center','convertVertices','flags','flipX','flipY','offset','screenSize','zoom']) 
-    %}
-}
-%extend b2EdgeShape {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['all_vertices','childCount','hasVertex0','hasVertex3','radius','type','vertex0','vertex1','vertex2','vertex3','vertexCount','vertices']) 
-    %}
-}
-%extend b2Filter {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['categoryBits','groupIndex','maskBits']) 
-    %}
-}
-%extend b2Fixture {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['body','density','filterData','friction','massData','restitution','sensor','shape','type','userData']) 
-    %}
-}
-%extend b2FixtureDef {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['categoryBits','density','filter','friction','groupIndex','isSensor','maskBits','restitution','shape','userData']) 
-    %}
-}
-%extend b2FixtureProxy {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['aabb','childIndex','fixture','proxyId']) 
-    %}
-}
-%extend b2FrictionJoint {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','maxForce','maxTorque','type','userData']) 
-    %}
-}
-%extend b2FrictionJointDef {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchor','bodyA','bodyB','collideConnected','localAnchorA','localAnchorB','maxForce','maxTorque','type','userData']) 
-    %}
-}
+
 %extend b2GearJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','ratio','type','userData']) 
+    def __repr__(self):
+        return "b2GearJoint(GetAnchor1():%s GetAnchor2():%s GetRatio():%s GetType():%s m_J:%s m_constant:%s m_ground1:%s m_ground2:%s m_groundAnchor1:%s m_groundAnchor2:%s m_impulse:%s m_localAnchor1:%s m_localAnchor2:%s m_mass:%s m_prismatic1:%s m_prismatic2:%s m_ratio:%s m_revolute1:%s m_revolute2:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetRatio(),self.GetType(),self.m_J,self.m_constant,self.m_ground1,self.m_ground2,self.m_groundAnchor1,self.m_groundAnchor2,self.m_impulse,self.m_localAnchor1,self.m_localAnchor2,self.m_mass,self.m_prismatic1,self.m_prismatic2,self.m_ratio,self.m_revolute1,self.m_revolute2)])
     %}
 }
+
 %extend b2GearJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['bodyA','bodyB','collideConnected','joint1','joint2','ratio','type','userData']) 
+    def __repr__(self):
+        return "b2GearJointDef(body1:%s body2:%s collideConnected:%s joint1:%s joint2:%s ratio:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.joint1,self.joint2,self.ratio,self.type,self.userData)])
     %}
 }
+
 %extend b2Jacobian {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['angularA','angularB','linearA','linearB']) 
+    def __repr__(self):
+        return "b2Jacobian(angular1:%s angular2:%s linear1:%s linear2:%s)" %\
+            tuple([str(a) for a in (self.angular1,self.angular2,self.linear1,self.linear2)])
     %}
 }
+
 %extend b2Joint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','type','userData']) 
+    def __repr__(self):
+        return "b2Joint(GetAnchor1():%s GetAnchor2():%s GetType():%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetType())])
     %}
 }
+
 %extend b2JointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['bodyA','bodyB','collideConnected','type','userData']) 
+    def __repr__(self):
+        return "b2JointDef(body1:%s body2:%s collideConnected:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.type,self.userData)])
     %}
 }
+
 %extend b2JointEdge {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['joint','other']) 
+    def __repr__(self):
+        return "b2JointEdge(joint:%s other:%s)" %\
+            tuple([str(a) for a in (self.joint,self.other)])
     %}
 }
-%extend b2WheelJoint {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','maxMotorTorque','motorEnabled','motorSpeed','speed','springDampingRatio','springFrequencyHz','translation','type','userData']) 
-    %}
-}
-%extend b2WheelJointDef {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchor','axis','bodyA','bodyB','collideConnected','dampingRatio','enableMotor','frequencyHz','localAnchorA','localAnchorB','localAxisA','maxMotorTorque','motorSpeed','type','userData']) 
-    %}
-}
-%extend b2LoopShape {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['childCount','edges','radius','type','vertexCount','vertices']) 
-    %}
-}
+
 %extend b2Manifold {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['localNormal','localPoint','pointCount','points','type_']) 
+    def __repr__(self):
+        return "b2Manifold(normal:%s pointCount:%s points:%s)" %\
+            tuple([str(a) for a in (self.normal,self.pointCount,self.points)])
     %}
 }
+
 %extend b2ManifoldPoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['id','isNew','localPoint','normalImpulse','tangentImpulse']) 
+    def __repr__(self):
+        return "b2ManifoldPoint(id:%s localPoint1:%s localPoint2:%s normalImpulse:%s separation:%s tangentImpulse:%s)" %\
+            tuple([str(a) for a in (self.id,self.localPoint1,self.localPoint2,self.normalImpulse,self.separation,self.tangentImpulse)])
     %}
 }
+
 %extend b2MassData {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['I','center','mass']) 
+    def __repr__(self):
+        return "b2MassData(I:%s center:%s mass:%s)" %\
+            tuple([str(a) for a in (self.I,self.center,self.mass)])
     %}
 }
+
 %extend b2Mat22 {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['angle','col1','col2','inverse']) 
+    def __repr__(self):
+        return "b2Mat22(GetAngle():%s col1:%s col2:%s)" %\
+            tuple([str(a) for a in (self.GetAngle(),self.col1,self.col2)])
     %}
 }
-%extend b2Mat33 {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['col1','col2','col3']) 
-    %}
-}
+
 %extend b2MouseJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','dampingRatio','frequency','maxForce','target','type','userData']) 
+    def __repr__(self):
+        return "b2MouseJoint(GetAnchor1():%s GetAnchor2():%s GetType():%s m_C:%s m_beta:%s m_dampingRatio:%s m_frequencyHz:%s m_gamma:%s m_impulse:%s m_localAnchor:%s m_mass:%s m_maxForce:%s m_target:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetType(),self.m_C,self.m_beta,self.m_dampingRatio,self.m_frequencyHz,self.m_gamma,self.m_impulse,self.m_localAnchor,self.m_mass,self.m_maxForce,self.m_target)])
     %}
 }
+
 %extend b2MouseJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['bodyA','bodyB','collideConnected','dampingRatio','frequencyHz','maxForce','target','type','userData']) 
+    def __repr__(self):
+        return "b2MouseJointDef(body1:%s body2:%s collideConnected:%s dampingRatio:%s frequencyHz:%s maxForce:%s target:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.dampingRatio,self.frequencyHz,self.maxForce,self.target,self.type,self.userData)])
     %}
 }
+
+%extend b2NullContact {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2NullContact(GetManifoldCount():%s GetManifolds():%s GetShape1():%s GetShape2():%s IsSolid():%s e_islandFlag:%s e_nonSolidFlag:%s e_slowFlag:%s e_toiFlag:%s m_flags:%s m_manifoldCount:%s m_node1:%s m_node2:%s m_shape1:%s m_shape2:%s m_toi:%s s_initialized:%s s_registers:%s)" %\
+            tuple([str(a) for a in (self.GetManifoldCount(),self.GetManifolds(),self.GetShape1(),self.GetShape2(),self.IsSolid(),self.e_islandFlag,self.e_nonSolidFlag,self.e_slowFlag,self.e_toiFlag,self.m_flags,self.m_manifoldCount,self.m_node1,self.m_node2,self.m_shape1,self.m_shape2,self.m_toi,self.s_initialized,self.s_registers)])
+    %}
+}
+
+%extend b2OBB {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2OBB(R:%s center:%s extents:%s)" %\
+            tuple([str(a) for a in (self.R,self.center,self.extents)])
+    %}
+}
+
 %extend b2Pair {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['proxyIdA','proxyIdB']) 
+    def __repr__(self):
+        return "b2Pair(IsBuffered():%s IsFinal():%s IsRemoved():%s e_pairBuffered:%s e_pairFinal:%s e_pairRemoved:%s proxyId1:%s proxyId2:%s status:%s userData:%s)" %\
+            tuple([str(a) for a in (self.IsBuffered(),self.IsFinal(),self.IsRemoved(),self.e_pairBuffered,self.e_pairFinal,self.e_pairRemoved,self.proxyId1,self.proxyId2,self.status,self.userData)])
     %}
 }
+
+%extend b2PairCallback {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2PairCallback()"
+    %}
+}
+
+%extend b2PairManager {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2PairManager(m_broadPhase:%s m_callback:%s m_freePair:%s m_hashTable:%s m_pairBuffer:%s m_pairBufferCount:%s m_pairCount:%s m_pairs:%s)" %\
+            tuple([str(a) for a in (self.m_broadPhase,self.m_callback,self.m_freePair,self.m_hashTable,self.m_pairBuffer,self.m_pairBufferCount,self.m_pairCount,self.m_pairs)])
+    %}
+}
+
+%extend b2PolygonDef {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2PolygonDef(density:%s filter:%s friction:%s isSensor:%s restitution:%s type:%s userData:%s vertexCount:%s vertices:%s)" %\
+            tuple([str(a) for a in (self.density,self.filter,self.friction,self.isSensor,self.restitution,self.type,self.userData,self.vertexCount,self.vertices)])
+    %}
+}
+
 %extend b2PolygonShape {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['box','centroid','childCount','normals','radius','type','valid','vertexCount','vertices']) 
+    def __repr__(self):
+        return "b2PolygonShape(GetBody():%s GetCentroid():%s GetCoreVertices():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetOBB():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertexCount():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCentroid(),self.GetCoreVertices(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetOBB(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertexCount(),self.IsSensor())])
     %}
 }
+
 %extend b2PrismaticJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','limitEnabled','limits','lowerLimit','maxMotorForce','motorEnabled','motorSpeed','speed','translation','type','upperLimit','userData']) 
+    def __repr__(self):
+        return "b2PrismaticJoint(GetAnchor1():%s GetAnchor2():%s GetJointSpeed():%s GetJointTranslation():%s GetLowerLimit():%s GetMotorForce():%s GetMotorSpeed():%s GetType():%s GetUpperLimit():%s IsLimitEnabled():%s IsMotorEnabled():%s m_K:%s m_a1:%s m_a2:%s m_axis:%s m_enableLimit:%s m_enableMotor:%s m_impulse:%s m_limitState:%s m_localAnchor1:%s m_localAnchor2:%s m_localXAxis1:%s m_localYAxis1:%s m_lowerTranslation:%s m_maxMotorForce:%s m_motorImpulse:%s m_motorMass:%s m_motorSpeed:%s m_perp:%s m_refAngle:%s m_s1:%s m_s2:%s m_upperTranslation:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetJointSpeed(),self.GetJointTranslation(),self.GetLowerLimit(),self.GetMotorForce(),self.GetMotorSpeed(),self.GetType(),self.GetUpperLimit(),self.IsLimitEnabled(),self.IsMotorEnabled(),self.m_K,self.m_a1,self.m_a2,self.m_axis,self.m_enableLimit,self.m_enableMotor,self.m_impulse,self.m_limitState,self.m_localAnchor1,self.m_localAnchor2,self.m_localXAxis1,self.m_localYAxis1,self.m_lowerTranslation,self.m_maxMotorForce,self.m_motorImpulse,self.m_motorMass,self.m_motorSpeed,self.m_perp,self.m_refAngle,self.m_s1,self.m_s2,self.m_upperTranslation)])
     %}
 }
+
 %extend b2PrismaticJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchor','axis','bodyA','bodyB','collideConnected','enableLimit','enableMotor','localAnchorA','localAnchorB','localAxis1','lowerTranslation','maxMotorForce','motorSpeed','referenceAngle','type','upperTranslation','userData']) 
+    def __repr__(self):
+        return "b2PrismaticJointDef(body1:%s body2:%s collideConnected:%s enableLimit:%s enableMotor:%s localAnchor1:%s localAnchor2:%s localAxis1:%s lowerTranslation:%s maxMotorForce:%s motorSpeed:%s referenceAngle:%s type:%s upperTranslation:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.enableLimit,self.enableMotor,self.localAnchor1,self.localAnchor2,self.localAxis1,self.lowerTranslation,self.maxMotorForce,self.motorSpeed,self.referenceAngle,self.type,self.upperTranslation,self.userData)])
     %}
 }
+
+%extend b2Proxy {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2Proxy(IsValid():%s lowerBounds:%s overlapCount:%s timeStamp:%s upperBounds:%s userData:%s)" %\
+            tuple([str(a) for a in (self.IsValid(),self.lowerBounds,self.overlapCount,self.timeStamp,self.upperBounds,self.userData)])
+    %}
+}
+
 %extend b2PulleyJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','groundAnchorA','groundAnchorB','length1','length2','ratio','type','userData']) 
+    def __repr__(self):
+        return "b2PulleyJoint(GetAnchor1():%s GetAnchor2():%s GetGroundAnchor1():%s GetGroundAnchor2():%s GetLength1():%s GetLength2():%s GetRatio():%s GetType():%s m_constant:%s m_ground:%s m_groundAnchor1:%s m_groundAnchor2:%s m_impulse:%s m_limitImpulse1:%s m_limitImpulse2:%s m_limitMass1:%s m_limitMass2:%s m_limitState1:%s m_limitState2:%s m_localAnchor1:%s m_localAnchor2:%s m_maxLength1:%s m_maxLength2:%s m_pulleyMass:%s m_ratio:%s m_state:%s m_u1:%s m_u2:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetGroundAnchor1(),self.GetGroundAnchor2(),self.GetLength1(),self.GetLength2(),self.GetRatio(),self.GetType(),self.m_constant,self.m_ground,self.m_groundAnchor1,self.m_groundAnchor2,self.m_impulse,self.m_limitImpulse1,self.m_limitImpulse2,self.m_limitMass1,self.m_limitMass2,self.m_limitState1,self.m_limitState2,self.m_localAnchor1,self.m_localAnchor2,self.m_maxLength1,self.m_maxLength2,self.m_pulleyMass,self.m_ratio,self.m_state,self.m_u1,self.m_u2)])
     %}
 }
+
 %extend b2PulleyJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchorA','anchorB','bodyA','bodyB','collideConnected','groundAnchorA','groundAnchorB','lengthA','lengthB','localAnchorA','localAnchorB','maxLengthA','maxLengthB','ratio','type','userData']) 
+    def __repr__(self):
+        return "b2PulleyJointDef(body1:%s body2:%s collideConnected:%s groundAnchor1:%s groundAnchor2:%s length1:%s length2:%s localAnchor1:%s localAnchor2:%s maxLength1:%s maxLength2:%s ratio:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.groundAnchor1,self.groundAnchor2,self.length1,self.length2,self.localAnchor1,self.localAnchor2,self.maxLength1,self.maxLength2,self.ratio,self.type,self.userData)])
     %}
 }
-%extend b2QueryCallback {
-    %pythoncode %{
-        def __repr__(self):
-            return "b2QueryCallback()"
-    %}
-}
-%extend b2RayCastCallback {
-    %pythoncode %{
-        def __repr__(self):
-            return "b2RayCastCallback()"
-    %}
-}
-%extend b2RayCastInput {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['maxFraction','p1','p2']) 
-    %}
-}
-%extend b2RayCastOutput {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['fraction','normal']) 
-    %}
-}
+
 %extend b2RevoluteJoint {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','angle','bodyA','bodyB','limitEnabled','limits','lowerLimit','maxMotorTorque','motorEnabled','motorSpeed','speed','type','upperLimit','userData']) 
+    def __repr__(self):
+        return "b2RevoluteJoint(GetAnchor1():%s GetAnchor2():%s GetJointAngle():%s GetJointSpeed():%s GetLowerLimit():%s GetMotorSpeed():%s GetMotorTorque():%s GetType():%s GetUpperLimit():%s IsLimitEnabled():%s IsMotorEnabled():%s m_enableLimit:%s m_enableMotor:%s m_impulse:%s m_limitState:%s m_localAnchor1:%s m_localAnchor2:%s m_lowerAngle:%s m_mass:%s m_maxMotorTorque:%s m_motorImpulse:%s m_motorMass:%s m_motorSpeed:%s m_referenceAngle:%s m_upperAngle:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetJointAngle(),self.GetJointSpeed(),self.GetLowerLimit(),self.GetMotorSpeed(),self.GetMotorTorque(),self.GetType(),self.GetUpperLimit(),self.IsLimitEnabled(),self.IsMotorEnabled(),self.m_enableLimit,self.m_enableMotor,self.m_impulse,self.m_limitState,self.m_localAnchor1,self.m_localAnchor2,self.m_lowerAngle,self.m_mass,self.m_maxMotorTorque,self.m_motorImpulse,self.m_motorMass,self.m_motorSpeed,self.m_referenceAngle,self.m_upperAngle)])
     %}
 }
+
 %extend b2RevoluteJointDef {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchor','bodyA','bodyB','collideConnected','enableLimit','enableMotor','localAnchorA','localAnchorB','lowerAngle','maxMotorTorque','motorSpeed','referenceAngle','type','upperAngle','userData']) 
+    def __repr__(self):
+        return "b2RevoluteJointDef(body1:%s body2:%s collideConnected:%s enableLimit:%s enableMotor:%s localAnchor1:%s localAnchor2:%s lowerAngle:%s maxMotorTorque:%s motorSpeed:%s referenceAngle:%s type:%s upperAngle:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.enableLimit,self.enableMotor,self.localAnchor1,self.localAnchor2,self.lowerAngle,self.maxMotorTorque,self.motorSpeed,self.referenceAngle,self.type,self.upperAngle,self.userData)])
     %}
 }
-%extend b2RopeJoint {
+
+%extend b2Segment {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','limitState','maxLength','type','userData']) 
+    def __repr__(self):
+        return "b2Segment(p1:%s p2:%s)" %\
+            tuple([str(a) for a in (self.p1,self.p2)])
     %}
 }
-%extend b2RopeJointDef {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchorA','anchorB','bodyA','bodyB','collideConnected','localAnchorA','localAnchorB','maxLength','type','userData']) 
-    %}
-}
+
 %extend b2Shape {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['childCount','radius','type']) 
+    def __repr__(self):
+        return "b2Shape(GetBody():%s GetDensity():%s GetFilterData():%s GetFriction():%s GetRestitution():%s GetSweepRadius():%s GetType():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetDensity(),self.GetFilterData(),self.GetFriction(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.IsSensor())])
     %}
 }
+
+%extend b2ShapeDef {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ShapeDef(density:%s filter:%s friction:%s isSensor:%s restitution:%s type:%s userData:%s)" %\
+            tuple([str(a) for a in (self.density,self.filter,self.friction,self.isSensor,self.restitution,self.type,self.userData)])
+    %}
+}
+
+%extend b2StackAllocator {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2StackAllocator(GetMaxAllocation():%s)" % (self.GetMaxAllocation())
+    %}
+}
+
+%extend b2StackEntry {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2StackEntry(data:%s size:%s usedMalloc:%s)" %\
+            tuple([str(a) for a in (self.data,self.size,self.usedMalloc)])
+    %}
+}
+
 %extend b2Sweep {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['a','a0','alpha0','c','c0','localCenter']) 
+    def __repr__(self):
+        return "b2Sweep(a:%s a0:%s c:%s c0:%s localCenter:%s t0:%s)" %\
+            tuple([str(a) for a in (self.a,self.a0,self.c,self.c0,self.localCenter,self.t0)])
     %}
 }
-%extend b2TOIInput {
+
+%extend b2TimeStep {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['proxyA','proxyB','sweepA','sweepB','tMax']) 
+    def __repr__(self):
+        return "b2TimeStep(dt:%s dtRatio:%s inv_dt:%s positionIterations:%s velocityIterations:%s warmStarting:%s)" %\
+            tuple([str(a) for a in (self.dt,self.dtRatio,self.inv_dt,self.positionIterations,self.velocityIterations,self.warmStarting)])
     %}
 }
-%extend b2TOIOutput {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['state','t']) 
-    %}
-}
-%extend b2Transform {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['R','angle','position']) 
-    %}
-}
-%extend b2Vec2 {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['length','lengthSquared','skew','tuple','valid','x','y']) 
-    %}
-}
-%extend b2Vec3 {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['length','lengthSquared','tuple','valid','x','y','z']) 
-    %}
-}
+
 %extend b2Version {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['major','minor','revision']) 
+    def __repr__(self):
+        return "b2Version(major:%s minor:%s revision:%s)" %\
+            tuple([str(a) for a in (self.major,self.minor,self.revision)])
     %}
 }
-%extend b2WeldJoint {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['active','anchorA','anchorB','bodyA','bodyB','type','userData']) 
-    %}
-}
-%extend b2WeldJointDef {
-    %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['anchor','bodyA','bodyB','collideConnected','localAnchorA','localAnchorB','referenceAngle','type','userData']) 
-    %}
-}
+
 %extend b2World {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['autoClearForces','bodies','bodyCount','contactCount','contactFilter','contactListener','contactManager','contacts','continuousPhysics','destructionListener','gravity','jointCount','joints','locked','proxyCount','renderer','subStepping','warmStarting']) 
+    def __repr__(self):
+        return "b2World(GetBodyCount():%s GetContactCount():%s GetControllerCount():%s GetControllerList():%s GetGravity():%s GetGroundBody():%s GetJointCount():%s GetPairCount():%s GetProxyCount():%s)" %\
+            tuple([str(a) for a in (self.GetBodyCount(),self.GetContactCount(),self.GetControllerCount(),self.GetControllerList(),self.GetGravity(),self.GetGroundBody(),self.GetJointCount(),self.GetPairCount(),self.GetProxyCount())])
     %}
 }
-%extend b2WorldManifold {
+
+%extend b2XForm {
+public:
     %pythoncode %{
-        def __repr__(self):
-            return _format_repr(self, ['normal','points']) 
+    def __repr__(self):
+        return "b2XForm(R:%s position:%s)" %\
+            tuple([str(a) for a in (self.R,self.position)])
     %}
 }
+
+%extend b2ContactRegister {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ContactRegister(createFcn:%s destroyFcn:%s primary:%s)" %\
+            tuple([str(a) for a in (self.createFcn,self.destroyFcn,self.primary)])
+    %}
+}
+
+%extend b2LineJointDef {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2LineJointDef(body1:%s body2:%s collideConnected:%s enableLimit:%s enableMotor:%s localAnchor1:%s localAnchor2:%s localAxis1:%s lowerTranslation:%s maxMotorForce:%s motorSpeed:%s type:%s upperTranslation:%s userData:%s)" %\
+            tuple([str(a) for a in (self.body1,self.body2,self.collideConnected,self.enableLimit,self.enableMotor,self.localAnchor1,self.localAnchor2,self.localAxis1,self.lowerTranslation,self.maxMotorForce,self.motorSpeed,self.type,self.upperTranslation,self.userData)])
+    %}
+}
+
+%extend b2LineJoint {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2LineJoint(GetAnchor1():%s GetAnchor2():%s GetJointSpeed():%s GetJointTranslation():%s GetLowerLimit():%s GetMotorForce():%s GetMotorSpeed():%s GetType():%s GetUpperLimit():%s IsLimitEnabled():%s IsMotorEnabled():%s m_K:%s m_a1:%s m_a2:%s m_axis:%s m_enableLimit:%s m_enableMotor:%s m_impulse:%s m_limitState:%s m_localAnchor1:%s m_localAnchor2:%s m_localXAxis1:%s m_localYAxis1:%s m_lowerTranslation:%s m_maxMotorForce:%s m_motorImpulse:%s m_motorMass:%s m_motorSpeed:%s m_perp:%s m_s1:%s m_s2:%s m_upperTranslation:%s)" %\
+            tuple([str(a) for a in (self.GetAnchor1(),self.GetAnchor2(),self.GetJointSpeed(),self.GetJointTranslation(),self.GetLowerLimit(),self.GetMotorForce(),self.GetMotorSpeed(),self.GetType(),self.GetUpperLimit(),self.IsLimitEnabled(),self.IsMotorEnabled(),self.m_K,self.m_a1,self.m_a2,self.m_axis,self.m_enableLimit,self.m_enableMotor,self.m_impulse,self.m_limitState,self.m_localAnchor1,self.m_localAnchor2,self.m_localXAxis1,self.m_localYAxis1,self.m_lowerTranslation,self.m_maxMotorForce,self.m_motorImpulse,self.m_motorMass,self.m_motorSpeed,self.m_perp,self.m_s1,self.m_s2,self.m_upperTranslation)])
+    %}
+}
+
+%extend b2EdgeShape {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2EdgeShape(GetBody():%s GetCoreVertex1():%s GetCoreVertex2():%s GetCorner1Vector():%s GetCorner2Vector():%s GetDensity():%s GetDirectionVector():%s GetFilterData():%s GetFriction():%s GetLength():%s GetNormalVector():%s GetRestitution():%s GetSweepRadius():%s GetType():%s GetVertex1():%s GetVertex2():%s IsSensor():%s)" %\
+            tuple([str(a) for a in (self.GetBody(),self.GetCoreVertex1(),self.GetCoreVertex2(),self.GetCorner1Vector(),self.GetCorner2Vector(),self.GetDensity(),self.GetDirectionVector(),self.GetFilterData(),self.GetFriction(),self.GetLength(),self.GetNormalVector(),self.GetRestitution(),self.GetSweepRadius(),self.GetType(),self.GetVertex1(),self.GetVertex2(),self.IsSensor())])
+    %}
+}
+
+%extend b2BuoyancyController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2BuoyancyController(angularDrag:%s density:%s gravity:%s linearDrag:%s normal:%s offset:%s useDensity:%s useWorldGravity:%s velocity:%s)" %\
+            tuple([str(a) for a in (self.angularDrag,self.density,self.gravity,self.linearDrag,self.normal,self.offset,self.useDensity,self.useWorldGravity,self.velocity)])
+    %}
+}
+
+%extend b2ConstantAccelController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ConstantAccelController(A:%s)" % (self.A)
+    %}
+}
+
+%extend b2ConstantForceController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2ConstantForceController(F:%s)" % (self.F)
+    %}
+}
+
+%extend b2Controller {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2Controller()"
+    %}
+}
+
+%extend b2GravityController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2GravityController(G:%s invSqr:%s)" %\
+            tuple([str(a) for a in (self.G,self.invSqr)])
+    %}
+}
+
+%extend b2TensorDampingController {
+public:
+    %pythoncode %{
+    def __repr__(self):
+        return "b2TensorDampingController(T:%s maxTimestep:%s)" %\
+            tuple([str(a) for a in (self.T,self.maxTimestep)])
+    %}
+}
+

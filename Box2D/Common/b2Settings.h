@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Erin Catto http://www.box2d.org
+* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -19,19 +19,20 @@
 #ifndef B2_SETTINGS_H
 #define B2_SETTINGS_H
 
-#include <cassert>
-#include <cmath>
+#include <assert.h>
+#include <math.h>
 
-#define B2_NOT_USED(x) ((void)(x))
-#define USE_EXCEPTIONS
-
-#ifdef USE_EXCEPTIONS
-#include <Python.h>
-class b2AssertException {};
-#define b2Assert(A) if (!(A)) { PyErr_SetString(PyExc_AssertionError, #A); throw b2AssertException(); }
-#else
+#define B2_NOT_USED(x) x
 #define b2Assert(A) assert(A)
-#endif
+
+// need to include NDS jtypes.h instead of 
+// usual typedefs because NDS jtypes defines
+// them slightly differently, oh well.
+#ifdef TARGET_IS_NDS
+
+#include "jtypes.h"
+
+#else
 
 typedef signed char	int8;
 typedef signed short int16;
@@ -39,109 +40,116 @@ typedef signed int int32;
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
-typedef float float32;
-typedef double float64;
 
-#define	b2_maxFloat		FLT_MAX
-#define	b2_epsilon		FLT_EPSILON
-#define b2_pi			3.14159265359f
+#endif
+
+#ifdef	TARGET_FLOAT32_IS_FIXED
+
+#include "Fixed.h"
+
+typedef Fixed float32;
+#define	B2_FLT_MAX	FIXED_MAX
+#define	B2_FLT_EPSILON	FIXED_EPSILON
+#define	B2FORCE_SCALE(x)	((x)<<7)
+#define	B2FORCE_INV_SCALE(x)	((x)>>7)
+
+#else
+
+typedef float float32;
+#define	B2_FLT_MAX	FLT_MAX
+#define	B2_FLT_EPSILON	FLT_EPSILON
+#define	B2FORCE_SCALE(x)	(x)
+#define	B2FORCE_INV_SCALE(x)	(x)
+
+#endif
+
+const float32 b2_pi = 3.14159265359f;
 
 /// @file
 /// Global tuning constants based on meters-kilograms-seconds (MKS) units.
 ///
 
 // Collision
-
-/// The maximum number of contact points between two convex shapes. Do
-/// not change this value.
-#define b2_maxManifoldPoints	2
-
-/// The maximum number of vertices on a convex polygon. You cannot increase
-/// this too much because b2BlockAllocator has a maximum object size.
-#define b2_maxPolygonVertices	16
-
-/// This is used to fatten AABBs in the dynamic tree. This allows proxies
-/// to move by a small amount without triggering a tree adjustment.
-/// This is in meters.
-#define b2_aabbExtension		0.1f
-
-/// This is used to fatten AABBs in the dynamic tree. This is used to predict
-/// the future position based on the current displacement.
-/// This is a dimensionless multiplier.
-#define b2_aabbMultiplier		2.0f
-
-/// A small length used as a collision and constraint tolerance. Usually it is
-/// chosen to be numerically significant, but visually insignificant.
-#define b2_linearSlop			0.005f
-
-/// A small angle used as a collision and constraint tolerance. Usually it is
-/// chosen to be numerically significant, but visually insignificant.
-#define b2_angularSlop			(2.0f / 180.0f * b2_pi)
-
-/// The radius of the polygon/edge shape skin. This should not be modified. Making
-/// this smaller means polygons will have an insufficient buffer for continuous collision.
-/// Making it larger may create artifacts for vertex collision.
-#define b2_polygonRadius		(2.0f * b2_linearSlop)
-
-/// Maximum number of sub-steps per contact in continuous physics simulation.
-#define b2_maxSubSteps			8
-
+const int32 b2_maxManifoldPoints = 2;
+const int32 b2_maxPolygonVertices = 16;
+const int32 b2_maxProxies = 1024;				// this must be a power of two
+const int32 b2_maxPairs = 8 * b2_maxProxies;	// this must be a power of two
 
 // Dynamics
 
-/// Maximum number of contacts to be handled to solve a TOI impact.
-#define b2_maxTOIContacts			32
+/// A small length used as a collision and constraint tolerance. Usually it is
+/// chosen to be numerically significant, but visually insignificant.
+const float32 b2_linearSlop = 0.005f;	// 0.5 cm
+
+/// A small angle used as a collision and constraint tolerance. Usually it is
+/// chosen to be numerically significant, but visually insignificant.
+const float32 b2_angularSlop = 2.0f / 180.0f * b2_pi;			// 2 degrees
+
+/// Continuous collision detection (CCD) works with core, shrunken shapes. This is the
+/// amount by which shapes are automatically shrunk to work with CCD. This must be
+/// larger than b2_linearSlop.
+const float32 b2_toiSlop = 8.0f * b2_linearSlop;
+
+/// Maximum number of contacts to be handled to solve a TOI island.
+const int32 b2_maxTOIContactsPerIsland = 32;
+
+/// Maximum number of joints to be handled to solve a TOI island.
+const int32 b2_maxTOIJointsPerIsland = 32;
 
 /// A velocity threshold for elastic collisions. Any collision with a relative linear
 /// velocity below this threshold will be treated as inelastic.
-#define b2_velocityThreshold		1.0f
+const float32 b2_velocityThreshold = 1.0f;		// 1 m/s
 
 /// The maximum linear position correction used when solving constraints. This helps to
 /// prevent overshoot.
-#define b2_maxLinearCorrection		0.2f
+const float32 b2_maxLinearCorrection = 0.2f;	// 20 cm
 
 /// The maximum angular position correction used when solving constraints. This helps to
 /// prevent overshoot.
-#define b2_maxAngularCorrection		(8.0f / 180.0f * b2_pi)
+const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 
 /// The maximum linear velocity of a body. This limit is very large and is used
 /// to prevent numerical problems. You shouldn't need to adjust this.
-#define b2_maxTranslation			2.0f
-#define b2_maxTranslationSquared	(b2_maxTranslation * b2_maxTranslation)
+#ifdef TARGET_FLOAT32_IS_FIXED
+const float32 b2_maxLinearVelocity = 100.0f;
+#else
+const float32 b2_maxLinearVelocity = 200.0f;
+const float32 b2_maxLinearVelocitySquared = b2_maxLinearVelocity * b2_maxLinearVelocity;
+#endif
 
 /// The maximum angular velocity of a body. This limit is very large and is used
 /// to prevent numerical problems. You shouldn't need to adjust this.
-#define b2_maxRotation				(0.5f * b2_pi)
-#define b2_maxRotationSquared		(b2_maxRotation * b2_maxRotation)
+const float32 b2_maxAngularVelocity = 250.0f;
+#ifndef TARGET_FLOAT32_IS_FIXED
+const float32 b2_maxAngularVelocitySquared = b2_maxAngularVelocity * b2_maxAngularVelocity;
+#endif
 
 /// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
 /// that overlap is removed in one time step. However using values close to 1 often lead
 /// to overshoot.
-#define b2_baumgarte				0.2f
-#define b2_toiBaugarte				0.75f
-
+const float32 b2_contactBaumgarte = 0.2f;
 
 // Sleep
 
 /// The time that a body must be still before it will go to sleep.
-#define b2_timeToSleep				0.5f
+const float32 b2_timeToSleep = 0.5f;									// half a second
 
 /// A body cannot sleep if its linear velocity is above this tolerance.
-#define b2_linearSleepTolerance		0.01f
+const float32 b2_linearSleepTolerance = 0.01f;		// 1 cm/s
 
 /// A body cannot sleep if its angular velocity is above this tolerance.
-#define b2_angularSleepTolerance	(2.0f / 180.0f * b2_pi)
+const float32 b2_angularSleepTolerance = 2.0f / 180.0f;		// 2 degrees/s
 
 // Memory Allocation
+
+/// The current number of bytes allocated through b2Alloc.
+extern int32 b2_byteCount;
 
 /// Implement this function to use your own memory allocator.
 void* b2Alloc(int32 size);
 
 /// If you implement b2Alloc, you should also implement this function.
 void b2Free(void* mem);
-
-/// Logging function.
-void b2Log(const char* string, ...);
 
 /// Version numbering scheme.
 /// See http://en.wikipedia.org/wiki/Software_versioning
@@ -154,5 +162,17 @@ struct b2Version
 
 /// Current version.
 extern b2Version b2_version;
+
+/// Friction mixing law. Feel free to customize this.
+inline float32 b2MixFriction(float32 friction1, float32 friction2)
+{
+	return sqrtf(friction1 * friction2);
+}
+
+/// Restitution mixing law. Feel free to customize this.
+inline float32 b2MixRestitution(float32 restitution1, float32 restitution2)
+{
+	return restitution1 > restitution2 ? restitution1 : restitution2;
+}
 
 #endif
