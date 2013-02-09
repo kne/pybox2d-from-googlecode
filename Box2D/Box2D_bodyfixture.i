@@ -156,7 +156,7 @@ public:
             shape=type_()
             fixture=b2FixtureDef(shape=shape)
             
-            for key, value in kwargs.iteritems():
+            for key, value in list(kwargs.items()):
                 # Note that these hasattrs use the types to get around
                 # the fact that some properties are write-only (like 'box' in
                 # polygon shapes), and as such do not show up with 'hasattr'.
@@ -169,9 +169,7 @@ public:
 
                 try:
                     setattr(to_set, key, value)
-                except:
-                    from sys import exc_info
-                    ex=exc_info()[1]
+                except Exception as ex:
                     raise ex.__class__('Failed on kwargs, class="%s" key="%s": %s' \
                                 % (to_set.__class__.__name__, key, ex))
 
@@ -257,7 +255,7 @@ public:
             shapeFixture.shape=oldShape
             return ret
 
-        def CreateFixture(self, defn=None, **kwargs):
+        def CreateFixture(self, *args, **kwargs):
             """
             Create a fixtures on the body.
 
@@ -266,9 +264,15 @@ public:
             CreateFixture(shape=s, restitution=0.2, ...)
             
             """
-            if defn is not None and isinstance(defn, b2FixtureDef):
-                return self.__CreateFixture(defn)
-            else:
+            if len(args) > 1:
+                raise TypeError('Takes only one argument or kwargs. See help(b2Body.CreateFixture)')
+            elif len(args)==1:
+                if isinstance(args[0], b2FixtureDef):
+                    defn = args[0]
+                    return self.__CreateFixture(defn)
+                else:
+                    raise TypeError('Expected b2FixtureDef argument or kwargs')
+            else: # no arguments, just kwargs
                 return self.__CreateFixture(b2FixtureDef(**kwargs))
 
         def CreateEdgeChain(self, edge_list):

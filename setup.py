@@ -6,11 +6,10 @@ Setup script for pybox2d.
 For installation instructions, see INSTALL.
 
 Basic install steps:
- python distribute_setup.py
- python setup.py build
+ setup.py build
 
 If that worked, then:
- python setup.py install
+ setup.py install
 """
 
 import os
@@ -24,21 +23,16 @@ __version__="$Revision$"
 
 setuptools_version=None
 try:
-    from distribute_setup import use_setuptools
-    use_setuptools()
-
     import setuptools
     from setuptools import (setup, Extension)
     setuptools_version=setuptools.__version__
     print('Using setuptools (version %s).' % setuptools_version)
 except:
     from distutils.core import (setup, Extension)
-    ex = sys.exc_info()[1] # py2.5~py3k compatibility
-    print("""Setuptools not found/distribute setup failed; falling back on distutils. 
- !!! Setup will likely fail. Please install distribute by running distribute_setup.py
- Error information: %s
- ---""" % ex)
- 
+    print("""Setuptools not found; falling back on distutils. 
+            !!! This might fail. Please install setuptools by running ez_setup.py for Python
+            2.x or ez_setup3.0.py for Python 3.x""")
+
 if setuptools_version:
     if (setuptools_version in ["0.6c%d"%i for i in range(1,9)] # old versions
         or setuptools_version=="0.7a1"): # 0.7a1 py 3k alpha version based on old version
@@ -59,7 +53,7 @@ if setuptools_version:
             build_ext.build_ext.get_ext_filename = get_ext_filename
 
 # release version number
-box2d_version  = '2.3'
+box2d_version  = '2.1'
 release_number = 0
 
 # create the version string
@@ -78,7 +72,7 @@ def write_init():
     license_header = open(os.path.join(source_dir, 'pybox2d_license_header.txt')).read()
 
     # create the source code for the file
-    if sys.version_info >= (2, 6):
+    if sys.version_info >= (2, 5):
         import_string = "from .%s import *" % library_name
     else:
         import_string = "from %s import *" % library_name
@@ -156,8 +150,7 @@ CLASSIFIERS = [
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX",
     "Programming Language :: Python",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Libraries :: pygame",
+    "Games :: Physics Libraries"
     ]
 
 write_init()
@@ -181,7 +174,6 @@ setup_dict = dict(
                          'egg_info' : { 'egg_base' : library_base },
                         },
     ext_modules      = [ pybox2d_extension ],
-#   use_2to3         = (sys.version_info >= (3,)),
     )
 
 # run the actual setup from distutils

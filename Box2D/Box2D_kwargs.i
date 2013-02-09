@@ -20,25 +20,26 @@
 
 %pythoncode %{
     def _init_kwargs(self, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in list(kwargs.items()):
             try:
                 setattr(self, key, value)
-            except:
-                from sys import exc_info
-                ex=exc_info()[1]
+            except Exception as ex:
                 raise ex.__class__('Failed on kwargs for %s.%s: %s' \
                             % (self.__class__.__name__, key, ex))
-
-    def _init_jointdef_kwargs(self, bodyA=None, bodyB=None, **kwargs):
-        if bodyA is not None or bodyB is not None:
-            # Make sure that bodyA and bodyB are defined before the rest
-            _init_kwargs(self, bodyA=bodyA, bodyB=bodyB)
-
-        _init_kwargs(self, **kwargs)
+    def _init_jointdef_kwargs(self, **kwargs):
+        keys = list(kwargs.items()) 
+        if 'bodyA' in kwargs or 'bodyB' in kwargs:
+            # A little trick, make sure that bodyA and bodyB are defined before the rest
+            bodies = dict((key, kwargs[key]) for key in kwargs.keys()
+                                if key in ('bodyA', 'bodyB'))
+            _init_kwargs(self, **bodies)
+            others = dict((key, kwargs[key]) for key in kwargs.keys()
+                                if key not in ('bodyA', 'bodyB'))
+            _init_kwargs(self, **others)
+        else:
+            _init_kwargs(self, **kwargs)
 %}
 
-
-// Generic kwarg initialization:
 
 %feature("shadow") b2ContactFilter::b2ContactFilter() {
     def __init__(self, **kwargs):
@@ -283,16 +284,10 @@
         _init_kwargs(self, **kwargs)
 }
 
-%feature("shadow") b2MotorJoint::b2MotorJoint() {
-    def __init__(self, **kwargs):
-        _Box2D.b2MotorJoint_swiginit(self,_Box2D.new_b2MotorJoint())
-        _init_kwargs(self, **kwargs)
-}
 
-
-%feature("shadow") b2ChainShape::b2ChainShape() {
+%feature("shadow") b2LoopShape::b2LoopShape() {
     def __init__(self, **kwargs):
-        _Box2D.b2ChainShape_swiginit(self,_Box2D.new_b2ChainShape())
+        _Box2D.b2LoopShape_swiginit(self,_Box2D.new_b2LoopShape())
         _init_kwargs(self, **kwargs)
 }
 
@@ -427,8 +422,10 @@
         _init_kwargs(self, **kwargs)
 }
 
-%feature("shadow") b2Rot::b2Rot() {
+%feature("shadow") b2DistanceProxy::b2DistanceProxy() {
     def __init__(self, **kwargs):
-        _Box2D.b2Rot_swiginit(self,_Box2D.new_b2Rot())
+        _Box2D.b2DistanceProxy_swiginit(self,_Box2D.new_b2DistanceProxy())
         _init_kwargs(self, **kwargs)
 }
+
+

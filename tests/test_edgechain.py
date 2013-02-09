@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import unittest
 import Box2D as b2
-import sys
 
 class testEdgeChain (unittest.TestCase):
     def setUp(self):
@@ -17,8 +16,8 @@ class testEdgeChain (unittest.TestCase):
             ground.CreateEdgeChain([])
         except ValueError:
             pass #good
-        except Exception:
-            self.fail("Failed to create empty edge chain (%s)" % sys.exc_info()[1])
+        except Exception as s:
+            self.fail("Failed to create empty edge chain (%s)" % s)
 
         try:
             ground.CreateEdgeChain(
@@ -28,8 +27,8 @@ class testEdgeChain (unittest.TestCase):
                                   ( 20,-20),
                                   (-20,-20) ]
                                 )
-        except Exception:
-            self.fail("Failed to create valid edge chain (%s)"  % sys.exc_info()[1])
+        except Exception as s:
+            self.fail("Failed to create valid edge chain (%s)" % s)
 
     def test_b2EdgeShape(self):
         world = b2.b2World()

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import unittest
 import itertools
-import sys
 
 class testJoints (unittest.TestCase):
     world = None
@@ -26,8 +25,7 @@ class testJoints (unittest.TestCase):
         self.b2 = __import__('Box2D')
         try:
             self.world = self.b2.b2World(self.b2.b2Vec2(0.0, -10.0), True)
-        except Exception:
-            s=sys.exc_info()[1]
+        except Exception as s:
             self.fail("Failed to create world (%s)" % s)
 
         try:
@@ -35,8 +33,7 @@ class testJoints (unittest.TestCase):
             self.dbody1.userData = "dbody1"
             self.dbody2 = self.create_body((0, 12))
             self.dbody2.userData = "dbody2"
-        except Exception:
-            s=sys.exc_info()[1]
+        except Exception as s:
             self._fail("Failed to create dynamic bodies (%s)" % s)
 
         try:
@@ -44,8 +41,7 @@ class testJoints (unittest.TestCase):
             self.sbody1.userData = "sbody1"
             self.sbody2 = self.create_body((1, 4), False)
             self.sbody2.userData = "sbody2"
-        except Exception:
-            s=sys.exc_info()[1]
+        except Exception as s:
             self._fail("Failed to create static bodies (%s)" % s)
 
     def create_body(self, position, dynamic=True):
@@ -329,54 +325,48 @@ class testJoints (unittest.TestCase):
         for bodyA, bodyB in itertools.permutations( ( self.sbody1, self.sbody2, self.dbody1, self.dbody2), 2 ):
             try:
                 dfn = get_dfn(body1=bodyA, body2=bodyB, **init_args)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self._fail("%s: Failed on bodies %s and %s, joint definition (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 kw_args=dfn.to_kwargs()
                 joint = create_name(**kw_args)
                 self.world.DestroyJoint(joint)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self._fail("%s: Failed on bodies %s and %s, joint creation by kwargs (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 joint = self.world.CreateJoint(dfn)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self._fail("%s: Failed on bodies %s and %s, joint creation (%s)" % (name, bodyA.userData, bodyB.userData, s))
                 
             try:
                 asserts(dfn, joint)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self.world.DestroyJoint(joint)
                 raise
+                self._fail("%s: Failed on bodies %s and %s, joint assertions (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 checks(dfn, joint)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self.world.DestroyJoint(joint)
                 self._fail("%s: Failed on bodies %s and %s, joint checks (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 self.step_world(5)
-            except Exception:
+            except Exception as s:
                 # self.world.DestroyJoint(joint) # -> locked
                 try:
                     # Ok, this will cause an assertion to go off during unwinding (in the b2StackAllocator deconstructor),
                     # so do it once, catch that, and then fail finally
                     self.fail() 
                 except AssertionError:
-                    s=sys.exc_info()[1]
                     self._fail("%s: Failed on bodies %s and %s, joint simulation (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
             try:
                 self.world.DestroyJoint(joint)
-            except Exception:
-                s=sys.exc_info()[1]
+            except Exception as s:
                 self._fail("%s: Failed on bodies %s and %s joint deletion (%s)" % (name, bodyA.userData, bodyB.userData, s))
 
     # --- the actual tests ---

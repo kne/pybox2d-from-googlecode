@@ -21,15 +21,15 @@
 
 #include <Box2D/Common/b2Math.h>
 #include <Box2D/Collision/b2Collision.h>
-#include <Box2D/Dynamics/b2TimeStep.h>
+#include <Box2D/Dynamics/b2Island.h>
 
 class b2Contact;
 class b2Body;
 class b2StackAllocator;
-struct b2ContactPositionConstraint;
 
-struct b2VelocityConstraintPoint
+struct b2ContactConstraintPoint
 {
+	b2Vec2 localPoint;
 	b2Vec2 rA;
 	b2Vec2 rB;
 	float32 normalImpulse;
@@ -39,31 +39,31 @@ struct b2VelocityConstraintPoint
 	float32 velocityBias;
 };
 
-struct b2ContactVelocityConstraint
+struct b2ContactConstraint
 {
-	b2VelocityConstraintPoint points[b2_maxManifoldPoints];
+	b2ContactConstraintPoint points[b2_maxManifoldPoints];
+	b2Vec2 localNormal;
+	b2Vec2 localPoint;
 	b2Vec2 normal;
 	b2Mat22 normalMass;
 	b2Mat22 K;
-	int32 indexA;
-	int32 indexB;
-	float32 invMassA, invMassB;
-	float32 invIA, invIB;
+	b2Body* bodyA;
+	b2Body* bodyB;
+	b2Manifold::Type type;
+	float32 radiusA, radiusB;
 	float32 friction;
 	float32 restitution;
-	float32 tangentSpeed;
 	int32 pointCount;
-	int32 contactIndex;
+	b2Manifold* manifold;
 };
 
 struct b2ContactSolverDef
 {
-	b2TimeStep step;
 	b2Contact** contacts;
 	int32 count;
-	b2Position* positions;
-	b2Velocity* velocities;
 	b2StackAllocator* allocator;
+	float32 impulseRatio;
+	bool warmStarting;
 };
 
 class b2ContactSolver
@@ -78,16 +78,11 @@ public:
 	void SolveVelocityConstraints();
 	void StoreImpulses();
 
-	bool SolvePositionConstraints();
-	bool SolveTOIPositionConstraints(int32 toiIndexA, int32 toiIndexB);
+	bool SolvePositionConstraints(float32 baumgarte);
+	bool SolveTOIPositionConstraints(float32 baumgarte, const b2Body* toiBodyA, const b2Body* toiBodyB);
 
-	b2TimeStep m_step;
-	b2Position* m_positions;
-	b2Velocity* m_velocities;
 	b2StackAllocator* m_allocator;
-	b2ContactPositionConstraint* m_positionConstraints;
-	b2ContactVelocityConstraint* m_velocityConstraints;
-	b2Contact** m_contacts;
+	b2ContactConstraint* m_constraints;
 	int m_count;
 };
 

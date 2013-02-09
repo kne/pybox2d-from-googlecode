@@ -37,17 +37,14 @@ class ApplyForce (Framework):
                               ( 20,-20),
                               (-20,-20) ]
                             )
-
-
-        #  TODO: make note of transform.R.set() -> transform.angle = 
         xf1 = b2Transform()
-        xf1.angle = 0.3524 * b2_pi
+        xf1.R.set(0.3524 * b2_pi)
         xf1.position = b2Mul(xf1.R, (1.0, 0.0))
 
         xf2 = b2Transform()
-        xf2.angle = -0.3524 * b2_pi
+        xf2.R.set(-0.3524 * b2_pi)
         xf2.position = b2Mul(xf2.R, (-1.0, 0.0))
-        vertices=[xf1*(-1,0), xf1*(1,0), xf1*(0,.5)]
+
         self.body = self.world.CreateDynamicBody(
                     position=(0, 2), 
                     angle=b2_pi,
@@ -83,11 +80,11 @@ class ApplyForce (Framework):
         if key==Keys.K_w:
             f = self.body.GetWorldVector(localVector=(0.0, -200.0))
             p = self.body.GetWorldPoint(localPoint=(0.0, 2.0))
-            self.body.ApplyForce(f, p, True)
+            self.body.ApplyForce(f, p)
         elif key==Keys.K_a:
-            self.body.ApplyTorque(50.0, True)
+            self.body.ApplyTorque(50.0)
         elif key==Keys.K_d:
-            self.body.ApplyTorque(-50.0, True)
+            self.body.ApplyTorque(-50.0)
 
 if __name__=="__main__":
      main(ApplyForce)

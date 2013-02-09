@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.box2d.org
-# Python version by Ken Lauer / sirkne at gmail dot com
+# Python version Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -24,7 +24,6 @@
 
 from framework import *
 from math import sin, cos, pi
-import sys
 
 LASER_HALF_WIDTH=2
 LASER_SPLIT_SIZE=0.1
@@ -103,9 +102,9 @@ def _polygon_split(fixture, p1, p2, split_size):
 
     try:
         return [b2PolygonShape(vertices=verts) for verts in new_vertices]
-    except b2AssertException:
+    except b2AssertException as ex:
         return []
-    except ValueError:
+    except ValueError as ex:
         return []
 
 def _laser_cut(world, laser_body, length=30.0, laser_half_width=2, **kwargs):
@@ -164,8 +163,8 @@ def laser_cut(world, laser_body, length=30.0, laser_half_width=2, **kwargs):
                         density=fixture.density,
                         shape=new_shapes[1],
                     )
-        except AssertionError:
-            print('New body fixture failed: %s' % sys.exc_info()[1])
+        except AssertionError as ex:
+            print('New body fixture failed: %s' % ex)
             remove_bodies.append(new_body)
 
         try:
@@ -177,8 +176,8 @@ def laser_cut(world, laser_body, length=30.0, laser_half_width=2, **kwargs):
                     )
 
             body.DestroyFixture(fixture)
-        except AssertionError:
-            print('New fixture/destroy failed: %s' % sys.exc_info()[1])
+        except AssertionError as ex:
+            print('New fixture/destroy failed: %s' % ex)
             remove_bodies.append(body)
 
     for body in remove_bodies:

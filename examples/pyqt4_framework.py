@@ -35,6 +35,7 @@ Mouse:
 
 """
 
+from __future__ import print_function
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import QObject, SIGNAL, pyqtSlot
 from PyQt4.QtGui import QTableWidget, QTableWidgetItem, QColor, QPixmap
@@ -67,7 +68,6 @@ class Pyqt4Draw(object):
     temp_items array to be deleted on the next draw. 
     """
     MAX_TIMES=20
-    axisScale = 0.4
     def __init__(self, test): 
         self.test=test
         self.window=self.test.window
@@ -133,8 +133,9 @@ class Pyqt4Draw(object):
         Draw the transform xf on the screen
         """
         p1 = xf.position
-        p2 = p1 + self.axisScale * xf.R.col1
-        p3 = p1 + self.axisScale * xf.R.col2
+        axisScale = 0.4
+        p2 = p1 + axisScale * xf.R.col1
+        p3 = p1 + axisScale * xf.R.col2
 
         line1=self.scene.addLine(p1[0], p1[1], p2[0], p2[1], pen=QtGui.QPen(QColor(255,0,0)))
         line2=self.scene.addLine(p1[0], p1[1], p3[0], p3[1], pen=QtGui.QPen(QColor(0,255,0)))
@@ -687,7 +688,7 @@ class Pyqt4Framework(FrameworkBase):
                 # Attempt to determine whether it's read-only or not
                 try:
                     setattr(obj, prop, value)
-                except:
+                except Exception as ex:
                     editable=False
                 else:
                     editable=True
@@ -783,8 +784,8 @@ class Pyqt4Framework(FrameworkBase):
 
                 try:
                     setattr(inst, prop, value)
-                except:
-                    print('Failed - %s' % sys.exc_info()[1])
+                except Exception as ex:
+                    print('Failed - %s' % ex)
 
     def ShowProperties(self, p):
         aabb = b2AABB(lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))

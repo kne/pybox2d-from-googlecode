@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.box2d.org
-# Python version by Ken Lauer / sirkne at gmail dot com
+# Python version Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -18,6 +18,7 @@
 # misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from __future__ import print_function
 from framework import *
 
 class CollisionProcessing (Framework):

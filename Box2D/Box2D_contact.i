@@ -187,8 +187,6 @@ public:
         touching = property(__IsTouching, None)
         friction = property(__GetFriction, __SetFriction)
         restitution = property(__GetRestitution, __SetRestitution)
-        tangentSpeed = property(__GetTangentSpeed, __SetTangentSpeed)
-
     %}
 }
 
@@ -206,8 +204,6 @@ public:
 %rename(__SetFriction) b2Contact::SetFriction;
 %rename(__GetRestitution) b2Contact::GetRestitution;
 %rename(__SetRestitution) b2Contact::SetRestitution;
-%rename(__GetTangentSpeed) b2Contact::GetTangentSpeed;
-%rename(__SetTangentSpeed) b2Contact::SetTangentSpeed;
 
 /**** Create our own ContactPoint structure ****/
 /* And allow kwargs for it */
@@ -254,7 +250,7 @@ public:
 %}
 
 %pythoncode %{
-    def b2TimeOfImpact(shapeA=None, idxA=0, shapeB=None, idxB=0, sweepA=None, sweepB=None, tMax=0.0):
+    def b2TimeOfImpact(*args, **kwargs):
         """
         Compute the upper bound on time before two shapes penetrate. Time is represented as
         a fraction between [0,tMax]. This uses a swept separating axis and may miss some intermediate,
@@ -280,12 +276,25 @@ public:
                 e_touching,
                 e_separated ]
         """
-
-        if isinstance(shapeA, b2TOIInput):
-            toi_input = shapeA
-            out = _b2TimeOfImpact(toi_input)
+        if len(args) == 5 or len(args) == 1:
+            out=_b2TimeOfImpact(*args)
+        elif kwargs: # use kwargs
+            shapeA = kwargs['shapeA']
+            shapeB = kwargs['shapeB']
+            sweepA = kwargs['sweepA']
+            sweepB = kwargs['sweepB']
+            tMax = kwargs['tMax']
+            if 'idxA' in kwargs:
+                idxA = kwargs['idxA']
+            else:
+                idxA=0
+            if 'idxB' in kwargs:
+                idxB = kwargs['idxB']
+            else:
+                idxB=0
+            out=_b2TimeOfImpact(shapeA, idxA, shapeB, idxB, sweepA, sweepB, tMax)
         else:
-            out = _b2TimeOfImpact(shapeA, idxA, shapeB, idxB, sweepA, sweepB, tMax)
+            raise ValueError('Expected arguments for b2TimeOfImpact or kwargs')
 
         return (out.state, out.t)
 %}

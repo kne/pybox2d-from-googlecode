@@ -35,6 +35,7 @@ Mouse:
 
 """
 
+from __future__ import print_function
 import pygame
 import framework
 from pygame.locals import *
@@ -43,8 +44,9 @@ from framework import *
 try:
     from pygame_gui import (fwGUI, gui)
     GUIEnabled = True
-except:
+except ImportError as ex:
     print('Unable to load PGU; menu disabled.')
+    print('ImportError: %s' % ex)
     GUIEnabled = False
 
 class PygameDraw(b2DrawExtended):
@@ -56,7 +58,6 @@ class PygameDraw(b2DrawExtended):
     Debug drawing, as its name implies, is for debugging.
     """
     surface = None
-    axisScale = 10.0
     def __init__(self, **kwargs): 
         b2DrawExtended.__init__(self, **kwargs)
         self.flipX = False
@@ -99,8 +100,9 @@ class PygameDraw(b2DrawExtended):
         Draw the transform xf on the screen
         """
         p1 = xf.position
-        p2 = self.to_screen(p1 + self.axisScale * xf.R.col1)
-        p3 = self.to_screen(p1 + self.axisScale * xf.R.col2)
+        axisScale = 0.4
+        p2 = self.to_screen(p1 + axisScale * xf.R.col1)
+        p3 = self.to_screen(p1 + axisScale * xf.R.col2)
         p1 = self.to_screen(p1)
 
         pygame.draw.aaline(self.surface, (255,0,0), p1, p2)
@@ -170,6 +172,7 @@ class PygameDraw(b2DrawExtended):
     #     if self.flipY:
     #         y = self.screenSize.y-y
     #     return (x, y)
+       
 
 class PygameFramework(FrameworkBase):
     TEXTLINE_START=30
@@ -244,7 +247,7 @@ class PygameFramework(FrameworkBase):
         Tells the debug draw to update its values also.
         """
         self._viewCenter = b2Vec2( *value )
-        self._viewCenter *= self._viewZoom
+        self._viewCenter*= self._viewZoom
         self._viewOffset = self._viewCenter - self.screenSize/2
     
     def setZoom(self, zoom):
@@ -405,6 +408,7 @@ class PygameFramework(FrameworkBase):
     def ConvertScreenToWorld(self, x, y):
         return b2Vec2((x + self.viewOffset.x) / self.viewZoom, 
                            ((self.screenSize.y - y + self.viewOffset.y) / self.viewZoom))
+
 
     def DrawStringAt(self, x, y, str, color=(229,153,153,255)):
         """

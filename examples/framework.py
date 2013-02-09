@@ -3,7 +3,7 @@
 #!/usr/bin/python
 #
 # C++ version Copyright (c) 2006-2007 Erin Catto http://www.box2d.org
-# Python version by Ken Lauer / sirkne at gmail dot com
+# Python version Copyright (c) 2010 Ken Lauer / sirkne at gmail dot com
 # 
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -22,6 +22,7 @@
 """
 The framework's base is FrameworkBase. See its help for more information.
 """
+from __future__ import print_function
 from Box2D import *
 from settings import fwSettings
 from time import time
@@ -90,7 +91,6 @@ class FrameworkBase(b2ContactListener):
     colors={
         'mouse_point'     : b2Color(0,1,0),
         'bomb_center'     : b2Color(0,0,1.0),
-        'bomb_line'       : b2Color(0,1.0,1.0),
         'joint_line'      : b2Color(0.8,0.8,0.8),
         'contact_add'     : b2Color(0.3, 0.95, 0.3),
         'contact_persist' : b2Color(0.3, 0.3, 0.95),
@@ -212,20 +212,21 @@ class FrameworkBase(b2ContactListener):
             # Draw the slingshot bomb
             if self.bombSpawning:
                 self.renderer.DrawPoint(self.renderer.to_screen(self.bombSpawnPoint), settings.pointSize, self.colors['bomb_center'])
-                self.renderer.DrawSegment(self.renderer.to_screen(self.bombSpawnPoint), self.renderer.to_screen(self.mouseWorld), self.colors['bomb_line'])
+                self.renderer.DrawSegment(self.renderer.to_screen(self.bombSpawnPoint), self.mouseWorld, self.colors['bomb_line'])
 
             # Draw each of the contact points in different colors.
             if self.settings.drawContactPoints:
                 for point in self.points:
                     if point['state'] == b2_addState:
-                        self.renderer.DrawPoint(self.renderer.to_screen(point['position']), settings.pointSize, self.colors['contact_add'])
+                        self.renderer.DrawPoint(point['position'], settings.pointSize, self.colors['contact_add'])
                     elif point['state'] == b2_persistState:
-                        self.renderer.DrawPoint(self.renderer.to_screen(point['position']), settings.pointSize, self.colors['contact_persist'])
+                        self.renderer.DrawPoint(point['position'], settings.pointSize, self.colors['contact_persist'])
 
             if settings.drawContactNormals:
+                axisScale = 0.3
                 for point in self.points:
                     p1 = self.renderer.to_screen(point['position'])
-                    p2 = self.renderer.axisScale * point['normal'] + p1
+                    p2 = p1 + axisScale * point['normal']
                     self.renderer.DrawSegment(p1, p2, self.colors['contact_normal']) 
 
             self.renderer.EndDraw()
@@ -233,21 +234,14 @@ class FrameworkBase(b2ContactListener):
 
             t_draw=max(b2_epsilon, t_draw)
             t_step=max(b2_epsilon, t_step)
-
             try:
                 self.t_draws.append(1.0/t_draw)
+                self.t_steps.append(1.0/t_step)
             except:
                 pass
             else:
                 if len(self.t_draws) > 2:
                     self.t_draws.pop(0)
-
-            try:
-                self.t_steps.append(1.0/t_step)
-            except:
-                pass
-            else:
-                if len(self.t_steps) > 2:
                     self.t_steps.pop(0)
 
             if settings.drawFPS:
@@ -261,7 +255,7 @@ class FrameworkBase(b2ContactListener):
                     (settings.hz, settings.velocityIterations, settings.positionIterations))
 
                 if self.t_draws and self.t_steps:
-                    self.Print("Potential draw rate: %.2f fps Step rate: %.2f Hz" % (sum(self.t_draws)/len(self.t_draws), sum(self.t_steps)/len(self.t_steps)))
+                    self.Print("Potential draw rate: %.2f Hz Step rate: %.2f Hz" % (sum(self.t_draws)/len(self.t_draws), sum(self.t_steps)/len(self.t_steps)))
 
     def ShiftMouseDown(self, p):
         """
@@ -495,9 +489,7 @@ if __name__=='__main__':
 try:
     framework_module=__import__('%s_framework' % (fwSettings.backend.lower()), fromlist=['%sFramework' % fwSettings.backend.capitalize()])
     Framework=getattr(framework_module, '%sFramework' % fwSettings.backend.capitalize())
-except:
-    from sys import exc_info
-    ex=exc_info()[1]
+except Exception as ex:
     print('Unable to import the back-end %s: %s' % (fwSettings.backend, ex))
     print('Attempting to fall back on the pygame back-end.')
 
