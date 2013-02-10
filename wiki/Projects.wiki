@@ -4,7 +4,7 @@
 Note that the categories and entries are in no particular order (not even alphabetical).
 
 === In Academia ===
- * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_.
+ * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_. See my implementation of it [OpenCV here].
 
 === Libraries / Add-ons / Learning Utilities ===
 
