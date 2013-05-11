@@ -5,6 +5,7 @@ Note that the categories and entries are in no particular order (not even alphab
 
 === In Academia ===
  * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_. See my implementation of it [OpenCV here].
+ * [http://www.golems.org/papers/LevihnICRA2013.pdf Planning with Movable Obstacles in Continuous Environments with Uncertain Dynamics] by M. Levihn, J. Scholz, M. Stilman
 
 === Libraries / Add-ons / Learning Utilities ===
 
@@ -20,6 +21,7 @@ Note that the categories and entries are in no particular order (not even alphab
 
 === Games ===
 
+ * [http://blog.dragonlab.de/2012/12/hammertennis/ Hammertennis] "Take Hammerfight. Add Pong. Mix and stir. Sprinkle with a little realism and Tron."
  * [http://www.pygame.org/project-Bricks+Knock+Off-1712-.html Bricks Knock Off] Knock the bricks off the platform to win (pybox2d 2.1)
  * [http://www.pyweek.org/e/RohypnolTappper/ Nein] is a 2D physics sandbox based around animal cruelty. Specifically, animal cruelty towards a cat.
  * [http://code.google.com/p/pybotwar/ pybotwar] is a fun and educational game where players create computer programs to control simulated robots to compete in a battle arena
