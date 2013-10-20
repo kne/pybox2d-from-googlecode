@@ -6,6 +6,7 @@ Note that the categories and entries are in no particular order (not even alphab
 === In Academia ===
  * [http://www.kirp.chtf.stuba.sk/pc11/data/abstracts/053.html Michal Sedlák]'s _Simulation of 2D Physics of Objects Captured by Web Camera Using OpenCV and Box2D_. See my implementation of it [OpenCV here].
  * [http://www.golems.org/papers/LevihnICRA2013.pdf Planning with Movable Obstacles in Continuous Environments with Uncertain Dynamics] by M. Levihn, J. Scholz, M. Stilman
+ * [http://physics.gac.edu/~miller/jterm_2013/pygame.html PHY-109-001], a course on Python 2D game programming (including pygame and pybox2d), offered at Gustavus Adolphus College
 
 === Libraries / Add-ons / Learning Utilities ===
 
