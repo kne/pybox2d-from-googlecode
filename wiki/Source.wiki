@@ -1,0 +1,8 @@
+#summary Repository
+#labels Featured
+
+= pybox2d source code =
+
+The source code repository is now on [https://github.com/pybox2d/pybox2d GitHub].
+
+The pure-Python implementation, pypybox2d, can be found on [https://github.com/pybox2d/pypybox2d GitHub] as well.
