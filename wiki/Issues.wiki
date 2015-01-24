@@ -1,0 +1,6 @@
+#summary Issue tracker
+#labels Phase-Support
+
+= pybox2d issues =
+
+Issues are now tracked on [https://github.com/pybox2d/pybox2d/issues GitHub].
